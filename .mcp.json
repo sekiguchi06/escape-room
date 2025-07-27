@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "atlassian": {
+      "url": "https://mcp.atlassian.com/v1/sse",
+      "type": "sse",
+      "description": "Atlassian Remote MCP Server for Jira and Confluence access"
+    }
+  }
+}
