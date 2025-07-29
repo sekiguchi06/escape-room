@@ -35,8 +35,8 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   flame: ^1.30.1
-  google_mobile_ads: ^6.0.0
-  firebase_analytics: ^11.6.0
+  # google_mobile_ads: ^6.0.0
+  # firebase_analytics: ^11.6.0
   shared_preferences: ^2.5.3
   audioplayers: ^6.5.0
 

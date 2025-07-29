@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flame/game.dart';
-import 'game/tap_game.dart';
+import 'game/simple_game.dart';
 
 void main() {
   runApp(const MyApp());
@@ -30,7 +30,7 @@ class GameScreen extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          GameWidget(game: TapGame()),
+          GameWidget(game: SimpleGame()),
           SafeArea(
             child: BackButton(
               color: Colors.white,
