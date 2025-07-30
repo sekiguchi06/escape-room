@@ -9,43 +9,44 @@ import '../framework/config/game_configuration.dart';
 import '../framework/timer/timer_system.dart';
 import '../framework/ui/ui_system.dart';
 import '../framework/core/configurable_game.dart';
+import '../framework/animation/animation_system.dart';
 import 'framework_integration/simple_game_states.dart';
 import 'framework_integration/simple_game_configuration.dart';
 
-class SimpleGame extends ConfigurableGame<GameState, SimpleGameConfig> with TapDetector {
-  late final SimpleGameStateProvider _stateProvider;
-  late final SimpleGameConfiguration _configuration;
-  late final TimerManager _timerManager;
-  late final ThemeManager _themeManager;
-  
-  late TextComponent _statusText;
-  late TextComponent _configText;
+class SimpleGame extends ConfigurableGame<GameState, SimpleGameConfig> with TapCallbacks {
+  late GameComponent _statusText;
+  late GameComponent _configText;
+  late GameComponent _testCircle;
+  late GameComponent _buttonTestArea;
   int _sessionCount = 0;
+  bool _hasPlayingAnimationRun = false;
+  
+  SimpleGame() : super(
+    configuration: SimpleGameConfiguration.defaultConfig,
+    debugMode: false,
+  ) {
+    // プリセットの初期化
+    SimpleGameConfigPresets.initialize();
+  }
+  
+  @override
+  GameStateProvider<GameState> createStateProvider() {
+    return SimpleGameStateProvider();
+  }
 
   @override
-  GameStateProvider<GameState> get stateProvider => _stateProvider;
-  
-  @override
-  GameConfiguration<GameState, SimpleGameConfig> get configuration => _configuration;
-  
-  @override
-  TimerManager get timerManager => _timerManager;
-  
-  @override
-  ThemeManager get themeManager => _themeManager;
-
-  @override
-  Future<void> onLoad() async {
-    _stateProvider = SimpleGameStateProvider();
-    _configuration = SimpleGameConfiguration.defaultConfig;
-    _timerManager = TimerManager();
-    _themeManager = ThemeManager();
-    
-    _themeManager.initializeDefaultThemes();
-    
-    _statusText = TextComponent(
-      text: 'TAP TO START',
+  Future<void> initializeGame() async {
+    // テキスト表示用GameComponent（透明度アニメーション対応）
+    _statusText = GameComponent(
       position: Vector2(size.x / 2, size.y / 2),
+      size: Vector2(200, 50),
+      anchor: Anchor.center,
+    );
+    add(_statusText);
+    
+    // テキストコンポーネントをGameComponentの子として追加
+    final statusTextChild = TextComponent(
+      text: 'TAP TO START',
       anchor: Anchor.center,
       textRenderer: TextPaint(
         style: TextStyle(
@@ -55,11 +56,16 @@ class SimpleGame extends ConfigurableGame<GameState, SimpleGameConfig> with TapD
         ),
       ),
     );
-    add(_statusText);
+    _statusText.add(statusTextChild);
     
-    _configText = TextComponent(
-      text: 'Config: Default',
+    _configText = GameComponent(
       position: Vector2(20, 20),
+      size: Vector2(150, 20),
+    );
+    add(_configText);
+    
+    final configTextChild = TextComponent(
+      text: 'Config: Default',
       textRenderer: TextPaint(
         style: TextStyle(
           fontSize: 14,
@@ -67,22 +73,47 @@ class SimpleGame extends ConfigurableGame<GameState, SimpleGameConfig> with TapD
         ),
       ),
     );
-    add(_configText);
+    _configText.add(configTextChild);
     
-    _stateProvider.addListener(_onStateChanged);
+    // アニメーションテスト用の円 - タップボタンとして使用
+    _testCircle = GameComponent(
+      position: Vector2(size.x / 2, size.y / 2 + 100),
+      size: Vector2(80, 80),
+      anchor: Anchor.center,
+    );
+    _testCircle.paint.color = Colors.blue;
+    add(_testCircle);
     
-    await super.onLoad();
+    // ボタンタップテスト用の領域を明示するための背景
+    _buttonTestArea = GameComponent(
+      position: Vector2(size.x / 2, size.y / 2 + 100),
+      size: Vector2(120, 120),
+      anchor: Anchor.center,
+    );
+    _buttonTestArea.paint.color = Colors.grey.withOpacity(0.3);
+    add(_buttonTestArea);
+    
+    // 状態変更リスナーを追加
+    stateProvider.addListener(_onStateChanged);
+    
+    // 初期状態でも_onStateChangedを呼び出し
+    _onStateChanged();
   }
 
   @override
   void update(double dt) {
-    final mainTimer = _timerManager.getTimer('main');
+    final mainTimer = timerManager.getTimer('main');
     if (mainTimer != null && mainTimer.isRunning) {
       mainTimer.update(dt);
       
-      if (_stateProvider.currentState is SimpleGamePlayingState) {
+      if (stateProvider.currentState is SimpleGamePlayingState) {
         final remaining = mainTimer.current.inMilliseconds / 1000.0;
-        _stateProvider.updateTimer(remaining);
+        (stateProvider as SimpleGameStateProvider).updateTimer(remaining);
+        
+        // タイマーが終了した場合、ゲームオーバー処理を実行
+        if (remaining <= 0) {
+          _endGame();
+        }
       }
     }
     
@@ -90,90 +121,141 @@ class SimpleGame extends ConfigurableGame<GameState, SimpleGameConfig> with TapD
   }
 
   @override
-  bool onTapDown(TapDownInfo info) {
-    final state = _stateProvider.currentState;
+  void onTapDown(TapDownEvent event) {
+    // フレームワークの入力処理を先に実行
+    super.onTapDown(event);
+    
+    final state = stateProvider.currentState;
+    
+    // 青い円をタップした場合のButtonTapアニメーションテスト
+    final tapPosition = event.localPosition;
+    final circleCenter = _testCircle.position;
+    final distance = (tapPosition - circleCenter).length;
+    
+    if (distance <= _testCircle.size.x / 2) {
+      AnimationPresets.buttonTap(_testCircle);
+    }
     
     if (state is SimpleGameStartState) {
       _startGame();
     } else if (state is SimpleGameOverState) {
       _restartGame();
     }
-    
-    return true;
   }
 
   void switchConfig() {
     final configs = ['default', 'easy', 'hard'];
-    final currentIndex = configs.indexOf(_configuration.currentPreset);
-    final nextIndex = (currentIndex + 1) % configs.length;
-    final nextConfig = configs[nextIndex];
+    // セッション数に基づいて設定を循環
+    final configIndex = _sessionCount % configs.length;
+    final nextConfig = configs[configIndex];
     
-    _configuration = SimpleGameConfigPresets.getConfigurationPreset(nextConfig);
-    _configText.text = 'Config: $nextConfig';
+    final newConfig = SimpleGameConfigPresets.getPreset(nextConfig);
+    if (newConfig != null) {
+      configuration.updateConfig(newConfig);
+      final configTextChild = _configText.children.whereType<TextComponent>().firstOrNull;
+      if (configTextChild != null) {
+        configTextChild.text = 'Config: $nextConfig';
+      }
+    }
     
-    _timerManager.removeTimer('main');
+    timerManager.removeTimer('main');
   }
 
   void _startGame() {
     switchConfig();
     
-    final config = _configuration.config;
-    _stateProvider.startGame(config.gameDuration.inMilliseconds / 1000.0);
+    final config = configuration.config;
+    (stateProvider as SimpleGameStateProvider).startGame(config.gameDuration.inMilliseconds / 1000.0);
     
-    _timerManager.addTimer('main', TimerConfiguration(
+    timerManager.addTimer('main', TimerConfiguration(
       duration: config.gameDuration,
       type: TimerType.countdown,
       onComplete: () => _endGame(),
     ));
     
-    _timerManager.getTimer('main')?.start();
+    timerManager.getTimer('main')?.start();
     _sessionCount++;
   }
 
   void _restartGame() {
-    _stateProvider.restart(_configuration.config.gameDuration.inMilliseconds / 1000.0);
-    _timerManager.getTimer('main')?.reset();
-    _timerManager.getTimer('main')?.start();
+    switchConfig();
+    
+    final config = configuration.config;
+    (stateProvider as SimpleGameStateProvider).restart(config.gameDuration.inMilliseconds / 1000.0);
+    
+    // タイマーを再作成
+    timerManager.addTimer('main', TimerConfiguration(
+      duration: config.gameDuration,
+      type: TimerType.countdown,
+      onComplete: () => _endGame(),
+    ));
+    
+    timerManager.getTimer('main')?.start();
     _sessionCount++;
   }
 
   void _endGame() {
-    final finalTime = _timerManager.getTimer('main')?.current.inMilliseconds ?? 0;
-    _stateProvider.updateTimer(finalTime / 1000.0);
+    final finalTime = timerManager.getTimer('main')?.current.inMilliseconds ?? 0;
+    // タイマー終了時は残り時間を0にしてゲームオーバー状態にする
+    (stateProvider as SimpleGameStateProvider).updateTimer(0.0);
   }
 
   void _onStateChanged() {
-    final state = _stateProvider.currentState;
-    final config = _configuration.config;
+    final state = stateProvider.currentState;
+    final config = configuration.config;
+    final statusTextChild = _statusText.children.whereType<TextComponent>().firstOrNull;
     
-    if (state is SimpleGameStartState) {
-      _statusText.text = config.getStateText('start');
-      _statusText.textRenderer = TextPaint(
-        style: TextStyle(
-          fontSize: config.getFontSize('start'),
-          color: config.getStateColor('start'),
-          fontWeight: config.getFontWeight('start'),
-        ),
-      );
-    } else if (state is SimpleGamePlayingState) {
-      final dynamicText = config.getStateText('playing', timeRemaining: state.timeRemaining);
-      _statusText.text = dynamicText;
-      _statusText.textRenderer = TextPaint(
-        style: TextStyle(
-          fontSize: config.getFontSize('playing'),
-          color: config.getDynamicColor('playing', timeRemaining: state.timeRemaining),
-          fontWeight: config.getFontWeight('playing'),
-        ),
-      );
-    } else if (state is SimpleGameOverState) {
-      _statusText.text = '${config.getStateText('gameOver')}\nSession: $_sessionCount';
-      _statusText.textRenderer = TextPaint(
-        style: TextStyle(
-          fontSize: config.getFontSize('gameOver'),
-          color: config.getStateColor('gameOver'),
-          fontWeight: config.getFontWeight('gameOver'),
-        ),
-      );
+    if (statusTextChild != null) {
+      if (state is SimpleGameStartState) {
+        statusTextChild.text = config.getStateText('start');
+        statusTextChild.textRenderer = TextPaint(
+          style: TextStyle(
+            fontSize: config.getFontSize('start'),
+            color: config.getStateColor('start'),
+            fontWeight: config.getFontWeight('start'),
+          ),
+        );
+        // AnimationPresets使用 - PopInアニメーション
+        AnimationPresets.popIn(_statusText);
+        AnimationPresets.popIn(_testCircle);
+        _hasPlayingAnimationRun = false;
+      } else if (state is SimpleGamePlayingState) {
+        final dynamicText = config.getStateText('playing', timeRemaining: state.timeRemaining);
+        statusTextChild.text = dynamicText;
+        statusTextChild.textRenderer = TextPaint(
+          style: TextStyle(
+            fontSize: config.getFontSize('playing'),
+            color: config.getDynamicColor('playing', timeRemaining: state.timeRemaining),
+            fontWeight: config.getFontWeight('playing'),
+          ),
+        );
+        // AnimationPresets使用 - SlideInアニメーション（1回のみ実行）
+        if (!_hasPlayingAnimationRun) {
+          AnimationPresets.slideInFromLeft(_testCircle, size.x);
+          _testCircle.animateRotateBy(
+            6.28318, // 2π
+            config: const AnimationConfig(duration: Duration(milliseconds: 2000)),
+          );
+          _hasPlayingAnimationRun = true;
+        }
+      } else if (state is SimpleGameOverState) {
+        statusTextChild.text = '${config.getStateText('gameOver')}\nSession: $_sessionCount';
+        statusTextChild.textRenderer = TextPaint(
+          style: TextStyle(
+            fontSize: config.getFontSize('gameOver'),
+            color: config.getStateColor('gameOver'),
+            fontWeight: config.getFontWeight('gameOver'),
+          ),
+        );
+        // ゲームオーバーアニメーション
+        _statusText.animateFadeOut(
+          config: const AnimationConfig(duration: Duration(milliseconds: 200)),
+        );
+        _testCircle.animateShake(intensity: 20.0);
+        _testCircle.animateFadeOut(
+          config: const AnimationConfig(duration: Duration(milliseconds: 500)),
+        );
+      }
     }
   }
 }

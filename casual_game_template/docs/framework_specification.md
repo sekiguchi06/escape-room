@@ -40,15 +40,15 @@ AI支援による効率的なカジュアルゲーム開発を実現する汎用
 ## アーキテクチャ概要
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    Game Application Layer                    │
-├─────────────────────────────────────────────────────────────┤
-│  ConfigSystem  │  StateSystem  │  TimerSystem  │  UISystem   │
-├─────────────────────────────────────────────────────────────┤
-│                  Framework Core Layer                       │
-├─────────────────────────────────────────────────────────────┤
-│            Flutter + Flame + Provider                       │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│                           Game Application Layer                                    │
+├─────────────────────────────────────────────────────────────────────────────────────┤
+│ ConfigSystem │ StateSystem │ TimerSystem │ UISystem │ AudioSystem │ InputSystem │
+├─────────────────────────────────────────────────────────────────────────────────────┤
+│ PersistenceSystem │ MonetizationSystem │ AnalyticsSystem │ Framework Core Layer │
+├─────────────────────────────────────────────────────────────────────────────────────┤
+│                    Flutter + Flame + Provider + MCP                                │
+└─────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ## 1. 状態管理システム (StateSystem)
@@ -251,18 +251,164 @@ class ProgressBarUIComponent extends PositionComponent {
 }
 ```
 
-## 5. フレームワーク統合 (Core Integration)
+## 5. 音響システム (AudioSystem)
 
-### 5.1 ConfigurableGame
+### 5.1 AudioProvider抽象インターフェース
+
+```dart
+abstract class AudioProvider {
+  Future<void> initialize(AudioConfiguration config);
+  Future<void> playBgm(String assetId, {bool loop = true});
+  Future<void> stopBgm();
+  Future<void> playSfx(String assetId, {double volume = 1.0});
+  Future<void> dispose();
+}
+```
+
+**実装プロバイダー:**
+- `SilentAudioProvider`: サイレント（テスト・デバッグ用）
+- `BasicAudioProvider`: 基本音響機能（実装は差し替え可能）
+
+### 5.2 AudioConfiguration設定駆動
+
+```dart
+abstract class AudioConfiguration {
+  Map<String, String> get bgmAssets;
+  Map<String, String> get sfxAssets;
+  double get masterVolume;
+  bool get bgmEnabled;
+  bool get sfxEnabled;
+}
+```
+
+## 6. 入力システム (InputSystem)
+
+### 6.1 InputProcessor抽象インターフェース
+
+```dart
+abstract class InputProcessor {
+  bool processTapDown(Vector2 position);
+  bool processPanStart(Vector2 position);
+  bool processPanUpdate(Vector2 position, Vector2 delta);
+  bool processPanEnd(Vector2 position, Vector2 velocity);
+  void addInputListener(void Function(InputEventData event) listener);
+}
+```
+
+**入力イベント種類:**
+- タップ、ダブルタップ、長押し
+- スワイプ（上下左右）
+- ピンチイン・アウト
+- マルチタッチ
+
+### 6.2 InputConfiguration設定駆動
+
+```dart
+abstract class InputConfiguration {
+  double get tapSensitivity;
+  double get swipeMinDistance;
+  Set<InputEventType> get enabledInputTypes;
+  bool get debugMode;
+}
+```
+
+## 7. データ永続化システム (PersistenceSystem)
+
+### 7.1 StorageProvider抽象インターフェース
+
+```dart
+abstract class StorageProvider {
+  Future<PersistenceResult> save(String key, dynamic value);
+  Future<T?> load<T>(String key, {T? defaultValue});
+  Future<PersistenceResult> delete(String key);
+  Future<PersistenceResult> syncToCloud();
+}
+```
+
+**実装プロバイダー:**
+- `LocalStorageProvider`: SharedPreferences基盤
+- `MemoryStorageProvider`: メモリ内保存（テスト用）
+
+### 7.2 高レベルAPI
+
+```dart
+class DataManager {
+  Future<PersistenceResult> saveHighScore(int score);
+  Future<int> loadHighScore();
+  Future<PersistenceResult> saveUserSettings(Map settings);
+  Future<Map> loadUserSettings();
+}
+```
+
+## 8. 収益化システム (MonetizationSystem)
+
+### 8.1 AdProvider抽象インターフェース
+
+```dart
+abstract class AdProvider {
+  Future<AdResult> loadAd(AdType adType);
+  Future<AdResult> showAd(AdType adType);
+  Future<bool> isAdReady(AdType adType);
+  void addAdEventListener(void Function(AdEventData event) listener);
+}
+```
+
+**広告種類:**
+- バナー、インタースティシャル、リワード
+- ネイティブ、アプリ起動広告
+
+### 8.2 MonetizationManager
+
+```dart
+class MonetizationManager {
+  Future<AdResult> showInterstitial();
+  Future<AdResult> showRewarded();
+  bool shouldShowInterstitial();
+  Map<String, dynamic> getRevenueStats();
+}
+```
+
+## 9. 分析システム (AnalyticsSystem)
+
+### 9.1 AnalyticsProvider抽象インターフェース
+
+```dart
+abstract class AnalyticsProvider {
+  Future<bool> trackEvent(AnalyticsEvent event);
+  Future<bool> setUserId(String userId);
+  Future<bool> startSession(String sessionId);
+  Future<bool> trackError(String error, String? stackTrace);
+}
+```
+
+### 9.2 高レベルAPI
+
+```dart
+class AnalyticsManager {
+  Future<bool> trackGameStart();
+  Future<bool> trackGameEnd({required int score});
+  Future<bool> trackLevelComplete({required int level});
+  Future<bool> trackAdShown({required String adType});
+}
+```
+
+## 10. フレームワーク統合 (Core Integration)
+
+### 10.1 ConfigurableGame
 
 ```dart
 abstract class ConfigurableGame<TState extends GameState, TConfig> 
-    extends FlameGame {
+    extends FlameGame with HasTapDetector, HasPanDetector, HasScaleDetector {
   
   GameStateProvider<TState> get stateProvider;
   GameConfiguration<TState, TConfig> get configuration;
   TimerManager get timerManager;
   ThemeManager get themeManager;
+  AudioManager get audioManager;
+  InputManager get inputManager;
+  DataManager get dataManager;
+  MonetizationManager get monetizationManager;
+  AnalyticsManager get analyticsManager;
   
   @override
   Future<void> onLoad();
@@ -274,13 +420,70 @@ abstract class ConfigurableGame<TState extends GameState, TConfig>
 ```
 
 **ライフサイクル:**
-1. `onLoad()`: 初期化処理
-2. `update(dt)`: フレーム更新
+1. `onLoad()`: 初期化処理（全システム自動初期化）
+2. `update(dt)`: フレーム更新（全システム自動更新）
 3. `render(canvas)`: 描画処理
 
-## 6. パフォーマンス仕様
+**プロバイダー作成メソッド（差し替え可能）:**
+```dart
+AudioProvider createAudioProvider() => SilentAudioProvider();
+InputProcessor createInputProcessor() => BasicInputProcessor();
+StorageProvider createStorageProvider() => LocalStorageProvider();
+AdProvider createAdProvider() => MockAdProvider();
+AnalyticsProvider createAnalyticsProvider() => ConsoleAnalyticsProvider();
+```
 
-### 6.1 ベンチマーク結果
+## 11. 設定駆動開発の実現
+
+### 11.1 ゲーム差分化の例
+
+```dart
+// ゲーム1: タップゲーム設定
+class TapGameConfig extends ConfigurableGame<GameState, TapConfig> {
+  @override
+  AudioProvider createAudioProvider() => BasicAudioProvider();
+  
+  @override
+  AudioConfiguration createAudioConfiguration() => DefaultAudioConfiguration(
+    bgmAssets: {'main': 'tap_bgm.mp3'},
+    sfxAssets: {'tap': 'tap_sound.wav'},
+  );
+  
+  @override
+  InputConfiguration createInputConfiguration() => DefaultInputConfiguration(
+    enabledInputTypes: {InputEventType.tap},
+  );
+}
+
+// ゲーム2: スワイプパズル設定  
+class PuzzleGameConfig extends ConfigurableGame<GameState, PuzzleConfig> {
+  @override
+  InputConfiguration createInputConfiguration() => DefaultInputConfiguration(
+    enabledInputTypes: {InputEventType.swipeUp, InputEventType.swipeDown},
+    swipeMinDistance: 100.0,
+  );
+}
+```
+
+### 11.2 プロバイダー差し替えパターン
+
+```dart
+// 開発時: モック・デバッグ用
+@override
+AdProvider createAdProvider() => MockAdProvider();
+@override  
+AnalyticsProvider createAnalyticsProvider() => ConsoleAnalyticsProvider();
+
+// 本番時: 実サービス連携
+@override
+AdProvider createAdProvider() => AdMobProvider();
+@override
+AnalyticsProvider createAnalyticsProvider() => FirebaseAnalyticsProvider();
+```
+
+## 12. パフォーマンス仕様
+
+### 12.1 ベンチマーク結果
 
 | 項目 | 目標値 | 実測値 | 状況 |
 |------|--------|--------|------|
@@ -290,16 +493,16 @@ abstract class ConfigurableGame<TState extends GameState, TConfig>
 | メモリ効率 | 履歴<1000件 | 制限実装済み | ✅ |
 | 統合処理 | <5000ms | 2-4ms | ✅ |
 
-### 6.2 スケーラビリティ
+### 12.2 スケーラビリティ
 
 - **同時ゲーム**: 10個まで検証済み
 - **状態遷移**: 1000回連続実行対応
 - **タイマー**: 100個同時実行対応
 - **設定変更**: リアルタイム反映
 
-## 7. 品質保証
+## 13. 品質保証
 
-### 7.1 テスト戦略
+### 13.1 テスト戦略
 
 #### 単体テスト
 ```bash
@@ -333,7 +536,7 @@ flutter run -d chrome
 - 実時間進行確認
 - ユーザー体験検証
 
-### 7.2 品質基準
+### 13.2 品質基準
 
 **機能要件:**
 - 全テストケース成功率: 100%
@@ -345,9 +548,9 @@ flutter run -d chrome
 - D7リテンション: 15%以上
 - 目標ARPU: $0.13以上
 
-## 8. 使用方法
+## 14. 使用方法
 
-### 8.1 実装判断ガイド
+### 14.1 実装判断ガイド
 
 #### ゲーム仕様からの実装判断
 ```
@@ -369,7 +572,7 @@ flutter run -d chrome
 - リアルタイム設定変更: ConfigurationNotifier必須
 ```
 
-### 8.2 基本実装パターン
+### 14.2 基本実装パターン
 
 #### Step 1: 状態定義
 ```dart
@@ -428,7 +631,7 @@ class MyGame extends ConfigurableGame<GameState, MyGameConfig> {
 }
 ```
 
-### 8.2 プリセット活用
+### 14.3 プリセット活用
 
 ```dart
 // プリセット使用
@@ -444,9 +647,9 @@ final customConfig = SimpleGameConfig(
 );
 ```
 
-## 9. 拡張性
+## 15. 拡張性
 
-### 9.1 新機能追加パターン
+### 15.1 新機能追加パターン
 
 #### カスタム状態追加
 ```dart
@@ -475,14 +678,14 @@ class CustomUITheme extends DefaultUITheme {
 }
 ```
 
-### 9.2 フレームワーク拡張
+### 15.2 フレームワーク拡張
 - プラグインアーキテクチャ対応
 - カスタムコンポーネント追加
 - 外部サービス統合（Analytics, Ads等）
 
-## 10. 運用・保守
+## 16. 運用・保守
 
-### 10.1 デバッグ支援
+### 16.1 デバッグ支援
 
 **ログレベル:**
 - `DEBUG`: 詳細な実行ログ
@@ -495,7 +698,7 @@ class CustomUITheme extends DefaultUITheme {
 - パフォーマンス監視
 - 設定検証ツール
 
-### 10.2 よくある問題と解決策
+### 16.2 よくある問題と解決策
 
 #### 状態遷移エラー
 ```dart
@@ -537,7 +740,7 @@ void dispose() {
 }
 ```
 
-### 10.3 本番運用
+### 16.3 本番運用
 
 **監視項目:**
 - 状態遷移エラー率
@@ -550,13 +753,18 @@ void dispose() {
 - メモリ使用量 > 100MB
 - レスポンス時間 > 100ms
 
-## 11. ロードマップ
+## 17. ロードマップ
 
 ### Phase 1 (完了)
 - ✅ 基本フレームワーク実装
 - ✅ 状態管理システム
 - ✅ 設定駆動開発
 - ✅ テスト基盤構築
+- ✅ 音響システム骨格
+- ✅ 入力システム骨格
+- ✅ データ永続化システム骨格
+- ✅ 収益化システム骨格
+- ✅ 分析システム骨格
 
 ### Phase 2 (計画中)
 - 🔄 高度なアニメーション対応

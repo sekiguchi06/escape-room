@@ -13,7 +13,7 @@ class CasualGameApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Casual Game Framework Demo',
+      title: 'Casual Game Template',
       theme: ThemeData(
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
@@ -31,8 +31,14 @@ class GameScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
+      appBar: AppBar(
+        title: const Text('Casual Game Template'),
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
+      ),
       body: GameWidget<SimpleGame>.controlled(
         gameFactory: SimpleGame.new,
+        key: const ValueKey('game_canvas'),
       ),
     );
   }

@@ -11,7 +11,7 @@ import 'simple_game_configuration.dart';
 
 /// SimpleGame のフレームワーク統合版
 /// 汎用フレームワークを使用して従来のSimpleGameを再実装
-class SimpleGameFramework extends ConfigurableGame<GameState, SimpleGameConfig> with TapDetector {
+class SimpleGameFramework extends ConfigurableGame<GameState, SimpleGameConfig> with TapCallbacks {
   
   // UI コンポーネント
   late TextUIComponent _statusText;
@@ -68,7 +68,7 @@ class SimpleGameFramework extends ConfigurableGame<GameState, SimpleGameConfig> 
     add(_timerProgress);
     
     // 初期状態では非表示
-    _timerProgress.opacity = 0.0;
+    // _timerProgress.opacity = 0.0; // ProgressBarUIComponentにopacityプロパティが未実装
   }
   
   /// タイマーのセットアップ
@@ -83,15 +83,13 @@ class SimpleGameFramework extends ConfigurableGame<GameState, SimpleGameConfig> 
   
   /// 状態変更リスナーのセットアップ  
   void _setupStateListeners() {
-    stateProvider.addStateChangeListener(_onStateChanged);
+    stateProvider.addListener(_onStateChanged);
   }
   
   /// 状態変更時のハンドラ
-  void _onStateChanged(GameState state) {
+  void _onStateChanged() {
+    final state = stateProvider.currentState;
     debugPrint('State changed to: ${state.name}');
-    
-    // アナリティクス追跡
-    trackStateTransition(stateProvider.currentState, state);
     
     // UI更新
     _updateUI(state);
@@ -103,7 +101,7 @@ class SimpleGameFramework extends ConfigurableGame<GameState, SimpleGameConfig> 
       case SimpleGameStartState:
         _statusText.setText(config.getStateText('start'));
         _statusText.setTextColor(config.getStateColor('start'));
-        _timerProgress.opacity = 0.0;
+        // _timerProgress.opacity = 0.0; // opacityプロパティ未実装
         break;
         
       case SimpleGamePlayingState:
@@ -111,7 +109,7 @@ class SimpleGameFramework extends ConfigurableGame<GameState, SimpleGameConfig> 
         final timeText = config.getStateText('playing', timeRemaining: playingState.timeRemaining);
         _statusText.setText(timeText);
         _statusText.setTextColor(config.getDynamicColor('playing', timeRemaining: playingState.timeRemaining));
-        _timerProgress.opacity = 1.0;
+        // _timerProgress.opacity = 1.0; // opacityプロパティ未実装
         
         // プログレスバー更新
         final progress = playingState.timeRemaining / config.gameDuration.inMilliseconds * 1000;
@@ -122,7 +120,7 @@ class SimpleGameFramework extends ConfigurableGame<GameState, SimpleGameConfig> 
         final gameOverState = state as SimpleGameOverState;
         _statusText.setText(config.getStateText('gameOver'));
         _statusText.setTextColor(config.getStateColor('gameOver'));
-        _timerProgress.opacity = 0.0;
+        // _timerProgress.opacity = 0.0; // opacityプロパティ未実装
         
         // セッション統計を記録
         trackGameSession();
@@ -134,32 +132,32 @@ class SimpleGameFramework extends ConfigurableGame<GameState, SimpleGameConfig> 
   /// タイマー更新ハンドラ
   void _onTimerUpdate(Duration remaining) {
     if (stateProvider.currentState is SimpleGamePlayingState) {
-      final stateProvider = this.stateProvider as SimpleGameStateProvider;
-      stateProvider.updateTimer(remaining.inMilliseconds / 1000.0);
+      final simpleStateProvider = this.stateProvider as SimpleGameStateProvider;
+      simpleStateProvider.updateTimer(remaining.inMilliseconds / 1000.0);
     }
   }
   
   /// タイマー完了ハンドラ
   void _onTimerComplete() {
     if (stateProvider.currentState is SimpleGamePlayingState) {
-      final stateProvider = this.stateProvider as SimpleGameStateProvider;
-      final currentState = stateProvider.currentState as SimpleGamePlayingState;
+      final simpleStateProvider = this.stateProvider as SimpleGameStateProvider;
+      final currentState = simpleStateProvider.currentState as SimpleGamePlayingState;
       
       final gameOverState = SimpleGameStateFactory.createGameOverState(
         finalTime: 0.0,
         sessionNumber: currentState.sessionNumber,
       );
       
-      stateProvider.transitionTo(gameOverState);
+      simpleStateProvider.transitionTo(gameOverState);
     }
   }
   
   @override
-  void onTapDown(TapDownInfo info) {
+  void onTapDown(TapDownEvent event) {
     if (!isInitialized) return;
     
     final state = stateProvider.currentState;
-    final stateProvider = this.stateProvider as SimpleGameStateProvider;
+    final simpleStateProvider = this.stateProvider as SimpleGameStateProvider;
     
     switch (state.runtimeType) {
       case SimpleGameStartState:
@@ -179,10 +177,10 @@ class SimpleGameFramework extends ConfigurableGame<GameState, SimpleGameConfig> 
   
   /// ゲーム開始
   void _startGame() {
-    final stateProvider = this.stateProvider as SimpleGameStateProvider;
+    final simpleStateProvider = this.stateProvider as SimpleGameStateProvider;
     final initialTime = config.gameDuration.inMilliseconds / 1000.0;
     
-    if (stateProvider.startGame(initialTime)) {
+    if (simpleStateProvider.startGame(initialTime)) {
       // タイマー開始
       timerManager.resetTimer('main');
       timerManager.startTimer('main');
@@ -193,10 +191,10 @@ class SimpleGameFramework extends ConfigurableGame<GameState, SimpleGameConfig> 
   
   /// ゲーム再開
   void _restartGame() {
-    final stateProvider = this.stateProvider as SimpleGameStateProvider;
+    final simpleStateProvider = this.stateProvider as SimpleGameStateProvider;
     final initialTime = config.gameDuration.inMilliseconds / 1000.0;
     
-    if (stateProvider.restart(initialTime)) {
+    if (simpleStateProvider.restart(initialTime)) {
       // タイマー再開
       timerManager.resetTimer('main');
       timerManager.startTimer('main');
@@ -271,13 +269,13 @@ class SimpleGameFramework extends ConfigurableGame<GameState, SimpleGameConfig> 
   
   /// ゲーム統計情報を取得
   Map<String, dynamic> getGameStatistics() {
-    final stateProvider = this.stateProvider as SimpleGameStateProvider;
-    final gameInfo = stateProvider.getCurrentGameInfo();
+    final simpleStateProvider = this.stateProvider as SimpleGameStateProvider;
+    final gameInfo = simpleStateProvider.getCurrentGameInfo();
     
     return {
       ...gameInfo,
       'total_sessions': _currentSessionNumber,
-      'framework_stats': stateProvider.getStatistics().toJson(),
+      'framework_stats': simpleStateProvider.getStatistics().toJson(),
       'timer_status': timerManager.getDebugInfo(),
     };
   }
