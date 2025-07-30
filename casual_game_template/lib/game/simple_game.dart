@@ -10,6 +10,12 @@ import '../framework/timer/timer_system.dart';
 import '../framework/ui/ui_system.dart';
 import '../framework/core/configurable_game.dart';
 import '../framework/animation/animation_system.dart';
+import '../framework/audio/audio_system.dart';
+import '../framework/monetization/monetization_system.dart';
+import '../framework/analytics/analytics_system.dart';
+import '../framework/audio/providers/audioplayers_provider.dart';
+import '../framework/monetization/providers/google_ad_provider.dart';
+import '../framework/analytics/providers/firebase_analytics_provider.dart';
 import 'framework_integration/simple_game_states.dart';
 import 'framework_integration/simple_game_configuration.dart';
 
@@ -32,6 +38,21 @@ class SimpleGame extends ConfigurableGame<GameState, SimpleGameConfig> with TapC
   @override
   GameStateProvider<GameState> createStateProvider() {
     return SimpleGameStateProvider();
+  }
+
+  @override
+  AudioProvider createAudioProvider() {
+    return AudioPlayersProvider();
+  }
+
+  @override
+  AdProvider createAdProvider() {
+    return GoogleAdProvider();
+  }
+
+  @override
+  AnalyticsProvider createAnalyticsProvider() {
+    return FirebaseAnalyticsProvider();
   }
 
   @override
