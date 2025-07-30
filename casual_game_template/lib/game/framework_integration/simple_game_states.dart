@@ -1,0 +1,260 @@
+import '../../framework/state/game_state_system.dart';
+
+/// SimpleGame用の状態定義（フレームワーク対応）
+class SimpleGameStartState extends GameState {
+  const SimpleGameStartState() : super();
+  
+  @override
+  String get name => 'start';
+  
+  @override
+  String get description => 'ゲーム開始待ち状態';
+}
+
+class SimpleGamePlayingState extends GameState {
+  final double timeRemaining;
+  final int sessionNumber;
+  
+  const SimpleGamePlayingState({
+    required this.timeRemaining,
+    required this.sessionNumber,
+  }) : super();
+  
+  @override
+  String get name => 'playing';
+  
+  @override
+  String get description => 'ゲームプレイ中 (残り${timeRemaining.toStringAsFixed(1)}秒)';
+  
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      ...super.toJson(),
+      'timeRemaining': timeRemaining,
+      'sessionNumber': sessionNumber,
+    };
+  }
+  
+  @override
+  bool operator ==(Object other) {
+    return other is SimpleGamePlayingState && 
+           other.timeRemaining == timeRemaining &&
+           other.sessionNumber == sessionNumber;
+  }
+  
+  @override
+  int get hashCode => Object.hash(name, timeRemaining, sessionNumber);
+}
+
+class SimpleGameOverState extends GameState {
+  final double finalTime;
+  final int sessionNumber;
+  
+  const SimpleGameOverState({
+    required this.finalTime,
+    required this.sessionNumber,
+  }) : super();
+  
+  @override
+  String get name => 'gameOver';
+  
+  @override
+  String get description => 'ゲームオーバー (セッション$sessionNumber完了)';
+  
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      ...super.toJson(),
+      'finalTime': finalTime,
+      'sessionNumber': sessionNumber,
+    };
+  }
+  
+  @override
+  bool operator ==(Object other) {
+    return other is SimpleGameOverState && 
+           other.finalTime == finalTime &&
+           other.sessionNumber == sessionNumber;
+  }
+  
+  @override
+  int get hashCode => Object.hash(name, finalTime, sessionNumber);
+}
+
+/// SimpleGame用の状態遷移定義
+class SimpleGameTransitions {
+  static List<StateTransition<GameState>> getTransitions() {
+    return [
+      // Start -> Playing
+      StateTransition<GameState>(
+        fromState: SimpleGameStartState,
+        toState: SimpleGamePlayingState,
+        condition: (current, target) => current is SimpleGameStartState && target is SimpleGamePlayingState,
+        onTransition: (from, to) {
+          print('ゲーム開始: セッション${(to as SimpleGamePlayingState).sessionNumber}');
+        },
+      ),
+      
+      // Playing -> GameOver
+      StateTransition<GameState>(
+        fromState: SimpleGamePlayingState,
+        toState: SimpleGameOverState,
+        condition: (current, target) {
+          if (current is! SimpleGamePlayingState || target is! SimpleGameOverState) {
+            return false;
+          }
+          return current.timeRemaining <= 0 || target.finalTime <= 0;
+        },
+        onTransition: (from, to) {
+          final playingState = from as SimpleGamePlayingState;
+          final gameOverState = to as SimpleGameOverState;
+          print('ゲームオーバー: セッション${playingState.sessionNumber} -> 最終時刻${gameOverState.finalTime}');
+        },
+      ),
+      
+      // GameOver -> Start
+      StateTransition<GameState>(
+        fromState: SimpleGameOverState,
+        toState: SimpleGameStartState,
+        onTransition: (from, to) {
+          print('リスタート準備完了');
+        },
+      ),
+      
+      // GameOver -> Playing (直接リスタート)
+      StateTransition<GameState>(
+        fromState: SimpleGameOverState,
+        toState: SimpleGamePlayingState,
+        condition: (current, target) => current is SimpleGameOverState && target is SimpleGamePlayingState,
+        onTransition: (from, to) {
+          final gameOverState = from as SimpleGameOverState;
+          final playingState = to as SimpleGamePlayingState;
+          print('直接リスタート: セッション${gameOverState.sessionNumber} -> セッション${playingState.sessionNumber}');
+        },
+      ),
+    ];
+  }
+}
+
+/// SimpleGame用のステートファクトリ
+class SimpleGameStateFactory {
+  static SimpleGameStartState createStartState() {
+    return SimpleGameStartState();
+  }
+  
+  static SimpleGamePlayingState createPlayingState({
+    required double timeRemaining,
+    required int sessionNumber,
+  }) {
+    return SimpleGamePlayingState(
+      timeRemaining: timeRemaining,
+      sessionNumber: sessionNumber,
+    );
+  }
+  
+  static SimpleGameOverState createGameOverState({
+    required double finalTime,
+    required int sessionNumber,
+  }) {
+    return SimpleGameOverState(
+      finalTime: finalTime,
+      sessionNumber: sessionNumber,
+    );
+  }
+}
+
+/// SimpleGame用の状態プロバイダー（フレームワーク統合）
+class SimpleGameStateProvider extends GameStateProvider<GameState> {
+  SimpleGameStateProvider() : super(SimpleGameStateFactory.createStartState()) {
+    // 状態遷移を定義
+    stateMachine.defineTransitions(SimpleGameTransitions.getTransitions());
+  }
+  
+  /// 現在の状態が特定の型かチェック
+  bool isInState<T extends GameState>() {
+    return currentState is T;
+  }
+  
+  /// 安全な状態キャスト
+  T? getStateAs<T extends GameState>() {
+    return currentState is T ? currentState as T : null;
+  }
+  
+  /// ゲーム開始
+  bool startGame(double initialTime) {
+    final newState = SimpleGameStateFactory.createPlayingState(
+      timeRemaining: initialTime,
+      sessionNumber: sessionCount + 1,
+    );
+    
+    final success = transitionTo(newState);
+    if (success) {
+      startNewSession();
+    }
+    return success;
+  }
+  
+  /// タイマー更新
+  bool updateTimer(double timeRemaining) {
+    if (currentState is! SimpleGamePlayingState) return false;
+    
+    final currentPlayingState = currentState as SimpleGamePlayingState;
+    
+    if (timeRemaining <= 0) {
+      // ゲームオーバーに遷移
+      final gameOverState = SimpleGameStateFactory.createGameOverState(
+        finalTime: 0.0,
+        sessionNumber: currentPlayingState.sessionNumber,
+      );
+      return transitionTo(gameOverState);
+    } else {
+      // プレイ中状態の更新
+      final updatedState = SimpleGameStateFactory.createPlayingState(
+        timeRemaining: timeRemaining,
+        sessionNumber: currentPlayingState.sessionNumber,
+      );
+      stateMachine.forceSetState(updatedState);
+      notifyListeners();
+      return true;
+    }
+  }
+  
+  /// リスタート
+  bool restart(double initialTime) {
+    if (currentState is! SimpleGameOverState) return false;
+    
+    final gameOverState = currentState as SimpleGameOverState;
+    final newState = SimpleGameStateFactory.createPlayingState(
+      timeRemaining: initialTime,
+      sessionNumber: gameOverState.sessionNumber + 1,
+    );
+    
+    final success = transitionTo(newState);
+    if (success) {
+      startNewSession();
+    }
+    return success;
+  }
+  
+  /// 状態を強制リセット（テスト用）
+  void resetToState(GameState newState) {
+    stateMachine.forceSetState(newState);
+  }
+  
+  /// 現在のゲーム情報を取得
+  Map<String, dynamic> getCurrentGameInfo() {
+    final state = currentState;
+    
+    return {
+      'stateName': state.name,
+      'stateDescription': state.description,
+      'timeRemaining': state is SimpleGamePlayingState ? state.timeRemaining : null,
+      'sessionNumber': state is SimpleGamePlayingState 
+          ? state.sessionNumber 
+          : (state is SimpleGameOverState ? state.sessionNumber : null),
+      'finalTime': state is SimpleGameOverState ? state.finalTime : null,
+      'canStart': canTransitionTo(SimpleGameStateFactory.createPlayingState(timeRemaining: 5.0, sessionNumber: 1)),
+      'canRestart': state is SimpleGameOverState,
+    };
+  }
+}
