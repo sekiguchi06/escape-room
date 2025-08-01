@@ -1,6 +1,88 @@
 import 'package:flame/components.dart';
+import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+
+/// UIレイアウトマネージャー
+/// 画面サイズに応じたUI要素の配置を管理
+class UILayoutManager {
+  /// 右寄せ配置（マージン付き）
+  static Vector2 topRight(Vector2 screenSize, Vector2 componentSize, double margin) {
+    return Vector2(
+      screenSize.x - componentSize.x - margin,
+      margin,
+    );
+  }
+  
+  /// 左寄せ配置（マージン付き）
+  static Vector2 topLeft(Vector2 screenSize, Vector2 componentSize, double margin) {
+    return Vector2(margin, margin);
+  }
+  
+  /// 中央配置
+  static Vector2 center(Vector2 screenSize, Vector2 componentSize) {
+    return Vector2(
+      (screenSize.x - componentSize.x) / 2,
+      (screenSize.y - componentSize.y) / 2,
+    );
+  }
+  
+  /// 下部中央配置（マージン付き）
+  static Vector2 bottomCenter(Vector2 screenSize, Vector2 componentSize, double margin) {
+    return Vector2(
+      (screenSize.x - componentSize.x) / 2,
+      screenSize.y - componentSize.y - margin,
+    );
+  }
+  
+  /// 右寄せ中央配置（マージン付き） - 互換性のため残す
+  static Vector2 centerRight(Vector2 screenSize, Vector2 componentSize, double margin) {
+    return topRight(screenSize, componentSize, margin);
+  }
+  
+  /// 上下中央、左配置
+  static Vector2 centerLeft(Vector2 screenSize, Vector2 componentSize, double margin) {
+    return Vector2(
+      margin,
+      (screenSize.y - componentSize.y) / 2,
+    );
+  }
+  
+  /// 上配置、左右中央
+  static Vector2 topCenter(Vector2 screenSize, Vector2 componentSize, double margin) {
+    return Vector2(
+      (screenSize.x - componentSize.x) / 2,
+      margin,
+    );
+  }
+  
+  /// グリッドレイアウト
+  static List<Vector2> grid(
+    Vector2 parentSize,
+    Vector2 childSize,
+    int columns,
+    int rows, {
+    EdgeInsets padding = EdgeInsets.zero,
+    double spacing = 8.0,
+  }) {
+    final positions = <Vector2>[];
+    final availableWidth = parentSize.x - padding.left - padding.right - (spacing * (columns - 1));
+    final availableHeight = parentSize.y - padding.top - padding.bottom - (spacing * (rows - 1));
+    
+    final cellWidth = availableWidth / columns;
+    final cellHeight = availableHeight / rows;
+    
+    for (int row = 0; row < rows; row++) {
+      for (int col = 0; col < columns; col++) {
+        final x = padding.left + col * (cellWidth + spacing) + (cellWidth - childSize.x) / 2;
+        final y = padding.top + row * (cellHeight + spacing) + (cellHeight - childSize.y) / 2;
+        positions.add(Vector2(x, y));
+      }
+    }
+    
+    return positions;
+  }
+}
 
 /// UIテーマの抽象基底クラス
 abstract class UITheme {
@@ -413,7 +495,7 @@ class TextUIComponent extends UIComponent<String> {
 }
 
 /// ボタンUIコンポーネント
-class ButtonUIComponent extends UIComponent<String> {
+class ButtonUIComponent extends UIComponent<String> with TapCallbacks {
   late RectangleComponent _background;
   late TextUIComponent _textComponent;
   
@@ -483,6 +565,37 @@ class ButtonUIComponent extends UIComponent<String> {
       _background.paint.color = theme.getColor(_colorId);
     }
   }
+  
+  @override
+  void onTapDown(TapDownEvent event) {
+    // ボタン押下時のビジュアルフィードバック
+    if (isMounted) {
+      _background.paint.color = theme.getColor(_colorId).withOpacity(0.8);
+    }
+    // イベント伝播を停止
+    event.handled = true;
+  }
+  
+  @override
+  void onTapUp(TapUpEvent event) {
+    // ボタンを離した時の処理
+    if (isMounted) {
+      _background.paint.color = theme.getColor(_colorId);
+      onPressed?.call();
+    }
+    // イベント伝播を停止
+    event.handled = true;
+  }
+  
+  @override
+  void onTapCancel(TapCancelEvent event) {
+    // タップがキャンセルされた時の処理
+    if (isMounted) {
+      _background.paint.color = theme.getColor(_colorId);
+    }
+    // イベント伝播を停止
+    event.handled = true;
+  }
 }
 
 /// プログレスバーUIコンポーネント  
@@ -548,75 +661,5 @@ class ProgressBarUIComponent extends UIComponent<double> {
       _background.paint.color = theme.getColor(_backgroundColorId);
       _foreground.paint.color = theme.getColor(_foregroundColorId);
     }
-  }
-}
-
-/// UIレイアウトマネージャー
-class UILayoutManager {
-  /// 中央配置
-  static Vector2 center(Vector2 parentSize, Vector2 childSize) {
-    return Vector2(
-      (parentSize.x - childSize.x) / 2,
-      (parentSize.y - childSize.y) / 2,
-    );
-  }
-  
-  /// 上下中央、左配置
-  static Vector2 centerLeft(Vector2 parentSize, Vector2 childSize, double margin) {
-    return Vector2(
-      margin,
-      (parentSize.y - childSize.y) / 2,
-    );
-  }
-  
-  /// 上下中央、右配置
-  static Vector2 centerRight(Vector2 parentSize, Vector2 childSize, double margin) {
-    return Vector2(
-      parentSize.x - childSize.x - margin,
-      (parentSize.y - childSize.y) / 2,
-    );
-  }
-  
-  /// 上配置、左右中央
-  static Vector2 topCenter(Vector2 parentSize, Vector2 childSize, double margin) {
-    return Vector2(
-      (parentSize.x - childSize.x) / 2,
-      margin,
-    );
-  }
-  
-  /// 下配置、左右中央
-  static Vector2 bottomCenter(Vector2 parentSize, Vector2 childSize, double margin) {
-    return Vector2(
-      (parentSize.x - childSize.x) / 2,
-      parentSize.y - childSize.y - margin,
-    );
-  }
-  
-  /// グリッドレイアウト
-  static List<Vector2> grid(
-    Vector2 parentSize,
-    Vector2 childSize,
-    int columns,
-    int rows, {
-    EdgeInsets padding = EdgeInsets.zero,
-    double spacing = 8.0,
-  }) {
-    final positions = <Vector2>[];
-    final availableWidth = parentSize.x - padding.left - padding.right - (spacing * (columns - 1));
-    final availableHeight = parentSize.y - padding.top - padding.bottom - (spacing * (rows - 1));
-    
-    final cellWidth = availableWidth / columns;
-    final cellHeight = availableHeight / rows;
-    
-    for (int row = 0; row < rows; row++) {
-      for (int col = 0; col < columns; col++) {
-        final x = padding.left + col * (cellWidth + spacing) + (cellWidth - childSize.x) / 2;
-        final y = padding.top + row * (cellHeight + spacing) + (cellHeight - childSize.y) / 2;
-        positions.add(Vector2(x, y));
-      }
-    }
-    
-    return positions;
   }
 }

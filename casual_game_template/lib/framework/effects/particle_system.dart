@@ -86,17 +86,34 @@ class ParticleEffectManager extends Component {
     final config = _effectConfigs[name];
     if (config == null) return;
     
-    final particle = _createParticle(name, config, position);
-    final system = ParticleSystemComponent(particle: particle);
+    // コンポーネントとその親のマウント状態を厳密に確認
+    if (!isMounted || parent == null || !parent!.isMounted) {
+      print('⚠️ ParticleEffectManager: Cannot play effect $name - not properly mounted');
+      return;
+    }
     
-    add(system);
-    _activeEffects[name] = system;
-    
-    // 自動削除
-    Future.delayed(Duration(milliseconds: (config.lifespan * 1000).round()), () {
-      system.removeFromParent();
-      _activeEffects.remove(name);
-    });
+    try {
+      final particle = _createParticle(name, config, position);
+      final system = ParticleSystemComponent(particle: particle);
+      
+      // 非同期でエフェクトを追加
+      Future.microtask(() {
+        if (isMounted && parent != null && parent!.isMounted) {
+          add(system);
+          _activeEffects[name] = system;
+          
+          // 自動削除
+          Future.delayed(Duration(milliseconds: (config.lifespan * 1000).round()), () {
+            if (system.isMounted) {
+              system.removeFromParent();
+            }
+            _activeEffects.remove(name);
+          });
+        }
+      });
+    } catch (e) {
+      print('❌ ParticleEffectManager: Error playing effect $name: $e');
+    }
   }
   
   /// パーティクル生成
@@ -228,7 +245,9 @@ class ParticleEffectManager extends Component {
   /// 全エフェクト停止
   void stopAllEffects() {
     for (final effect in _activeEffects.values) {
-      effect.removeFromParent();
+      if (effect.isMounted) {
+        effect.removeFromParent();
+      }
     }
     _activeEffects.clear();
   }

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import 'game/simple_game.dart';
 import 'game/framework_integration/simple_game_states.dart';
+import 'audio_test_page.dart';
 
 void main() {
   runApp(CasualGameApp());
@@ -35,6 +36,17 @@ class GameScreen extends StatelessWidget {
         title: const Text('Casual Game Template'),
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.volume_up),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AudioTestPage()),
+              );
+            },
+          ),
+        ],
       ),
       body: GameWidget<SimpleGame>.controlled(
         gameFactory: SimpleGame.new,

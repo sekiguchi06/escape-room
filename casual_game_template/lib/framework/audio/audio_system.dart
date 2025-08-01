@@ -285,28 +285,28 @@ class AudioManager {
   Future<void> playBgm(String bgmId) async {
     if (!_configuration.bgmEnabled) return;
     
-    final assetPath = _configuration.bgmAssets[bgmId];
-    if (assetPath == null) {
+    // BGMアセットの存在確認（AudioPlayersProviderが実際のパス解決を行う）
+    if (!_configuration.bgmAssets.containsKey(bgmId)) {
       debugPrint('BGM asset not found: $bgmId');
       return;
     }
     
     final loop = _configuration.loopSettings[bgmId] ?? true;
-    await _provider.playBgm(assetPath, loop: loop);
+    await _provider.playBgm(bgmId, loop: loop);
   }
   
   /// 効果音再生
   Future<void> playSfx(String sfxId, {double volumeMultiplier = 1.0}) async {
     if (!_configuration.sfxEnabled) return;
     
-    final assetPath = _configuration.sfxAssets[sfxId];
-    if (assetPath == null) {
+    // SFXアセットの存在確認（AudioPlayersProviderが実際のパス解決を行う）
+    if (!_configuration.sfxAssets.containsKey(sfxId)) {
       debugPrint('SFX asset not found: $sfxId');
       return;
     }
     
     final volume = _configuration.sfxVolume * volumeMultiplier;
-    await _provider.playSfx(assetPath, volume: volume);
+    await _provider.playSfx(sfxId, volume: volume);
   }
   
   /// BGM停止
