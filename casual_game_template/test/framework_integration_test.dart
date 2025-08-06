@@ -1,14 +1,26 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flame/components.dart';
+
 import 'package:casual_game_template/game/framework_integration/simple_game_framework.dart';
 import 'package:casual_game_template/game/framework_integration/simple_game_configuration.dart';
 import 'package:casual_game_template/game/framework_integration/simple_game_states.dart';
 import 'package:casual_game_template/framework/state/game_state_system.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  
+  setUpAll(() {
+    // プリセット初期化
+    SimpleGameConfigPresets.initialize();
+  });
+  
   group('フレームワーク統合テスト', () {
     test('基本初期化テスト', () async {
       // デフォルト設定でゲームを作成
       final game = SimpleGameFrameworkFactory.createDefault();
+      
+      // ゲームサイズを設定（テスト用）
+      game.onGameResize(Vector2(400, 600));
       
       // 初期化
       await game.onLoad();
@@ -191,7 +203,11 @@ void main() {
           .withDebugMode(true)
           .build();
       
+      // ゲームサイズを設定（テスト用）
+      game.onGameResize(Vector2(400, 600));
+      
       await game.onLoad();
+      game.onMount();
       
       expect(game.config.gameDuration.inSeconds, equals(10), reason: 'プリセット設定が適用されていない');
       expect(game.debugMode, isTrue, reason: 'デバッグモードが有効になっていない');

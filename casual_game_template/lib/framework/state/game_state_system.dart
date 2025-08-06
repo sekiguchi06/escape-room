@@ -216,6 +216,24 @@ class GameStateProvider<T extends GameState> extends ChangeNotifier {
     return _stateMachine.canTransitionTo(newState);
   }
   
+  /// 状態を変更（遷移ルールに従う）
+  bool changeState(T newState) {
+    final success = transitionTo(newState);
+    if (success) {
+      notifyListeners(); // Flutter公式Provider準拠
+    }
+    return success;
+  }
+  
+  /// 強制的に状態を変更（遷移ルールを無視）
+  /// テスト用途など、遷移ルールを無視して直接状態を設定したい場合に使用
+  void forceStateChange(T newState) {
+    _stateMachine.forceSetState(newState);
+    _totalStateChanges++;
+    _recordStateVisit(newState);
+    notifyListeners(); // Flutter公式Provider準拠
+  }
+
   /// 新しいセッション開始
   void startNewSession() {
     _sessionCount++;

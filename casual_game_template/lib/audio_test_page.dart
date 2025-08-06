@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:casual_game_template/framework/audio/audio_system.dart';
-import 'package:casual_game_template/framework/audio/providers/audioplayers_provider.dart';
+import 'package:casual_game_template/framework/audio/providers/flame_audio_provider.dart';
 
 class AudioTestPage extends StatefulWidget {
   const AudioTestPage({Key? key}) : super(key: key);
@@ -10,7 +10,7 @@ class AudioTestPage extends StatefulWidget {
 }
 
 class _AudioTestPageState extends State<AudioTestPage> {
-  late AudioPlayersProvider audioProvider;
+  late FlameAudioProvider audioProvider;
   bool isInitialized = false;
   String status = 'Not initialized';
 
@@ -21,16 +21,16 @@ class _AudioTestPageState extends State<AudioTestPage> {
   }
 
   Future<void> _initializeAudio() async {
-    audioProvider = AudioPlayersProvider();
+    audioProvider = FlameAudioProvider();
     
     const config = DefaultAudioConfiguration(
       bgmAssets: {
-        'menu_bgm': 'audio/bgm/menu.mp3',
+        'menu_bgm': 'menu.mp3',
       },
       sfxAssets: {
-        'tap': 'audio/sfx/tap.wav',
-        'success': 'audio/sfx/success.wav',
-        'error': 'audio/sfx/error.wav',
+        'tap': 'tap.wav',
+        'success': 'success.wav',
+        'error': 'error.wav',
       },
       masterVolume: 1.0,
       bgmVolume: 0.7,
@@ -70,9 +70,10 @@ class _AudioTestPageState extends State<AudioTestPage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -226,7 +227,8 @@ class _AudioTestPageState extends State<AudioTestPage> {
               '4. Listen for actual audio output from your speakers/headphones',
               style: TextStyle(fontSize: 14),
             ),
-          ],
+            ],
+          ),
         ),
       ),
     );

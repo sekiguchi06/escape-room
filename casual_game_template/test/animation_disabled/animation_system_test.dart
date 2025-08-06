@@ -7,6 +7,7 @@ import 'package:casual_game_template/framework/animation/animation_system.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  TestWidgetsFlutterBinding.ensureInitialized();
   
   group('AnimationConfig Tests', () {
     test('デフォルト設定', () {

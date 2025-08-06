@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../framework/core/configurable_game.dart';
 import '../../framework/state/game_state_system.dart';
-import '../../framework/timer/timer_system.dart';
+import '../../framework/timer/flame_timer_system.dart';
 import '../../framework/ui/ui_system.dart';
 import 'simple_game_states.dart';
 import 'simple_game_configuration.dart';
@@ -16,9 +16,13 @@ class SimpleGameFramework extends ConfigurableGame<GameState, SimpleGameConfig> 
   // UI コンポーネント
   late TextUIComponent _statusText;
   late ProgressBarUIComponent _timerProgress;
+  bool _isUIInitialized = false;
   
   // ゲーム状態
   int _currentSessionNumber = 0;
+  
+  // ビルダーパターン用の保留テーマ
+  String? _pendingTheme;
   
   SimpleGameFramework({
     SimpleGameConfiguration? configuration,
@@ -30,16 +34,29 @@ class SimpleGameFramework extends ConfigurableGame<GameState, SimpleGameConfig> 
   
   @override
   Future<void> initializeGame() async {
-    // UIコンポーネントの初期化
-    await _setupUI();
-    
-    // タイマーの初期化
+    // タイマーの初期化（size不要）
     await _setupTimers();
     
     // 状態変更リスナーの設定
     _setupStateListeners();
     
     debugPrint('SimpleGameFramework initialized');
+  }
+  
+  @override
+  void onMount() {
+    super.onMount();
+    
+    // 保留中のテーマを適用
+    if (_pendingTheme != null) {
+      themeManager.setTheme(_pendingTheme!);
+      _pendingTheme = null;
+    }
+    
+    // UIコンポーネントの初期化（sizeが利用可能になってから）
+    if (hasLayout) {
+      _setupUI();
+    }
   }
   
   @override
@@ -69,6 +86,9 @@ class SimpleGameFramework extends ConfigurableGame<GameState, SimpleGameConfig> 
     
     // 初期状態では非表示
     // _timerProgress.opacity = 0.0; // ProgressBarUIComponentにopacityプロパティが未実装
+    
+    // UI初期化完了フラグを設定
+    _isUIInitialized = true;
   }
   
   /// タイマーのセットアップ
@@ -97,6 +117,9 @@ class SimpleGameFramework extends ConfigurableGame<GameState, SimpleGameConfig> 
   
   /// UI更新
   void _updateUI(GameState state) {
+    // UI コンポーネントが初期化されていない場合はスキップ
+    if (!_isUIInitialized) return;
+    
     switch (state.runtimeType) {
       case SimpleGameStartState:
         _statusText.setText(config.getStateText('start'));
@@ -342,9 +365,9 @@ class SimpleGameFrameworkBuilder {
       debugMode: _debugMode,
     );
     
-    // テーマの設定
+    // テーマの設定は初期化後に行う
     if (_theme != null) {
-      game.themeManager.setTheme(_theme!);
+      game._pendingTheme = _theme;
     }
     
     return game;

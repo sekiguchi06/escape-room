@@ -2,6 +2,17 @@ import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'flutter_theme_system.dart';
+
+/// UI階層の優先度定義
+class UILayerPriority {
+  static const int background = 0;
+  static const int gameContent = 100;
+  static const int ui = 200;
+  static const int modal = 300;
+  static const int overlay = 400;
+  static const int tooltip = 500;
+}
 
 /// UIレイアウトマネージャー
 /// 画面サイズに応じたUI要素の配置を管理
@@ -84,267 +95,12 @@ class UILayoutManager {
   }
 }
 
-/// UIテーマの抽象基底クラス
-abstract class UITheme {
-  /// テキストスタイルを取得
-  TextStyle getTextStyle(String styleId);
-  
-  /// 色を取得
-  Color getColor(String colorId);
-  
-  /// サイズ・寸法を取得
-  double getDimension(String dimensionId);
-  
-  /// フォントサイズを取得
-  double getFontSize(String sizeId);
-  
-  /// フォント重みを取得
-  FontWeight getFontWeight(String weightId);
-  
-  /// マージン・パディングを取得
-  EdgeInsets getSpacing(String spacingId);
-  
-  /// アニメーション設定を取得
-  Duration getAnimationDuration(String animationId);
-}
 
-/// デフォルトUIテーマ
-class DefaultUITheme implements UITheme {
-  final Map<String, TextStyle> _textStyles;
-  final Map<String, Color> _colors;
-  final Map<String, double> _dimensions;
-  final Map<String, double> _fontSizes;
-  final Map<String, FontWeight> _fontWeights;
-  final Map<String, EdgeInsets> _spacings;
-  final Map<String, Duration> _animationDurations;
-  
-  const DefaultUITheme({
-    Map<String, TextStyle>? textStyles,
-    Map<String, Color>? colors,
-    Map<String, double>? dimensions,
-    Map<String, double>? fontSizes,
-    Map<String, FontWeight>? fontWeights,
-    Map<String, EdgeInsets>? spacings,
-    Map<String, Duration>? animationDurations,
-  })  : _textStyles = textStyles ?? const {},
-        _colors = colors ?? const {},
-        _dimensions = dimensions ?? const {},
-        _fontSizes = fontSizes ?? const {},
-        _fontWeights = fontWeights ?? const {},
-        _spacings = spacings ?? const {},
-        _animationDurations = animationDurations ?? const {};
-  
-  @override
-  TextStyle getTextStyle(String styleId) {
-    return _textStyles[styleId] ?? TextStyle(
-      fontSize: getFontSize(styleId),
-      fontWeight: getFontWeight(styleId),
-      color: getColor('text'),
-    );
-  }
-  
-  @override
-  Color getColor(String colorId) {
-    return _colors[colorId] ?? _getDefaultColor(colorId);
-  }
-  
-  @override
-  double getDimension(String dimensionId) {
-    return _dimensions[dimensionId] ?? _getDefaultDimension(dimensionId);
-  }
-  
-  @override
-  double getFontSize(String sizeId) {
-    return _fontSizes[sizeId] ?? _getDefaultFontSize(sizeId);
-  }
-  
-  @override
-  FontWeight getFontWeight(String weightId) {
-    return _fontWeights[weightId] ?? _getDefaultFontWeight(weightId);
-  }
-  
-  @override
-  EdgeInsets getSpacing(String spacingId) {
-    return _spacings[spacingId] ?? _getDefaultSpacing(spacingId);
-  }
-  
-  @override
-  Duration getAnimationDuration(String animationId) {
-    return _animationDurations[animationId] ?? _getDefaultAnimationDuration(animationId);
-  }
-  
-  Color _getDefaultColor(String colorId) {
-    switch (colorId) {
-      case 'primary': return Colors.blue;
-      case 'secondary': return Colors.green;
-      case 'danger': return Colors.red;
-      case 'warning': return Colors.orange;
-      case 'info': return Colors.cyan;
-      case 'success': return Colors.green;
-      case 'text': return Colors.white;
-      case 'background': return Colors.black;
-      default: return Colors.white;
-    }
-  }
-  
-  double _getDefaultDimension(String dimensionId) {
-    switch (dimensionId) {
-      case 'small': return 8.0;
-      case 'medium': return 16.0;
-      case 'large': return 24.0;
-      case 'xlarge': return 32.0;
-      default: return 16.0;
-    }
-  }
-  
-  double _getDefaultFontSize(String sizeId) {
-    switch (sizeId) {
-      case 'small': return 12.0;
-      case 'medium': return 16.0;
-      case 'large': return 20.0;
-      case 'xlarge': return 24.0;
-      case 'xxlarge': return 32.0;
-      default: return 16.0;
-    }
-  }
-  
-  FontWeight _getDefaultFontWeight(String weightId) {
-    switch (weightId) {
-      case 'light': return FontWeight.w300;
-      case 'normal': return FontWeight.w400;
-      case 'medium': return FontWeight.w500;
-      case 'bold': return FontWeight.w700;
-      case 'heavy': return FontWeight.w900;
-      default: return FontWeight.w400;
-    }
-  }
-  
-  EdgeInsets _getDefaultSpacing(String spacingId) {
-    switch (spacingId) {
-      case 'none': return EdgeInsets.zero;
-      case 'small': return const EdgeInsets.all(8.0);
-      case 'medium': return const EdgeInsets.all(16.0);
-      case 'large': return const EdgeInsets.all(24.0);
-      default: return const EdgeInsets.all(16.0);
-    }
-  }
-  
-  Duration _getDefaultAnimationDuration(String animationId) {
-    switch (animationId) {
-      case 'fast': return const Duration(milliseconds: 150);
-      case 'normal': return const Duration(milliseconds: 250);
-      case 'slow': return const Duration(milliseconds: 400);
-      default: return const Duration(milliseconds: 250);
-    }
-  }
-}
 
-/// テーマ管理システム
-class ThemeManager {
-  static final ThemeManager _instance = ThemeManager._internal();
-  factory ThemeManager() => _instance;
-  ThemeManager._internal();
-  
-  final Map<String, UITheme> _themes = {};
-  String _currentTheme = 'default';
-  final List<void Function(String)> _listeners = [];
-  
-  /// テーマを登録
-  void registerTheme(String id, UITheme theme) {
-    _themes[id] = theme;
-    
-    // デフォルトテーマがない場合は最初に登録されたテーマをデフォルトに
-    if (_themes.length == 1) {
-      _currentTheme = id;
-    }
-  }
-  
-  /// テーマを設定
-  void setTheme(String themeId) {
-    if (_themes.containsKey(themeId)) {
-      final oldTheme = _currentTheme;
-      _currentTheme = themeId;
-      
-      if (oldTheme != _currentTheme) {
-        _notifyListeners();
-      }
-    }
-  }
-  
-  /// 現在のテーマを取得
-  UITheme get currentTheme {
-    return _themes[_currentTheme] ?? _getDefaultTheme();
-  }
-  
-  /// 現在のテーマIDを取得
-  String get currentThemeId => _currentTheme;
-  
-  /// 利用可能なテーマ一覧を取得
-  List<String> getAvailableThemes() {
-    return _themes.keys.toList();
-  }
-  
-  /// テーマ変更リスナーを追加
-  void addThemeChangeListener(void Function(String) listener) {
-    _listeners.add(listener);
-  }
-  
-  /// テーマ変更リスナーを削除
-  void removeThemeChangeListener(void Function(String) listener) {
-    _listeners.remove(listener);
-  }
-  
-  void _notifyListeners() {
-    for (final listener in _listeners) {
-      listener(_currentTheme);
-    }
-  }
-  
-  UITheme _getDefaultTheme() {
-    return const DefaultUITheme();
-  }
-  
-  /// デフォルトテーマを初期化
-  void initializeDefaultThemes() {
-    // ライトテーマ
-    registerTheme('light', DefaultUITheme(
-      colors: const {
-        'primary': Colors.blue,
-        'secondary': Colors.green,
-        'text': Colors.black,
-        'background': Colors.white,
-      },
-    ));
-    
-    // ダークテーマ
-    registerTheme('dark', DefaultUITheme(
-      colors: const {
-        'primary': Colors.blueAccent,
-        'secondary': Colors.greenAccent,
-        'text': Colors.white,
-        'background': Colors.black,
-      },
-    ));
-    
-    // ゲーム用テーマ
-    registerTheme('game', DefaultUITheme(
-      colors: const {
-        'primary': Colors.orange,
-        'secondary': Colors.purple,
-        'text': Colors.white,
-        'background': Colors.indigo,
-      },
-      fontSizes: const {
-        'small': 14.0,
-        'medium': 18.0,
-        'large': 24.0,
-        'xlarge': 32.0,
-      },
-    ));
-  }
-}
 
-/// 汎用UIコンポーネント基底クラス
+
+/// 汎用UIコンポーネント基底クラス（Flutter公式ThemeData準拠）
+/// FlutterThemeManagerを内部で使用し、Material Design準拠のテーマシステムを利用
 abstract class UIComponent<T> extends PositionComponent {
   String _themeId = 'default';
   final Map<String, dynamic> _properties = {};
@@ -359,8 +115,12 @@ abstract class UIComponent<T> extends PositionComponent {
     }
   }
   
-  /// 現在のテーマを取得
-  UITheme get theme => ThemeManager().currentTheme;
+  /// 現在のテーマを取得（Flutter公式ThemeData準拠）
+  /// Material Design準拠の色・スタイル取得
+  UITheme get theme => FlutterThemeManager().currentTheme;
+  Color getThemeColor(String key) => theme.getColor(key);
+  double getThemeFontSize(String key) => theme.getFontSize(key);
+  double getThemeSpacing(String key) => theme.getSpacing(key);
   
   /// テーマIDを取得
   String get themeId => _themeId;
@@ -429,6 +189,7 @@ class TextUIComponent extends UIComponent<String> {
       textRenderer: TextPaint(style: theme.getTextStyle(_styleId)),
       position: Vector2.zero(),
     );
+    _textComponent.anchor = Anchor.center;
     
     add(_textComponent);
   }
@@ -524,7 +285,7 @@ class ButtonUIComponent extends UIComponent<String> with TapCallbacks {
     // 背景
     _background = RectangleComponent(
       size: size,
-      paint: Paint()..color = theme.getColor(_colorId),
+      paint: Paint()..color = getThemeColor(_colorId),
     );
     add(_background);
     
@@ -549,7 +310,7 @@ class ButtonUIComponent extends UIComponent<String> with TapCallbacks {
   void setColor(String colorId) {
     _colorId = colorId;
     if (isMounted) {
-      _background.paint.color = theme.getColor(_colorId);
+      _background.paint.color = getThemeColor(_colorId);
     }
   }
   
@@ -562,7 +323,7 @@ class ButtonUIComponent extends UIComponent<String> with TapCallbacks {
   void onThemeChanged() {
     super.onThemeChanged();
     if (isMounted) {
-      _background.paint.color = theme.getColor(_colorId);
+      _background.paint.color = getThemeColor(_colorId);
     }
   }
   
@@ -570,7 +331,7 @@ class ButtonUIComponent extends UIComponent<String> with TapCallbacks {
   void onTapDown(TapDownEvent event) {
     // ボタン押下時のビジュアルフィードバック
     if (isMounted) {
-      _background.paint.color = theme.getColor(_colorId).withOpacity(0.8);
+      _background.paint.color = getThemeColor(_colorId).withOpacity(0.8);
     }
     // イベント伝播を停止
     event.handled = true;
@@ -580,7 +341,7 @@ class ButtonUIComponent extends UIComponent<String> with TapCallbacks {
   void onTapUp(TapUpEvent event) {
     // ボタンを離した時の処理
     if (isMounted) {
-      _background.paint.color = theme.getColor(_colorId);
+      _background.paint.color = getThemeColor(_colorId);
       onPressed?.call();
     }
     // イベント伝播を停止
@@ -591,12 +352,106 @@ class ButtonUIComponent extends UIComponent<String> with TapCallbacks {
   void onTapCancel(TapCancelEvent event) {
     // タップがキャンセルされた時の処理
     if (isMounted) {
-      _background.paint.color = theme.getColor(_colorId);
+      _background.paint.color = getThemeColor(_colorId);
     }
     // イベント伝播を停止
     event.handled = true;
   }
 }
+
+/// 設定メニューUIコンポーネント
+/// ゲーム設定の変更を提供するモーダルメニュー
+class SettingsMenuComponent extends PositionComponent {
+  late RectangleComponent _background;
+  late TextUIComponent _titleText;
+  final List<ButtonUIComponent> _buttons = [];
+  
+  final void Function(String difficulty)? onDifficultyChanged;
+  final void Function()? onClosePressed;
+  
+  SettingsMenuComponent({
+    this.onDifficultyChanged,
+    this.onClosePressed,
+  }) {
+    size = Vector2(300, 400);
+    // 設定メニューはモーダル内コンテンツとして高優先度
+    priority = UILayerPriority.modal + 1;
+  }
+  
+  @override
+  Future<void> onLoad() async {
+    await super.onLoad();
+    
+    // 背景（不透明な白）
+    _background = RectangleComponent(
+      size: size,
+      paint: Paint()..color = Colors.white.withOpacity(0.95),
+    );
+    add(_background);
+    
+    // タイトル
+    _titleText = TextUIComponent(
+      text: 'Settings',
+      styleId: 'large',
+      position: Vector2(size.x / 2, 40),
+    );
+    _titleText.anchor = Anchor.center;
+    _titleText.setTextColor(Colors.black);
+    add(_titleText);
+    
+    // 難易度変更ボタン
+    _createDifficultyButtons();
+    
+    // 閉じるボタン
+    final closeButton = ButtonUIComponent(
+      text: 'Close',
+      colorId: 'danger',
+      position: Vector2(size.x / 2 - 60, size.y - 60),
+      size: Vector2(120, 40),
+      onPressed: () => onClosePressed?.call(),
+    );
+    _buttons.add(closeButton);
+    add(closeButton);
+  }
+  
+  void _createDifficultyButtons() {
+    final difficulties = ['Easy', 'Default', 'Hard'];
+    final buttonWidth = 80.0;
+    final buttonHeight = 40.0;
+    final spacing = 10.0;
+    final totalWidth = difficulties.length * buttonWidth + (difficulties.length - 1) * spacing;
+    final startX = (size.x - totalWidth) / 2;
+    
+    for (int i = 0; i < difficulties.length; i++) {
+      final difficulty = difficulties[i];
+      final button = ButtonUIComponent(
+        text: difficulty,
+        colorId: 'secondary',
+        position: Vector2(
+          startX + i * (buttonWidth + spacing),
+          150,
+        ),
+        size: Vector2(buttonWidth, buttonHeight),
+        onPressed: () => onDifficultyChanged?.call(difficulty.toLowerCase()),
+      );
+      _buttons.add(button);
+      add(button);
+    }
+  }
+  
+  @override
+  void onRemove() {
+    // ボタンのクリーンアップ
+    for (final button in _buttons) {
+      if (button.isMounted) {
+        button.removeFromParent();
+      }
+    }
+    _buttons.clear();
+    super.onRemove();
+  }
+}
+
 
 /// プログレスバーUIコンポーネント  
 class ProgressBarUIComponent extends UIComponent<double> {
@@ -626,14 +481,14 @@ class ProgressBarUIComponent extends UIComponent<double> {
     // 背景
     _background = RectangleComponent(
       size: size,
-      paint: Paint()..color = theme.getColor(_backgroundColorId),
+      paint: Paint()..color = getThemeColor(_backgroundColorId),
     );
     add(_background);
     
     // プログレス
     _foreground = RectangleComponent(
       size: Vector2(size.x * _progress, size.y),
-      paint: Paint()..color = theme.getColor(_foregroundColorId),
+      paint: Paint()..color = getThemeColor(_foregroundColorId),
     );
     add(_foreground);
   }
@@ -658,8 +513,8 @@ class ProgressBarUIComponent extends UIComponent<double> {
   void onThemeChanged() {
     super.onThemeChanged();
     if (isMounted) {
-      _background.paint.color = theme.getColor(_backgroundColorId);
-      _foreground.paint.color = theme.getColor(_foregroundColorId);
+      _background.paint.color = getThemeColor(_backgroundColorId);
+      _foreground.paint.color = getThemeColor(_foregroundColorId);
     }
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/gestures.dart';
@@ -9,6 +10,7 @@ import '../../lib/framework/state/game_state_system.dart';
 import '../../lib/game/framework_integration/simple_game_states.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   group('🔄 簡略化システムテスト - フレームワーク基盤', () {
     late IntegrationTestGame game;
     
@@ -59,6 +61,8 @@ void main() {
       
       // === データ永続化システム ===
       await game.dataManager.saveHighScore(500);
+      // 保存後に少し待機（フラッシュ対応）
+      await Future.delayed(const Duration(milliseconds: 100));
       final highScore = await game.dataManager.loadHighScore();
       expect(highScore, equals(500));
       print('  💾 データ永続化システム確認');

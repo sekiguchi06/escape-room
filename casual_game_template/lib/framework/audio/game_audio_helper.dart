@@ -1,13 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'audio_system.dart';
-import 'providers/audioplayers_provider.dart';
+import 'providers/flame_audio_provider.dart';
 
 /// 簡単なゲーム音声設定ヘルパー
 /// 流用時に間違いやすいパス設定を簡素化
 class GameAudioHelper {
-  /// 標準的なゲーム音声設定を作成
+  /// 標準的なゲーム音声設定を作成（flame_audio公式準拠）
   /// 
-  /// assets/audio/bgm/ と assets/audio/sfx/ フォルダに音声ファイルを配置することを前提
+  /// assets/audio/ フォルダ直下に音声ファイルを配置することを前提
   /// 
   /// 使用例:
   /// ```dart
@@ -35,16 +35,16 @@ class GameAudioHelper {
     Map<String, bool>? loopSettings,
     bool debugMode = false,
   }) {
-    // BGMアセットマップを自動生成（パス付加）
+    // BGMアセットマップを自動生成（flame_audio公式準拠：ファイル名のみ）
     final bgmAssets = <String, String>{};
     for (final entry in bgmFiles.entries) {
-      bgmAssets[entry.key] = 'audio/bgm/${entry.value}';
+      bgmAssets[entry.key] = entry.value;
     }
     
-    // SFXアセットマップを自動生成（パス付加）
+    // SFXアセットマップを自動生成（flame_audio公式準拠：ファイル名のみ）
     final sfxAssets = <String, String>{};
     for (final entry in sfxFiles.entries) {
-      sfxAssets[entry.key] = 'audio/sfx/${entry.value}';
+      sfxAssets[entry.key] = entry.value;
     }
     
     // デフォルトループ設定（BGMは全てループ、SFXはループなし）
@@ -94,10 +94,10 @@ class GameAudioHelper {
     );
   }
   
-  /// ゲーム開発用の実プロバイダーを作成
+  /// ゲーム開発用の実プロバイダーを作成（flame_audio公式準拠）
   /// 本番環境での音声再生用
   static AudioProvider createRealProvider() {
-    return AudioPlayersProvider();
+    return FlameAudioProvider();
   }
   
   /// テスト・開発用のサイレントプロバイダーを作成

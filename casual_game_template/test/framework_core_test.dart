@@ -1,9 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
+
 import 'package:flutter/material.dart';
 import 'package:casual_game_template/framework/state/game_state_system.dart';
 import 'package:casual_game_template/framework/config/game_configuration.dart';
-import 'package:casual_game_template/framework/timer/timer_system.dart';
+import 'package:casual_game_template/framework/timer/flame_timer_system.dart';
 import 'package:casual_game_template/framework/ui/ui_system.dart';
+import 'package:casual_game_template/framework/ui/flutter_theme_system.dart';
 
 /// テスト用の汎用ゲーム状態定義
 class TestGameIdleState extends GameState {
@@ -291,6 +293,7 @@ class TestGameStateProvider extends GameStateProvider<GameState> {
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   group('フレームワークコア基盤テスト', () {
     test('汎用状態管理システム - 基本動作', () {
       print('🔧 汎用状態管理システムテスト開始...');
@@ -391,15 +394,15 @@ void main() {
       // カウントダウンタイマー
       print('  🔻 カウントダウンタイマーテスト...');
       bool countdownCompleted = false;
-      final countdownTimer = GameTimer('countdown_test', TimerConfiguration(
+      final countdownTimer = FlameGameTimer('countdown_test', TimerConfiguration(
         duration: Duration(seconds: 3),
         type: TimerType.countdown,
         onComplete: () => countdownCompleted = true,
       ));
       
-      expect(countdownTimer.current, equals(Duration(seconds: 3)));
+      expect(countdownTimer.remaining, equals(Duration(seconds: 3)));
       expect(countdownTimer.type, equals(TimerType.countdown));
-      print('    ✅ 初期値: ${countdownTimer.current.inSeconds}秒');
+      print('    ✅ 初期値: ${countdownTimer.remaining.inSeconds}秒');
       
       // タイマー開始・更新シミュレーション
       countdownTimer.start();
@@ -407,30 +410,30 @@ void main() {
       
       // 1秒進行をシミュレート
       countdownTimer.update(1.0);
-      expect(countdownTimer.current.inSeconds, equals(2));
-      print('    ✅ 1秒後: ${countdownTimer.current.inSeconds}秒');
+      expect(countdownTimer.remaining.inSeconds, equals(2));
+      print('    ✅ 1秒後: ${countdownTimer.remaining.inSeconds}秒');
       
       // カウントアップタイマー
       print('  🔺 カウントアップタイマーテスト...');
       bool countupCompleted = false;
-      final countupTimer = GameTimer('countup_test', TimerConfiguration(
+      final countupTimer = FlameGameTimer('countup_test', TimerConfiguration(
         duration: Duration(seconds: 5),
         type: TimerType.countup,
         onComplete: () => countupCompleted = true,
       ));
       
-      expect(countupTimer.current, equals(Duration.zero));
+      expect(countupTimer.remaining, equals(Duration(seconds: 5)));
       expect(countupTimer.type, equals(TimerType.countup));
       
       countupTimer.start();
       countupTimer.update(2.0);
-      expect(countupTimer.current.inSeconds, equals(2));
-      print('    ✅ 2秒後: ${countupTimer.current.inSeconds}秒');
+      expect(countupTimer.remaining.inSeconds, equals(3));
+      print('    ✅ 2秒後: ${countupTimer.remaining.inSeconds}秒残り');
       
       // インターバルタイマー
       print('  🔄 インターバルタイマーテスト...');
       int intervalCount = 0;
-      final intervalTimer = GameTimer('interval_test', TimerConfiguration(
+      final intervalTimer = FlameGameTimer('interval_test', TimerConfiguration(
         duration: Duration(seconds: 2),
         type: TimerType.interval,
         onComplete: () => intervalCount++,
@@ -443,7 +446,7 @@ void main() {
       
       // タイマー制御操作
       print('  🎛️ タイマー制御テスト...');
-      final controlTimer = GameTimer('control_test', TimerConfiguration(
+      final controlTimer = FlameGameTimer('control_test', const TimerConfiguration(
         duration: Duration(seconds: 10),
         type: TimerType.countdown,
       ));
@@ -461,7 +464,7 @@ void main() {
       
       controlTimer.reset();
       expect(controlTimer.isRunning, isFalse);
-      expect(controlTimer.current, equals(Duration(seconds: 10)));
+      expect(controlTimer.remaining, equals(Duration(seconds: 10)));
       print('    ✅ 制御操作 (開始/一時停止/再開/リセット) 成功');
       
       print('🎉 汎用タイマーシステムテスト完了！');
@@ -470,7 +473,7 @@ void main() {
     test('汎用UIテーマシステム - テーマ管理', () {
       print('🎨 汎用UIテーマシステムテスト開始...');
       
-      final themeManager = ThemeManager();
+      final themeManager = FlutterThemeManager();
       themeManager.initializeDefaultThemes();
       
       // 利用可能なテーマ確認
@@ -498,7 +501,11 @@ void main() {
       }
       
       // カスタムテーマ登録
-      final customTheme = DefaultUITheme(
+      final customTheme = FlutterUITheme(
+        themeData: ThemeData(
+          primarySwatch: Colors.purple,
+          fontFamily: 'Arial',
+        ),
         colors: const {
           'primary': Colors.purple,
           'secondary': Colors.orange,

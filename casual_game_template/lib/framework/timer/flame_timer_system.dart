@@ -1,6 +1,9 @@
 import 'package:flame/components.dart';
 import 'package:flutter/foundation.dart';
 
+/// Flame公式Timer準拠のタイマーシステム
+/// 既存のTimerSystemと互換性を保ちつつ、内部でFlame公式Timerを使用
+
 /// タイマーの種類
 enum TimerType {
   countdown,  // カウントダウン
@@ -8,7 +11,7 @@ enum TimerType {
   interval,   // インターバル（繰り返し）
 }
 
-/// タイマー設定
+/// タイマー設定（既存API互換）
 class TimerConfiguration {
   final Duration duration;
   final TimerType type;
@@ -57,8 +60,8 @@ class TimerConfiguration {
   }
 }
 
-/// 汎用ゲームタイマー
-class GameTimer extends Component {
+/// Flame公式Timer準拠のゲームタイマー
+class FlameGameTimer extends Component {
   Duration _current = Duration.zero;
   Duration _duration = Duration.zero;
   TimerType _type = TimerType.countdown;
@@ -66,11 +69,19 @@ class GameTimer extends Component {
   bool _isPaused = false;
   
   TimerConfiguration _config;
+  Timer? _flameTimer;
   
-  GameTimer(String timerId, this._config) {
+  FlameGameTimer(String timerId, this._config) {
     _duration = _config.duration;
     _type = _config.type;
+    _resetCurrentTime();
     
+    if (_config.autoStart) {
+      start();
+    }
+  }
+  
+  void _resetCurrentTime() {
     switch (_type) {
       case TimerType.countdown:
         _current = _duration;
@@ -80,9 +91,61 @@ class GameTimer extends Component {
         _current = Duration.zero;
         break;
     }
+  }
+  
+  void _createFlameTimer() {
+    _flameTimer?.stop();
     
-    if (_config.autoStart) {
-      start();
+    switch (_type) {
+      case TimerType.countdown:
+        // カウントダウン：残り時間経過後に完了
+        final remainingSeconds = _current.inMilliseconds / 1000.0;
+        _flameTimer = Timer(remainingSeconds, onTick: () {
+          _current = Duration.zero;
+          _config.onComplete?.call();
+          if (_config.resetOnComplete) {
+            reset();
+            if (_config.autoStart) {
+              start();
+            }
+          } else {
+            _isRunning = false;
+          }
+        });
+        break;
+        
+      case TimerType.countup:
+        // カウントアップ：残り時間経過後に完了
+        final remainingSeconds = (_duration - _current).inMilliseconds / 1000.0;
+        _flameTimer = Timer(remainingSeconds, onTick: () {
+          _current = _duration;
+          _config.onComplete?.call();
+          if (_config.resetOnComplete) {
+            reset();
+            if (_config.autoStart) {
+              start();
+            }
+          } else {
+            _isRunning = false;
+          }
+        });
+        break;
+        
+      case TimerType.interval:
+        // インターバル：繰り返し実行（残り時間から開始）
+        void createIntervalTimer() {
+          final remainingSeconds = (_duration - _current).inMilliseconds / 1000.0;
+          _flameTimer = Timer(remainingSeconds, onTick: () {
+            _current = Duration.zero;
+            _config.onComplete?.call();
+            if (_isRunning && !_isPaused) {
+              createIntervalTimer(); // 次のタイマーを作成
+              _flameTimer?.start();
+            }
+          });
+        }
+        createIntervalTimer();
+        break;
     }
   }
   
@@ -144,13 +207,16 @@ class GameTimer extends Component {
     if (!_isRunning) {
       _isRunning = true;
       _isPaused = false;
+      _createFlameTimer();
+      _flameTimer?.start();
       _config.onStart?.call();
-      debugPrint('Timer started: $_duration');
+      debugPrint('FlameGameTimer started: $_duration');
     }
   }
   
   /// タイマー停止
   void stop() {
+    _flameTimer?.stop();
     _isRunning = false;
     _isPaused = false;
   }
@@ -158,32 +224,29 @@ class GameTimer extends Component {
   /// タイマー一時停止
   void pause() {
     if (_isRunning && !_isPaused) {
+      _flameTimer?.stop();
       _isPaused = true;
       _config.onPause?.call();
-      debugPrint('Timer paused');
+      debugPrint('FlameGameTimer paused');
     }
   }
   
   /// タイマー再開
   void resume() {
     if (_isRunning && _isPaused) {
+      // 残り時間でFlame Timerを再作成
+      _createFlameTimer();
+      _flameTimer?.start();
       _isPaused = false;
       _config.onResume?.call();
-      debugPrint('Timer resumed');
+      debugPrint('FlameGameTimer resumed');
     }
   }
   
   /// タイマーリセット
   void reset() {
-    switch (_type) {
-      case TimerType.countdown:
-        _current = _duration;
-        break;
-      case TimerType.countup:
-      case TimerType.interval:
-        _current = Duration.zero;
-        break;
-    }
+    _flameTimer?.stop();
+    _resetCurrentTime();
     _isRunning = false;
     _isPaused = false;
   }
@@ -197,26 +260,19 @@ class GameTimer extends Component {
     _duration = config.duration;
     _type = config.type;
     
-    // 新しい設定に合わせて現在時刻を調整
-    switch (_type) {
-      case TimerType.countdown:
-        if (_current > _duration) {
-          _current = _duration;
-        }
-        break;
-      case TimerType.countup:
-        if (_current > _duration) {
-          _current = _duration;
-        }
-        break;
-      case TimerType.interval:
-        _current = Duration(microseconds: _current.inMicroseconds % _duration.inMicroseconds);
-        break;
-    }
+    // 新設定でリセット
+    _resetCurrentTime();
     
     // 実行状態を復元
     _isRunning = wasRunning;
     _isPaused = wasPaused;
+    
+    if (_isRunning) {
+      _createFlameTimer();
+      if (!_isPaused) {
+        _flameTimer?.start();
+      }
+    }
   }
   
   /// 時間を直接設定
@@ -236,8 +292,12 @@ class GameTimer extends Component {
   void update(double dt) {
     super.update(dt);
     
-    if (!isRunning) return;
+    if (!isRunning || _flameTimer == null) return;
     
+    // Flame Timerを更新
+    _flameTimer!.update(dt);
+    
+    // 現在時刻を計算（Flame Timerの進行に基づいて）
     final deltaTime = Duration(microseconds: (dt * 1000000).round());
     final oldCurrent = _current;
     
@@ -254,7 +314,6 @@ class GameTimer extends Component {
         _current += deltaTime;
         if (_current >= _duration) {
           _current = Duration.zero;
-          _config.onComplete?.call();
         }
         break;
     }
@@ -262,20 +321,6 @@ class GameTimer extends Component {
     // 更新コールバック呼び出し
     if (_current != oldCurrent) {
       _config.onUpdate?.call(_current);
-    }
-    
-    // 完了チェック（インターバル以外）
-    if (_type != TimerType.interval && isCompleted && !isCompleted) {
-      _config.onComplete?.call();
-      
-      if (_config.resetOnComplete) {
-        reset();
-        if (_config.autoStart) {
-          start();
-        }
-      } else {
-        stop();
-      }
     }
   }
   
@@ -289,13 +334,20 @@ class GameTimer extends Component {
       'isPaused': _isPaused,
       'isCompleted': isCompleted,
       'progress': progress,
+      'flameTimer': _flameTimer?.toString() ?? 'null',
     };
+  }
+  
+  @override
+  void onRemove() {
+    _flameTimer?.stop();
+    super.onRemove();
   }
 }
 
-/// タイマー管理システム
-class TimerManager extends Component {
-  final Map<String, GameTimer> _timers = {};
+/// Flame公式Timer準拠のタイマー管理システム
+class FlameTimerManager extends Component {
+  final Map<String, FlameGameTimer> _timers = {};
   final Map<String, TimerConfiguration> _configurations = {};
   
   /// タイマーを追加
@@ -303,12 +355,12 @@ class TimerManager extends Component {
     // 既存のタイマーがあれば削除
     removeTimer(id);
     
-    final timer = GameTimer(id, config);
+    final timer = FlameGameTimer(id, config);
     _timers[id] = timer;
     _configurations[id] = config;
     
     add(timer);
-    debugPrint('Timer added: $id');
+    debugPrint('FlameTimerManager: Timer added: $id');
   }
   
   /// タイマーを削除
@@ -318,12 +370,12 @@ class TimerManager extends Component {
       timer.removeFromParent();
       _timers.remove(id);
       _configurations.remove(id);
-      debugPrint('Timer removed: $id');
+      debugPrint('FlameTimerManager: Timer removed: $id');
     }
   }
   
-  /// タイマーを取得
-  GameTimer? getTimer(String id) {
+  /// タイマーを取得（既存API互換）
+  FlameGameTimer? getTimer(String id) {
     return _timers[id];
   }
   
@@ -394,6 +446,13 @@ class TimerManager extends Component {
     return _timers.keys.toList();
   }
   
+  /// すべてのタイマーを更新
+  void update(double dt) {
+    for (final timer in _timers.values) {
+      timer.update(dt);
+    }
+  }
+  
   /// 実行中のタイマー一覧を取得
   List<String> getRunningTimerIds() {
     return _timers.entries
@@ -455,7 +514,7 @@ class TimerManager extends Component {
   }
 }
 
-/// タイマープリセット管理
+/// タイマープリセット管理（既存API互換）
 class TimerPresets {
   static const Map<String, TimerConfiguration> _presets = {
     'quickGame': TimerConfiguration(

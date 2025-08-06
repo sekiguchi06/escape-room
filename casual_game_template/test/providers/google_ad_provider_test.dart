@@ -4,6 +4,7 @@ import 'package:casual_game_template/framework/monetization/monetization_system.
 import 'package:casual_game_template/framework/monetization/providers/google_ad_provider.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   group('GoogleAdProvider Tests', () {
     late GoogleAdProvider provider;
     late DefaultMonetizationConfiguration config;

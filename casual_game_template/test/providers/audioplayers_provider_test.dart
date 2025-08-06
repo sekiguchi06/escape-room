@@ -3,6 +3,7 @@ import 'package:casual_game_template/framework/audio/audio_system.dart';
 import 'package:casual_game_template/framework/audio/providers/audioplayers_provider.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   group('AudioPlayersProvider Tests', () {
     late AudioPlayersProvider provider;
     late DefaultAudioConfiguration config;

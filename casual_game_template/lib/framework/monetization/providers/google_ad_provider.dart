@@ -25,7 +25,8 @@ class GoogleAdProvider implements AdProvider {
     
     try {
       // Google Mobile Ads SDKの初期化
-      await MobileAds.instance.initialize();
+      final mobileAds = MobileAds.instance;
+      await mobileAds.initialize();
       
       if (config.debugMode) {
         debugPrint('GoogleAdProvider initialized (testMode: ${config.testMode})');

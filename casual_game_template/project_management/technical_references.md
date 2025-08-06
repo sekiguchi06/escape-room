@@ -55,6 +55,7 @@
 - [Firebase Analytics](https://firebase.google.com/docs/analytics/get-started?platform=flutter)
 - [audioplayers](https://pub.dev/packages/audioplayers)
 - [shared_preferences](https://pub.dev/packages/shared_preferences)
+- [games_services](https://pub.dev/packages/games_services) ※導入済み
 
 ### 状態管理
 - [Provider](https://pub.dev/packages/provider)
@@ -101,5 +102,62 @@
 - ブラウザ動作確認: 必須
 - パフォーマンステスト: 60FPS維持
 
+## 🎮 Flutter Casual Games Toolkit 将来検討項目
+
+### 評価サマリー（2025年8月4日実施）
+Flutter Casual Games Toolkitの採用について評価を実施し、現時点では導入を見送ることを決定。
+
+### 評価結果
+
+#### 利点
+- **統合済み機能**: Google Mobile Ads、Firebase、In-app purchase、Play Games Services/Game Center
+- **ベストプラクティス**: ゲーム開発の設計パターンが組み込まれている
+- **プロジェクトテンプレート**: すぐに開始可能な構造
+- **メンテナンス**: Googleによる公式サポート
+
+#### 現状フレームワークとの重複
+1. **広告システム**: 独自AdProvider実装済み（Google Mobile Ads使用）
+2. **分析システム**: 独自AnalyticsManager実装済み（Firebase Analytics使用）  
+3. **音声システム**: FlameAudioProvider実装済み（flame_audio使用）
+4. **ゲーム状態管理**: FlutterGameStateProvider実装済み（ChangeNotifier使用）
+5. **永続化**: FlutterDataManager実装済み（shared_preferences使用）
+6. **ゲームサービス**: FlutterGameServicesManager実装済み（games_services使用）
+
+#### 推奨事項
+- **現時点**: 既存フレームワークの使用を継続
+- **将来検討**: 以下の条件で再評価を推奨
+  - 新規プロジェクト開始時
+  - 大規模リファクタリング時
+  - Toolkitの大幅アップデート時
+
+### 将来的な導入検討ポイント
+
+#### 1. 新規プロジェクトでの採用
+```yaml
+# pubspec.yaml
+dependencies:
+  flutter_casual_games_toolkit: ^最新バージョン
+```
+
+#### 2. 段階的移行戦略
+1. **Phase1**: Toolkitのプロジェクト構造を参考に既存コードを整理
+2. **Phase2**: Toolkitのベストプラクティスを既存実装に適用
+3. **Phase3**: 必要に応じて個別機能をToolkit実装に置換
+
+#### 3. 機能別採用優先度
+- **高**: In-app purchase統合（未実装機能）
+- **中**: プロジェクト構造・設計パターン
+- **低**: 既実装済みの機能（広告、分析、音声等）
+
+### 参考リンク
+- [Flutter Casual Games Toolkit](https://github.com/flutter/games)
+- [Games Toolkit Documentation](https://docs.flutter.dev/resources/games-toolkit)
+- [Sample Games](https://github.com/flutter/games/tree/main/samples)
+
+### 次回評価予定
+- 2025年Q3: Toolkit v2.0リリース時
+- 新規プロジェクト開始時
+- 現フレームワーク大規模改修時
+
 ---
-最終更新: 2025年7月31日
+最終更新: 2025年8月4日

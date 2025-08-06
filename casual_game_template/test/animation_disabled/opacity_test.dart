@@ -9,6 +9,7 @@ class OpacityComponent extends PositionComponent with HasPaint {}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  TestWidgetsFlutterBinding.ensureInitialized();
   
   testWithFlameGame('HasPaint使用時の透明度アニメーション', (game) async {
     final target = OpacityComponent();

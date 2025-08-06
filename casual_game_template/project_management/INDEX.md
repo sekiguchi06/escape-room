@@ -70,6 +70,22 @@
    - 外部ドキュメントリンク
    - 実装時の参照順序
 
+### UI架構設計（最新追加）
+9. **../docs/ui_architecture_official.md** - 公式パターン準拠UI設計
+   - Flame公式RouterComponent + OverlayRoute設計仕様
+   - 独自UISystemからの移行方針
+   - 公式ドキュメント検証結果
+
+10. **../docs/migration_plan_uiscreenmanager_removal.md** - UIScreenManager廃止計画
+    - 独自実装から公式パターンへの移行手順
+    - Phase分けされた詳細移行計画
+    - リスク管理とテスト戦略
+
+11. **../docs/router_implementation_guide.md** - RouterComponent実装ガイド
+    - Step-by-Step実装手順書
+    - コード例とファイル構成
+    - 完了条件とトラブルシューティング
+
 ### プロジェクト概要
 7. **README.md** - プロジェクト管理概要
    - フォルダ構成説明
@@ -82,9 +98,11 @@
    - フレームワーク統合ガイド
 
 ## 🎯 現在の最優先タスク
-1. **パーティクルエフェクトシステム** - 視覚的魅力向上
-2. **スコア・ランキングシステム** - ゲーム要素標準化
-3. **レベル進行システム** - 難易度調整機能
+1. **UIシステム公式化** - 独自UIScreenManagerを廃止し、Flame公式RouterComponent + OverlayRouteに移行
+   - 詳細: `../docs/router_implementation_guide.md` 参照
+   - 必須: 完了判定3ステップ（テスト→シミュレーション→問題なし確認）
+2. **パーティクルエフェクトシステム** - 視覚的魅力向上
+3. **スコア・ランキングシステム** - ゲーム要素標準化
 
 ## 💡 開発フロー
 ```

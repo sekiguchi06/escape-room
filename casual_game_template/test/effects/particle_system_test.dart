@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:casual_game_template/framework/effects/particle_system.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   group('ParticleEffectManager Tests', () {
     testWithFlameGame('パーティクルエフェクト初期化', (game) async {
       final manager = ParticleEffectManager();

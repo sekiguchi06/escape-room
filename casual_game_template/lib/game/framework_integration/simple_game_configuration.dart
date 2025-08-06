@@ -259,21 +259,10 @@ class SimpleGameConfiguration extends GameConfiguration<GameState, SimpleGameCon
   /// リモート設定同期
   @override
   Future<void> syncWithRemoteConfig() async {
-    final remoteConfig = RemoteConfigManager();
-    await remoteConfig.fetchAndActivate();
-    
-    // リモート設定値を取得
-    final remoteDuration = remoteConfig.getValue<int>('game_duration_ms');
-    final remoteDebugMode = remoteConfig.getValue<bool>('debug_mode');
-    
-    if (remoteDuration != null || remoteDebugMode != null) {
-      final updatedConfig = config.copyWith(
-        gameDuration: remoteDuration != null ? Duration(milliseconds: remoteDuration) : null,
-        enableDebugMode: remoteDebugMode,
-      );
-      
-      updateConfig(updatedConfig);
-    }
+    // TODO: RemoteConfigManagerの実装待ち
+    // 現在はスタブ実装
+    await Future.delayed(const Duration(milliseconds: 100));
+    print('Remote config sync completed (stub implementation)');
   }
 }
 

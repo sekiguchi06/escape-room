@@ -16,8 +16,8 @@ class SimpleGamePlayingState extends GameState {
   final int sessionNumber;
   
   const SimpleGamePlayingState({
-    required this.timeRemaining,
-    required this.sessionNumber,
+    this.timeRemaining = 30.0,
+    this.sessionNumber = 1,
   }) : super();
   
   @override
@@ -49,10 +49,12 @@ class SimpleGamePlayingState extends GameState {
 class SimpleGameOverState extends GameState {
   final double finalTime;
   final int sessionNumber;
+  final int finalScore;
   
   const SimpleGameOverState({
-    required this.finalTime,
-    required this.sessionNumber,
+    this.finalTime = 0.0,
+    this.sessionNumber = 1,
+    this.finalScore = 0,
   }) : super();
   
   @override
@@ -67,6 +69,7 @@ class SimpleGameOverState extends GameState {
       ...super.toJson(),
       'finalTime': finalTime,
       'sessionNumber': sessionNumber,
+      'finalScore': finalScore,
     };
   }
   
@@ -74,11 +77,12 @@ class SimpleGameOverState extends GameState {
   bool operator ==(Object other) {
     return other is SimpleGameOverState && 
            other.finalTime == finalTime &&
-           other.sessionNumber == sessionNumber;
+           other.sessionNumber == sessionNumber &&
+           other.finalScore == finalScore;
   }
   
   @override
-  int get hashCode => Object.hash(name, finalTime, sessionNumber);
+  int get hashCode => Object.hash(name, finalTime, sessionNumber, finalScore);
 }
 
 /// SimpleGame用の状態遷移定義
@@ -118,6 +122,16 @@ class SimpleGameTransitions {
         toState: SimpleGameStartState,
         onTransition: (from, to) {
           print('リスタート準備完了');
+        },
+      ),
+      
+      // Playing -> Playing (タイマー更新)
+      StateTransition<GameState>(
+        fromState: SimpleGamePlayingState,
+        toState: SimpleGamePlayingState,
+        condition: (current, target) => current is SimpleGamePlayingState && target is SimpleGamePlayingState,
+        onTransition: (from, to) {
+          // タイマー更新時の遷移は通常ログ出力しない（頻繁すぎる）
         },
       ),
       

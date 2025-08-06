@@ -6,13 +6,15 @@ import 'package:flutter/material.dart';
 
 import '../config/game_configuration.dart';
 import '../state/game_state_system.dart';
-import '../timer/timer_system.dart';
-import '../ui/ui_system.dart';
+import '../timer/flame_timer_system.dart';
+import '../ui/flutter_theme_system.dart';
 import '../audio/audio_system.dart';
-import '../input/input_system.dart';
+import '../input/flame_input_system.dart';
 import '../persistence/persistence_system.dart';
 import '../monetization/monetization_system.dart';
 import '../analytics/analytics_system.dart';
+import '../providers/provider_factory.dart';
+import '../game_services/flutter_official_game_services.dart';
 
 /// 設定可能なゲームの基底クラス
 /// フレームワークの全システムを統合し、設定駆動でゲームを構築
@@ -25,10 +27,10 @@ abstract class ConfigurableGame<TState extends GameState, TConfig> extends Flame
   late GameStateProvider<TState> stateProvider;
   
   /// タイマー管理
-  late TimerManager timerManager;
+  late FlameTimerManager timerManager;
   
-  /// テーマ管理
-  late ThemeManager themeManager;
+  /// テーマ管理（Flutter公式ThemeData準拠）
+  late FlutterThemeManager themeManager;
   
   /// 音響管理
   late AudioManager audioManager;
@@ -45,6 +47,15 @@ abstract class ConfigurableGame<TState extends GameState, TConfig> extends Flame
   /// 分析管理
   late AnalyticsManager analyticsManager;
   
+  /// ゲームサービス管理
+  late FlutterGameServicesManager gameServicesManager;
+  
+  /// プロバイダーファクトリー
+  late ProviderFactory providerFactory;
+  
+  /// プロバイダーバンドル
+  late ProviderBundle providerBundle;
+  
   /// 初期化完了フラグ
   bool _isInitialized = false;
   
@@ -54,12 +65,18 @@ abstract class ConfigurableGame<TState extends GameState, TConfig> extends Flame
   ConfigurableGame({
     GameConfiguration<TState, TConfig>? configuration,
     bool debugMode = false,
+    ProviderFactory? providerFactory,
   }) {
     _debugMode = debugMode;
     
     if (configuration != null) {
       this.configuration = configuration;
     }
+    
+    // プロバイダーファクトリーの初期化
+    this.providerFactory = providerFactory ?? ProviderFactoryHelper.createAuto(
+      debugMode: debugMode,
+    );
   }
   
   /// 初期化完了かどうか
@@ -94,52 +111,65 @@ abstract class ConfigurableGame<TState extends GameState, TConfig> extends Flame
   }
   
   /// フレームワークシステムの初期化
+  /// Flutter公式準拠: ProviderFactoryによる統一初期化
   Future<void> initializeFramework() async {
-    // タイマーマネージャーの初期化
-    timerManager = TimerManager();
+    // プロバイダーバンドル作成
+    providerBundle = providerFactory.createProviderBundle();
+    
+    if (_debugMode) {
+      debugPrint('🔧 Provider bundle created: ${providerBundle.profile.name}');
+    }
+    
+    // タイマーマネージャーの初期化（Flame公式Timer準拠）
+    timerManager = FlameTimerManager();
     add(timerManager);
     
-    // テーママネージャーの初期化
-    themeManager = ThemeManager();
+    // テーママネージャーの初期化（Flutter公式ThemeData準拠）
+    themeManager = FlutterThemeManager();
     themeManager.initializeDefaultThemes();
     
     // 状態プロバイダーの初期化（サブクラスで設定）
     stateProvider = createStateProvider();
     
-    // 音響システムの初期化
-    audioManager = AudioManager(
-      provider: createAudioProvider(),
-      configuration: createAudioConfiguration(),
-    );
-    await audioManager.initialize();
+    // プロバイダー一括初期化（依存関係順序保証）
+    final initResults = await providerBundle.initializeAll();
     
-    // 入力システムの初期化
-    inputManager = InputManager(
-      processor: createInputProcessor(),
-      configuration: createInputConfiguration(),
+    // 初期化結果の確認
+    for (final entry in initResults.entries) {
+      if (!entry.value && _debugMode) {
+        debugPrint('⚠️ Provider initialization warning: ${entry.key} failed');
+      }
+    }
+    
+    // システムマネージャーの初期化（プロバイダー使用）
+    audioManager = AudioManager(
+      provider: providerBundle.audioProvider,
+      configuration: providerBundle.audioConfiguration,
+    );
+    
+    inputManager = FlameInputManager(
+      processor: providerBundle.inputProcessor,
+      configuration: providerBundle.inputConfiguration,
     );
     inputManager.initialize();
     
-    // データ永続化システムの初期化
     dataManager = DataManager(
-      provider: createStorageProvider(),
-      configuration: createPersistenceConfiguration(),
+      provider: providerBundle.storageProvider,
+      configuration: providerBundle.persistenceConfiguration,
     );
     await dataManager.initialize();
     
-    // 収益化システムの初期化
     monetizationManager = MonetizationManager(
-      provider: createAdProvider(),
-      configuration: createMonetizationConfiguration(),
+      provider: providerBundle.adProvider,
+      configuration: providerBundle.monetizationConfiguration,
     );
-    await monetizationManager.initialize();
     
-    // 分析システムの初期化
     analyticsManager = AnalyticsManager(
-      provider: createAnalyticsProvider(),
-      configuration: createAnalyticsConfiguration(),
+      provider: providerBundle.analyticsProvider,
+      configuration: providerBundle.analyticsConfiguration,
     );
-    await analyticsManager.initialize();
+    
+    gameServicesManager = providerBundle.gameServicesManager;
     
     // 入力イベントリスナー設定
     inputManager.addInputListener(_onInputEvent);
@@ -155,36 +185,6 @@ abstract class ConfigurableGame<TState extends GameState, TConfig> extends Flame
   
   /// 状態プロバイダーの作成（サブクラスで実装）
   GameStateProvider<TState> createStateProvider();
-  
-  /// 音響プロバイダーの作成（サブクラスでオーバーライド可能）
-  AudioProvider createAudioProvider() => SilentAudioProvider();
-  
-  /// 音響設定の作成（サブクラスでオーバーライド可能）
-  AudioConfiguration createAudioConfiguration() => const DefaultAudioConfiguration();
-  
-  /// 入力プロセッサーの作成（サブクラスでオーバーライド可能）
-  InputProcessor createInputProcessor() => BasicInputProcessor();
-  
-  /// 入力設定の作成（サブクラスでオーバーライド可能）
-  InputConfiguration createInputConfiguration() => const DefaultInputConfiguration();
-  
-  /// ストレージプロバイダーの作成（サブクラスでオーバーライド可能）
-  StorageProvider createStorageProvider() => LocalStorageProvider();
-  
-  /// 永続化設定の作成（サブクラスでオーバーライド可能）
-  PersistenceConfiguration createPersistenceConfiguration() => const DefaultPersistenceConfiguration();
-  
-  /// 広告プロバイダーの作成（サブクラスでオーバーライド可能）
-  AdProvider createAdProvider() => MockAdProvider();
-  
-  /// 収益化設定の作成（サブクラスでオーバーライド可能）
-  MonetizationConfiguration createMonetizationConfiguration() => const DefaultMonetizationConfiguration();
-  
-  /// 分析プロバイダーの作成（サブクラスでオーバーライド可能）
-  AnalyticsProvider createAnalyticsProvider() => ConsoleAnalyticsProvider();
-  
-  /// 分析設定の作成（サブクラスでオーバーライド可能）
-  AnalyticsConfiguration createAnalyticsConfiguration() => const DefaultAnalyticsConfiguration();
   
   /// 設定の適用
   Future<void> applyConfiguration(TConfig config) async {
@@ -409,6 +409,7 @@ abstract class ConfigurableGame<TState extends GameState, TConfig> extends Flame
       'configuration': configuration.getDebugInfo(),
       'state_provider': stateProvider.getDebugInfo(),
       'timer_manager': timerManager.getDebugInfo(),
+      'theme_manager': themeManager.getDebugInfo(),
       'audio_manager': audioManager.getDebugInfo(),
       'input_manager': inputManager.getDebugInfo(),
       'data_manager': dataManager.getDebugInfo(),
@@ -420,12 +421,15 @@ abstract class ConfigurableGame<TState extends GameState, TConfig> extends Flame
   
   @override
   void onRemove() {
-    // リソースのクリーンアップ
-    timerManager.removeFromParent();
-    audioManager.dispose();
-    dataManager.dispose();
-    monetizationManager.dispose();
-    analyticsManager.dispose();
+    // リソースのクリーンアップ（初期化済みの場合のみ）
+    if (_isInitialized) {
+      timerManager.removeFromParent();
+      audioManager.dispose();
+      dataManager.dispose();
+      monetizationManager.dispose();
+      analyticsManager.dispose();
+      providerBundle.disposeAll();
+    }
     super.onRemove();
   }
 }

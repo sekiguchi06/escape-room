@@ -4,6 +4,7 @@ import 'package:casual_game_template/game/framework_integration/simple_game_stat
 import 'package:casual_game_template/game/framework_integration/simple_game_configuration.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   group('シンプルフレームワークテスト', () {
     test('SimpleGameState クラステスト', () {
       // SimpleGameStartState

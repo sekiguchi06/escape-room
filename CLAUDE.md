@@ -269,6 +269,10 @@ JQL: status = 10003 AND labels NOT IN ("human-intervention-required")
 - 目標: 月4本リリース、月収30-65万円
 - 技術スタック: Flutter + Flame + Claude Code + MCP
 
+### 📌 AI開発指示の統一エントリーポイント
+**必ず `/casual_game_template/project_management/INDEX.md` から開始してください。**
+このファイルが全プロジェクト情報への統合ガイドとなります。
+
 ### 20分サイクル開発フロー
 1. Jiraタスク確認・選択 (2分)
 2. task-decomposer agentによるタスク分解 (3分)

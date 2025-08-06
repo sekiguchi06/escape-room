@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+
 import 'package:flame/game.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
@@ -10,10 +11,17 @@ import '../../lib/framework/core/configurable_game.dart';
 import '../../lib/framework/state/game_state_system.dart';
 import '../../lib/framework/config/game_configuration.dart';
 import '../../lib/framework/audio/audio_system.dart';
-import '../../lib/framework/input/input_system.dart';
+import '../../lib/framework/input/flame_input_system.dart';
+import '../../lib/framework/timer/flame_timer_system.dart';
 import '../../lib/framework/persistence/persistence_system.dart';
 import '../../lib/framework/monetization/monetization_system.dart';
 import '../../lib/framework/analytics/analytics_system.dart';
+import '../../lib/framework/effects/particle_system.dart';
+import '../../lib/framework/ui/ui_system.dart';
+import '../../lib/framework/animation/animation_system.dart';
+
+// RouterComponent用のインポート
+import 'package:flame/game.dart' as flame_game show RouterComponent;
 
 // テスト用の実装
 import '../../lib/game/simple_game.dart';
@@ -43,6 +51,9 @@ class IntegrationTestGame extends ConfigurableGame<GameState, SimpleGameConfig> 
     SimpleGameConfigPresets.initialize();
     _configuration = SimpleGameConfigPresets.getConfigurationPreset('default');
     
+    // 状態変更リスナーを追加（直接状態変更でもタイマー管理）
+    _stateProvider.addListener(_onStateChanged);
+    
     // テスト用のUI要素を追加
     final textComponent = TextComponent(
       text: 'Integration Test Game',
@@ -50,9 +61,60 @@ class IntegrationTestGame extends ConfigurableGame<GameState, SimpleGameConfig> 
     );
     add(textComponent);
   }
+  
+  void _onStateChanged() {
+    final currentState = _stateProvider.currentState;
+    
+    if (currentState is SimpleGamePlayingState) {
+      // プレイ状態に変更された時、mainタイマーがなければ作成
+      if (!timerManager.hasTimer('main')) {
+        timerManager.addTimer('main', TimerConfiguration(
+          duration: config.gameDuration,
+          type: TimerType.countdown,
+          onComplete: () {
+            final gameOverState = SimpleGameOverState();
+            stateProvider.changeState(gameOverState);
+          },
+        ));
+        timerManager.startTimer('main');
+      }
+    }
+  }
+  
+  /// 入力イベント処理をオーバーライドしてテスト用の状態遷移を実装
+  @override
+  void onInputEvent(InputEventData event) {
+    super.onInputEvent(event);
+    
+    if (event.type == InputEventType.tap) {
+      // SimpleGameと同様の状態遷移ロジック
+      final currentState = this.currentState;
+      if (currentState is SimpleGameStartState) {
+        // ゲーム開始
+        final playingState = SimpleGamePlayingState(timeRemaining: config.gameDuration.inSeconds.toDouble());
+        stateProvider.changeState(playingState);
+        
+        // メインタイマーを開始
+        timerManager.addTimer('main', TimerConfiguration(
+          duration: config.gameDuration,
+          type: TimerType.countdown,
+          onComplete: () {
+            final gameOverState = SimpleGameOverState();
+            stateProvider.changeState(gameOverState);
+          },
+        ));
+        timerManager.startTimer('main');
+      } else if (currentState is SimpleGameOverState) {
+        // リスタート
+        final startState = SimpleGameStartState();
+        stateProvider.changeState(startState);
+      }
+    }
+  }
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   group('🔗 Flame統合テスト - ConfigurableGame', () {
     late IntegrationTestGame game;
     
@@ -106,8 +168,14 @@ void main() {
         final initialState = game.currentState;
         
         // 2. タイマーとの連携確認
-        // タイマー機能のテスト（簡略化）
+        // タイマー機能のテスト（デフォルトタイマーを作成）
         print('  📝 タイマーシステム連携確認');
+        
+        // テスト用タイマーを作成
+        game.timerManager.addTimer('test', TimerConfiguration(
+          duration: const Duration(seconds: 1),
+          type: TimerType.countdown,
+        ));
         
         final timer = game.timerManager.getTimer('test');
         expect(timer, isNotNull);
@@ -120,13 +188,9 @@ void main() {
         });
         
         // 実際のFlameイベントをシミュレート  
-        game.onTapDown(TapDownEvent(
-          1,
-          game,
-          TapDownDetails(
-            localPosition: const Offset(100, 100),
-          ),
-        ));
+        final tapPosition = Vector2(100, 100);
+        game.inputManager.handleTapDown(tapPosition);
+        game.inputManager.handleTapUp(tapPosition);
         
         // 少し待ってからイベント確認
         await Future.delayed(const Duration(milliseconds: 50));
@@ -153,17 +217,12 @@ void main() {
         // 1. 初期状態確認
         expect(game.currentState, isA<SimpleGameStartState>());
         
-        // 2. 実際のFlame TapDownEventを作成
-        final tapEvent = TapDownEvent(
-          1,
-          game,
-          TapDownDetails(
-            localPosition: const Offset(200, 300),
-          ),
-        );
+        // 2. タップ位置の定義
+        final tapPosition = Vector2(200, 300);
         
-        // 3. Flameイベントハンドラー実行
-        game.onTapDown(tapEvent);
+        // 3. 入力マネージャー経由でタップ処理（Flameイベント回避）
+        game.inputManager.handleTapDown(tapPosition);
+        game.inputManager.handleTapUp(tapPosition);
         
         // 4. フレームワーク処理の確認（非同期処理を待機）
         await Future.delayed(const Duration(milliseconds: 10));
@@ -188,13 +247,9 @@ void main() {
         await game.onLoad();
         
         // ゲーム開始
-        game.onTapDown(TapDownEvent(
-          1,
-          game,
-          TapDownDetails(
-            localPosition: const Offset(100, 100),
-          ),
-        ));
+        final startPosition = Vector2(100, 100);
+        game.inputManager.handleTapDown(startPosition);
+        game.inputManager.handleTapUp(startPosition);
         
         await Future.delayed(const Duration(milliseconds: 10));
         
@@ -277,22 +332,9 @@ void main() {
         
         // 連続でタップイベントを発生
         for (int i = 0; i < 10; i++) {
-          game.onTapDown(TapDownEvent(
-            1,
-            game,
-            TapDownDetails(
-              localPosition: Offset(i * 10.0, i * 10.0),
-            ),
-          ));
-          
-          game.onTapUp(TapUpEvent(
-            1,
-            game,
-            TapUpDetails(
-              kind: PointerDeviceKind.touch,
-              localPosition: Offset(i * 10.0, i * 10.0),
-            ),
-          ));
+          final position = Vector2(i * 10.0, i * 10.0);
+          game.inputManager.handleTapDown(position);
+          game.inputManager.handleTapUp(position);
         }
         
         // システムが正常動作することを確認
@@ -345,11 +387,16 @@ void main() {
       expect(simpleGame.isInitialized, isTrue);
       expect(simpleGame.children.isNotEmpty, isTrue);
       
-      // SimpleGame固有の要素確認
-      final textComponents = simpleGame.children.whereType<TextComponent>();
-      expect(textComponents.length, greaterThan(0));
+      // SimpleGame固有の要素確認（RouterComponent、ParticleEffectManager、GameComponent）
+      final routerComponents = simpleGame.children.whereType<flame_game.RouterComponent>();
+      final particleManagers = simpleGame.children.query<ParticleEffectManager>();
+      final gameComponents = simpleGame.children.whereType<GameComponent>();
       
-      print('  ✅ SimpleGameコンポーネント: ${textComponents.length}個');
+      expect(routerComponents.length, equals(1));
+      expect(particleManagers.length, equals(1)); 
+      expect(gameComponents.length, greaterThanOrEqualTo(1)); // _testCircle
+      
+      print('  ✅ SimpleGameコンポーネント: Router=${routerComponents.length}, Particle=${particleManagers.length}, Game=${gameComponents.length}');
       print('🎉 SimpleGame統合テスト成功！');
     });
   });

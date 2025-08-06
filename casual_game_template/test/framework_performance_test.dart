@@ -1,8 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
+
 import 'package:flutter/material.dart';
 import 'package:casual_game_template/framework/state/game_state_system.dart';
 import 'package:casual_game_template/framework/config/game_configuration.dart';
-import 'package:casual_game_template/framework/timer/timer_system.dart';
+import 'package:casual_game_template/framework/timer/flame_timer_system.dart';
 
 /// パフォーマンステスト用の軽量状態
 class PerfTestState extends GameState {
@@ -85,6 +86,7 @@ class PerfTestConfiguration extends GameConfiguration<GameState, PerfTestConfig>
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   group('フレームワークパフォーマンステスト', () {
     test('大量状態遷移パフォーマンス', () {
       print('🚀 大量状態遷移パフォーマンステスト開始...');
@@ -138,7 +140,7 @@ void main() {
     test('複数タイマー同時実行パフォーマンス', () {
       print('⏱️ 複数タイマー同時実行パフォーマンステスト開始...');
       
-      final timerManager = TimerManager();
+      final timerManager = FlameTimerManager();
       final stopwatch = Stopwatch();
       
       // 100個のタイマーを作成
@@ -393,7 +395,7 @@ void main() {
           condition: (current, target) => current is PerfTestState && target is PerfTestState,
         ));
         
-        final timerManager = TimerManager();
+        final timerManager = FlameTimerManager();
         final config = PerfTestConfiguration(config: PerfTestConfig(
           iterations: 100,
           duration: Duration(seconds: 10),

@@ -44,11 +44,11 @@ extension PositionComponentAnimations on PositionComponent {
     Vector2 destination, {
     AnimationConfig config = const AnimationConfig(),
   }) {
+    // onCompleteはEffectControllerで管理されるため、Effect自体には渡さない
     add(
       MoveEffect.to(
         destination,
         config.toEffectController(),
-        onComplete: config.onComplete,
       ),
     );
   }
@@ -62,7 +62,6 @@ extension PositionComponentAnimations on PositionComponent {
       MoveEffect.by(
         offset,
         config.toEffectController(),
-        onComplete: config.onComplete,
       ),
     );
   }
@@ -76,7 +75,6 @@ extension PositionComponentAnimations on PositionComponent {
       ScaleEffect.to(
         scale,
         config.toEffectController(),
-        onComplete: config.onComplete,
       ),
     );
   }
@@ -90,7 +88,6 @@ extension PositionComponentAnimations on PositionComponent {
       ScaleEffect.by(
         scaleFactor,
         config.toEffectController(),
-        onComplete: config.onComplete,
       ),
     );
   }
@@ -104,7 +101,6 @@ extension PositionComponentAnimations on PositionComponent {
       RotateEffect.to(
         angle,
         config.toEffectController(),
-        onComplete: config.onComplete,
       ),
     );
   }
@@ -118,7 +114,6 @@ extension PositionComponentAnimations on PositionComponent {
       RotateEffect.by(
         angle,
         config.toEffectController(),
-        onComplete: config.onComplete,
       ),
     );
   }
@@ -149,8 +144,10 @@ extension PositionComponentAnimations on PositionComponent {
         ),
         MoveEffect.by(
           Vector2(intensity, 0),
-          EffectController(duration: duration.inMilliseconds / 1000.0 / 8),
-          onComplete: onComplete,
+          EffectController(
+            duration: duration.inMilliseconds / 1000.0 / 8,
+            onMax: onComplete,
+          ),
         ),
       ]),
     );
@@ -167,7 +164,6 @@ extension HasPaintAnimations<T extends Component> on T {
       add(
         OpacityEffect.fadeIn(
           config.toEffectController(),
-          onComplete: config.onComplete,
         ),
       );
     }
@@ -181,7 +177,6 @@ extension HasPaintAnimations<T extends Component> on T {
       add(
         OpacityEffect.fadeOut(
           config.toEffectController(),
-          onComplete: config.onComplete,
         ),
       );
     }
@@ -197,7 +192,6 @@ extension HasPaintAnimations<T extends Component> on T {
         OpacityEffect.to(
           opacity,
           config.toEffectController(),
-          onComplete: config.onComplete,
         ),
       );
     }
@@ -213,7 +207,6 @@ extension HasPaintAnimations<T extends Component> on T {
         OpacityEffect.by(
           offset,
           config.toEffectController(),
-          onComplete: config.onComplete,
         ),
       );
     }
@@ -240,8 +233,10 @@ extension SpriteComponentAnimations on SpriteComponent {
       effects.add(
         OpacityEffect.to(
           1.0,
-          EffectController(duration: blinkDuration.inMilliseconds / 2000.0),
-          onComplete: i == blinkCount - 1 ? onComplete : null,
+          EffectController(
+            duration: blinkDuration.inMilliseconds / 2000.0,
+            onMax: i == blinkCount - 1 ? onComplete : null,
+          ),
         ),
       );
     }

@@ -1,9 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
+
 import 'package:flutter/material.dart';
 import 'package:casual_game_template/game/framework_integration/simple_game_states.dart';
 import 'package:casual_game_template/game/framework_integration/simple_game_configuration.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   group('フレームワークシミュレーションテスト', () {
     test('ゲーム完全サイクル シミュレーション', () {
       print('🎮 ゲーム完全サイクル シミュレーションを開始...');

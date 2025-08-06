@@ -1,212 +1,154 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
-import 'package:casual_game_template/game/config/game_config.dart';
-import 'package:casual_game_template/game/providers/game_state_provider.dart';
+import 'package:casual_game_template/game/framework_integration/simple_game_configuration.dart';
+import 'package:casual_game_template/game/framework_integration/simple_game_states.dart';
 
 void main() {
-  group('GameConfig テスト', () {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  group('SimpleGameConfig テスト', () {
     test('デフォルト設定の確認', () {
-      const config = GameConfig.defaultConfig;
+      final config = SimpleGameConfiguration.defaultConfig.config;
       
       expect(config.gameDuration, const Duration(seconds: 5));
-      expect(config.stateTexts[SimpleGameState.start], 'TAP TO START');
-      expect(config.stateColors[SimpleGameState.start], Colors.white);
-      expect(config.isValid(), true);
+      expect(config.stateTexts['start'], 'TAP TO START');
+      expect(config.stateTexts['gameOver'], 'GAME OVER\nTAP TO RESTART');
+      expect(config.stateColors['start'], isNotNull);
     });
 
     test('Easy設定の確認', () {
-      const config = GameConfig.easyConfig;
+      // プリセットを初期化
+      SimpleGameConfigPresets.initialize();
+      final config = SimpleGameConfigPresets.getPreset('easy');
+      expect(config, isNotNull);
       
-      expect(config.gameDuration, const Duration(seconds: 10));
-      expect(config.stateTexts[SimpleGameState.start], '🎮 EASY MODE\nTAP TO START');
-      expect(config.stateColors[SimpleGameState.start], Colors.green);
-      expect(config.isValid(), true);
+      if (config != null) {
+        expect(config.gameDuration, const Duration(seconds: 10));
+        expect(config.stateTexts['start']?.contains('EASY'), true);
+      }
     });
 
     test('Hard設定の確認', () {
-      const config = GameConfig.hardConfig;
+      // プリセットを初期化
+      SimpleGameConfigPresets.initialize();
+      final config = SimpleGameConfigPresets.getPreset('hard');
+      expect(config, isNotNull);
       
-      expect(config.gameDuration, const Duration(seconds: 3));
-      expect(config.stateTexts[SimpleGameState.start], '🔥 HARD MODE\nTAP TO START');
-      expect(config.stateColors[SimpleGameState.start], Colors.red);
-      expect(config.isValid(), true);
+      if (config != null) {
+        expect(config.gameDuration, const Duration(seconds: 3));
+        expect(config.stateTexts['start']?.contains('HARD'), true);
+      }
     });
 
-    test('状態テキスト取得（プレースホルダー対応）', () {
-      const config = GameConfig.defaultConfig;
+    test('JSON変換テスト', () {
+      final config = SimpleGameConfiguration.defaultConfig.config;
       
-      // プレースホルダーなし
-      expect(config.getStateText(SimpleGameState.start), 'TAP TO START');
-      expect(config.getStateText(SimpleGameState.gameOver), 'GAME OVER\nTAP TO RESTART');
+      // JSON変換
+      final json = config.toJson();
+      expect(json['gameDurationMs'], config.gameDuration.inMilliseconds);
+      expect(json['stateTexts'], config.stateTexts);
       
-      // プレースホルダーあり
-      expect(config.getStateText(SimpleGameState.playing, time: 3.7), 'TIME: 3.7');
-      expect(config.getStateText(SimpleGameState.playing, time: 1.0), 'TIME: 1.0');
+      // JSON復元
+      final restored = SimpleGameConfig.fromJson(json);
+      expect(restored.gameDuration, config.gameDuration);
+      expect(restored.stateTexts, config.stateTexts);
     });
 
-    test('動的タイマー色の取得', () {
-      const config = GameConfig.defaultConfig;
-      
-      // 通常時（80%以上）
-      expect(config.getDynamicTimerColor(5.0), Colors.white);
-      expect(config.getDynamicTimerColor(4.0), Colors.white);
-      
-      // 注意時（40-20%）
-      expect(config.getDynamicTimerColor(2.0), Colors.orange);
-      expect(config.getDynamicTimerColor(1.5), Colors.orange);
-      
-      // 警告時（20%以下）
-      expect(config.getDynamicTimerColor(1.0), Colors.red);
-      expect(config.getDynamicTimerColor(0.5), Colors.red);
-    });
-
-    test('JSON変換機能', () {
-      const originalConfig = GameConfig.defaultConfig;
-      final json = originalConfig.toJson();
-      final restoredConfig = GameConfig.fromJson(json);
-      
-      expect(restoredConfig.gameDuration, originalConfig.gameDuration);
-      expect(restoredConfig.timerUpdateInterval, originalConfig.timerUpdateInterval);
-      expect(restoredConfig.isValid(), true);
-    });
-
-    test('copyWith機能', () {
-      const originalConfig = GameConfig.defaultConfig;
-      final modifiedConfig = originalConfig.copyWith(
-        gameDuration: const Duration(seconds: 8),
-        stateColors: {
-          SimpleGameState.start: Colors.blue,
-          SimpleGameState.playing: Colors.green,
-          SimpleGameState.gameOver: Colors.purple,
+    test('カスタム設定の作成', () {
+      final customConfig = SimpleGameConfig(
+        gameDuration: const Duration(seconds: 15),
+        stateTexts: const {
+          'start': 'CUSTOM GAME\\nTAP TO START',
+          'playing': 'CUSTOM TIME: {time}',
+          'gameOver': 'CUSTOM OVER\\nTAP TO RESTART',
         },
+        stateColors: const {
+          'start': Colors.purple,
+          'playing': Colors.cyan,
+          'gameOver': Colors.lime,
+        },
+        fontSizes: const {
+          'small': 12.0,
+          'medium': 16.0,
+          'large': 24.0,
+        },
+        fontWeights: const {
+          'normal': FontWeight.normal,
+          'bold': FontWeight.bold,
+        },
+        enableDebugMode: false,
+        enableAnalytics: true,
       );
       
-      expect(modifiedConfig.gameDuration, const Duration(seconds: 8));
-      expect(modifiedConfig.stateColors[SimpleGameState.start], Colors.blue);
-      expect(modifiedConfig.stateTexts, originalConfig.stateTexts); // 変更されていない
-      expect(modifiedConfig.isValid(), true);
+      expect(customConfig.gameDuration.inSeconds, 15);
+      expect(customConfig.stateTexts['start'], 'CUSTOM GAME\\nTAP TO START');
+      expect(customConfig.stateColors['start'], Colors.purple);
+      expect(customConfig.fontSizes['medium'], 16.0);
     });
 
-    test('設定の妥当性チェック', () {
-      // 正常な設定
-      expect(GameConfig.defaultConfig.isValid(), true);
+    test('プリセット初期化と取得', () {
+      SimpleGameConfigPresets.initialize();
       
-      // 異常な設定（0秒以下のゲーム時間）
-      final invalidConfig = GameConfig.defaultConfig.copyWith(
-        gameDuration: const Duration(seconds: 0),
-      );
-      expect(invalidConfig.isValid(), false);
-    });
-
-    test('ゲーム時間の秒数変換', () {
-      expect(GameConfig.defaultConfig.gameDurationInSeconds, 5.0);
-      expect(GameConfig.easyConfig.gameDurationInSeconds, 10.0);
-      expect(GameConfig.hardConfig.gameDurationInSeconds, 3.0);
+      expect(SimpleGameConfigPresets.getPreset('default'), isNotNull);
+      expect(SimpleGameConfigPresets.getPreset('easy'), isNotNull);
+      expect(SimpleGameConfigPresets.getPreset('hard'), isNotNull);
+      expect(SimpleGameConfigPresets.getPreset('nonexistent'), isNull);
     });
   });
 
-  group('GameUIConfig テスト', () {
-    test('デフォルト設定', () {
-      const config = GameUIConfig.defaultConfig;
+  group('SimpleGameStateProvider テスト', () {
+    test('初期状態の確認', () {
+      final provider = SimpleGameStateProvider();
       
-      expect(config.fontSize, 24.0);
-      expect(config.fontWeight, FontWeight.bold);
-      expect(config.screenMargin, 20.0);
-      expect(config.showDebugInfo, false);
+      expect(provider.currentState, isA<SimpleGameStartState>());
+      expect(provider.currentState.name, 'start');
     });
 
-    test('JSON変換', () {
-      const original = GameUIConfig.defaultConfig;
-      final json = original.toJson();
-      final restored = GameUIConfig.fromJson(json);
-      
-      expect(restored.fontSize, original.fontSize);
-      expect(restored.fontWeight, original.fontWeight);
-      expect(restored.screenMargin, original.screenMargin);
-      expect(restored.showDebugInfo, original.showDebugInfo);
-    });
-  });
-
-  group('GameDebugConfig テスト', () {
-    test('デフォルト設定', () {
-      const config = GameDebugConfig.defaultConfig;
-      
-      expect(config.enableLogs, true);
-      expect(config.showPerformanceMetrics, false);
-      expect(config.showStateTransitions, true);
-    });
-
-    test('JSON変換', () {
-      const original = GameDebugConfig.defaultConfig;
-      final json = original.toJson();
-      final restored = GameDebugConfig.fromJson(json);
-      
-      expect(restored.enableLogs, original.enableLogs);
-      expect(restored.showPerformanceMetrics, original.showPerformanceMetrics);
-      expect(restored.showStateTransitions, original.showStateTransitions);
-    });
-  });
-
-  group('設定駆動化統合テスト', () {
-    test('GameStateProviderとの統合', () {
-      final provider = GameStateProvider();
-      
-      // 初期状態確認
-      expect(provider.gameConfig.gameDurationInSeconds, 5.0);
-      expect(provider.getStateDescription(), 'TAP TO START');
-      
-      // Easy設定に変更
-      provider.updateGameConfig(GameConfig.easyConfig);
-      expect(provider.gameConfig.gameDurationInSeconds, 10.0);
-      expect(provider.getStateDescription(), '🎮 EASY MODE\nTAP TO START');
-      
-      // Hard設定に変更
-      provider.updateGameConfig(GameConfig.hardConfig);
-      expect(provider.gameConfig.gameDurationInSeconds, 3.0);
-      expect(provider.getStateDescription(), '🔥 HARD MODE\nTAP TO START');
-    });
-
-    test('プレイ中の設定変更', () {
-      final provider = GameStateProvider();
+    test('状態遷移の確認', () {
+      final provider = SimpleGameStateProvider();
       
       // ゲーム開始
-      provider.setPlayingState();
-      expect(provider.currentState, SimpleGameState.playing);
+      provider.startGame(5.0);
+      expect(provider.currentState, isA<SimpleGamePlayingState>());
+      expect(provider.currentState.name, 'playing');
       
-      // Easy設定に変更（プレイ中は時間変更しない）
-      final originalTimer = provider.gameTimer;
-      provider.updateGameConfig(GameConfig.easyConfig);
-      expect(provider.gameTimer, originalTimer); // 時間は変わらない
-      expect(provider.gameConfig.gameDurationInSeconds, 10.0); // 設定は変わる
+      // ゲーム終了（状態更新）
+      provider.updateTimer(0.0);
+      // タイマーが0になるとGameOver状態に遷移する
+      expect(provider.currentState, isA<SimpleGameOverState>());
+      expect(provider.currentState.name, 'gameOver');
+      
+      // 再スタート
+      provider.restart(3.0);
+      expect(provider.currentState, isA<SimpleGamePlayingState>());
+      expect(provider.currentState.name, 'playing');
     });
 
-    test('カスタム設定の作成と適用', () {
-      final customConfig = GameConfig.defaultConfig.copyWith(
-        gameDuration: const Duration(seconds: 7),
-        stateTexts: {
-          SimpleGameState.start: 'CUSTOM GAME\nTAP TO START',
-          SimpleGameState.playing: 'CUSTOM TIME: {time}',
-          SimpleGameState.gameOver: 'CUSTOM OVER\nTAP TO RESTART',
-        },
-        stateColors: {
-          SimpleGameState.start: Colors.purple,
-          SimpleGameState.playing: Colors.cyan,
-          SimpleGameState.gameOver: Colors.lime,
-        },
-      );
+    test('タイマー更新', () {
+      final provider = SimpleGameStateProvider();
+      provider.startGame(5.0);
+      
+      // タイマー更新
+      provider.updateTimer(3.5);
+      final playingState = provider.currentState as SimpleGamePlayingState;
+      expect(playingState.timeRemaining, 3.5);
+      
+      // タイマーが0になるとGameOver状態に遷移
+      provider.updateTimer(0.0);
+      expect(provider.currentState, isA<SimpleGameOverState>());
+      final gameOverState = provider.currentState as SimpleGameOverState;
+      expect(gameOverState.finalTime, 0.0);
+    });
 
-      final provider = GameStateProvider();
-      provider.updateGameConfig(customConfig);
+    test('状態変更通知', () {
+      final provider = SimpleGameStateProvider();
+      bool notified = false;
       
-      expect(provider.gameConfig.gameDurationInSeconds, 7.0);
-      expect(provider.getStateDescription(), 'CUSTOM GAME\nTAP TO START');
-      expect(provider.getStateColor(), Colors.purple);
+      provider.addListener(() {
+        notified = true;
+      });
       
-      // プレイ中の表示
-      provider.setPlayingState();
-      provider.updateTimer(4.2);
-      expect(provider.getStateDescription(), 'CUSTOM TIME: 4.2');
-      expect(provider.getStateColor(), Colors.cyan);
+      provider.startGame(5.0);
+      expect(notified, true);
     });
   });
 }

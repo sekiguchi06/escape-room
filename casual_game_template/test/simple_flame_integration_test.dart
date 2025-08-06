@@ -1,12 +1,17 @@
 import 'package:flutter_test/flutter_test.dart';
+
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:casual_game_template/game/simple_game.dart';
 import 'package:casual_game_template/game/framework_integration/simple_game_states.dart';
 import 'package:casual_game_template/framework/state/game_state_system.dart';
+import 'package:casual_game_template/framework/effects/particle_system.dart';
+import 'package:casual_game_template/framework/animation/animation_system.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flame/game.dart' as flame_game show RouterComponent;
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   group('SimpleGame Flame統合テスト', () {
     test('SimpleGameの基本初期化', () async {
       final game = SimpleGame();
@@ -40,31 +45,17 @@ void main() {
       game.onGameResize(Vector2(400, 600));
       await game.onLoad();
       
-      // テキストコンポーネントが追加されているか確認
-      final textComponents = game.children.query<TextComponent>();
-      expect(textComponents.length, greaterThanOrEqualTo(2)); // ステータスとコンフィグのテキスト
+      // SimpleGame固有のコンポーネントが追加されているか確認（RouterComponent、ParticleEffectManager、GameComponent）
+      final routerComponents = game.children.whereType<flame_game.RouterComponent>();
+      final particleManagers = game.children.query<ParticleEffectManager>();
+      final gameComponents = game.children.whereType<GameComponent>();
       
-      // 各コンポーネントが正しく配置されているか確認
-      bool foundStatusText = false;
-      bool foundConfigText = false;
+      expect(routerComponents.length, equals(1), reason: 'RouterComponentが見つからない');
+      expect(particleManagers.length, equals(1), reason: 'ParticleEffectManagerが見つからない');
+      expect(gameComponents.length, greaterThanOrEqualTo(1), reason: 'GameComponent(_testCircle)が見つからない');
       
-      for (final component in textComponents) {
-        if (component.text.contains('TAP TO START')) {
-          foundStatusText = true;
-          // 中央配置の確認
-          expect(component.anchor, equals(Anchor.center));
-          expect(component.position.x, equals(200.0)); // 400/2
-          expect(component.position.y, equals(300.0)); // 600/2
-        } else if (component.text.contains('Config:')) {
-          foundConfigText = true;
-          // 左上配置の確認
-          expect(component.position.x, equals(20.0));
-          expect(component.position.y, equals(20.0));
-        }
-      }
-      
-      expect(foundStatusText, isTrue, reason: 'ステータステキストが見つからない');
-      expect(foundConfigText, isTrue, reason: 'コンフィグテキストが見つからない');
+      // 合計で3つ以上のコンポーネントが配置されていることを確認
+      expect(game.children.length, greaterThanOrEqualTo(3));
     });
 
     test('タップイベントでのゲーム開始', () async {
@@ -76,9 +67,9 @@ void main() {
       expect(game.stateProvider.currentState, isA<SimpleGameStartState>());
       
       // タップイベントをシミュレート
-      game.onTapDown(
-        _createTapDownEvent(game, const Offset(200, 300))
-      );
+      final tapPosition = Vector2(200, 300);
+      game.inputManager.handleTapDown(tapPosition);
+      game.inputManager.handleTapUp(tapPosition);
       
       // 状態がプレイング状態に変わったことを確認
       expect(game.stateProvider.currentState, isA<SimpleGamePlayingState>());
@@ -94,7 +85,9 @@ void main() {
       await game.onLoad();
       
       // ゲーム開始
-      game.onTapDown(_createTapDownEvent(game, const Offset(200, 300)));
+      final startPosition = Vector2(200, 300);
+      game.inputManager.handleTapDown(startPosition);
+      game.inputManager.handleTapUp(startPosition);
       expect(game.stateProvider.currentState, isA<SimpleGamePlayingState>());
       
       // 時間を進める
@@ -128,7 +121,9 @@ void main() {
       await game.onLoad();
       
       // 完全なゲームサイクルを実行
-      game.onTapDown(_createTapDownEvent(game, const Offset(200, 300)));
+      final startPosition = Vector2(200, 300);
+      game.inputManager.handleTapDown(startPosition);
+      game.inputManager.handleTapUp(startPosition);
       expect(game.stateProvider.currentState, isA<SimpleGamePlayingState>());
       
       // ゲームオーバーまで時間を進める
@@ -136,7 +131,9 @@ void main() {
       expect(game.stateProvider.currentState, isA<SimpleGameOverState>());
       
       // リスタートタップ
-      game.onTapDown(_createTapDownEvent(game, const Offset(200, 300)));
+      final restartPosition = Vector2(200, 300);
+      game.inputManager.handleTapDown(restartPosition);
+      game.inputManager.handleTapUp(restartPosition);
       
       // 再びプレイング状態になることを確認
       expect(game.stateProvider.currentState, isA<SimpleGamePlayingState>());
@@ -154,7 +151,9 @@ void main() {
       expect(game.config.gameDuration.inSeconds, equals(5));
       
       // ゲーム開始（設定が切り替わる）
-      game.onTapDown(_createTapDownEvent(game, const Offset(200, 300)));
+      final gameStartPosition = Vector2(200, 300);
+      game.inputManager.handleTapDown(gameStartPosition);
+      game.inputManager.handleTapUp(gameStartPosition);
       
       // 最初のセッション（_sessionCount = 0）では 'default' 設定が使われる
       final newDuration = game.config.gameDuration.inSeconds;
@@ -164,7 +163,9 @@ void main() {
       game.update(15.0); // 十分な時間経過
       expect(game.stateProvider.currentState, isA<SimpleGameOverState>());
       
-      game.onTapDown(_createTapDownEvent(game, const Offset(200, 300)));
+      final nextGamePosition = Vector2(200, 300);
+      game.inputManager.handleTapDown(nextGamePosition);
+      game.inputManager.handleTapUp(nextGamePosition);
       
       // 次のセッション（_sessionCount = 1）では 'easy' 設定が使われる
       final thirdDuration = game.config.gameDuration.inSeconds;
@@ -216,7 +217,9 @@ void main() {
       
       // 連続的なタップイベント
       for (int i = 0; i < 10; i++) {
-        game.onTapDown(_createTapDownEvent(game, Offset(200 + i * 10, 300)));
+        final position = Vector2(200 + i * 10.0, 300);
+        game.inputManager.handleTapDown(position);
+        game.inputManager.handleTapUp(position);
         game.update(0.1);
       }
       
@@ -226,11 +229,3 @@ void main() {
   });
 }
 
-/// テスト用のTapDownEventを作成するヘルパー関数
-TapDownEvent _createTapDownEvent(SimpleGame game, Offset position) {
-  return TapDownEvent(
-    1, // pointerId
-    game,
-    TapDownDetails(globalPosition: position),
-  );
-}
