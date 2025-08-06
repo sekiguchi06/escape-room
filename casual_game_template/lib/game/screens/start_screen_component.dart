@@ -1,4 +1,5 @@
 import 'package:flame/components.dart';
+import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
 import '../../framework/ui/ui_system.dart';
 import '../simple_game.dart';
@@ -11,7 +12,7 @@ class StartScreenComponent extends PositionComponent {
     final game = findGame()! as SimpleGame;
     final config = game.configuration.config;
     
-    // 背景
+    // 背景（視覚確認用のみ、タップ不可）
     final background = RectangleComponent(
       position: Vector2.zero(),
       size: game.size,
@@ -55,3 +56,4 @@ class StartScreenComponent extends PositionComponent {
     add(settingsButton);
   }
 }
+

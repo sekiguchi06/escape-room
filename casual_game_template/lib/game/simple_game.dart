@@ -230,20 +230,13 @@ class SimpleGame extends ConfigurableGame<GameState, SimpleGameConfig> {
     }
   }
 
-  /// 入力イベント処理（ConfigurableGameのonInputEventをオーバーライド）
+  /// 入力イベント処理を無効化
+  /// ゲーム制御は専用ボタンからのみ実行（背景タップでのゲーム開始を防止）
   @override
   void onInputEvent(InputEventData event) {
     super.onInputEvent(event);
-    
-    // tapまたはdoubleTapイベントを処理
-    if (event.type == InputEventType.tap || event.type == InputEventType.doubleTap) {
-      final currentState = this.currentState;
-      if (currentState is SimpleGameStartState) {
-        _startGame();
-      } else if (currentState is SimpleGameOverState) {
-        _restartGame();
-      }
-    }
+    // 背景タップによるゲーム開始を無効化
+    // START GAMEボタンとSettingsボタンからのみ制御
   }
 
   void _startGame() {

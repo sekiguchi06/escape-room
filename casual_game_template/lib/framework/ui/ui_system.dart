@@ -256,7 +256,7 @@ class TextUIComponent extends UIComponent<String> {
 }
 
 /// ボタンUIコンポーネント
-class ButtonUIComponent extends UIComponent<String> with TapCallbacks {
+class ButtonUIComponent extends UIComponent<String> with TapCallbacks, HasGameRef {
   late RectangleComponent _background;
   late TextUIComponent _textComponent;
   
@@ -281,6 +281,9 @@ class ButtonUIComponent extends UIComponent<String> with TapCallbacks {
   @override
   Future<void> onLoad() async {
     await super.onLoad();
+    
+    // ボタンは高優先度でイベントを処理
+    priority = UILayerPriority.ui;
     
     // 背景
     _background = RectangleComponent(
@@ -333,8 +336,8 @@ class ButtonUIComponent extends UIComponent<String> with TapCallbacks {
     if (isMounted) {
       _background.paint.color = getThemeColor(_colorId).withOpacity(0.8);
     }
-    // イベント伝播を停止
-    event.handled = true;
+    // Flame公式: イベント伝播を停止（デフォルトで停止するが明示）
+    // continuePropagationを設定しないことでイベント伝播を停止
   }
   
   @override
@@ -344,8 +347,8 @@ class ButtonUIComponent extends UIComponent<String> with TapCallbacks {
       _background.paint.color = getThemeColor(_colorId);
       onPressed?.call();
     }
-    // イベント伝播を停止
-    event.handled = true;
+    // Flame公式: イベント伝播を停止（デフォルトで停止するが明示）
+    // continuePropagationを設定しないことでイベント伝播を停止
   }
   
   @override
@@ -354,8 +357,7 @@ class ButtonUIComponent extends UIComponent<String> with TapCallbacks {
     if (isMounted) {
       _background.paint.color = getThemeColor(_colorId);
     }
-    // イベント伝播を停止
-    event.handled = true;
+    // Flame公式: イベント伝播を停止（デフォルトで停止）
   }
 }
 
