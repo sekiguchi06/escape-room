@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-This is currently an empty repository set up with Claude Code MCP (Model Context Protocol) integration for Atlassian services.
+This repository contains a complete Flutter + Flame casual game development framework with 90% implementation completion and 96.2% test success rate. The main project is located in the `casual_game_template/` directory.
 
 ## MCP Configuration
 
@@ -270,8 +270,8 @@ JQL: status = 10003 AND labels NOT IN ("human-intervention-required")
 - 技術スタック: Flutter + Flame + Claude Code + MCP
 
 ### 📌 AI開発指示の統一エントリーポイント
-**必ず `/casual_game_template/project_management/INDEX.md` から開始してください。**
-このファイルが全プロジェクト情報への統合ガイドとなります。
+**必ず `casual_game_template/AI_MASTER.md` から開始してください。**
+AI_MASTER.mdが唯一の統合ガイドです。
 
 ### 20分サイクル開発フロー
 1. Jiraタスク確認・選択 (2分)
