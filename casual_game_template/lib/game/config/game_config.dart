@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import '../providers/game_state_provider.dart';
+import '../framework_integration/simple_game_states.dart';
 
 /// ゲーム設定を一元管理するクラス
 /// 外部設定による動作制御を可能にし、A/Bテストやカスタマイズに対応
+/// 
 class GameConfig {
   /// ゲームの基本時間設定
   final Duration gameDuration;
@@ -113,7 +114,7 @@ class GameConfig {
         stateTexts.entries.map((e) => MapEntry(e.key.name, e.value)),
       ),
       'stateColors': Map<String, int>.fromEntries(
-        stateColors.entries.map((e) => MapEntry(e.key.name, e.value.value)),
+        stateColors.entries.map((e) => MapEntry(e.key.name, e.value.toARGB32())),
       ),
       'timerUpdateIntervalMs': timerUpdateInterval.inMilliseconds,
       'uiConfig': uiConfig.toJson(),

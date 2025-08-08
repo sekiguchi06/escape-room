@@ -19,7 +19,7 @@ class GameOverScreenComponent extends PositionComponent {
     final background = RectangleComponent(
       position: Vector2.zero(),
       size: game.size,
-      paint: Paint()..color = Colors.red.withOpacity(0.8),
+      paint: Paint()..color = Colors.red.withValues(alpha: 0.8),
     );
     background.priority = UILayerPriority.background;
     add(background);

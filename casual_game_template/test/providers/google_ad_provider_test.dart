@@ -1,4 +1,3 @@
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:casual_game_template/framework/monetization/monetization_system.dart';
 import 'package:casual_game_template/framework/monetization/providers/google_ad_provider.dart';
@@ -107,6 +106,10 @@ void main() {
       }
       
       provider.addAdEventListener(testListener);
+      
+      // テスト環境では広告表示が失敗するため、イベントは発火しない
+      await provider.showAd(AdType.interstitial);
+      expect(eventReceived, isFalse, reason: 'テスト環境ではプラグイン未実装によりイベント未発火');
       
       // リスナーが追加されていることを間接的に確認
       expect(provider.removeAdEventListener, isA<Function>());

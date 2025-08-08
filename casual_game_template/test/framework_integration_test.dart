@@ -1,10 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flame/components.dart';
 
 import 'package:casual_game_template/game/framework_integration/simple_game_framework.dart';
 import 'package:casual_game_template/game/framework_integration/simple_game_configuration.dart';
 import 'package:casual_game_template/game/framework_integration/simple_game_states.dart';
-import 'package:casual_game_template/framework/state/game_state_system.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -34,7 +34,7 @@ void main() {
       // フレームワークコンポーネントの確認
       expect(game.timerManager.hasTimer('main'), isTrue, reason: 'メインタイマーが作成されていない');
       
-      print('✅ 基本初期化テスト完了');
+      debugPrint('✅ 基本初期化テスト完了');
     });
     
     test('設定システムテスト', () async {
@@ -58,7 +58,7 @@ void main() {
       final mainTimer = game.timerManager.getTimer('main');
       expect(mainTimer?.duration.inSeconds, equals(10), reason: 'タイマー設定が連動していない');
       
-      print('✅ 設定システムテスト完了');
+      debugPrint('✅ 設定システムテスト完了');
     });
     
     test('状態管理システムテスト', () async {
@@ -89,7 +89,7 @@ void main() {
       expect(restartSuccess, isTrue, reason: 'リスタート機能が失敗');
       expect(stateProvider.isInState<SimpleGamePlayingState>(), isTrue, reason: 'リスタート後の状態が不正');
       
-      print('✅ 状態管理システムテスト完了');
+      debugPrint('✅ 状態管理システムテスト完了');
     });
     
     test('タイマーシステムテスト', () async {
@@ -119,7 +119,7 @@ void main() {
       timerManager.resetTimer('main');
       expect(mainTimer?.isRunning, isFalse, reason: 'タイマーリセットが失敗');
       
-      print('✅ タイマーシステムテスト完了');
+      debugPrint('✅ タイマーシステムテスト完了');
     });
     
     test('UIシステムテスト', () async {
@@ -138,7 +138,7 @@ void main() {
       // 元のテーマに戻す
       themeManager.setTheme(originalTheme);
       
-      print('✅ UIシステムテスト完了');
+      debugPrint('✅ UIシステムテスト完了');
     });
     
     test('プリセットシステムテスト', () async {
@@ -158,7 +158,7 @@ void main() {
       game.applyPreset('hard');
       expect(game.config.gameDuration.inSeconds, equals(3), reason: 'hardプリセットの適用が失敗');
       
-      print('✅ プリセットシステムテスト完了');
+      debugPrint('✅ プリセットシステムテスト完了');
     });
     
     test('A/Bテストシステムテスト', () async {
@@ -169,7 +169,7 @@ void main() {
       game.applyABTestConfig('easy');
       expect(game.config.gameDuration.inSeconds, equals(10), reason: 'A/Bテスト設定の適用が失敗');
       
-      print('✅ A/Bテストシステムテスト完了');
+      debugPrint('✅ A/Bテストシステムテスト完了');
     });
     
     test('ファクトリーパターンテスト', () async {
@@ -193,7 +193,7 @@ void main() {
       await debugGame.onLoad();
       expect(debugGame.debugMode, isTrue);
       
-      print('✅ ファクトリーパターンテスト完了');
+      debugPrint('✅ ファクトリーパターンテスト完了');
     });
     
     test('ビルダーパターンテスト', () async {
@@ -213,7 +213,7 @@ void main() {
       expect(game.debugMode, isTrue, reason: 'デバッグモードが有効になっていない');
       expect(game.themeManager.currentThemeId, equals('game'), reason: 'テーマが設定されていない');
       
-      print('✅ ビルダーパターンテスト完了');
+      debugPrint('✅ ビルダーパターンテスト完了');
     });
     
     test('統合シナリオテスト', () async {
@@ -255,7 +255,7 @@ void main() {
       expect(stats.sessionCount, greaterThan(0));
       expect(stats.totalStateChanges, greaterThan(0));
       
-      print('✅ 統合シナリオテスト完了');
+      debugPrint('✅ 統合シナリオテスト完了');
     });
   });
 }

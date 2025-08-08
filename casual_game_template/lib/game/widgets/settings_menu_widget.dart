@@ -5,10 +5,10 @@ class SettingsMenuWidget extends StatelessWidget {
   final void Function()? onClosePressed;
   
   const SettingsMenuWidget({
-    Key? key,
+    super.key,
     this.onDifficultyChanged,
     this.onClosePressed,
-  }) : super(key: key);
+  });
   
   @override
   Widget build(BuildContext context) {
@@ -16,11 +16,11 @@ class SettingsMenuWidget extends StatelessWidget {
       width: 300,
       height: 400,
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.95),
+        color: Colors.white.withValues(alpha: 0.95),
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             blurRadius: 8,
             offset: Offset(0, 4),
           ),
@@ -55,12 +55,12 @@ class SettingsMenuWidget extends StatelessWidget {
             children: ['Easy', 'Default', 'Hard'].map((difficulty) {
               return ElevatedButton(
                 onPressed: () => onDifficultyChanged?.call(difficulty.toLowerCase()),
-                child: Text(difficulty),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.purple,
                   foregroundColor: Colors.white,
                   minimumSize: Size(70, 35),
                 ),
+                child: Text(difficulty),
               );
             }).toList(),
           ),
@@ -70,12 +70,12 @@ class SettingsMenuWidget extends StatelessWidget {
           // 閉じるボタン
           ElevatedButton(
             onPressed: onClosePressed,
-            child: Text('Close'),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
               minimumSize: Size(120, 40),
             ),
+            child: Text('Close'),
           ),
         ],
       ),

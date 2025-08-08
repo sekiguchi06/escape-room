@@ -88,7 +88,7 @@ class ParticleEffectManager extends Component {
     
     // コンポーネントとその親のマウント状態を厳密に確認
     if (!isMounted || parent == null || !parent!.isMounted) {
-      print('⚠️ ParticleEffectManager: Cannot play effect $name - not properly mounted');
+      debugPrint('⚠️ ParticleEffectManager: Cannot play effect $name - not properly mounted');
       return;
     }
     
@@ -112,7 +112,7 @@ class ParticleEffectManager extends Component {
         }
       });
     } catch (e) {
-      print('❌ ParticleEffectManager: Error playing effect $name: $e');
+      debugPrint('❌ ParticleEffectManager: Error playing effect $name: $e');
     }
   }
   
@@ -187,7 +187,7 @@ class ParticleEffectManager extends Component {
               canvas.drawCircle(
                 Offset.zero,
                 radius,
-                Paint()..color = config.startColor.withOpacity(opacity / 255.0),
+                Paint()..color = config.startColor.withValues(alpha: opacity / 255.0),
               );
             },
           ),

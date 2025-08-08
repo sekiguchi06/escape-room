@@ -1,4 +1,12 @@
+import 'package:flutter/foundation.dart';
 import '../../framework/state/game_state_system.dart';
+
+/// SimpleGame用の状態列挙（game_config.dart用）
+enum SimpleGameState {
+  start,
+  playing,
+  gameOver,
+}
 
 /// SimpleGame用の状態定義（フレームワーク対応）
 class SimpleGameStartState extends GameState {
@@ -95,7 +103,7 @@ class SimpleGameTransitions {
         toState: SimpleGamePlayingState,
         condition: (current, target) => current is SimpleGameStartState && target is SimpleGamePlayingState,
         onTransition: (from, to) {
-          print('ゲーム開始: セッション${(to as SimpleGamePlayingState).sessionNumber}');
+          debugPrint('ゲーム開始: セッション${(to as SimpleGamePlayingState).sessionNumber}');
         },
       ),
       
@@ -112,7 +120,7 @@ class SimpleGameTransitions {
         onTransition: (from, to) {
           final playingState = from as SimpleGamePlayingState;
           final gameOverState = to as SimpleGameOverState;
-          print('ゲームオーバー: セッション${playingState.sessionNumber} -> 最終時刻${gameOverState.finalTime}');
+          debugPrint('ゲームオーバー: セッション${playingState.sessionNumber} -> 最終時刻${gameOverState.finalTime}');
         },
       ),
       
@@ -121,7 +129,7 @@ class SimpleGameTransitions {
         fromState: SimpleGameOverState,
         toState: SimpleGameStartState,
         onTransition: (from, to) {
-          print('リスタート準備完了');
+          debugPrint('リスタート準備完了');
         },
       ),
       
@@ -143,7 +151,7 @@ class SimpleGameTransitions {
         onTransition: (from, to) {
           final gameOverState = from as SimpleGameOverState;
           final playingState = to as SimpleGamePlayingState;
-          print('直接リスタート: セッション${gameOverState.sessionNumber} -> セッション${playingState.sessionNumber}');
+          debugPrint('直接リスタート: セッション${gameOverState.sessionNumber} -> セッション${playingState.sessionNumber}');
         },
       ),
     ];

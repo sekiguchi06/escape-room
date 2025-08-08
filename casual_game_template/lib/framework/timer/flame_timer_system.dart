@@ -102,6 +102,8 @@ class FlameGameTimer extends Component {
         final remainingSeconds = _current.inMilliseconds / 1000.0;
         _flameTimer = Timer(remainingSeconds, onTick: () {
           _current = Duration.zero;
+          // 完了時のonUpdateコールバックを先に実行
+          _config.onUpdate?.call(_current);
           _config.onComplete?.call();
           if (_config.resetOnComplete) {
             reset();
@@ -447,6 +449,7 @@ class FlameTimerManager extends Component {
   }
   
   /// すべてのタイマーを更新
+  @override
   void update(double dt) {
     for (final timer in _timers.values) {
       timer.update(dt);

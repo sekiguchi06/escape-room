@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'dart:convert';
 
 /// 分析イベントの重要度
 enum EventPriority {

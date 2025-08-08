@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../framework/ui/ui_system.dart';
 import '../../framework/animation/animation_system.dart';
 import '../simple_game.dart';
-import '../framework_integration/simple_game_states.dart';
 
 class PlayingScreenComponent extends PositionComponent {
   late TextUIComponent _timerText;
@@ -19,7 +18,7 @@ class PlayingScreenComponent extends PositionComponent {
     final background = RectangleComponent(
       position: Vector2.zero(),
       size: game.size,
-      paint: Paint()..color = Colors.indigo.withOpacity(0.3),
+      paint: Paint()..color = Colors.indigo.withValues(alpha: 0.3),
     );
     background.priority = UILayerPriority.background;
     add(background);
@@ -28,7 +27,7 @@ class PlayingScreenComponent extends PositionComponent {
     final timerBg = RectangleComponent(
       position: Vector2(game.size.x / 2 - 100, 25),
       size: Vector2(200, 50),
-      paint: Paint()..color = Colors.black.withOpacity(0.8),
+      paint: Paint()..color = Colors.black.withValues(alpha: 0.8),
     );
     add(timerBg);
     

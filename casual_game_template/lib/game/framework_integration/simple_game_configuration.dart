@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../framework/config/game_configuration.dart';
 import '../../framework/state/game_state_system.dart';
-import 'simple_game_states.dart';
 
 /// SimpleGame用の設定クラス（フレームワーク統合）
 class SimpleGameConfig {
@@ -28,7 +27,7 @@ class SimpleGameConfig {
     return {
       'gameDurationMs': gameDuration.inMilliseconds,
       'stateTexts': stateTexts,
-      'stateColors': stateColors.map((k, v) => MapEntry(k, v.value)),
+      'stateColors': stateColors.map((k, v) => MapEntry(k, v.toARGB32())),
       'fontSizes': fontSizes,
       'fontWeights': fontWeights.map((k, v) => MapEntry(k, v.index)),
       'enableDebugMode': enableDebugMode,
@@ -262,7 +261,7 @@ class SimpleGameConfiguration extends GameConfiguration<GameState, SimpleGameCon
     // TODO: RemoteConfigManagerの実装待ち
     // 現在はスタブ実装
     await Future.delayed(const Duration(milliseconds: 100));
-    print('Remote config sync completed (stub implementation)');
+    debugPrint('Remote config sync completed (stub implementation)');
   }
 }
 

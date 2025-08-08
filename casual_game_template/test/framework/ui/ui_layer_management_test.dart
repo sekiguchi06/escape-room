@@ -1,10 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:flame/components.dart';
-import 'package:flutter/material.dart';
-import 'package:flame/events.dart';
 
-import '../../../lib/framework/ui/ui_system.dart';
+import 'package:casual_game_template/framework/ui/ui_system.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -34,7 +32,7 @@ void main() {
     });
 
     test('ButtonUIComponent - ボタン基本動作', () async {
-      bool pressed = false;
+      bool pressed = false; // テスト用フラグ
       final button = ButtonUIComponent(
         text: 'Test Button',
         onPressed: () => pressed = true,
@@ -50,6 +48,11 @@ void main() {
       // プロパティシステムの動作確認
       button.setProperty('customProp', 'testValue');
       expect(button.getProperty<String>('customProp'), equals('testValue'));
+      
+      // ボタン押下状態の確認
+      expect(pressed, isFalse);
+      button.onPressed?.call(); // コールバック実行をシミュレート
+      expect(pressed, isTrue);
     });
 
     test('TextUIComponent - テキスト表示', () async {

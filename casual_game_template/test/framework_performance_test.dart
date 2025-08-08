@@ -89,13 +89,13 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   group('フレームワークパフォーマンステスト', () {
     test('大量状態遷移パフォーマンス', () {
-      print('🚀 大量状態遷移パフォーマンステスト開始...');
+      debugPrint('🚀 大量状態遷移パフォーマンステスト開始...');
       
       final stopwatch = Stopwatch();
       final stateMachine = GameStateMachine<GameState>(const PerfTestState(0, 'initial'));
       
       // 大量の状態遷移定義
-      print('  📝 状態遷移定義中...');
+      debugPrint('  📝 状態遷移定義中...');
       stopwatch.start();
       
       for (int i = 0; i < 100; i++) {
@@ -107,10 +107,10 @@ void main() {
       }
       
       stopwatch.stop();
-      print('  ✅ 100個の遷移定義完了: ${stopwatch.elapsedMilliseconds}ms');
+      debugPrint('  ✅ 100個の遷移定義完了: stopwatch.elapsedMillisecondsms');
       
       // 大量状態遷移実行
-      print('  🔄 大量状態遷移実行中...');
+      debugPrint('  🔄 大量状態遷移実行中...');
       stopwatch.reset();
       stopwatch.start();
       
@@ -126,25 +126,26 @@ void main() {
       final transitionsPerSecond = (successfulTransitions * 1000) / stopwatch.elapsedMilliseconds;
       
       expect(successfulTransitions, equals(1000));
-      print('  ✅ 1000回遷移完了: ${stopwatch.elapsedMilliseconds}ms');
-      print('  📊 遷移速度: ${transitionsPerSecond.toStringAsFixed(0)} 遷移/秒');
+      expect(transitionsPerSecond, greaterThan(100)); // パフォーマンス要件
+      debugPrint('  ✅ 1000回遷移完了: ${stopwatch.elapsedMilliseconds}ms');
+      debugPrint('  📊 遷移速度: ${transitionsPerSecond.toStringAsFixed(0)} 遷移/秒');
       
       // メモリ使用量チェック (概算)
       final finalState = stateMachine.currentState as PerfTestState;
       expect(finalState.id, equals(1000));
-      print('  ✅ 最終状態確認: ID=${finalState.id}, データ="${finalState.data}"');
+      debugPrint('  ✅ 最終状態確認: ID=finalState.id, データ="finalState.data"');
       
-      print('🎉 大量状態遷移パフォーマンステスト完了！');
+      debugPrint('🎉 大量状態遷移パフォーマンステスト完了！');
     });
     
     test('複数タイマー同時実行パフォーマンス', () {
-      print('⏱️ 複数タイマー同時実行パフォーマンステスト開始...');
+      debugPrint('⏱️ 複数タイマー同時実行パフォーマンステスト開始...');
       
       final timerManager = FlameTimerManager();
       final stopwatch = Stopwatch();
       
       // 100個のタイマーを作成
-      print('  📝 100個のタイマー作成中...');
+      debugPrint('  📝 100個のタイマー作成中...');
       stopwatch.start();
       
       final completionCounts = <String, int>{};
@@ -164,20 +165,20 @@ void main() {
       }
       
       stopwatch.stop();
-      print('  ✅ 100個のタイマー作成完了: ${stopwatch.elapsedMilliseconds}ms');
+      debugPrint('  ✅ 100個のタイマー作成完了: stopwatch.elapsedMillisecondsms');
       
       expect(timerManager.getTimerIds().length, equals(100));
-      print('  📊 登録タイマー数: ${timerManager.getTimerIds().length}');
+      debugPrint('  📊 登録タイマー数: timerManager.getTimerIds().length');
       
       // 全タイマー同時実行
-      print('  🚀 全タイマー同時実行中...');
+      debugPrint('  🚀 全タイマー同時実行中...');
       stopwatch.reset();
       stopwatch.start();
       
       timerManager.startAllTimers();
       final runningTimers = timerManager.getRunningTimerIds();
       expect(runningTimers.length, equals(100));
-      print('  ✅ 実行中タイマー数: ${runningTimers.length}');
+      debugPrint('  ✅ 実行中タイマー数: runningTimers.length');
       
       // 複数フレーム更新をシミュレート
       int frameCount = 0;
@@ -200,12 +201,12 @@ void main() {
       
       stopwatch.stop();
       
-      print('  ✅ シミュレーション完了: ${frameCount}フレーム, ${stopwatch.elapsedMilliseconds}ms');
-      print('  📊 総完了回数: $totalCompletions');
-      print('  📊 平均FPS: ${(frameCount * 1000 / stopwatch.elapsedMilliseconds).toStringAsFixed(1)}');
+      debugPrint('  ✅ シミュレーション完了: $frameCountフレーム, ${stopwatch.elapsedMilliseconds}ms');
+      debugPrint('  📊 総完了回数: $totalCompletions');
+      debugPrint('  📊 平均FPS: (frameCount * 1000 / stopwatch.elapsedMilliseconds).toStringAsFixed(1)');
       
       // タイマー制御操作パフォーマンス
-      print('  🎛️ 一括制御操作テスト中...');
+      debugPrint('  🎛️ 一括制御操作テスト中...');
       stopwatch.reset();
       stopwatch.start();
       
@@ -214,13 +215,13 @@ void main() {
       timerManager.stopAllTimers();
       
       stopwatch.stop();
-      print('  ✅ 一括制御操作完了: ${stopwatch.elapsedMilliseconds}ms');
+      debugPrint('  ✅ 一括制御操作完了: stopwatch.elapsedMillisecondsms');
       
-      print('🎉 複数タイマー同時実行パフォーマンステスト完了！');
+      debugPrint('🎉 複数タイマー同時実行パフォーマンステスト完了！');
     });
     
     test('設定変更・JSON変換パフォーマンス', () {
-      print('⚙️ 設定変更・JSON変換パフォーマンステスト開始...');
+      debugPrint('⚙️ 設定変更・JSON変換パフォーマンステスト開始...');
       
       // 大規模データセット作成
       final largeDataSet = List.generate(1000, (i) => 'data_item_$i');
@@ -235,7 +236,7 @@ void main() {
       final stopwatch = Stopwatch();
       
       // 設定妥当性チェックパフォーマンス
-      print('  🔍 設定妥当性チェック中...');
+      debugPrint('  🔍 設定妥当性チェック中...');
       stopwatch.start();
       
       for (int i = 0; i < 1000; i++) {
@@ -244,10 +245,10 @@ void main() {
       }
       
       stopwatch.stop();
-      print('  ✅ 1000回妥当性チェック完了: ${stopwatch.elapsedMilliseconds}ms');
+      debugPrint('  ✅ 1000回妥当性チェック完了: stopwatch.elapsedMillisecondsms');
       
       // JSON変換パフォーマンス
-      print('  📄 JSON変換パフォーマンステスト中...');
+      debugPrint('  📄 JSON変換パフォーマンステスト中...');
       stopwatch.reset();
       stopwatch.start();
       
@@ -259,7 +260,7 @@ void main() {
       
       stopwatch.stop();
       final jsonSerializationTime = stopwatch.elapsedMilliseconds;
-      print('  ✅ 100回JSON変換完了: ${jsonSerializationTime}ms');
+      debugPrint('  ✅ 100回JSON変換完了: jsonSerializationTimems');
       
       // JSON復元パフォーマンス
       stopwatch.reset();
@@ -279,7 +280,7 @@ void main() {
       
       stopwatch.stop();
       final jsonDeserializationTime = stopwatch.elapsedMilliseconds;
-      print('  ✅ 100回JSON復元完了: ${jsonDeserializationTime}ms');
+      debugPrint('  ✅ 100回JSON復元完了: jsonDeserializationTimems');
       
       expect(restoredConfigs.length, equals(100));
       expect(restoredConfigs.first.config.dataSet.length, equals(largeDataSet.length));
@@ -288,24 +289,26 @@ void main() {
       final avgSerializationTime = jsonSerializationTime / 100.0;
       final avgDeserializationTime = jsonDeserializationTime / 100.0;
       
-      print('  📊 平均JSON変換時間: ${avgSerializationTime.toStringAsFixed(2)}ms');
-      print('  📊 平均JSON復元時間: ${avgDeserializationTime.toStringAsFixed(2)}ms');
+      expect(avgSerializationTime, lessThan(10.0)); // パフォーマンス要件
+      expect(avgDeserializationTime, lessThan(10.0)); // パフォーマンス要件
+      debugPrint('  📊 平均JSON変換時間: ${avgSerializationTime.toStringAsFixed(2)}ms');
+      debugPrint('  📊 平均JSON復元時間: ${avgDeserializationTime.toStringAsFixed(2)}ms');
       
       // 大容量データ処理確認
       expect(restoredConfigs.first.config.dataSet.length, equals(1000));
-      print('  ✅ 大容量データ (1000項目) 処理成功');
+      debugPrint('  ✅ 大容量データ (1000項目) 処理成功');
       
-      print('🎉 設定変更・JSON変換パフォーマンステスト完了！');
+      debugPrint('🎉 設定変更・JSON変換パフォーマンステスト完了！');
     });
     
     test('メモリ効率性・リソース管理テスト', () {
-      print('💾 メモリ効率性・リソース管理テスト開始...');
+      debugPrint('💾 メモリ効率性・リソース管理テスト開始...');
       
       final stopwatch = Stopwatch();
       final stateProviders = <GameStateProvider<GameState>>[];
       
       // 複数の状態プロバイダー作成
-      print('  🏗️ 100個の状態プロバイダー作成中...');
+      debugPrint('  🏗️ 100個の状態プロバイダー作成中...');
       stopwatch.start();
       
       for (int i = 0; i < 100; i++) {
@@ -320,17 +323,17 @@ void main() {
         
         // 状態遷移履歴を蓄積
         for (int j = 0; j < 10; j++) {
-          provider.transitionTo(PerfTestState(i * 10 + j, 'state_${i}_${j}'));
+          provider.transitionTo(PerfTestState(i * 10 + j, 'state_i_j'));
         }
         
         stateProviders.add(provider);
       }
       
       stopwatch.stop();
-      print('  ✅ 100個の状態プロバイダー作成完了: ${stopwatch.elapsedMilliseconds}ms');
+      debugPrint('  ✅ 100個の状態プロバイダー作成完了: stopwatch.elapsedMillisecondsms');
       
       // 統計情報収集パフォーマンス
-      print('  📊 統計情報収集パフォーマンステスト中...');
+      debugPrint('  📊 統計情報収集パフォーマンステスト中...');
       stopwatch.reset();
       stopwatch.start();
       
@@ -341,40 +344,41 @@ void main() {
       }
       
       stopwatch.stop();
-      print('  ✅ 100個の統計情報収集完了: ${stopwatch.elapsedMilliseconds}ms');
+      debugPrint('  ✅ 100個の統計情報収集完了: stopwatch.elapsedMillisecondsms');
       
       // データ検証
       expect(allStatistics.length, equals(100));
       final totalStateChanges = allStatistics.fold(0, (sum, stats) => sum + stats.totalStateChanges);
-      print('  📈 総状態変更数: $totalStateChanges');
+      debugPrint('  📈 総状態変更数: $totalStateChanges');
       expect(totalStateChanges, equals(2000)); // 100プロバイダー × 10遷移 + 初期状態遷移 × 100 × 10
       
       // リソース使用量チェック (概算)
       final avgTransitionsPerProvider = totalStateChanges / stateProviders.length;
-      print('  📊 プロバイダーあたり平均遷移数: ${avgTransitionsPerProvider.toStringAsFixed(1)}');
+      expect(avgTransitionsPerProvider, greaterThan(10.0)); // 平均遷移数要件
+      debugPrint('  📊 プロバイダーあたり平均遷移数: ${avgTransitionsPerProvider.toStringAsFixed(1)}');
       
       // 遷移履歴サイズ制限チェック
       for (final provider in stateProviders) {
         final historySize = provider.transitionHistory.length;
         expect(historySize, lessThanOrEqualTo(1000)); // 履歴サイズ制限確認
       }
-      print('  ✅ 遷移履歴サイズ制限確認完了');
+      debugPrint('  ✅ 遷移履歴サイズ制限確認完了');
       
       // 大量データクリーンアップシミュレーション
-      print('  🧹 リソースクリーンアップテスト中...');
+      debugPrint('  🧹 リソースクリーンアップテスト中...');
       stopwatch.reset();
       stopwatch.start();
       
       stateProviders.clear(); // 明示的なクリーンアップ
       
       stopwatch.stop();
-      print('  ✅ リソースクリーンアップ完了: ${stopwatch.elapsedMilliseconds}ms');
+      debugPrint('  ✅ リソースクリーンアップ完了: stopwatch.elapsedMillisecondsms');
       
-      print('🎉 メモリ効率性・リソース管理テスト完了！');
+      debugPrint('🎉 メモリ効率性・リソース管理テスト完了！');
     });
     
     test('高負荷シナリオ統合テスト', () {
-      print('🔥 高負荷シナリオ統合テスト開始...');
+      debugPrint('🔥 高負荷シナリオ統合テスト開始...');
       
       final overallStopwatch = Stopwatch();
       overallStopwatch.start();
@@ -383,10 +387,10 @@ void main() {
       final gameSimulations = <Map<String, dynamic>>[];
       
       for (int gameId = 0; gameId < 10; gameId++) {
-        print('  🎮 ゲーム$gameId シミュレーション開始...');
+        debugPrint('  🎮 ゲーム$gameId シミュレーション開始...');
         
         // 各ゲームのコンポーネント作成
-        final stateProvider = GameStateProvider<GameState>(PerfTestState(0, 'game_${gameId}_start'));
+        final stateProvider = GameStateProvider<GameState>(PerfTestState(0, 'game_gameId_start'));
         
         // 状態遷移定義
         stateProvider.stateMachine.defineTransition(StateTransition<GameState>(
@@ -399,7 +403,7 @@ void main() {
         final config = PerfTestConfiguration(config: PerfTestConfig(
           iterations: 100,
           duration: Duration(seconds: 10),
-          dataSet: List.generate(50, (i) => 'game_${gameId}_data_$i'),
+          dataSet: List.generate(50, (i) => 'game_gameId_data_$i'),
         ));
         
         // メインタイマー追加
@@ -421,7 +425,7 @@ void main() {
         // ゲーム進行シミュレーション
         int stateChanges = 0;
         for (int step = 0; step < 20; step++) {
-          final newState = PerfTestState(step, 'game_${gameId}_step_$step');
+          final newState = PerfTestState(step, 'game_gameId_step_$step');
           if (stateProvider.transitionTo(newState)) {
             stateChanges++;
           }
@@ -444,7 +448,7 @@ void main() {
         };
         
         gameSimulations.add(gameResult);
-        print('    ✅ ゲーム$gameId 完了: ${stateChanges}状態変更, ${gameResult['activeTimers']}アクティブタイマー');
+        debugPrint('    ✅ ゲーム$gameId 完了: $stateChanges状態変更, ${gameResult['activeTimers']}アクティブタイマー');
       }
       
       overallStopwatch.stop();
@@ -456,24 +460,24 @@ void main() {
       final totalActiveTimers = gameSimulations.fold(0, (sum, game) => sum + (game['activeTimers'] as int));
       final allConfigsValid = gameSimulations.every((game) => game['configValid'] as bool);
       
-      print('  📊 統合結果:');
-      print('    - 総実行時間: ${overallStopwatch.elapsedMilliseconds}ms');
-      print('    - 総状態変更数: $totalStateChanges');
-      print('    - 総アクティブタイマー数: $totalActiveTimers');
-      print('    - 全設定妥当性: $allConfigsValid');
-      print('    - 平均ゲーム実行時間: ${overallStopwatch.elapsedMilliseconds / 10}ms');
+      debugPrint('  📊 統合結果:');
+      debugPrint('    - 総実行時間: overallStopwatch.elapsedMillisecondsms');
+      debugPrint('    - 総状態変更数: $totalStateChanges');
+      debugPrint('    - 総アクティブタイマー数: $totalActiveTimers');
+      debugPrint('    - 全設定妥当性: $allConfigsValid');
+      debugPrint('    - 平均ゲーム実行時間: overallStopwatch.elapsedMilliseconds / 10ms');
       
       // パフォーマンス閾値チェック
       expect(overallStopwatch.elapsedMilliseconds, lessThan(5000)); // 5秒以内
       expect(totalStateChanges, equals(200)); // 10ゲーム × 20状態変更
       expect(allConfigsValid, isTrue);
       
-      print('  🏆 パフォーマンス要件クリア!');
-      print('    - 実行時間: ${overallStopwatch.elapsedMilliseconds}ms < 5000ms ✅');
-      print('    - 状態変更: $totalStateChanges = 200 ✅');
-      print('    - 設定妥当性: $allConfigsValid ✅');
+      debugPrint('  🏆 パフォーマンス要件クリア!');
+      debugPrint('    - 実行時間: overallStopwatch.elapsedMillisecondsms < 5000ms ✅');
+      debugPrint('    - 状態変更: $totalStateChanges = 200 ✅');
+      debugPrint('    - 設定妥当性: $allConfigsValid ✅');
       
-      print('🎉 高負荷シナリオ統合テスト完了！');
+      debugPrint('🎉 高負荷シナリオ統合テスト完了！');
     });
   });
 }

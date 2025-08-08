@@ -86,7 +86,7 @@ class TapFireGame extends ConfigurableGame<GameState, TapFireConfig> {
         },
         sfxAssets: {
           'tap': 'tap.wav',
-          'success': 'success.wav',
+          'success': 'success.wav', 
           'error': 'error.wav',
         },
         masterVolume: 1.0,

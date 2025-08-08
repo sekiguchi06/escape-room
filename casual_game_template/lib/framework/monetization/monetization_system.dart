@@ -189,11 +189,17 @@ class MockAdProvider implements AdProvider {
   Future<bool> initialize(MonetizationConfiguration config) async {
     _config = config;
     
-    // 初期化シミュレート
-    await Future.delayed(const Duration(milliseconds: 100));
-    
-    if (config.debugMode) {
-      debugPrint('MockAdProvider initialized (testMode: ${config.testMode})');
+    // テスト環境では即座に完了（タイマー残存問題回避）
+    if (config.testMode) {
+      if (config.debugMode) {
+        debugPrint('MockAdProvider initialized in test mode (immediate)');
+      }
+    } else {
+      // 実環境でのみ初期化シミュレート
+      await Future.delayed(const Duration(milliseconds: 100));
+      if (config.debugMode) {
+        debugPrint('MockAdProvider initialized (testMode: ${config.testMode})');
+      }
     }
     
     return true;

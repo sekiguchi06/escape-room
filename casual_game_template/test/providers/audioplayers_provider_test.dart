@@ -1,19 +1,24 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:casual_game_template/framework/audio/audio_system.dart';
-import 'package:casual_game_template/framework/audio/providers/audioplayers_provider.dart';
+import 'package:casual_game_template/framework/providers/audio_provider_factory.dart';
+import 'package:casual_game_template/framework/test_utils/test_environment.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  group('AudioPlayersProvider Tests', () {
-    late AudioPlayersProvider provider;
+  
+  group('AudioProvider Tests (Auto-Selected)', () {
+    late AudioProvider provider;
     late DefaultAudioConfiguration config;
     
     setUpAll(() {
       TestWidgetsFlutterBinding.ensureInitialized();
+      // テスト環境であることを明示
+      TestEnvironmentDetector.setTestMode(true);
     });
     
     setUp(() {
-      provider = AudioPlayersProvider();
+      // ファクトリーで自動選択（テスト環境なのでSilentAudioProviderが選択される）
+      provider = AudioProviderFactory.create();
       config = const DefaultAudioConfiguration(
         bgmAssets: {
           'menu_bgm': 'audio/bgm/menu.mp3',
@@ -42,7 +47,11 @@ void main() {
       await provider.dispose();
     });
     
-    test('初期化成功', () async {
+    test('初期化成功（テスト環境自動選択）', () async {
+      // テスト環境ではFlameAudioProviderが選択されることを確認
+      expect(provider.isTestProvider, isTrue);
+      expect(provider.providerName, equals('FlameAudioProvider'));
+      
       await provider.initialize(config);
       
       // 初期化後の状態確認

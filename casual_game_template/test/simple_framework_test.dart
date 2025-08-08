@@ -30,7 +30,7 @@ void main() {
       expect(gameOverState.finalTime, equals(0.0));
       expect(gameOverState.sessionNumber, equals(1));
       
-      print('✅ SimpleGameState クラステスト完了');
+      debugPrint('✅ SimpleGameState クラステスト完了');
     });
     
     test('SimpleGameConfig クラステスト', () {
@@ -65,7 +65,7 @@ void main() {
       expect(config.getFontSize('playing'), equals(28.0));
       expect(config.getFontWeight('gameOver'), equals(FontWeight.bold));
       
-      print('✅ SimpleGameConfig クラステスト完了');
+      debugPrint('✅ SimpleGameConfig クラステスト完了');
     });
     
     test('SimpleGameConfiguration クラステスト', () {
@@ -81,7 +81,7 @@ void main() {
       final hardConfig = SimpleGameConfiguration.hardConfig;
       expect(hardConfig.config.gameDuration.inSeconds, equals(3));
       
-      print('✅ SimpleGameConfiguration クラステスト完了');
+      debugPrint('✅ SimpleGameConfiguration クラステスト完了');
     });
     
     test('SimpleGameConfigPresets クラステスト', () {
@@ -100,7 +100,7 @@ void main() {
       expect(easyPreset, isNotNull);
       expect(easyPreset!.gameDuration.inSeconds, equals(10));
       
-      print('✅ SimpleGameConfigPresets クラステスト完了');
+      debugPrint('✅ SimpleGameConfigPresets クラステスト完了');
     });
     
     test('SimpleGameStateProvider 基本テスト', () {
@@ -121,7 +121,7 @@ void main() {
       expect(gameInfo['canStart'], isFalse);
       expect(gameInfo['canRestart'], isFalse);
       
-      print('✅ SimpleGameStateProvider 基本テスト完了');
+      debugPrint('✅ SimpleGameStateProvider 基本テスト完了');
     });
     
     test('SimpleGameStateFactory テスト', () {
@@ -142,7 +142,7 @@ void main() {
       expect(gameOverState.finalTime, equals(0.0));
       expect(gameOverState.sessionNumber, equals(2));
       
-      print('✅ SimpleGameStateFactory テスト完了');
+      debugPrint('✅ SimpleGameStateFactory テスト完了');
     });
     
     test('JSON変換テスト', () {
@@ -181,7 +181,7 @@ void main() {
       expect(restoredConfig.getStateText('start'), equals('テスト開始'));
       expect(restoredConfig.getStateColor('start'), equals(const Color(0xFF123456)));
       
-      print('✅ JSON変換テスト完了');
+      debugPrint('✅ JSON変換テスト完了');
     });
   });
 }

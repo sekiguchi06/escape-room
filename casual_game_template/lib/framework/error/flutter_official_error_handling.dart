@@ -172,7 +172,7 @@ class FlutterGameErrorHandler {
       final gameError = GameError(
         type: _classifyFlutterError(details),
         message: details.exception.toString(),
-        details: details.summary?.toString(),
+        details: details.summary.toString(),
         originalError: details.exception,
         stackTrace: details.stack,
         timestamp: DateTime.now(),

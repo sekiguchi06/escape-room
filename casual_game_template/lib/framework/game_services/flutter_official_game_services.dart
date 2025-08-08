@@ -217,7 +217,7 @@ class FlutterGameServicesManager {
           );
           
           if (_config.debugMode) {
-            debugPrint('✅ Successfully signed in: ${_currentPlayer}');
+            debugPrint('✅ Successfully signed in: $_currentPlayer');
           }
           
           return GameServiceResult.success;

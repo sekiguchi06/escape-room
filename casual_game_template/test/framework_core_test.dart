@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:casual_game_template/framework/state/game_state_system.dart';
 import 'package:casual_game_template/framework/config/game_configuration.dart';
 import 'package:casual_game_template/framework/timer/flame_timer_system.dart';
-import 'package:casual_game_template/framework/ui/ui_system.dart';
 import 'package:casual_game_template/framework/ui/flutter_theme_system.dart';
 
 /// テスト用の汎用ゲーム状態定義
@@ -119,7 +118,7 @@ class TestGameConfig {
       'maxTimeMs': maxTime.inMilliseconds,
       'maxLevel': maxLevel,
       'messages': messages,
-      'colors': colors.map((k, v) => MapEntry(k, v.value)),
+      'colors': colors.map((k, v) => MapEntry(k, v.toARGB32())),
       'enablePowerUps': enablePowerUps,
       'difficultyMultiplier': difficultyMultiplier,
     };
@@ -216,7 +215,7 @@ class TestGameStateProvider extends GameStateProvider<GameState> {
         toState: TestGameActiveState,
         onTransition: (from, to) {
           final activeState = to as TestGameActiveState;
-          print('ゲーム開始: レベル${activeState.level}');
+          debugPrint('ゲーム開始: レベル${activeState.level}');
         },
       ),
       
@@ -228,7 +227,7 @@ class TestGameStateProvider extends GameStateProvider<GameState> {
           final fromActive = from as TestGameActiveState;
           final toActive = to as TestGameActiveState;
           if (toActive.level > fromActive.level) {
-            print('レベルアップ: ${fromActive.level} -> ${toActive.level}');
+            debugPrint('レベルアップ: ${fromActive.level} -> ${toActive.level}');
           }
         },
       ),
@@ -240,7 +239,7 @@ class TestGameStateProvider extends GameStateProvider<GameState> {
         onTransition: (from, to) {
           final activeState = from as TestGameActiveState;
           final completedState = to as TestGameCompletedState;
-          print('ゲーム完了: レベル${activeState.level} -> 最終レベル${completedState.finalLevel}');
+          debugPrint('ゲーム完了: レベル${activeState.level} -> 最終レベル${completedState.finalLevel}');
         },
       ),
       
@@ -249,7 +248,7 @@ class TestGameStateProvider extends GameStateProvider<GameState> {
         fromState: TestGameCompletedState,
         toState: TestGameIdleState,
         onTransition: (from, to) {
-          print('ゲームリセット');
+          debugPrint('ゲームリセット');
         },
       ),
     ]);
@@ -296,7 +295,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   group('フレームワークコア基盤テスト', () {
     test('汎用状態管理システム - 基本動作', () {
-      print('🔧 汎用状態管理システムテスト開始...');
+      debugPrint('🔧 汎用状態管理システムテスト開始...');
       
       // カスタム状態での状態マシン作成
       final stateMachine = GameStateMachine<GameState>(const TestGameIdleState());
@@ -311,7 +310,7 @@ void main() {
       
       // 初期状態確認
       expect(stateMachine.currentState, isA<TestGameIdleState>());
-      print('  ✅ 初期状態: ${stateMachine.currentState.name}');
+      debugPrint('  ✅ 初期状態: ${stateMachine.currentState.name}');
       
       // 状態遷移実行
       final activeState = TestGameActiveState(level: 1, progress: 0.0);
@@ -319,20 +318,20 @@ void main() {
       
       expect(success, isTrue);
       expect(stateMachine.currentState, isA<TestGameActiveState>());
-      print('  ✅ 状態遷移成功: ${stateMachine.currentState.description}');
+      debugPrint('  ✅ 状態遷移成功: ${stateMachine.currentState.description}');
       
       // 遷移可能性チェック
       final canTransitionToCompleted = stateMachine.canTransitionTo(
         TestGameCompletedState(finalLevel: 5, completionTime: Duration(seconds: 30))
       );
       expect(canTransitionToCompleted, isFalse); // 遷移定義されていないので失敗
-      print('  ✅ 無効遷移の適切な拒否');
+      debugPrint('  ✅ 無効遷移の適切な拒否');
       
-      print('🎉 汎用状態管理システムテスト完了！');
+      debugPrint('🎉 汎用状態管理システムテスト完了！');
     });
     
     test('汎用設定管理システム - 設定駆動', () {
-      print('⚙️ 汎用設定管理システムテスト開始...');
+      debugPrint('⚙️ 汎用設定管理システムテスト開始...');
       
       // テスト用設定作成
       final config = TestGameConfig(
@@ -352,16 +351,16 @@ void main() {
         difficultyMultiplier: 1.5,
       );
       
-      print('  📝 設定作成完了:');
-      print('    - 最大時間: ${config.maxTime.inSeconds}秒');
-      print('    - 最大レベル: ${config.maxLevel}');
-      print('    - パワーアップ: ${config.enablePowerUps}');
-      print('    - 難易度倍率: ${config.difficultyMultiplier}');
+      debugPrint('  📝 設定作成完了:');
+      debugPrint('    - 最大時間: ${config.maxTime.inSeconds}秒');
+      debugPrint('    - 最大レベル: ${config.maxLevel}');
+      debugPrint('    - パワーアップ: ${config.enablePowerUps}');
+      debugPrint('    - 難易度倍率: ${config.difficultyMultiplier}');
       
       // 設定オブジェクト作成
       final configuration = TestGameConfiguration(config: config);
       expect(configuration.isValid(), isTrue);
-      print('  ✅ 設定バリデーション成功');
+      debugPrint('  ✅ 設定バリデーション成功');
       
       // JSON変換テスト
       final json = configuration.toJson();
@@ -370,30 +369,30 @@ void main() {
       expect(restoredConfiguration.config.maxTime, equals(config.maxTime));
       expect(restoredConfiguration.config.maxLevel, equals(config.maxLevel));
       expect(restoredConfiguration.config.enablePowerUps, equals(config.enablePowerUps));
-      print('  ✅ JSON変換・復元成功');
+      debugPrint('  ✅ JSON変換・復元成功');
       
       // A/Bテスト設定テスト
       final easyVariant = configuration.getConfigForVariant('easy');
       expect(easyVariant.maxTime.inSeconds, equals(120));
       expect(easyVariant.maxLevel, equals(3));
       expect(easyVariant.difficultyMultiplier, equals(0.5));
-      print('  ✅ A/Bテストバリアント (easy): ${easyVariant.maxTime.inSeconds}秒, レベル${easyVariant.maxLevel}');
+      debugPrint('  ✅ A/Bテストバリアント (easy): ${easyVariant.maxTime.inSeconds}秒, レベル${easyVariant.maxLevel}');
       
       final hardVariant = configuration.getConfigForVariant('hard');
       expect(hardVariant.maxTime.inSeconds, equals(30));
       expect(hardVariant.maxLevel, equals(10));
       expect(hardVariant.difficultyMultiplier, equals(2.0));
-      print('  ✅ A/Bテストバリアント (hard): ${hardVariant.maxTime.inSeconds}秒, レベル${hardVariant.maxLevel}');
+      debugPrint('  ✅ A/Bテストバリアント (hard): ${hardVariant.maxTime.inSeconds}秒, レベル${hardVariant.maxLevel}');
       
-      print('🎉 汎用設定管理システムテスト完了！');
+      debugPrint('🎉 汎用設定管理システムテスト完了！');
     });
     
     test('汎用タイマーシステム - 各種タイマータイプ', () {
-      print('⏱️ 汎用タイマーシステムテスト開始...');
+      debugPrint('⏱️ 汎用タイマーシステムテスト開始...');
       
       // カウントダウンタイマー
-      print('  🔻 カウントダウンタイマーテスト...');
-      bool countdownCompleted = false;
+      debugPrint('  🔻 カウントダウンタイマーテスト...');
+      bool countdownCompleted = false; // タイマー完了フラグ
       final countdownTimer = FlameGameTimer('countdown_test', TimerConfiguration(
         duration: Duration(seconds: 3),
         type: TimerType.countdown,
@@ -402,7 +401,7 @@ void main() {
       
       expect(countdownTimer.remaining, equals(Duration(seconds: 3)));
       expect(countdownTimer.type, equals(TimerType.countdown));
-      print('    ✅ 初期値: ${countdownTimer.remaining.inSeconds}秒');
+      debugPrint('    ✅ 初期値: ${countdownTimer.remaining.inSeconds}秒');
       
       // タイマー開始・更新シミュレーション
       countdownTimer.start();
@@ -411,11 +410,17 @@ void main() {
       // 1秒進行をシミュレート
       countdownTimer.update(1.0);
       expect(countdownTimer.remaining.inSeconds, equals(2));
-      print('    ✅ 1秒後: ${countdownTimer.remaining.inSeconds}秒');
+      debugPrint('    ✅ 1秒後: ${countdownTimer.remaining.inSeconds}秒');
+      
+      // 完了まで進行してフラグをテスト
+      expect(countdownCompleted, isFalse);
+      countdownTimer.update(2.1); // 残り時間を0にする
+      expect(countdownCompleted, isTrue);
+      debugPrint('    ✅ タイマー完了フラグ: $countdownCompleted');
       
       // カウントアップタイマー
-      print('  🔺 カウントアップタイマーテスト...');
-      bool countupCompleted = false;
+      debugPrint('  🔺 カウントアップタイマーテスト...');
+      bool countupCompleted = false; // タイマー完了フラグ
       final countupTimer = FlameGameTimer('countup_test', TimerConfiguration(
         duration: Duration(seconds: 5),
         type: TimerType.countup,
@@ -428,10 +433,16 @@ void main() {
       countupTimer.start();
       countupTimer.update(2.0);
       expect(countupTimer.remaining.inSeconds, equals(3));
-      print('    ✅ 2秒後: ${countupTimer.remaining.inSeconds}秒残り');
+      debugPrint('    ✅ 2秒後: ${countupTimer.remaining.inSeconds}秒残り');
+      
+      // 完了フラグのテスト
+      expect(countupCompleted, isFalse);
+      countupTimer.update(3.1); // 残り時間を0にする
+      expect(countupCompleted, isTrue);
+      debugPrint('    ✅ カウントアップタイマー完了フラグ: $countupCompleted');
       
       // インターバルタイマー
-      print('  🔄 インターバルタイマーテスト...');
+      debugPrint('  🔄 インターバルタイマーテスト...');
       int intervalCount = 0;
       final intervalTimer = FlameGameTimer('interval_test', TimerConfiguration(
         duration: Duration(seconds: 2),
@@ -442,10 +453,10 @@ void main() {
       intervalTimer.start();
       intervalTimer.update(2.5); // 2秒を超えると1回完了
       expect(intervalCount, equals(1));
-      print('    ✅ インターバル完了回数: $intervalCount');
+      debugPrint('    ✅ インターバル完了回数: $intervalCount');
       
       // タイマー制御操作
-      print('  🎛️ タイマー制御テスト...');
+      debugPrint('  🎛️ タイマー制御テスト...');
       final controlTimer = FlameGameTimer('control_test', const TimerConfiguration(
         duration: Duration(seconds: 10),
         type: TimerType.countdown,
@@ -465,13 +476,13 @@ void main() {
       controlTimer.reset();
       expect(controlTimer.isRunning, isFalse);
       expect(controlTimer.remaining, equals(Duration(seconds: 10)));
-      print('    ✅ 制御操作 (開始/一時停止/再開/リセット) 成功');
+      debugPrint('    ✅ 制御操作 (開始/一時停止/再開/リセット) 成功');
       
-      print('🎉 汎用タイマーシステムテスト完了！');
+      debugPrint('🎉 汎用タイマーシステムテスト完了！');
     });
     
     test('汎用UIテーマシステム - テーマ管理', () {
-      print('🎨 汎用UIテーマシステムテスト開始...');
+      debugPrint('🎨 汎用UIテーマシステムテスト開始...');
       
       final themeManager = FlutterThemeManager();
       themeManager.initializeDefaultThemes();
@@ -479,7 +490,7 @@ void main() {
       // 利用可能なテーマ確認
       final availableThemes = themeManager.getAvailableThemes();
       expect(availableThemes.length, greaterThan(0));
-      print('  📋 利用可能テーマ: ${availableThemes.join(', ')}');
+      debugPrint('  📋 利用可能テーマ: ${availableThemes.join(', ')}');
       
       // デフォルトテーマ確認
       final defaultTheme = themeManager.currentTheme;
@@ -488,16 +499,16 @@ void main() {
       
       expect(primaryColor, isNotNull);
       expect(textSize, greaterThan(0));
-      print('  🎯 デフォルトテーマ - プライマリ色: $primaryColor, テキストサイズ: $textSize');
+      debugPrint('  🎯 デフォルトテーマ - プライマリ色: $primaryColor, テキストサイズ: $textSize');
       
       // テーマ変更
       if (availableThemes.contains('dark')) {
         themeManager.setTheme('dark');
         expect(themeManager.currentThemeId, equals('dark'));
-        print('  🌙 ダークテーマに変更成功');
+        debugPrint('  🌙 ダークテーマに変更成功');
         
         final darkPrimaryColor = themeManager.currentTheme.getColor('primary');
-        print('  🎨 ダークテーマプライマリ色: $darkPrimaryColor');
+        debugPrint('  🎨 ダークテーマプライマリ色: $darkPrimaryColor');
       }
       
       // カスタムテーマ登録
@@ -523,13 +534,13 @@ void main() {
       
       expect(themeManager.currentThemeId, equals('custom'));
       expect(themeManager.currentTheme.getColor('primary'), equals(Colors.purple));
-      print('  🎭 カスタムテーマ登録・適用成功');
+      debugPrint('  🎭 カスタムテーマ登録・適用成功');
       
-      print('🎉 汎用UIテーマシステムテスト完了！');
+      debugPrint('🎉 汎用UIテーマシステムテスト完了！');
     });
     
     test('統合シナリオ - 複合ゲームシミュレーション', () {
-      print('🎮 統合シナリオテスト開始...');
+      debugPrint('🎮 統合シナリオテスト開始...');
       
       // 設定作成
       final config = TestGameConfig(
@@ -552,11 +563,11 @@ void main() {
       final configuration = TestGameConfiguration(config: config);
       final stateProvider = TestGameStateProvider();
       
-      print('  🎯 ゲームシナリオ実行...');
+      debugPrint('  🎯 ゲームシナリオ実行...');
       
       // Phase 1: ゲーム開始
       expect(stateProvider.currentState, isA<TestGameIdleState>());
-      print('    📍 初期状態: ${stateProvider.currentState.name}');
+      debugPrint('    📍 初期状態: ${stateProvider.currentState.name}');
       
       final startSuccess = stateProvider.startGame(1);
       expect(startSuccess, isTrue);
@@ -565,7 +576,7 @@ void main() {
       final initialState = stateProvider.currentState as TestGameActiveState;
       expect(initialState.level, equals(1));
       expect(initialState.progress, equals(0.0));
-      print('    🚀 ゲーム開始: レベル${initialState.level}');
+      debugPrint('    🚀 ゲーム開始: レベル${initialState.level}');
       
       // Phase 2: 進捗更新・レベルアップ
       stateProvider.updateProgress(1, 0.5);
@@ -575,7 +586,7 @@ void main() {
       
       final currentState = stateProvider.currentState as TestGameActiveState;
       expect(currentState.level, equals(3));
-      print('    📈 最終レベル到達: レベル${currentState.level}');
+      debugPrint('    📈 最終レベル到達: レベル${currentState.level}');
       
       // Phase 3: ゲーム完了
       final completionTime = Duration(seconds: 25);
@@ -586,31 +597,31 @@ void main() {
       final completedState = stateProvider.currentState as TestGameCompletedState;
       expect(completedState.finalLevel, equals(3));
       expect(completedState.completionTime, equals(completionTime));
-      print('    🏆 ゲーム完了: 最終レベル${completedState.finalLevel}, 時間${completedState.completionTime.inSeconds}秒');
+      debugPrint('    🏆 ゲーム完了: 最終レベル${completedState.finalLevel}, 時間${completedState.completionTime.inSeconds}秒');
       
       // Phase 4: 統計確認
       final statistics = stateProvider.getStatistics();
       expect(statistics.sessionCount, greaterThan(0));
       expect(statistics.totalStateChanges, greaterThan(0));
-      print('    📊 統計情報:');
-      print('      - セッション数: ${statistics.sessionCount}');
-      print('      - 状態変更数: ${statistics.totalStateChanges}');
-      print('      - 最多訪問状態: ${statistics.mostVisitedState}');
+      debugPrint('    📊 統計情報:');
+      debugPrint('      - セッション数: ${statistics.sessionCount}');
+      debugPrint('      - 状態変更数: ${statistics.totalStateChanges}');
+      debugPrint('      - 最多訪問状態: ${statistics.mostVisitedState}');
       
       // Phase 5: リセット
       final resetSuccess = stateProvider.resetGame();
       expect(resetSuccess, isTrue);
       expect(stateProvider.currentState, isA<TestGameIdleState>());
-      print('    🔄 ゲームリセット完了');
+      debugPrint('    🔄 ゲームリセット完了');
       
       // Phase 6: A/Bテスト設定変更
       final hardConfig = configuration.getConfigForVariant('hard');
       expect(hardConfig.maxTime.inSeconds, equals(30));
       expect(hardConfig.maxLevel, equals(10));
       expect(hardConfig.difficultyMultiplier, equals(2.0));
-      print('    🧪 A/Bテスト (hard): 時間${hardConfig.maxTime.inSeconds}秒, レベル${hardConfig.maxLevel}, 難易度x${hardConfig.difficultyMultiplier}');
+      debugPrint('    🧪 A/Bテスト (hard): 時間${hardConfig.maxTime.inSeconds}秒, レベル${hardConfig.maxLevel}, 難易度x${hardConfig.difficultyMultiplier}');
       
-      print('🎉 統合シナリオテスト完了！');
+      debugPrint('🎉 統合シナリオテスト完了！');
     });
   });
 }

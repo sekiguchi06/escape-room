@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/foundation.dart';
 
-import 'package:flame/game.dart';
-import '../../lib/framework/timer/flame_timer_system.dart';
+import 'package:casual_game_template/framework/timer/flame_timer_system.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -13,7 +13,7 @@ void main() {
     });
     
     test('FlameGameTimer基本機能テスト', () {
-      print('=== FlameGameTimer基本機能テスト開始 ===');
+      debugPrint('=== FlameGameTimer基本機能テスト開始 ===');
       
       int completeCount = 0;
       Duration? lastUpdateTime;
@@ -23,11 +23,11 @@ void main() {
         type: TimerType.countdown,
         onComplete: () {
           completeCount++;
-          print('Timer completed! Count: $completeCount');
+          debugPrint('Timer completed! Count: $completeCount');
         },
         onUpdate: (remaining) {
           lastUpdateTime = remaining;
-          print('Timer update: ${remaining.inMilliseconds}ms');
+          debugPrint('Timer update: ${remaining.inMilliseconds}ms');
         },
       );
       
@@ -40,28 +40,30 @@ void main() {
       expect(timer.isRunning, isFalse);
       expect(timer.isPaused, isFalse);
       expect(timer.isCompleted, isFalse);
-      print('✅ 初期状態確認完了');
+      debugPrint('✅ 初期状態確認完了');
       
       // タイマー開始
       timer.start();
       expect(timer.isRunning, isTrue);
-      print('✅ タイマー開始確認');
+      debugPrint('✅ タイマー開始確認');
       
       // 時間進行シミュレーション
       timer.update(0.5); // 0.5秒経過
       expect(timer.current.inMilliseconds, lessThan(2000));
-      print('✅ 時間進行確認: ${timer.current.inMilliseconds}ms');
+      debugPrint('✅ 時間進行確認: ${timer.current.inMilliseconds}ms');
       
       // 完了まで時間を進める
       timer.update(2.0); // 2秒経過（合計2.5秒）
       expect(completeCount, equals(1));
-      print('✅ タイマー完了確認');
+      expect(lastUpdateTime, isNotNull);
+      expect(lastUpdateTime!.inMilliseconds, lessThanOrEqualTo(0));
+      debugPrint('✅ タイマー完了確認: 最終更新時間=${lastUpdateTime?.inMilliseconds}ms');
       
-      print('🎉 FlameGameTimer基本機能テスト成功！');
+      debugPrint('🎉 FlameGameTimer基本機能テスト成功！');
     });
     
     test('FlameTimerManager統合テスト', () {
-      print('=== FlameTimerManager統合テスト開始 ===');
+      debugPrint('=== FlameTimerManager統合テスト開始 ===');
       
       int timer1CompleteCount = 0;
       int timer2CompleteCount = 0;
@@ -84,13 +86,13 @@ void main() {
       expect(timerManager.hasTimer('timer1'), isTrue);
       expect(timerManager.hasTimer('timer2'), isTrue);
       expect(timerManager.getTimerIds().length, equals(2));
-      print('✅ タイマー追加確認');
+      debugPrint('✅ タイマー追加確認');
       
       // タイマー開始
       timerManager.startAllTimers();
       expect(timerManager.isTimerRunning('timer1'), isTrue);
       expect(timerManager.isTimerRunning('timer2'), isTrue);
-      print('✅ 全タイマー開始確認');
+      debugPrint('✅ 全タイマー開始確認');
       
       // 時間進行シミュレーション
       timerManager.update(0.5); // 0.5秒経過
@@ -98,17 +100,17 @@ void main() {
       timerManager.update(0.6); // 1.1秒経過（timer1完了）
       expect(timer1CompleteCount, equals(1));
       expect(timer2CompleteCount, equals(0));
-      print('✅ timer1完了確認');
+      debugPrint('✅ timer1完了確認');
       
       timerManager.update(1.0); // 2.1秒経過（timer2完了）
       expect(timer2CompleteCount, equals(1));
-      print('✅ timer2完了確認');
+      debugPrint('✅ timer2完了確認');
       
-      print('🎉 FlameTimerManager統合テスト成功！');
+      debugPrint('🎉 FlameTimerManager統合テスト成功！');
     });
     
     test('タイマー一時停止・再開テスト', () {
-      print('=== タイマー一時停止・再開テスト開始 ===');
+      debugPrint('=== タイマー一時停止・再開テスト開始 ===');
       
       int completeCount = 0;
       
@@ -133,29 +135,32 @@ void main() {
       timer.pause();
       expect(timer.isRunning, isFalse); // 一時停止中はisRunningはfalse
       expect(timer.isPaused, isTrue);
-      print('✅ 一時停止確認');
+      debugPrint('✅ 一時停止確認');
       
       // 一時停止中の時間経過（変化しないはず）
       final pausedTime = timer.current;
       timer.update(1.0); // 1秒経過
       // 注意: Flame Timer内部では停止しているが、独自の時間計算は続く
+      expect(pausedTime, isNotNull);
+      expect(pausedTime.inMilliseconds, greaterThan(0));
+      debugPrint('✅ 一時停止時の時間: ${pausedTime.inMilliseconds}ms');
       
       // 再開
       timer.resume();
       expect(timer.isRunning, isTrue);
       expect(timer.isPaused, isFalse);
-      print('✅ 再開確認');
+      debugPrint('✅ 再開確認');
       
       // 完了まで時間を進める
       timer.update(2.0); // 2秒経過
       expect(completeCount, equals(1));
-      print('✅ 再開後完了確認');
+      debugPrint('✅ 再開後完了確認');
       
-      print('🎉 一時停止・再開テスト成功！');
+      debugPrint('🎉 一時停止・再開テスト成功！');
     });
     
     test('タイマー設定更新テスト', () {
-      print('=== タイマー設定更新テスト開始 ===');
+      debugPrint('=== タイマー設定更新テスト開始 ===');
       
       timerManager.addTimer('updateTest', TimerConfiguration(
         duration: const Duration(seconds: 2),
@@ -174,13 +179,13 @@ void main() {
       timer.updateConfiguration(newConfig);
       expect(timer.duration, equals(const Duration(seconds: 5)));
       expect(timer.type, equals(TimerType.countup));
-      print('✅ 設定更新確認');
+      debugPrint('✅ 設定更新確認');
       
-      print('🎉 設定更新テスト成功！');
+      debugPrint('🎉 設定更新テスト成功！');
     });
     
     test('デバッグ情報テスト', () {
-      print('=== デバッグ情報テスト開始 ===');
+      debugPrint('=== デバッグ情報テスト開始 ===');
       
       timerManager.addTimer('debugTest', TimerConfiguration(
         duration: const Duration(seconds: 3),
@@ -194,14 +199,14 @@ void main() {
       expect(debugInfo['type'], equals('countdown'));
       expect(debugInfo['isRunning'], isFalse);
       expect(debugInfo['isPaused'], isFalse);
-      print('✅ Timer デバッグ情報確認');
+      debugPrint('✅ Timer デバッグ情報確認');
       
       final managerDebugInfo = timerManager.getDebugInfo();
       expect(managerDebugInfo['timerCount'], equals(1));
       expect(managerDebugInfo['timers'], isA<Map>());
-      print('✅ TimerManager デバッグ情報確認');
+      debugPrint('✅ TimerManager デバッグ情報確認');
       
-      print('🎉 デバッグ情報テスト成功！');
+      debugPrint('🎉 デバッグ情報テスト成功！');
     });
   });
 }

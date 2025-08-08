@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
-import '../../lib/framework/ui/flutter_theme_system.dart';
+import 'package:casual_game_template/framework/ui/flutter_theme_system.dart';
 
 /// Flutter公式ThemeData準拠テーマシステムの単体テスト
 /// 既存インターフェース互換性とFlutter公式準拠実装の確認

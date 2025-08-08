@@ -78,9 +78,9 @@ void main() {
     
     test('AnimationPresets API存在確認', () {
       // AnimationPresetsの静的メソッドが存在することを確認
-      expect(AnimationPresets.popIn is Function, isTrue);
-      expect(AnimationPresets.buttonTap is Function, isTrue);
-      expect(AnimationPresets.slideInFromLeft is Function, isTrue);
+      expect(AnimationPresets.popIn, isA<Function>());
+      expect(AnimationPresets.buttonTap, isA<Function>());
+      expect(AnimationPresets.slideInFromLeft, isA<Function>());
     });
     
     testWithFlameGame('Effect管理機能確認', (game) async {

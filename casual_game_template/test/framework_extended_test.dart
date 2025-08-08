@@ -1,14 +1,14 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/foundation.dart';
 
-import 'package:flutter/services.dart';
 import 'package:flame/components.dart';
 
 // 拡張システムのインポート
-import '../lib/framework/audio/audio_system.dart';
-import '../lib/framework/input/flame_input_system.dart';
-import '../lib/framework/persistence/persistence_system.dart';
-import '../lib/framework/monetization/monetization_system.dart';
-import '../lib/framework/analytics/analytics_system.dart';
+import 'package:casual_game_template/framework/audio/audio_system.dart';
+import 'package:casual_game_template/framework/input/flame_input_system.dart';
+import 'package:casual_game_template/framework/persistence/persistence_system.dart';
+import 'package:casual_game_template/framework/monetization/monetization_system.dart';
+import 'package:casual_game_template/framework/analytics/analytics_system.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -16,7 +16,7 @@ void main() {
     
     group('音響システム - プロバイダーパターン', () {
       test('SilentAudioProvider - 基本動作', () async {
-        print('🔊 音響システムテスト開始...');
+        debugPrint('🔊 音響システムテスト開始...');
         
         final config = const DefaultAudioConfiguration(
           bgmAssets: {
@@ -40,17 +40,17 @@ void main() {
         
         // 初期化
         await manager.initialize();
-        print('  ✅ 音響システム初期化成功');
+        debugPrint('  ✅ 音響システム初期化成功');
         
         // BGM再生テスト
         await manager.playBgm('menu');
         expect(provider.isBgmPlaying, isTrue);
-        print('  ✅ BGM再生: ${provider.isBgmPlaying}');
+        debugPrint('  ✅ BGM再生: ${provider.isBgmPlaying}');
         
         // 効果音再生テスト
         await manager.playSfx('tap');
         await manager.playSfx('success', volumeMultiplier: 1.5);
-        print('  ✅ 効果音再生テスト成功');
+        debugPrint('  ✅ 効果音再生テスト成功');
         
         // 音量制御テスト
         await manager.setVolumes(
@@ -58,29 +58,29 @@ void main() {
           bgmVolume: 0.5,
           sfxVolume: 0.6,
         );
-        print('  ✅ 音量制御テスト成功');
+        debugPrint('  ✅ 音量制御テスト成功');
         
         // BGM制御テスト
         await manager.pauseBgm();
         expect(provider.isBgmPaused, isTrue);
         await manager.resumeBgm();
         expect(provider.isBgmPaused, isFalse);
-        print('  ✅ BGM制御（一時停止・再開）成功');
+        debugPrint('  ✅ BGM制御（一時停止・再開）成功');
         
         // デバッグ情報確認
         final debugInfo = manager.getDebugInfo();
         expect(debugInfo['bgm_enabled'], isTrue);
         expect(debugInfo['sfx_enabled'], isTrue);
-        print('  ✅ デバッグ情報: BGM有効=${debugInfo['bgm_enabled']}, SFX有効=${debugInfo['sfx_enabled']}');
+        debugPrint('  ✅ デバッグ情報: BGM有効=${debugInfo['bgm_enabled']}, SFX有効=${debugInfo['sfx_enabled']}');
         
         await manager.dispose();
-        print('🎉 音響システムテスト完了！');
+        debugPrint('🎉 音響システムテスト完了！');
       });
     });
     
     group('入力システム - Flame公式準拠', () {
       test('FlameInputProcessor - TapCallbacks動作確認', () async {
-        print('👆 入力システムテスト開始...');
+        debugPrint('👆 入力システムテスト開始...');
         
         final config = const DefaultInputConfiguration(
           enabledInputTypes: {
@@ -96,13 +96,13 @@ void main() {
         );
         
         manager.initialize();
-        print('  ✅ 入力システム初期化成功');
+        debugPrint('  ✅ 入力システム初期化成功');
         
         // Flame公式TapCallbacks動作確認
         final receivedEvents = <InputEventData>[];
         manager.addInputListener((event) {
           receivedEvents.add(event);
-          print('  📥 入力イベント受信: ${event.type.name} at ${event.position}');
+          debugPrint('  📥 入力イベント受信: ${event.type.name} at ${event.position}');
         });
         
         // Flame公式: onTapDown → onTapUp パターン
@@ -111,25 +111,25 @@ void main() {
         
         await Future.delayed(const Duration(milliseconds: 10));
         expect(receivedEvents.any((e) => e.type == InputEventType.tap), isTrue);
-        print('  ✅ Flame公式TapCallbacks動作確認');
+        debugPrint('  ✅ Flame公式TapCallbacks動作確認');
         
         // Flame公式DragCallbacks動作確認（ログ出力のみ）
         processor.processPanStart(Vector2(100, 100));
         processor.processPanUpdate(Vector2(120, 100), Vector2(20, 0));
         processor.processPanEnd(Vector2(200, 100), Vector2(50, 0));
-        print('  ✅ Flame公式DragCallbacks動作確認');
+        debugPrint('  ✅ Flame公式DragCallbacks動作確認');
         
         // デバッグ情報確認（Flame公式準拠）
         final debugInfo = manager.getDebugInfo();
-        print('  ✅ デバッグ情報確認: ${debugInfo.keys.length}項目');
+        debugPrint('  ✅ デバッグ情報確認: ${debugInfo.keys.length}項目');
         
-        print('🎉 入力システムテスト完了！');
+        debugPrint('🎉 入力システムテスト完了！');
       });
     });
     
     group('データ永続化システム - プロバイダーパターン', () {
       test('LocalStorageProvider - データ操作', () async {
-        print('💾 データ永続化システムテスト開始...');
+        debugPrint('💾 データ永続化システムテスト開始...');
         
         final config = const DefaultPersistenceConfiguration(
           autoSaveInterval: 5,
@@ -146,25 +146,25 @@ void main() {
         // 初期化
         final initResult = await manager.initialize();
         expect(initResult, equals(PersistenceResult.success));
-        print('  ✅ データ永続化システム初期化成功');
+        debugPrint('  ✅ データ永続化システム初期化成功');
         
         // ハイスコア保存・読み込みテスト
         await manager.saveHighScore(1500);
         final highScore = await manager.loadHighScore();
         expect(highScore, equals(1500));
-        print('  ✅ ハイスコア保存・読み込み: $highScore');
+        debugPrint('  ✅ ハイスコア保存・読み込み: $highScore');
         
         // より高いスコアで更新
         await manager.saveHighScore(2000);
         final newHighScore = await manager.loadHighScore();
         expect(newHighScore, equals(2000));
-        print('  ✅ ハイスコア更新: $newHighScore');
+        debugPrint('  ✅ ハイスコア更新: $newHighScore');
         
         // 低いスコアでは更新されないことを確認
         await manager.saveHighScore(1000);
         final unchangedScore = await manager.loadHighScore();
         expect(unchangedScore, equals(2000));
-        print('  ✅ ハイスコア保護: $unchangedScore（低いスコアで変更されない）');
+        debugPrint('  ✅ ハイスコア保護: $unchangedScore（低いスコアで変更されない）');
         
         // ユーザー設定テスト
         final userSettings = {
@@ -176,7 +176,7 @@ void main() {
         final loadedSettings = await manager.loadUserSettings();
         expect(loadedSettings['sound_enabled'], isTrue);
         expect(loadedSettings['music_volume'], equals(0.8));
-        print('  ✅ ユーザー設定保存・読み込み: $loadedSettings');
+        debugPrint('  ✅ ユーザー設定保存・読み込み: $loadedSettings');
         
         // ゲーム進行状況テスト
         final progress = {
@@ -188,25 +188,25 @@ void main() {
         final loadedProgress = await manager.loadGameProgress();
         expect(loadedProgress['current_level'], equals(5));
         expect(loadedProgress['unlocked_levels'], hasLength(5));
-        print('  ✅ ゲーム進行状況: レベル${loadedProgress['current_level']}, 解放${loadedProgress['unlocked_levels'].length}個');
+        debugPrint('  ✅ ゲーム進行状況: レベル${loadedProgress['current_level']}, 解放${loadedProgress['unlocked_levels'].length}個');
         
         // ストレージ情報確認
         final storageInfo = await manager.getStorageInfo();
-        print('  ✅ ストレージ情報: ${storageInfo['total_keys']}キー, ${storageInfo['total_size_kb']}KB');
+        debugPrint('  ✅ ストレージ情報: ${storageInfo['total_keys']}キー, ${storageInfo['total_size_kb']}KB');
         
         // デバッグ情報確認
         final debugInfo = manager.getDebugInfo();
         expect(debugInfo['encryption_enabled'], isTrue);
-        print('  ✅ デバッグ情報: 暗号化=${debugInfo['encryption_enabled']}');
+        debugPrint('  ✅ デバッグ情報: 暗号化=${debugInfo['encryption_enabled']}');
         
         await manager.dispose();
-        print('🎉 データ永続化システムテスト完了！');
+        debugPrint('🎉 データ永続化システムテスト完了！');
       });
     });
     
     group('収益化システム - 広告統合抽象化', () {
       test('MockAdProvider - 広告制御', () async {
-        print('💰 収益化システムテスト開始...');
+        debugPrint('💰 収益化システムテスト開始...');
         
         final config = const DefaultMonetizationConfiguration(
           interstitialInterval: 1,  // テスト用に短い間隔に設定
@@ -224,13 +224,13 @@ void main() {
         // 初期化
         final initSuccess = await manager.initialize();
         expect(initSuccess, isTrue);
-        print('  ✅ 収益化システム初期化成功');
+        debugPrint('  ✅ 収益化システム初期化成功');
         
         // 広告イベントリスナー設定
         final List<AdEventData> adEvents = [];
         manager.addAdEventListener((event) {
           adEvents.add(event);
-          print('  📊 広告イベント: ${event.adType.name} - ${event.result.name}');
+          debugPrint('  📊 広告イベント: ${event.adType.name} - ${event.result.name}');
         });
         
         // インタースティシャル広告テスト
@@ -239,7 +239,7 @@ void main() {
         final interstitialResult = await manager.showInterstitial();
         expect(interstitialResult, equals(AdResult.shown));
         expect(adEvents.any((e) => e.adType == AdType.interstitial && e.result == AdResult.shown), isTrue);
-        print('  ✅ インタースティシャル広告表示成功');
+        debugPrint('  ✅ インタースティシャル広告表示成功');
         
         // リワード広告テスト
         adEvents.clear();
@@ -249,40 +249,40 @@ void main() {
         // リワードイベント確認
         await Future.delayed(const Duration(milliseconds: 600));
         expect(adEvents.any((e) => e.result == AdResult.rewarded), isTrue);
-        print('  ✅ リワード広告とボーナス獲得成功');
+        debugPrint('  ✅ リワード広告とボーナス獲得成功');
         
         // 広告表示間隔チェック
         // 間隔設定が1秒なので、直後は表示不可
         final shouldShow1 = manager.shouldShowInterstitial();
-        print('  📊 広告表示間隔チェック（直後）: $shouldShow1');
+        debugPrint('  📊 広告表示間隔チェック（直後）: $shouldShow1');
         
         // 1.5秒待機後は表示可能
         await Future.delayed(const Duration(milliseconds: 1500));
         final shouldShow2 = manager.shouldShowInterstitial();
-        print('  📊 広告表示間隔チェック（1.5秒後）: $shouldShow2');
+        debugPrint('  📊 広告表示間隔チェック（1.5秒後）: $shouldShow2');
         expect(shouldShow2, isTrue); // 1.5秒後は表示可能
-        print('  ✅ 広告表示間隔制御確認');
+        debugPrint('  ✅ 広告表示間隔制御確認');
         
         // 収益統計確認
         await Future.delayed(const Duration(milliseconds: 100));
         final revenueStats = manager.getRevenueStats();
         final totalShows = revenueStats['total_shows'];
         expect(totalShows is int ? totalShows : int.parse(totalShows.toString()), greaterThan(0));
-        print('  ✅ 収益統計: 総表示${revenueStats['total_shows']}回, 推定収益\$${revenueStats['total_revenue']}');
+        debugPrint('  ✅ 収益統計: 総表示${revenueStats['total_shows']}回, 推定収益\$${revenueStats['total_revenue']}');
         
         // デバッグ情報確認
         final debugInfo = manager.getDebugInfo();
         expect(debugInfo['test_mode'], isTrue);
-        print('  ✅ デバッグ情報: テストモード=${debugInfo['test_mode']}');
+        debugPrint('  ✅ デバッグ情報: テストモード=${debugInfo['test_mode']}');
         
         await manager.dispose();
-        print('🎉 収益化システムテスト完了！');
+        debugPrint('🎉 収益化システムテスト完了！');
       });
     });
     
     group('分析システム - イベント追跡抽象化', () {
       test('ConsoleAnalyticsProvider - イベント追跡', () async {
-        print('📊 分析システムテスト開始...');
+        debugPrint('📊 分析システムテスト開始...');
         
         final config = const DefaultAnalyticsConfiguration(
           batchSize: 5,
@@ -301,14 +301,14 @@ void main() {
         final initSuccess = await manager.initialize();
         expect(initSuccess, isTrue);
         expect(manager.currentSessionId, isNotNull);
-        print('  ✅ 分析システム初期化、セッション開始: ${manager.currentSessionId}');
+        debugPrint('  ✅ 分析システム初期化、セッション開始: ${manager.currentSessionId}');
         
         // 基本イベント追跡
         await manager.trackEvent('test_event', parameters: {
           'test_parameter': 'test_value',
           'numeric_value': 42,
         });
-        print('  ✅ 基本イベント追跡成功');
+        debugPrint('  ✅ 基本イベント追跡成功');
         
         // ゲーム固有イベント追跡
         await manager.trackGameStart(gameConfig: {
@@ -327,7 +327,7 @@ void main() {
           duration: const Duration(minutes: 10),
           additionalData: {'reason': 'completed'},
         );
-        print('  ✅ ゲーム固有イベント追跡成功');
+        debugPrint('  ✅ ゲーム固有イベント追跡成功');
         
         // 広告・課金イベント
         await manager.trackAdShown(
@@ -340,45 +340,45 @@ void main() {
           price: 2.99,
           currency: 'USD',
         );
-        print('  ✅ 広告・課金イベント追跡成功');
+        debugPrint('  ✅ 広告・課金イベント追跡成功');
         
         // エラー追跡
         await manager.trackError('Test error message', stackTrace: 'Stack trace here');
-        print('  ✅ エラー追跡成功');
+        debugPrint('  ✅ エラー追跡成功');
         
         // ユーザープロパティ設定
         await manager.setUserId('test_user_12345');
         await manager.setUserProperty('user_type', 'premium');
-        print('  ✅ ユーザープロパティ設定成功');
+        debugPrint('  ✅ ユーザープロパティ設定成功');
         
         // 統計情報確認
         final statistics = manager.getStatistics();
         expect(statistics['session_id'], isNotNull);
         expect(statistics['session_event_count'], greaterThan(0));
-        print('  ✅ 統計情報: セッションイベント数=${statistics['session_event_count']}');
+        debugPrint('  ✅ 統計情報: セッションイベント数=${statistics['session_event_count']}');
         
         // バッチ送信テスト
         await manager.flushEvents();
-        print('  ✅ イベントバッチ送信成功');
+        debugPrint('  ✅ イベントバッチ送信成功');
         
         // デバッグ情報確認
         final debugInfo = manager.getDebugInfo();
         expect(debugInfo['auto_tracking_enabled'], isTrue);
-        print('  ✅ デバッグ情報: 自動追跡=${debugInfo['auto_tracking_enabled']}');
+        debugPrint('  ✅ デバッグ情報: 自動追跡=${debugInfo['auto_tracking_enabled']}');
         
         // セッション終了
         await manager.endSession();
         expect(manager.currentSessionId, isNull);
-        print('  ✅ セッション終了成功');
+        debugPrint('  ✅ セッション終了成功');
         
         await manager.dispose();
-        print('🎉 分析システムテスト完了！');
+        debugPrint('🎉 分析システムテスト完了！');
       });
     });
     
     group('統合シナリオ - 全システム連携', () {
       test('マルチシステム連携動作', () async {
-        print('🎮 統合シナリオテスト開始...');
+        debugPrint('🎮 統合シナリオテスト開始...');
         
         // 全システム初期化
         final audioManager = AudioManager(
@@ -417,12 +417,12 @@ void main() {
         await dataManager.initialize();
         await monetizationManager.initialize();
         await analyticsManager.initialize();
-        print('  ✅ 全システム初期化完了');
+        debugPrint('  ✅ 全システム初期化完了');
         
         // ゲーム開始シナリオ
         await audioManager.playBgm('game');
         await analyticsManager.trackGameStart();
-        print('  🎵 ゲーム開始: BGM再生、分析追跡');
+        debugPrint('  🎵 ゲーム開始: BGM再生、分析追跡');
         
         // プレイヤーアクション統合処理
         int score = 0;
@@ -443,20 +443,20 @@ void main() {
             'score': score,
           });
           
-          print('  👆 アクション${i + 1}: タップ→効果音→スコア$score→分析');
+          debugPrint('  👆 アクション${i + 1}: タップ→効果音→スコア$score→分析');
         }
         
         // ハイスコア保存
         await dataManager.saveHighScore(score);
         final savedScore = await dataManager.loadHighScore();
         expect(savedScore, equals(score));
-        print('  💾 ハイスコア保存: $savedScore');
+        debugPrint('  💾 ハイスコア保存: $savedScore');
         
         // 広告表示（ゲーム終了時）
         final adResult = await monetizationManager.showInterstitial();
         if (adResult == AdResult.shown) {
           await analyticsManager.trackAdShown(adType: 'interstitial', adId: 'end_game_ad');
-          print('  📺 ゲーム終了広告表示・追跡完了');
+          debugPrint('  📺 ゲーム終了広告表示・追跡完了');
         }
         
         // ゲーム終了処理
@@ -465,26 +465,26 @@ void main() {
           score: score,
           duration: const Duration(minutes: 1),
         );
-        print('  🏁 ゲーム終了: BGM停止、分析追跡');
+        debugPrint('  🏁 ゲーム終了: BGM停止、分析追跡');
         
         // 最終統計
         final revenueStats = monetizationManager.getRevenueStats();
         final analyticsStats = analyticsManager.getStatistics();
         final storageInfo = await dataManager.getStorageInfo();
         
-        print('  📊 最終統計:');
-        print('    - 広告収益: \$${revenueStats['total_revenue']}');
-        print('    - 分析イベント: ${analyticsStats['session_event_count']}件');
-        print('    - データサイズ: ${storageInfo['total_size_kb']}KB');
+        debugPrint('  📊 最終統計:');
+        debugPrint('    - 広告収益: \$${revenueStats['total_revenue']}');
+        debugPrint('    - 分析イベント: ${analyticsStats['session_event_count']}件');
+        debugPrint('    - データサイズ: ${storageInfo['total_size_kb']}KB');
         
         // リソース解放
         await audioManager.dispose();
         await dataManager.dispose();
         await monetizationManager.dispose();
         await analyticsManager.dispose();
-        print('  🧹 全システムリソース解放完了');
+        debugPrint('  🧹 全システムリソース解放完了');
         
-        print('🎉 統合シナリオテスト完了！');
+        debugPrint('🎉 統合シナリオテスト完了！');
       });
     });
   });

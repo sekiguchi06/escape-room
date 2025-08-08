@@ -1,5 +1,4 @@
 import 'package:flame/components.dart';
-import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
 import '../../framework/ui/ui_system.dart';
 import '../simple_game.dart';
@@ -16,7 +15,7 @@ class StartScreenComponent extends PositionComponent {
     final background = RectangleComponent(
       position: Vector2.zero(),
       size: game.size,
-      paint: Paint()..color = Colors.indigo.withOpacity(0.3),
+      paint: Paint()..color = Colors.indigo.withValues(alpha: 0.3),
     );
     background.priority = UILayerPriority.background;
     add(background);

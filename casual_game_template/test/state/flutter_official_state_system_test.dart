@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:flutter/foundation.dart';
-import '../../lib/framework/state/flutter_official_state_system.dart';
+import 'package:casual_game_template/framework/state/flutter_official_state_system.dart';
 
 /// Flutter公式準拠状態管理システムの単体テスト
 /// 
@@ -456,17 +456,16 @@ void main() {
         
         // Flutter公式ChangeNotifierパターンの確認
         expect(provider, isA<ChangeNotifier>());
-        expect(provider.hasListeners, isFalse);
         
-        provider.addListener(() {});
-        expect(provider.hasListeners, isTrue);
+        // リスナー追加テスト（protectedメンバーは直接テストしない）
+        bool listenerCalled = false;
+        provider.addListener(() {
+          listenerCalled = true;
+        });
         
-        // notifyListeners()による通知確認
-        var notified = false;
-        provider.addListener(() => notified = true);
-        
+        // notifyListeners()による通知確認（状態変更で自動的に通知される）
         provider.transitionTo(playingState);
-        expect(notified, isTrue);
+        expect(listenerCalled, isTrue);
       });
       
       test('公式推奨パターン確認', () {

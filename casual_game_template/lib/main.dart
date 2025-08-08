@@ -2,14 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flame/game.dart';
 import 'package:provider/provider.dart';
 
-import 'game/simple_game.dart';
+import 'game/tap_fire_game.dart';
 import 'game/framework_integration/simple_game_states.dart';
 
 void main() {
-  runApp(CasualGameApp());
+  runApp(const CasualGameApp());
 }
 
 class CasualGameApp extends StatelessWidget {
+  const CasualGameApp({super.key});
+  
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -27,17 +29,19 @@ class CasualGameApp extends StatelessWidget {
 }
 
 class GameScreen extends StatelessWidget {
+  const GameScreen({super.key});
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text('Casual Game Template'),
+        title: const Text('Tap Fire Game'),
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
       ),
-      body: GameWidget<SimpleGame>.controlled(
-        gameFactory: SimpleGame.new,
+      body: GameWidget<TapFireGame>.controlled(
+        gameFactory: TapFireGame.new,
         key: const ValueKey('game_canvas'),
       ),
     );

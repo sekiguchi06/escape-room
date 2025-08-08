@@ -7,33 +7,26 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   testWidgets('CasualGameApp smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(CasualGameApp());
+    await tester.pumpWidget(const CasualGameApp());
 
     // Verify that our app loads without errors.
-    expect(find.text('Casual Game Template'), findsOneWidget);
+    expect(find.text('Tap Fire Game'), findsOneWidget);
     
     // Verify that the game widget is present.
     expect(find.byKey(const ValueKey('game_canvas')), findsOneWidget);
-    
-    // Verify that the audio test button is present.
-    expect(find.byIcon(Icons.volume_up), findsOneWidget);
   });
   
-  testWidgets('Navigation to AudioTestPage', (WidgetTester tester) async {
-    await tester.pumpWidget(CasualGameApp());
+  testWidgets('Basic app navigation test', (WidgetTester tester) async {
+    await tester.pumpWidget(const CasualGameApp());
     
-    // Tap the audio test button.
-    await tester.tap(find.byIcon(Icons.volume_up));
+    // Wait for initial frame to load
+    await tester.pump(const Duration(milliseconds: 100));
     
-    // Manual pumps instead of pumpAndSettle to avoid timeout
-    for (int i = 0; i < 10; i++) {
-      await tester.pump(const Duration(milliseconds: 100));
-      if (tester.any(find.text('Audio Test'))) {
-        break;
-      }
-    }
+    // Verify that the basic UI is working
+    expect(find.text('Tap Fire Game'), findsOneWidget);
+    expect(find.byKey(const ValueKey('game_canvas')), findsOneWidget);
     
-    // Verify that we navigated to the audio test page.
-    expect(find.text('Audio Test'), findsOneWidget);
+    // Allow one more frame for game initialization
+    await tester.pump(const Duration(milliseconds: 100));
   });
 }

@@ -26,10 +26,9 @@ class SimpleGameFramework extends ConfigurableGame<GameState, SimpleGameConfig> 
   
   SimpleGameFramework({
     SimpleGameConfiguration? configuration,
-    bool debugMode = false,
+    super.debugMode = false,
   }) : super(
     configuration: configuration ?? SimpleGameConfiguration.defaultConfig,
-    debugMode: debugMode,
   );
   
   @override
@@ -120,15 +119,13 @@ class SimpleGameFramework extends ConfigurableGame<GameState, SimpleGameConfig> 
     // UI コンポーネントが初期化されていない場合はスキップ
     if (!_isUIInitialized) return;
     
-    switch (state.runtimeType) {
-      case SimpleGameStartState:
+    switch (state) {
+      case SimpleGameStartState _:
         _statusText.setText(config.getStateText('start'));
         _statusText.setTextColor(config.getStateColor('start'));
         // _timerProgress.opacity = 0.0; // opacityプロパティ未実装
-        break;
         
-      case SimpleGamePlayingState:
-        final playingState = state as SimpleGamePlayingState;
+      case SimpleGamePlayingState playingState:
         final timeText = config.getStateText('playing', timeRemaining: playingState.timeRemaining);
         _statusText.setText(timeText);
         _statusText.setTextColor(config.getDynamicColor('playing', timeRemaining: playingState.timeRemaining));
@@ -137,10 +134,8 @@ class SimpleGameFramework extends ConfigurableGame<GameState, SimpleGameConfig> 
         // プログレスバー更新
         final progress = playingState.timeRemaining / config.gameDuration.inMilliseconds * 1000;
         _timerProgress.setProgress(progress);
-        break;
         
-      case SimpleGameOverState:
-        final gameOverState = state as SimpleGameOverState;
+      case SimpleGameOverState gameOverState:
         _statusText.setText(config.getStateText('gameOver'));
         _statusText.setTextColor(config.getStateColor('gameOver'));
         // _timerProgress.opacity = 0.0; // opacityプロパティ未実装
@@ -148,14 +143,13 @@ class SimpleGameFramework extends ConfigurableGame<GameState, SimpleGameConfig> 
         // セッション統計を記録
         trackGameSession();
         debugPrint('Game Over - Session ${gameOverState.sessionNumber} completed');
-        break;
     }
   }
   
   /// タイマー更新ハンドラ
   void _onTimerUpdate(Duration remaining) {
     if (stateProvider.currentState is SimpleGamePlayingState) {
-      final simpleStateProvider = this.stateProvider as SimpleGameStateProvider;
+      final simpleStateProvider = stateProvider as SimpleGameStateProvider;
       simpleStateProvider.updateTimer(remaining.inMilliseconds / 1000.0);
     }
   }
@@ -163,7 +157,7 @@ class SimpleGameFramework extends ConfigurableGame<GameState, SimpleGameConfig> 
   /// タイマー完了ハンドラ
   void _onTimerComplete() {
     if (stateProvider.currentState is SimpleGamePlayingState) {
-      final simpleStateProvider = this.stateProvider as SimpleGameStateProvider;
+      final simpleStateProvider = stateProvider as SimpleGameStateProvider;
       final currentState = simpleStateProvider.currentState as SimpleGamePlayingState;
       
       final gameOverState = SimpleGameStateFactory.createGameOverState(
@@ -180,27 +174,24 @@ class SimpleGameFramework extends ConfigurableGame<GameState, SimpleGameConfig> 
     if (!isInitialized) return;
     
     final state = stateProvider.currentState;
-    final simpleStateProvider = this.stateProvider as SimpleGameStateProvider;
+    // final simpleStateProvider = this.stateProvider as SimpleGameStateProvider;
     
-    switch (state.runtimeType) {
-      case SimpleGameStartState:
+    switch (state) {
+      case SimpleGameStartState _:
         _startGame();
-        break;
         
-      case SimpleGamePlayingState:
+      case SimpleGamePlayingState _:
         // ゲーム中はタップ無効
         debugPrint('Game in progress - tap ignored');
-        break;
         
-      case SimpleGameOverState:
+      case SimpleGameOverState _:
         _restartGame();
-        break;
     }
   }
   
   /// ゲーム開始
   void _startGame() {
-    final simpleStateProvider = this.stateProvider as SimpleGameStateProvider;
+    final simpleStateProvider = stateProvider as SimpleGameStateProvider;
     final initialTime = config.gameDuration.inMilliseconds / 1000.0;
     
     if (simpleStateProvider.startGame(initialTime)) {
@@ -214,7 +205,7 @@ class SimpleGameFramework extends ConfigurableGame<GameState, SimpleGameConfig> 
   
   /// ゲーム再開
   void _restartGame() {
-    final simpleStateProvider = this.stateProvider as SimpleGameStateProvider;
+    final simpleStateProvider = stateProvider as SimpleGameStateProvider;
     final initialTime = config.gameDuration.inMilliseconds / 1000.0;
     
     if (simpleStateProvider.restart(initialTime)) {
@@ -292,7 +283,7 @@ class SimpleGameFramework extends ConfigurableGame<GameState, SimpleGameConfig> 
   
   /// ゲーム統計情報を取得
   Map<String, dynamic> getGameStatistics() {
-    final simpleStateProvider = this.stateProvider as SimpleGameStateProvider;
+    final simpleStateProvider = stateProvider as SimpleGameStateProvider;
     final gameInfo = simpleStateProvider.getCurrentGameInfo();
     
     return {
@@ -307,7 +298,6 @@ class SimpleGameFramework extends ConfigurableGame<GameState, SimpleGameConfig> 
   void applyPreset(String presetName) {
     final preset = SimpleGameConfigPresets.getPreset(presetName);
     if (preset != null) {
-      final newConfiguration = SimpleGameConfiguration(config: preset);
       applyConfiguration(preset);
       
       debugPrint('Preset applied: $presetName');

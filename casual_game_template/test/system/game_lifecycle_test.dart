@@ -1,12 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flame/components.dart';
-import 'package:flame/events.dart';
 
 // テスト用のゲーム実装
 import '../integration/flame_integration_test.dart';
-import '../../lib/framework/state/game_state_system.dart';
-import '../../lib/game/framework_integration/simple_game_states.dart';
-import '../../lib/framework/input/flame_input_system.dart';
+import 'package:casual_game_template/game/framework_integration/simple_game_states.dart';
+import 'package:casual_game_template/framework/input/flame_input_system.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -22,13 +21,13 @@ void main() {
     
     group('完全ゲームサイクル', () {
       test('ゲーム開始 → プレイ → ゲームオーバー → リスタート', () async {
-        print('🎮 システムテスト: 完全ゲームライフサイクル開始...');
+        debugPrint('🎮 システムテスト: 完全ゲームライフサイクル開始...');
         
         // === 1. ゲーム初期化フェーズ ===
         await game.onLoad();
         expect(game.isInitialized, isTrue);
         expect(game.currentState, isA<SimpleGameStartState>());
-        print('  ✅ Phase 1: 初期化完了 - 開始画面表示');
+        debugPrint('  ✅ Phase 1: 初期化完了 - 開始画面表示');
         
         // === 2. ゲーム開始フェーズ ===
         // Flame公式: ゲーム状態を直接変更してテスト
@@ -42,7 +41,7 @@ void main() {
         final timer = game.timerManager.getTimer('main');
         expect(timer, isNotNull);
         expect(timer!.isRunning, isTrue);
-        print('  ✅ Phase 2: ゲーム開始 - プレイ状態移行、タイマー開始');
+        debugPrint('  ✅ Phase 2: ゲーム開始 - プレイ状態移行、タイマー開始');
         
         // === 3. ゲームプレイフェーズ ===
         final initialTime = timer.current;
@@ -56,13 +55,13 @@ void main() {
           expect(game.currentState, isA<SimpleGamePlayingState>());
           
           if (i % 10 == 0) {
-            print('  📊 Frame ${i}: Timer=${timer.current.inMilliseconds}ms, State=${game.currentState.name}');
+            debugPrint('  📊 Frame $i: Timer=${timer.current.inMilliseconds}ms, State=${game.currentState.name}');
           }
         }
         
         // タイマーが正常に減少していることを確認
         expect(timer.current.inMilliseconds, lessThan(initialTime.inMilliseconds));
-        print('  ✅ Phase 3: ゲームプレイ中 - タイマー正常動作');
+        debugPrint('  ✅ Phase 3: ゲームプレイ中 - タイマー正常動作');
         
         // === 4. ゲームオーバーフェーズ ===
         // タイマーを強制的に0にしてゲームオーバーをトリガー
@@ -77,7 +76,7 @@ void main() {
         expect(game.currentState, isA<SimpleGameOverState>());
         final gameOverState = game.currentState as SimpleGameOverState;
         expect(gameOverState.finalScore, equals(100));
-        print('  ✅ Phase 4: ゲームオーバー - 最終スコア${gameOverState.finalScore}');
+        debugPrint('  ✅ Phase 4: ゲームオーバー - 最終スコア${gameOverState.finalScore}');
         
         // === 5. リスタートフェーズ ===
         final previousSessionNumber = gameOverState.sessionNumber;
@@ -101,20 +100,20 @@ void main() {
         final newTimer = game.timerManager.getTimer('main');
         expect(newTimer, isNotNull);
         expect(newTimer!.isRunning, isTrue);
-        print('  ✅ Phase 5: リスタート完了 - セッション${newPlayingState.sessionNumber}開始');
+        debugPrint('  ✅ Phase 5: リスタート完了 - セッション${newPlayingState.sessionNumber}開始');
         
-        print('🎉 完全ゲームライフサイクルテスト成功！');
+        debugPrint('🎉 完全ゲームライフサイクルテスト成功！');
       });
       
       test('設定変更を含むマルチセッション', () async {
-        print('⚙️ システムテスト: 設定変更マルチセッション...');
+        debugPrint('⚙️ システムテスト: 設定変更マルチセッション...');
         
         await game.onLoad();
         
         final configs = ['default', 'easy', 'hard'];
         
         for (int session = 0; session < 3; session++) {
-          print('  🎯 セッション${session + 1}: ${configs[session]}設定');
+          debugPrint('  🎯 セッション${session + 1}: ${configs[session]}設定');
           
           // 設定変更
           // SimpleGameConfigPresetsは未実装のため、テストではスキップ
@@ -154,16 +153,16 @@ void main() {
           game.stateProvider.forceStateChange(gameOverState);
           expect(game.currentState, isA<SimpleGameOverState>());
           
-          print('    ✅ セッション完了: スコア${gameOverState.finalScore}');
+          debugPrint('    ✅ セッション完了: スコア${gameOverState.finalScore}');
         }
         
-        print('🎉 設定変更マルチセッションテスト成功！');
+        debugPrint('🎉 設定変更マルチセッションテスト成功！');
       });
     });
     
     group('システム統合シナリオ', () {
       test('全システム連携ワークフロー', () async {
-        print('🌐 システムテスト: 全システム連携ワークフロー...');
+        debugPrint('🌐 システムテスト: 全システム連携ワークフロー...');
         
         await game.onLoad();
         
@@ -172,19 +171,19 @@ void main() {
           'test_scenario': 'system_integration',
           'version': '1.0.0',
         });
-        print('  📊 分析: ゲーム開始イベント送信');
+        debugPrint('  📊 分析: ゲーム開始イベント送信');
         
         // === データ永続化: 初期データ設定 ===
         await game.dataManager.saveHighScore(500);
         final initialHighScore = await game.dataManager.loadHighScore();
         expect(initialHighScore, equals(500));
-        print('  💾 データ: 初期ハイスコア設定 - ${initialHighScore}点');
+        debugPrint('  💾 データ: 初期ハイスコア設定 - $initialHighScore点');
         
         // === 音響システム: BGM開始 ===
         await game.audioManager.playBgm('test_bgm');
         // SilentAudioProviderは未実装のため、テストではスキップ
         // expect(game.audioManager.provider, isA<SilentAudioProvider>());
-        print('  🎵 音響: BGM再生開始');
+        debugPrint('  🎵 音響: BGM再生開始');
         
         // === ゲーム開始 ===
         // Flame公式準拠: ゲーム状態遷移
@@ -204,7 +203,7 @@ void main() {
         
         await Future.delayed(const Duration(milliseconds: 10));
         expect(inputEvents, isNotEmpty);
-        print('  👆 入力: タップイベント${inputEvents.length}件処理');
+        debugPrint('  👆 入力: タップイベント${inputEvents.length}件処理');
         
         // ゲームオーバー状態に変更
         game.stateProvider.changeState(const SimpleGameOverState());
@@ -213,7 +212,7 @@ void main() {
         final adResult = await game.monetizationManager.showInterstitial();
         // AdResultは未実装のため、テストではスキップ
         // expect(adResult, equals(AdResult.shown));
-        print('  💰 収益化: インタースティシャル広告表示（結果: $adResult）');
+        debugPrint('  💰 収益化: インタースティシャル広告表示（結果: $adResult）');
         
         // === タイマーシステム: 時間管理 ===
         final timer = game.timerManager.getTimer('main');
@@ -224,7 +223,7 @@ void main() {
         }
         
         expect(timer!.current.inMilliseconds, lessThan(5000));
-        print('  ⏱️ タイマー: ${timer.current.inMilliseconds}ms残り');
+        debugPrint('  ⏱️ タイマー: ${timer.current.inMilliseconds}ms残り');
         
         // === ゲーム終了 ===
         // ゲームオーバー状態になる前にプレイ状態から情報を取得
@@ -234,7 +233,7 @@ void main() {
         await game.dataManager.saveHighScore(finalScore);
         final newHighScore = await game.dataManager.loadHighScore();
         expect(newHighScore, equals(finalScore));
-        print('  💾 データ: ハイスコア更新 - ${newHighScore}点');
+        debugPrint('  💾 データ: ハイスコア更新 - $newHighScore点');
         
         // === 分析システム: ゲーム終了 ===
         await game.analyticsManager.trackGameEnd(
@@ -242,11 +241,11 @@ void main() {
           duration: const Duration(seconds: 30),
           additionalData: {'systems_tested': 6},
         );
-        print('  📊 分析: ゲーム終了イベント送信');
+        debugPrint('  📊 分析: ゲーム終了イベント送信');
         
         // === 音響システム: BGM停止 ===
         await game.audioManager.stopBgm();
-        print('  🎵 音響: BGM停止');
+        debugPrint('  🎵 音響: BGM停止');
         
         // === 最終状態確認 ===
         expect(game.isInitialized, isTrue);
@@ -256,13 +255,13 @@ void main() {
         expect(game.monetizationManager, isNotNull);
         expect(game.analyticsManager, isNotNull);
         
-        print('🎉 全システム連携ワークフローテスト成功！');
+        debugPrint('🎉 全システム連携ワークフローテスト成功！');
       });
     });
     
     group('パフォーマンス・安定性', () {
       test('長時間実行安定性', () async {
-        print('⏰ システムテスト: 長時間実行安定性...');
+        debugPrint('⏰ システムテスト: 長時間実行安定性...');
         
         await game.onLoad();
         
@@ -299,28 +298,28 @@ void main() {
           // 進捗表示
           if (frame % 200 == 0) {
             final elapsed = DateTime.now().difference(startTime);
-            print('  📊 Frame ${frame}/600 (${elapsed.inMilliseconds}ms)');
+            debugPrint('  📊 Frame $frame/600 (${elapsed.inMilliseconds}ms)');
           }
         }
         
         final totalTime = DateTime.now().difference(startTime);
-        print('  ✅ 600フレーム実行完了: ${totalTime.inMilliseconds}ms');
+        debugPrint('  ✅ 600フレーム実行完了: ${totalTime.inMilliseconds}ms');
         
         // 最終状態確認
         expect(game.isInitialized, isTrue);
         expect(() => game.update(1/60), returnsNormally);
         
-        print('🎉 長時間実行安定性テスト成功！');
+        debugPrint('🎉 長時間実行安定性テスト成功！');
       });
       
       test('メモリリークテスト', () async {
-        print('🧠 システムテスト: メモリリーク検出...');
+        debugPrint('🧠 システムテスト: メモリリーク検出...');
         
         await game.onLoad();
         
         // 複数回のゲームサイクル実行
         for (int cycle = 0; cycle < 5; cycle++) {
-          print('  🔄 メモリテストサイクル ${cycle + 1}/5');
+          debugPrint('  🔄 メモリテストサイクル ${cycle + 1}/5');
           
           // ゲーム開始
           if (cycle == 0) {
@@ -366,8 +365,8 @@ void main() {
         expect(game.isInitialized, isTrue);
         expect(() => game.update(1/60), returnsNormally);
         
-        print('  ✅ 5サイクル完了 - メモリリーク検出なし');
-        print('🎉 メモリリークテスト成功！');
+        debugPrint('  ✅ 5サイクル完了 - メモリリーク検出なし');
+        debugPrint('🎉 メモリリークテスト成功！');
       });
     });
   });

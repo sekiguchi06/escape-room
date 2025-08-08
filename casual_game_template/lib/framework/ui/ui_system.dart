@@ -1,7 +1,6 @@
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'flutter_theme_system.dart';
 
 /// UI階層の優先度定義
@@ -106,10 +105,10 @@ abstract class UIComponent<T> extends PositionComponent {
   final Map<String, dynamic> _properties = {};
   
   UIComponent({
-    Vector2? position,
-    Vector2? size,
+    super.position,
+    super.size,
     String? themeId,
-  }) : super(position: position, size: size) {
+  }) : super() {
     if (themeId != null) {
       _themeId = themeId;
     }
@@ -173,12 +172,11 @@ class TextUIComponent extends UIComponent<String> {
   TextUIComponent({
     String text = '',
     String styleId = 'medium',
-    Vector2? position,
-    Vector2? size,
-    String? themeId,
+    super.position,
+    super.size,
+    super.themeId,
   }) : _text = text,
-       _styleId = styleId,
-       super(position: position, size: size, themeId: themeId);
+       _styleId = styleId;
   
   @override
   Future<void> onLoad() async {
@@ -256,13 +254,13 @@ class TextUIComponent extends UIComponent<String> {
 }
 
 /// ボタンUIコンポーネント
-class ButtonUIComponent extends UIComponent<String> with TapCallbacks, HasGameRef {
+class ButtonUIComponent extends UIComponent<String> with TapCallbacks, HasGameReference {
   late RectangleComponent _background;
   late TextUIComponent _textComponent;
   
   String _text = '';
-  String _styleId = 'medium';
-  String _colorId = 'primary';
+  final String _styleId;
+  String _colorId;
   void Function()? onPressed;
   
   ButtonUIComponent({
@@ -270,13 +268,13 @@ class ButtonUIComponent extends UIComponent<String> with TapCallbacks, HasGameRe
     String styleId = 'medium',
     String colorId = 'primary',
     this.onPressed,
-    Vector2? position,
+    super.position,
     Vector2? size,
-    String? themeId,
+    super.themeId,
   }) : _text = text,
        _styleId = styleId,
        _colorId = colorId,
-       super(position: position, size: size ?? Vector2(120, 40), themeId: themeId);
+       super(size: size ?? Vector2(120, 40));
   
   @override
   Future<void> onLoad() async {
@@ -334,7 +332,7 @@ class ButtonUIComponent extends UIComponent<String> with TapCallbacks, HasGameRe
   void onTapDown(TapDownEvent event) {
     // ボタン押下時のビジュアルフィードバック
     if (isMounted) {
-      _background.paint.color = getThemeColor(_colorId).withOpacity(0.8);
+      _background.paint.color = getThemeColor(_colorId).withValues(alpha: 0.8);
     }
     // Flame公式: イベント伝播を停止（デフォルトで停止するが明示）
     // continuePropagationを設定しないことでイベント伝播を停止
@@ -387,7 +385,7 @@ class SettingsMenuComponent extends PositionComponent {
     // 背景（不透明な白）
     _background = RectangleComponent(
       size: size,
-      paint: Paint()..color = Colors.white.withOpacity(0.95),
+      paint: Paint()..color = Colors.white.withValues(alpha: 0.95),
     );
     add(_background);
     
@@ -461,20 +459,20 @@ class ProgressBarUIComponent extends UIComponent<double> {
   late RectangleComponent _foreground;
   
   double _progress = 0.0; // 0.0 - 1.0
-  String _backgroundColorId = 'background';
-  String _foregroundColorId = 'primary';
+  final String _backgroundColorId;
+  final String _foregroundColorId;
   
   ProgressBarUIComponent({
     double progress = 0.0,
     String backgroundColorId = 'background',
     String foregroundColorId = 'primary',
-    Vector2? position,
+    super.position,
     Vector2? size,
-    String? themeId,
+    super.themeId,
   }) : _progress = progress,
        _backgroundColorId = backgroundColorId,
        _foregroundColorId = foregroundColorId,
-       super(position: position, size: size ?? Vector2(200, 20), themeId: themeId);
+       super(size: size ?? Vector2(200, 20));
   
   @override
   Future<void> onLoad() async {

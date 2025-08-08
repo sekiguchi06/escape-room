@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../lib/framework/persistence/flutter_official_persistence_system.dart';
+import 'package:casual_game_template/framework/persistence/flutter_official_persistence_system.dart';
 
 /// Flutter公式準拠永続化システムの単体テスト
 /// 

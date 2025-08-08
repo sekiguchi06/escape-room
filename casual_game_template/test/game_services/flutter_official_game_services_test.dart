@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import '../../lib/framework/game_services/flutter_official_game_services.dart';
+import 'package:casual_game_template/framework/game_services/flutter_official_game_services.dart';
 
 /// Flutter公式準拠ゲームサービスシステムの単体テスト
 /// 

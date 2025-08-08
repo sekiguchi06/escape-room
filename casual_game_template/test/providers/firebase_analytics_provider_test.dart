@@ -1,19 +1,24 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:casual_game_template/framework/analytics/analytics_system.dart';
-import 'package:casual_game_template/framework/analytics/providers/firebase_analytics_provider.dart';
+import 'package:casual_game_template/framework/providers/analytics_provider_factory.dart';
+import 'package:casual_game_template/framework/test_utils/test_environment.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  group('FirebaseAnalyticsProvider Tests', () {
-    late FirebaseAnalyticsProvider provider;
+  
+  group('AnalyticsProvider Tests (Auto-Selected)', () {
+    late AnalyticsProvider provider;
     late DefaultAnalyticsConfiguration config;
     
     setUpAll(() {
       TestWidgetsFlutterBinding.ensureInitialized();
+      // テスト環境であることを明示
+      TestEnvironmentDetector.setTestMode(true);
     });
     
     setUp(() {
-      provider = FirebaseAnalyticsProvider();
+      // ファクトリーで自動選択（テスト環境なのでSilentAnalyticsProviderが選択される）
+      provider = AnalyticsProviderFactory.create();
       config = const DefaultAnalyticsConfiguration(
         batchInterval: 10,
         batchSize: 5,
@@ -38,7 +43,10 @@ void main() {
       await provider.dispose();
     });
     
-    test('初期化成功（単体テスト環境では失敗が想定）', () async {
+    test('初期化成功（テスト環境自動選択）', () async {
+      // テスト環境ではConsoleAnalyticsProviderが選択されることを確認
+      expect(provider.isTestProvider, isTrue);
+      expect(provider.providerName, equals('ConsoleAnalyticsProvider'));
       final success = await provider.initialize(config);
       // 単体テスト環境ではFirebase初期化が失敗する可能性が高い
       expect([true, false].contains(success), isTrue);

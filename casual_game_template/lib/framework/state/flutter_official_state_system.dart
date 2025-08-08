@@ -176,7 +176,7 @@ class FlutterGameStateProvider<T extends GameState> extends ChangeNotifier {
   
   /// デバッグ情報を取得
   /// 
-  /// Flutter公式準拠: Map<String, dynamic>でデバッグ情報を返す
+  /// Flutter公式準拠: Map&lt;String, dynamic&gt;でデバッグ情報を返す
   Map<String, dynamic> getDebugInfo() {
     return <String, dynamic>{
       'flutter_official_compliant': true, // Flutter公式準拠であることを明示

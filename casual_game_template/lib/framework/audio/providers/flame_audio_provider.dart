@@ -62,8 +62,8 @@ class FlameAudioProvider implements AudioProvider {
       final assetsToLoad = <String>[];
       
       for (final assetId in _config!.preloadAssets) {
-        // プリロード時は設定済みのパスをそのまま使用
-        final assetPath = _config!.sfxAssets[assetId] ?? _config!.bgmAssets[assetId] ?? assetId;
+        // プリロード時も_resolveAssetPathを使用して一貫性を保つ
+        final assetPath = _resolveAssetPath(assetId, isBgm: false);
         assetsToLoad.add(assetPath);
         
         if (_config!.debugMode) {
@@ -309,13 +309,26 @@ class FlameAudioProvider implements AudioProvider {
       fileName = assetId;
     }
     
-    // flame_audio公式準拠：audio/プレフィックスを追加（FlameAudioが自動でassets/を付加）
-    // ファイル名に既にパスが含まれている場合はそのまま使用
-    if (fileName.contains('/')) {
-      return fileName;
+    if (_config?.debugMode == true) {
+      debugPrint('FlameAudio path resolution: $assetId -> $fileName');
     }
     
-    return 'audio/$fileName';
+    // flame_audio公式準拠の実験：audio/プレフィックスなしでテスト
+    // FlameAudioが内部でassets/audio/を自動付加する可能性
+    String resolvedPath;
+    
+    if (fileName.contains('/')) {
+      resolvedPath = fileName;
+    } else {
+      // 単純なファイル名の場合、FlameAudioに直接渡してテスト
+      resolvedPath = fileName;
+    }
+    
+    if (_config?.debugMode == true) {
+      debugPrint('FlameAudio resolved path: $resolvedPath');
+    }
+    
+    return resolvedPath;
   }
   
   /// 高頻度効果音用のAudioPool作成

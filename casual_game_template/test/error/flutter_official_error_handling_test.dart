@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import '../../lib/framework/error/flutter_official_error_handling.dart';
+import 'package:casual_game_template/framework/error/flutter_official_error_handling.dart';
 
 /// Flutter公式準拠エラーハンドリングシステムの単体テスト
 /// 

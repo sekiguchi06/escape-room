@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:flame/components.dart';
-import '../../lib/framework/input/flame_input_system.dart';
+import 'package:casual_game_template/framework/input/flame_input_system.dart';
 
 /// Flame公式events準拠InputSystemの単体テスト
 /// 既存インターフェース互換性とFlame公式準拠実装の確認

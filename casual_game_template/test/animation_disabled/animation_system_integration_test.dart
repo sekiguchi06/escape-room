@@ -78,7 +78,7 @@ void main() {
       await game.ready();
       
       // 初期透明度確認
-      expect(target.paint.color.opacity, equals(1.0));
+      expect(target.paint.color.a, equals(1.0));
       
       // 正しいExtension Methods使用の透明度アニメーション実行
       target.animateFadeOut(
@@ -128,7 +128,7 @@ void main() {
       await game.add(target);
       await game.ready();
       
-      final originalPosition = target.position.clone();
+      target.position.clone(); // 元の位置を記録（参照用）
       
       // SlideInFromLeftアニメーション実行（画面幅を指定）
       AnimationPresets.slideInFromLeft(target, 800.0);

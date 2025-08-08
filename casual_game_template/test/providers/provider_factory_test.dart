@@ -2,17 +2,16 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:flutter/foundation.dart';
 
-import '../../lib/framework/providers/provider_factory.dart';
-import '../../lib/framework/audio/audio_system.dart';
-import '../../lib/framework/audio/providers/flame_audio_provider.dart';
-import '../../lib/framework/audio/providers/audioplayers_provider.dart';
-import '../../lib/framework/input/flame_input_system.dart';
-import '../../lib/framework/persistence/persistence_system.dart';
-import '../../lib/framework/persistence/flutter_official_persistence_system.dart';
-import '../../lib/framework/monetization/monetization_system.dart';
-import '../../lib/framework/monetization/providers/google_ad_provider.dart';
-import '../../lib/framework/analytics/analytics_system.dart';
-import '../../lib/framework/analytics/providers/firebase_analytics_provider.dart';
+import 'package:casual_game_template/framework/providers/provider_factory.dart';
+import 'package:casual_game_template/framework/audio/audio_system.dart';
+import 'package:casual_game_template/framework/audio/providers/flame_audio_provider.dart';
+import 'package:casual_game_template/framework/audio/providers/audioplayers_provider.dart';
+import 'package:casual_game_template/framework/input/flame_input_system.dart';
+import 'package:casual_game_template/framework/persistence/persistence_system.dart';
+import 'package:casual_game_template/framework/monetization/monetization_system.dart';
+import 'package:casual_game_template/framework/monetization/providers/google_ad_provider.dart';
+import 'package:casual_game_template/framework/analytics/analytics_system.dart';
+import 'package:casual_game_template/framework/analytics/providers/firebase_analytics_provider.dart';
 
 /// Flutter公式準拠プロバイダーファクトリーの単体テスト
 /// 

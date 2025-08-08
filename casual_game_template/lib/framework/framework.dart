@@ -2,6 +2,9 @@
 /// 
 /// Flutter + Flame をベースとした汎用フレームワークで、
 /// 設定駆動でゲームを構築し、迅速なプロトタイピングを実現します。
+library;
+
+import 'package:flutter/foundation.dart';
 /// 
 /// ## 主な機能
 /// - 汎用状態管理システム
@@ -21,7 +24,6 @@
 ///     .withDebugMode(true)
 ///     .build(() => MyGame());
 /// ```
-library framework;
 
 // Core System
 export 'core/configurable_game.dart';
@@ -33,7 +35,7 @@ export 'config/game_configuration.dart';
 export 'state/game_state_system.dart';
 
 // Timer System
-export 'timer/timer_system.dart';
+export 'timer/flame_timer_system.dart';
 
 // UI System
 export 'ui/ui_system.dart';
@@ -46,16 +48,16 @@ class FrameworkInfo {
   
   /// フレームワーク情報を表示
   static void printInfo() {
-    print('🎮 $name v$version');
-    print('📝 $description');
-    print('🔧 利用可能なシステム:');
-    print('   - ConfigurableGame (汎用ゲーム基底クラス)');
-    print('   - GameConfiguration (設定管理)');
-    print('   - GameStateMachine (状態管理)');
-    print('   - TimerManager (タイマー管理)');
-    print('   - ThemeManager (UIテーマ管理)');
-    print('');
-    print('📚 詳細なドキュメントは docs/casual_game_framework_design.md を参照してください');
+    debugPrint('🎮 $name v$version');
+    debugPrint('📝 $description');
+    debugPrint('🔧 利用可能なシステム:');
+    debugPrint('   - ConfigurableGame (汎用ゲーム基底クラス)');
+    debugPrint('   - GameConfiguration (設定管理)');
+    debugPrint('   - GameStateMachine (状態管理)');
+    debugPrint('   - TimerManager (タイマー管理)');
+    debugPrint('   - ThemeManager (UIテーマ管理)');
+    debugPrint('');
+    debugPrint('📚 詳細なドキュメントは docs/casual_game_framework_design.md を参照してください');
   }
 }
 
@@ -66,12 +68,12 @@ class FrameworkInitializer {
   /// フレームワークを初期化
   static void initialize({bool showInfo = false}) {
     if (_initialized) {
-      print('⚠️ Framework already initialized');
+      debugPrint('⚠️ Framework already initialized');
       return;
     }
     
     // テーマの初期化
-    ThemeManager().initializeDefaultThemes();
+    // ThemeManager initialization moved to configurable_game.dart
     
     // タイマープリセットの初期化
     // TimerPresets は既に静的なので初期化不要
@@ -82,7 +84,7 @@ class FrameworkInitializer {
       FrameworkInfo.printInfo();
     }
     
-    print('✅ Casual Game Framework initialized');
+    debugPrint('✅ Casual Game Framework initialized');
   }
   
   /// 初期化状態を取得

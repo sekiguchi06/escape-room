@@ -2,12 +2,12 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
+import 'package:flutter/gestures.dart';
 import 'package:casual_game_template/game/simple_game.dart';
 import 'package:casual_game_template/game/framework_integration/simple_game_states.dart';
 import 'package:casual_game_template/framework/state/game_state_system.dart';
 import 'package:casual_game_template/framework/effects/particle_system.dart';
 import 'package:casual_game_template/framework/animation/animation_system.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flame/game.dart' as flame_game show RouterComponent;
 
 void main() {
@@ -68,8 +68,9 @@ void main() {
       
       // タップイベントをシミュレート
       final tapPosition = Vector2(200, 300);
-      game.inputManager.handleTapDown(tapPosition);
-      game.inputManager.handleTapUp(tapPosition);
+      // FlameのTapDownEventを作成して直接呼び出し
+      final tapEvent = TapDownEvent(1, game, TapDownDetails(globalPosition: Offset(tapPosition.x, tapPosition.y)));
+      game.onTapDown(tapEvent);
       
       // 状態がプレイング状態に変わったことを確認
       expect(game.stateProvider.currentState, isA<SimpleGamePlayingState>());
@@ -155,7 +156,7 @@ void main() {
       game.inputManager.handleTapDown(gameStartPosition);
       game.inputManager.handleTapUp(gameStartPosition);
       
-      // 最初のセッション（_sessionCount = 0）では 'default' 設定が使われる
+      // 最初のセッション（_sessionCount = 1）では 'default' 設定が使われる
       final newDuration = game.config.gameDuration.inSeconds;
       expect(newDuration, equals(5)); // default設定
       
@@ -167,7 +168,7 @@ void main() {
       game.inputManager.handleTapDown(nextGamePosition);
       game.inputManager.handleTapUp(nextGamePosition);
       
-      // 次のセッション（_sessionCount = 1）では 'easy' 設定が使われる
+      // 次のセッション（_sessionCount = 2）では 'easy' 設定が使われる
       final thirdDuration = game.config.gameDuration.inSeconds;
       expect(thirdDuration, equals(10)); // easy設定
     });
