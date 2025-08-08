@@ -1,8 +1,8 @@
 import 'package:flame/game.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 
 import '../config/game_configuration.dart';
 import '../state/game_state_system.dart';
@@ -83,6 +83,7 @@ abstract class ConfigurableGame<TState extends GameState, TConfig> extends Flame
   bool get isInitialized => _isInitialized;
   
   /// デバッグモードかどうか
+  @override
   bool get debugMode => _debugMode;
   
   /// 現在のゲーム状態
@@ -93,21 +94,27 @@ abstract class ConfigurableGame<TState extends GameState, TConfig> extends Flame
   
   @override
   Future<void> onLoad() async {
+    debugPrint('⚙️ ConfigurableGame.onLoad() starting for $runtimeType');
+    
     // フレームワークの初期化を先に行う
+    debugPrint('⚙️ About to call initializeFramework()');
     await initializeFramework();
+    debugPrint('⚙️ initializeFramework() completed - audioManager: ${audioManager != null}');
     
     // 親クラスのonLoadを呼び出す
     await super.onLoad();
     
     // ゲーム固有の初期化
+    debugPrint('⚙️ About to call initializeGame()');
     await initializeGame();
+    debugPrint('⚙️ initializeGame() completed');
     
     // 設定の適用
     await applyConfiguration(configuration.config);
     
     _isInitialized = true;
     
-    debugPrint('ConfigurableGame initialized: ${runtimeType}');
+    debugPrint('ConfigurableGame initialized: $runtimeType');
   }
   
   /// フレームワークシステムの初期化
@@ -152,6 +159,20 @@ abstract class ConfigurableGame<TState extends GameState, TConfig> extends Flame
       configuration: providerBundle.inputConfiguration,
     );
     inputManager.initialize();
+    
+    // テスト用：inputManagerからのタップイベントをゲームのonTapDownに接続
+    (inputManager as FlameInputManager).addInputListener((event) {
+      // タップダウンイベント（シングルタップとダブルタップ両方を処理）
+      if ((event.type == InputEventType.tap || event.type == InputEventType.doubleTap) && 
+          event.position != null) {
+        debugPrint('InputManager: ${event.type} event received at ${event.position}');
+        final tapDetails = TapDownDetails(
+          globalPosition: Offset(event.position!.x, event.position!.y),
+        );
+        final tapEvent = TapDownEvent(1, this, tapDetails);
+        onTapDown(tapEvent);
+      }
+    });
     
     dataManager = DataManager(
       provider: providerBundle.storageProvider,
@@ -440,7 +461,7 @@ class FpsTextComponent extends TextComponent {
   int _frameCount = 0;
   double _timeAccumulator = 0.0;
   
-  FpsTextComponent({Vector2? position}) : super(
+  FpsTextComponent({super.position}) : super(
     text: 'FPS: 0',
     textRenderer: TextPaint(
       style: const TextStyle(
@@ -448,7 +469,6 @@ class FpsTextComponent extends TextComponent {
         fontSize: 12,
       ),
     ),
-    position: position,
   );
   
   @override
@@ -471,12 +491,12 @@ class FpsTextComponent extends TextComponent {
 /// デバッグ情報表示コンポーネント
 class DebugInfoComponent extends TextComponent {
   final ConfigurableGame game;
-  double _updateInterval = 0.5; // 0.5秒ごとに更新
+  final double _updateInterval = 0.5; // 0.5秒ごとに更新
   double _timeAccumulator = 0.0;
   
   DebugInfoComponent({
     required this.game,
-    Vector2? position,
+    super.position,
   }) : super(
     text: 'Debug Info',
     textRenderer: TextPaint(
@@ -485,7 +505,6 @@ class DebugInfoComponent extends TextComponent {
         fontSize: 10,
       ),
     ),
-    position: position,
   );
   
   @override

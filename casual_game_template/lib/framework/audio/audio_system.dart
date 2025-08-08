@@ -162,6 +162,9 @@ class SilentAudioProvider implements AudioProvider {
   bool _bgmPaused = false;
   String? _currentBgm;
   
+  /// 現在再生中のBGMを取得
+  String? get currentBgm => _currentBgm;
+  
   @override
   Future<void> initialize(AudioConfiguration config) async {
     debugPrint('SilentAudioProvider initialized');
@@ -277,8 +280,11 @@ class AudioManager {
   
   /// 設定更新
   Future<void> updateConfiguration(AudioConfiguration newConfiguration) async {
+    debugPrint('🎵 AudioManager.updateConfiguration() called');
+    debugPrint('🎵 New config SFX assets: ${newConfiguration.sfxAssets}');
     _configuration = newConfiguration;
     await _provider.initialize(_configuration);
+    debugPrint('🎵 Provider initialized with new configuration');
   }
   
   /// BGM再生
@@ -297,14 +303,24 @@ class AudioManager {
   
   /// 効果音再生
   Future<void> playSfx(String sfxId, {double volumeMultiplier = 1.0}) async {
-    if (!_configuration.sfxEnabled) return;
+    debugPrint('🎵 AudioManager.playSfx() called for: $sfxId');
+    debugPrint('🎵 SFX enabled: ${_configuration.sfxEnabled}');
+    debugPrint('🎵 Available SFX assets: ${_configuration.sfxAssets.keys.join(", ")}');
+    debugPrint('🎵 Looking for asset: $sfxId');
+    
+    if (!_configuration.sfxEnabled) {
+      debugPrint('🎵 SFX disabled, skipping: $sfxId');
+      return;
+    }
     
     // SFXアセットの存在確認（AudioPlayersProviderが実際のパス解決を行う）
     if (!_configuration.sfxAssets.containsKey(sfxId)) {
       debugPrint('SFX asset not found: $sfxId');
+      debugPrint('🎵 Available assets: ${_configuration.sfxAssets}');
       return;
     }
     
+    debugPrint('🎵 SFX asset found, playing: $sfxId');
     final volume = _configuration.sfxVolume * volumeMultiplier;
     await _provider.playSfx(sfxId, volume: volume);
   }

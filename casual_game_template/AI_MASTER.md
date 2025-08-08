@@ -6,15 +6,20 @@
 2. **このファイル** - プロジェクト情報・技術仕様・実装ガイド
 
 ## 現在の最優先タスク
-1. **ParticleSystem統合** - `lib/game/simple_game.dart`で`_particleEffectManager`初期化追加
-2. **ScoreSystem実装** - スコア管理・ランキング機能
-3. **サンプルゲーム作成** - タップファイヤー（2-3日で完成可能）
+1. ✅ **ParticleSystem統合** - 完了済み（既に統合済みでした）
+2. ✅ **ScoreSystem実装** - 完了済み（スコア管理・ランキング・コンボシステム）
+3. ✅ **タップファイヤーゲーム実装** - 完了済み（CasualGameTemplateの完全な使用例）
+
+## 次期優先タスク
+1. **LevelSystem実装** - 難易度進行・ステージ管理システム
+2. **PowerUpSystem実装** - アイテム・パワーアップシステム  
+3. **量産フロー最適化** - 月4本リリース体制の構築
 
 ## プロジェクト概要
 - **目的**: AI支援カジュアルゲーム開発フレームワーク
 - **目標**: 月4本リリース、月収30-65万円
 - **技術**: Flutter + Flame 1.30.1 + MCP
-- **完成度**: 85%
+- **完成度**: 90%
 - **テスト**: 351/365成功（96.2%）
 
 ## テスト定義・品質基準
@@ -59,15 +64,14 @@
 | AdProvider | lib/framework/monetization/providers/google_ad_provider.dart | test/providers/google_ad_provider_test.dart | Google Mobile Ads |
 | AnalyticsProvider | lib/framework/analytics/providers/firebase_analytics_provider.dart | test/providers/firebase_analytics_provider_test.dart | Firebase Analytics |
 
-### ⚠️ 実装済み・未統合
-| システム | ファイル | 必要作業 | テスト状況 |
-|---------|---------|----------|-----------|
-| ParticleSystem | lib/framework/effects/particle_system.dart | SimpleGameで初期化 | 9/9成功 |
+### ✅ 完了（100%統合済み）
+| システム | ファイル | テスト | 備考 |
+|---------|---------|--------|------|
+| ScoreSystem | lib/framework/score/score_system.dart | 実装完了 | スコア計算・ランキング・コンボ対応 |
 
 ### ❌ 未実装
 | システム | 説明 | 優先度 |
 |---------|------|--------|
-| ScoreSystem | スコア計算・ランキング管理 | 高 |
 | LevelSystem | 難易度進行・ステージ管理 | 中 |
 | PowerUpSystem | アイテム・パワーアップ | 低 |
 
@@ -278,6 +282,9 @@ test/                          # テスト（96.2%成功）
 - **品質基準変更時**: 「テスト定義・品質基準」を更新
 
 ## 最近の主な変更
+- 2025-08-08: ScoreSystem完全実装（スコア管理・ランキング・コンボシステム・LocalStorageProvider）
+- 2025-08-08: TapFireGame実装完了（CasualGameTemplateの完全使用例・量産テンプレート）
+- 2025-08-08: CasualGameTemplateにScoreSystem統合（便利メソッド追加）
 - 2024-12-10: ドキュメント構造整理（CLAUDE.md/AI_MASTER.md分離）
 - 2024-12-10: UI操作正常化（ボタン専用制御、背景タップ無効化）
 - 2024-08-06: テスト修正完了（96.2%成功率達成）

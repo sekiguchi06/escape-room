@@ -1,4 +1,3 @@
-import 'package:flame/events.dart';
 import 'package:flame/components.dart';
 import 'package:flutter/foundation.dart';
 
@@ -177,8 +176,11 @@ class FlameInputProcessor implements InputProcessor {
       final timeDiff = now.difference(_lastTapTime!).inMilliseconds;
       final positionDiff = (_lastTapPosition! - position).length;
       
+      debugPrint('FlameInputProcessor: checking double tap - timeDiff=$timeDiff, positionDiff=$positionDiff');
+      
       if (timeDiff <= _config.doubleTapInterval && positionDiff <= _config.tapSensitivity) {
         // ダブルタップイベント
+        debugPrint('FlameInputProcessor: double tap detected!');
         final event = InputEventData(
           type: InputEventType.doubleTap,
           position: position,
@@ -201,7 +203,10 @@ class FlameInputProcessor implements InputProcessor {
         position: position,
         additionalData: {'timestamp': now.millisecondsSinceEpoch},
       );
+      debugPrint('FlameInputProcessor: generating tap event at $position');
       _notifyListeners(event);
+    } else {
+      debugPrint('FlameInputProcessor: tap events disabled in config');
     }
     
     // 次のダブルタップ検出用に記録
@@ -335,11 +340,13 @@ class FlameInputManager {
   
   /// Flame公式TapCallbacks準拠のタップダウン処理
   void handleTapDown(Vector2 position) {
+    debugPrint('FlameInputManager: handleTapDown at $position');
     _processor.processTapDown(position);
   }
   
   /// Flame公式TapCallbacks準拠のタップアップ処理
   void handleTapUp(Vector2 position) {
+    debugPrint('FlameInputManager: handleTapUp at $position');
     _processor.processTapUp(position);
   }
   

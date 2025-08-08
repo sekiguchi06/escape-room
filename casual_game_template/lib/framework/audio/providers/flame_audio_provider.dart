@@ -20,12 +20,16 @@ class FlameAudioProvider implements AudioProvider {
   
   @override
   Future<void> initialize(AudioConfiguration config) async {
+    debugPrint('🎵 FlameAudioProvider.initialize() called');
     _config = config;
     _masterVolume = config.masterVolume;
     _bgmVolume = config.bgmVolume;
     _sfxVolume = config.sfxVolume;
     _bgmEnabled = config.bgmEnabled;
     _sfxEnabled = config.sfxEnabled;
+    
+    debugPrint('🎵 Config loaded - SFX enabled: $_sfxEnabled');
+    debugPrint('🎵 SFX assets: ${config.sfxAssets}');
     
     try {
       // BGMシステム初期化
@@ -58,7 +62,8 @@ class FlameAudioProvider implements AudioProvider {
       final assetsToLoad = <String>[];
       
       for (final assetId in _config!.preloadAssets) {
-        final assetPath = _resolveAssetPath(assetId, isBgm: false);
+        // プリロード時は設定済みのパスをそのまま使用
+        final assetPath = _config!.sfxAssets[assetId] ?? _config!.bgmAssets[assetId] ?? assetId;
         assetsToLoad.add(assetPath);
         
         if (_config!.debugMode) {
@@ -170,11 +175,20 @@ class FlameAudioProvider implements AudioProvider {
   
   @override
   Future<void> playSfx(String assetId, {double volume = 1.0}) async {
-    if (!_sfxEnabled) return;
+    if (!_sfxEnabled) {
+      debugPrint('SFX disabled, skipping: $assetId');
+      return;
+    }
     
     try {
       // アセットパス解決
       final assetPath = _resolveAssetPath(assetId, isBgm: false);
+      
+      if (_config?.debugMode == true) {
+        debugPrint('SFX attempting to play: $assetId -> $assetPath');
+        debugPrint('SFX config available: ${_config?.sfxAssets.containsKey(assetId)}');
+        debugPrint('SFX all configured assets: ${_config?.sfxAssets.keys.join(", ")}');
+      }
       
       // 音量計算
       final effectiveVolume = (volume * _sfxVolume * _masterVolume).clamp(0.0, 1.0);
@@ -183,10 +197,13 @@ class FlameAudioProvider implements AudioProvider {
       await FlameAudio.play(assetPath, volume: effectiveVolume);
       
       if (_config?.debugMode == true) {
-        debugPrint('SFX playing: $assetId (volume: $effectiveVolume)');
+        debugPrint('SFX successfully playing: $assetId at $assetPath (volume: $effectiveVolume)');
       }
     } catch (e) {
-      debugPrint('SFX play failed: $e');
+      debugPrint('SFX play failed for $assetId: $e');
+      if (_config?.debugMode == true) {
+        debugPrint('SFX error details: ${e.runtimeType}');
+      }
     }
   }
   
@@ -280,17 +297,25 @@ class FlameAudioProvider implements AudioProvider {
   
   /// アセットパスを解決（flame_audio公式準拠：assets/audio/直下に配置）
   String _resolveAssetPath(String assetId, {required bool isBgm}) {
-    // 設定からパスを取得
+    String fileName;
+    
+    // 設定からファイル名を取得
     if (isBgm && _config?.bgmAssets.containsKey(assetId) == true) {
-      return _config!.bgmAssets[assetId]!;
+      fileName = _config!.bgmAssets[assetId]!;
+    } else if (!isBgm && _config?.sfxAssets.containsKey(assetId) == true) {
+      fileName = _config!.sfxAssets[assetId]!;
+    } else {
+      // デフォルト: assetIdをファイル名として使用
+      fileName = assetId;
     }
     
-    if (!isBgm && _config?.sfxAssets.containsKey(assetId) == true) {
-      return _config!.sfxAssets[assetId]!;
+    // flame_audio公式準拠：audio/プレフィックスを追加（FlameAudioが自動でassets/を付加）
+    // ファイル名に既にパスが含まれている場合はそのまま使用
+    if (fileName.contains('/')) {
+      return fileName;
     }
     
-    // デフォルトパス生成（flame_audio公式：サブディレクトリなし）
-    return assetId;
+    return 'audio/$fileName';
   }
   
   /// 高頻度効果音用のAudioPool作成
