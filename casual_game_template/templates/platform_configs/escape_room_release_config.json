@@ -1,0 +1,285 @@
+{
+  "template_version": "1.0.0",
+  "template_name": "Escape Room Game Release Configuration",
+  "created_date": "2025-08-11",
+  "description": "脱出ゲーム 'Escape Master' のApp Store公開用設定ファイル",
+  "base_template": "app_release_template.json",
+  
+  "app_metadata": {
+    "app_name": "Escape Master",
+    "app_name_japanese": "脱出マスター",
+    "bundle_identifier": "com.casualgames.escapemaster",
+    "version": "1.0.0",
+    "build_number": "1",
+    "display_name": "Escape Master",
+    "short_description": "究極の5分間脱出ゲーム体験",
+    "long_description": "制限時間内に部屋から脱出せよ！アイテムを組み合わせ、謎を解き、隠された手がかりを見つけて脱出を目指します。直感的なタップ操作で楽しめる本格派脱出ゲームです。",
+    "keywords": [
+      "脱出ゲーム",
+      "パズル",
+      "謎解き",
+      "カジュアルゲーム",
+      "アドベンチャー"
+    ]
+  },
+  
+  "app_store_metadata": {
+    "category": "Games",
+    "subcategory": "Puzzle",
+    "age_rating": "4+",
+    "content_rating_description": "このアプリは全年齢対象で、不適切なコンテンツは含まれていません。",
+    "pricing": {
+      "type": "free",
+      "monetization_model": "広告収益モデル（リワード広告・インタースティシャル広告）"
+    },
+    "supported_languages": [
+      "ja",
+      "en"
+    ],
+    "release_notes": "初回リリース：シンプルで直感的な脱出ゲーム体験をお楽しみください。"
+  },
+  
+  "game_specific": {
+    "genre": "脱出ゲーム",
+    "gameplay_type": "パズル・アドベンチャー",
+    "target_session_duration": "300",
+    "difficulty_levels": "1",
+    "features": [
+      "5分間の集中型ゲームプレイ",
+      "直感的なタップ・ドラッグ操作",
+      "インベントリシステム",
+      "複数アイテムの組み合わせパズル",
+      "レスポンシブデザイン（iPhone最適化）"
+    ],
+    "target_audience": {
+      "primary": "カジュアルゲーマー",
+      "secondary": "パズルゲーム愛好者",
+      "age_range": "13-45歳"
+    },
+    "unique_selling_points": [
+      "5分で完結するクイックプレイ",
+      "日本語完全対応",
+      "シンプルで美しいUI",
+      "中毒性のある謎解き要素"
+    ]
+  },
+  
+  "technical_requirements": {
+    "min_ios_version": "12.0",
+    "min_android_version": "21",
+    "target_devices": [
+      "iPhone"
+    ],
+    "required_permissions": [],
+    "optional_permissions": [
+      "通知権限（ゲーム完了通知用）"
+    ],
+    "device_capabilities": [
+      "タッチスクリーン",
+      "音声出力"
+    ]
+  },
+  
+  "monetization": {
+    "ad_networks": [
+      "Google Mobile Ads"
+    ],
+    "ad_types": [
+      "リワード広告（ヒント獲得）",
+      "インタースティシャル広告（ゲーム終了時）"
+    ],
+    "analytics_providers": [
+      "Firebase Analytics",
+      "Google Analytics"
+    ],
+    "privacy_policy_url": "https://casualgames.example.com/privacy-policy",
+    "terms_of_service_url": "https://casualgames.example.com/terms-of-service"
+  },
+  
+  "assets": {
+    "app_icon": {
+      "source_file": "assets/icons/escape_master_icon_1024x1024.png",
+      "required_sizes": [
+        "20x20",
+        "29x29",
+        "40x40",
+        "58x58",
+        "60x60",
+        "76x76",
+        "80x80",
+        "87x87",
+        "120x120",
+        "152x152",
+        "167x167",
+        "180x180",
+        "1024x1024"
+      ]
+    },
+    "launch_screen": {
+      "background_color": "#2C3E50",
+      "logo_file": "assets/icons/escape_master_logo.png",
+      "text_color": "#ECF0F1"
+    },
+    "screenshots": {
+      "iphone_6_5": [
+        "screenshots/escape_room_gameplay_6_5_1.png",
+        "screenshots/escape_room_inventory_6_5_2.png",
+        "screenshots/escape_room_puzzle_6_5_3.png"
+      ],
+      "iphone_5_5": [
+        "screenshots/escape_room_gameplay_5_5_1.png",
+        "screenshots/escape_room_inventory_5_5_2.png",
+        "screenshots/escape_room_puzzle_5_5_3.png"
+      ],
+      "ipad_12_9": [
+        "screenshots/escape_room_gameplay_12_9_1.png",
+        "screenshots/escape_room_inventory_12_9_2.png",
+        "screenshots/escape_room_puzzle_12_9_3.png"
+      ],
+      "requirements": {
+        "format": "PNG",
+        "color_space": "sRGB",
+        "no_transparency": true,
+        "no_rounded_corners": true
+      }
+    },
+    "promotional_text": "5分間で脱出せよ！究極のパズル体験",
+    "marketing_description": "シンプルで直感的な操作で楽しめる本格派脱出ゲーム。制限時間内にアイテムを集め、謎を解き、部屋から脱出しましょう。美しいグラフィックと中毒性のあるゲームプレイで、移動時間やちょっとした空き時間に最適です。"
+  },
+  
+  "build_configuration": {
+    "flutter": {
+      "version": "3.8.1",
+      "channel": "stable"
+    },
+    "ios": {
+      "deployment_target": "12.0",
+      "development_team": "YOUR_TEAM_ID",
+      "code_sign_identity": "iPhone Distribution: Your Name",
+      "provisioning_profile": "Escape Master Distribution Profile",
+      "build_configuration": "Release",
+      "archive_configuration": "Release"
+    },
+    "android": {
+      "min_sdk_version": "21",
+      "target_sdk_version": "34",
+      "compile_sdk_version": "34",
+      "signing_config": {
+        "key_alias": "escape_master",
+        "key_password": "SECURE_KEY_PASSWORD",
+        "store_file": "android/keystore/escape_master.keystore",
+        "store_password": "SECURE_STORE_PASSWORD"
+      }
+    },
+    "dependencies": {
+      "flame": "1.30.1",
+      "google_mobile_ads": "6.0.0",
+      "firebase_analytics": "10.7.4",
+      "firebase_core": "2.24.2",
+      "audioplayers": "6.5.0",
+      "flame_audio": "2.10.6",
+      "shared_preferences": "2.5.3"
+    }
+  },
+  
+  "release_workflow": {
+    "phases": [
+      {
+        "phase": "1",
+        "name": "Asset Creation",
+        "tasks": [
+          "脱出ゲーム向けアプリアイコン作成（鍵・ドア・謎解きモチーフ）",
+          "1024x1024メインアイコンから全サイズ自動生成",
+          "ダークブルー基調のローンチスクリーン作成",
+          "ゲームプレイスクリーンショット撮影（iPhone 6.5\"、5.5\"、iPad 12.9\"）",
+          "App Store用プロモーション素材作成"
+        ],
+        "deliverables": [
+          "アプリアイコン（全サイズ）",
+          "ローンチスクリーン素材",
+          "3デバイス向けスクリーンショット各3枚",
+          "プロモーションテキスト・マーケティング説明文"
+        ]
+      },
+      {
+        "phase": "2", 
+        "name": "App Store Configuration",
+        "tasks": [
+          "App Store Connect で 'Escape Master' アプリ作成",
+          "日本語・英語メタデータ設定",
+          "スクリーンショット・アイコンアップロード",
+          "無料アプリ・広告収益モデル設定",
+          "4+ 年齢制限・コンテンツレーティング設定"
+        ],
+        "deliverables": [
+          "App Store Connect完全設定済み",
+          "全メタデータ・素材アップロード完了",
+          "価格・配信地域設定完了"
+        ]
+      },
+      {
+        "phase": "3",
+        "name": "Build and Submit", 
+        "tasks": [
+          "iOS Release ビルド作成（flutter build ios --release）",
+          "Xcode でアーカイブ・App Store Connect アップロード",
+          "App Store 審査提出",
+          "審査ステータス監視・対応",
+          "承認後 App Store 公開"
+        ],
+        "deliverables": [
+          "Release ビルド提出完了",
+          "App Store 審査承認・公開完了"
+        ]
+      }
+    ]
+  },
+  
+  "testing_requirements": {
+    "required_tests": [
+      "単体テスト: lib/framework/game_types/quick_templates/escape_room_template.dart",
+      "統合テスト: test/framework/simple_escape_room_test.dart（12項目）",
+      "ブラウザシミュレーション: Chrome/Safari での実動作確認", 
+      "iOS シミュレーター: iPhone 15 での動作確認",
+      "実機テスト: iPhone での最終動作確認"
+    ],
+    "performance_targets": {
+      "app_launch_time": "< 2秒",
+      "memory_usage": "< 80MB", 
+      "battery_usage": "低",
+      "network_usage": "最小限（広告読み込み時のみ）"
+    }
+  },
+  
+  "compliance": {
+    "privacy_requirements": [
+      "プライバシーポリシー作成・ホスティング",
+      "Google Mobile Ads データ収集開示",
+      "Firebase Analytics データ収集開示",
+      "第三者SDK利用に関する透明性",
+      "COPPA 準拠（13歳未満ユーザー対応）"
+    ],
+    "app_store_guidelines": [
+      "Human Interface Guidelines 準拠",
+      "App Store Review Guidelines 準拠", 
+      "コンテンツポリシー準拠（暴力・不適切表現なし）",
+      "広告ガイドライン準拠（適切な広告頻度・配置）"
+    ]
+  },
+  
+  "localization": {
+    "primary_language": "Japanese",
+    "supported_languages": {
+      "ja": {
+        "app_name": "脱出マスター",
+        "description": "制限時間内に部屋から脱出せよ！アイテムを組み合わせ、謎を解き、隠された手がかりを見つけて脱出を目指します。",
+        "keywords": "脱出ゲーム, パズル, 謎解き, カジュアルゲーム"
+      },
+      "en": {
+        "app_name": "Escape Master", 
+        "description": "Escape from the room within the time limit! Combine items, solve puzzles, and find hidden clues to achieve your escape.",
+        "keywords": "escape game, puzzle, mystery, casual game"
+      }
+    }
+  }
+}

@@ -1,0 +1,265 @@
+{
+  "template_version": "1.0.0",
+  "template_name": "App Release Configuration Template",
+  "created_date": "2025-08-11",
+  "description": "汎用的なアプリリリース設定テンプレート - 複数ゲームで使い回し可能",
+  
+  "app_metadata": {
+    "app_name": "{{APP_NAME}}",
+    "app_name_japanese": "{{APP_NAME_JAPANESE}}",
+    "bundle_identifier": "{{BUNDLE_IDENTIFIER}}",
+    "version": "1.0.0",
+    "build_number": "1",
+    "display_name": "{{DISPLAY_NAME}}",
+    "short_description": "{{SHORT_DESCRIPTION}}",
+    "long_description": "{{LONG_DESCRIPTION}}",
+    "keywords": [
+      "{{KEYWORD_1}}",
+      "{{KEYWORD_2}}",
+      "{{KEYWORD_3}}"
+    ]
+  },
+  
+  "app_store_metadata": {
+    "category": "{{APP_STORE_CATEGORY}}",
+    "subcategory": "{{APP_STORE_SUBCATEGORY}}",
+    "age_rating": "{{AGE_RATING}}",
+    "content_rating_description": "{{CONTENT_RATING_DESCRIPTION}}",
+    "pricing": {
+      "type": "free",
+      "monetization_model": "{{MONETIZATION_MODEL}}"
+    },
+    "supported_languages": [
+      "ja",
+      "en"
+    ],
+    "release_notes": "{{RELEASE_NOTES}}"
+  },
+  
+  "game_specific": {
+    "genre": "{{GAME_GENRE}}",
+    "gameplay_type": "{{GAMEPLAY_TYPE}}",
+    "target_session_duration": "{{SESSION_DURATION_SECONDS}}",
+    "difficulty_levels": "{{DIFFICULTY_LEVELS}}",
+    "features": [
+      "{{FEATURE_1}}",
+      "{{FEATURE_2}}",
+      "{{FEATURE_3}}"
+    ],
+    "target_audience": {
+      "primary": "{{PRIMARY_AUDIENCE}}",
+      "secondary": "{{SECONDARY_AUDIENCE}}",
+      "age_range": "{{AGE_RANGE}}"
+    },
+    "unique_selling_points": [
+      "{{USP_1}}",
+      "{{USP_2}}",
+      "{{USP_3}}"
+    ]
+  },
+  
+  "technical_requirements": {
+    "min_ios_version": "12.0",
+    "min_android_version": "21",
+    "target_devices": [
+      "iPhone",
+      "iPad"
+    ],
+    "required_permissions": [
+      "{{PERMISSION_1}}",
+      "{{PERMISSION_2}}"
+    ],
+    "optional_permissions": [
+      "{{OPTIONAL_PERMISSION_1}}"
+    ],
+    "device_capabilities": [
+      "{{CAPABILITY_1}}",
+      "{{CAPABILITY_2}}"
+    ]
+  },
+  
+  "monetization": {
+    "ad_networks": [
+      "{{AD_NETWORK_1}}",
+      "{{AD_NETWORK_2}}"
+    ],
+    "ad_types": [
+      "{{AD_TYPE_1}}",
+      "{{AD_TYPE_2}}"
+    ],
+    "analytics_providers": [
+      "{{ANALYTICS_PROVIDER_1}}",
+      "{{ANALYTICS_PROVIDER_2}}"
+    ],
+    "privacy_policy_url": "{{PRIVACY_POLICY_URL}}",
+    "terms_of_service_url": "{{TERMS_OF_SERVICE_URL}}"
+  },
+  
+  "assets": {
+    "app_icon": {
+      "source_file": "{{APP_ICON_SOURCE}}",
+      "required_sizes": [
+        "20x20",
+        "29x29",
+        "40x40",
+        "58x58",
+        "60x60",
+        "76x76",
+        "80x80",
+        "87x87",
+        "120x120",
+        "152x152",
+        "167x167",
+        "180x180",
+        "1024x1024"
+      ]
+    },
+    "launch_screen": {
+      "background_color": "{{LAUNCH_SCREEN_BG_COLOR}}",
+      "logo_file": "{{LAUNCH_SCREEN_LOGO}}",
+      "text_color": "{{LAUNCH_SCREEN_TEXT_COLOR}}"
+    },
+    "screenshots": {
+      "iphone_6_5": [
+        "{{SCREENSHOT_1_6_5}}",
+        "{{SCREENSHOT_2_6_5}}",
+        "{{SCREENSHOT_3_6_5}}"
+      ],
+      "iphone_5_5": [
+        "{{SCREENSHOT_1_5_5}}",
+        "{{SCREENSHOT_2_5_5}}",
+        "{{SCREENSHOT_3_5_5}}"
+      ],
+      "ipad_12_9": [
+        "{{SCREENSHOT_1_12_9}}",
+        "{{SCREENSHOT_2_12_9}}",
+        "{{SCREENSHOT_3_12_9}}"
+      ],
+      "requirements": {
+        "format": "PNG",
+        "color_space": "sRGB",
+        "no_transparency": true,
+        "no_rounded_corners": true
+      }
+    },
+    "promotional_text": "{{PROMOTIONAL_TEXT}}",
+    "marketing_description": "{{MARKETING_DESCRIPTION}}"
+  },
+  
+  "build_configuration": {
+    "flutter": {
+      "version": "3.8.1",
+      "channel": "stable"
+    },
+    "ios": {
+      "deployment_target": "12.0",
+      "development_team": "{{DEVELOPMENT_TEAM_ID}}",
+      "code_sign_identity": "{{CODE_SIGN_IDENTITY}}",
+      "provisioning_profile": "{{PROVISIONING_PROFILE}}",
+      "build_configuration": "Release",
+      "archive_configuration": "Release"
+    },
+    "android": {
+      "min_sdk_version": "21",
+      "target_sdk_version": "34",
+      "compile_sdk_version": "34",
+      "signing_config": {
+        "key_alias": "{{KEY_ALIAS}}",
+        "key_password": "{{KEY_PASSWORD}}",
+        "store_file": "{{STORE_FILE}}",
+        "store_password": "{{STORE_PASSWORD}}"
+      }
+    },
+    "dependencies": {
+      "flame": "1.30.1",
+      "google_mobile_ads": "6.0.0",
+      "firebase_analytics": "10.7.4",
+      "firebase_core": "2.24.2"
+    }
+  },
+  
+  "release_workflow": {
+    "phases": [
+      {
+        "phase": "1",
+        "name": "Asset Creation",
+        "tasks": [
+          "Create app icon ({{APP_ICON_SOURCE}})",
+          "Generate all required icon sizes",
+          "Create launch screen design",
+          "Take gameplay screenshots for all device sizes",
+          "Create promotional materials"
+        ],
+        "deliverables": [
+          "App icon in all required sizes",
+          "Launch screen assets",
+          "Screenshots for iPhone 6.5\", iPhone 5.5\", iPad 12.9\"",
+          "Promotional text and marketing copy"
+        ]
+      },
+      {
+        "phase": "2",
+        "name": "App Store Configuration",
+        "tasks": [
+          "Create App Store Connect entry",
+          "Configure app metadata",
+          "Upload screenshots and promotional materials",
+          "Set up pricing and availability",
+          "Configure age rating and content description"
+        ],
+        "deliverables": [
+          "App Store Connect configured",
+          "All metadata and assets uploaded",
+          "Pricing and availability set"
+        ]
+      },
+      {
+        "phase": "3",
+        "name": "Build and Submit",
+        "tasks": [
+          "Create release build (iOS)",
+          "Archive and upload to App Store Connect",
+          "Submit for review",
+          "Monitor review status",
+          "Release to App Store"
+        ],
+        "deliverables": [
+          "Release build submitted",
+          "App approved and released"
+        ]
+      }
+    ]
+  },
+  
+  "testing_requirements": {
+    "required_tests": [
+      "Unit tests: 100% pass rate",
+      "Integration tests: 100% pass rate", 
+      "Browser simulation: Chrome/Safari testing",
+      "iOS Simulator: iPhone 15 testing",
+      "Real device testing (optional but recommended)"
+    ],
+    "performance_targets": {
+      "app_launch_time": "< 3 seconds",
+      "memory_usage": "< 100MB",
+      "battery_usage": "low",
+      "network_usage": "minimal"
+    }
+  },
+  
+  "compliance": {
+    "privacy_requirements": [
+      "Privacy policy creation and hosting",
+      "Data collection disclosure",
+      "Third-party SDK privacy compliance",
+      "COPPA compliance (if applicable)",
+      "GDPR compliance (if applicable)"
+    ],
+    "app_store_guidelines": [
+      "Human Interface Guidelines compliance",
+      "App Store Review Guidelines compliance",
+      "Content policy compliance",
+      "Monetization guidelines compliance"
+    ]
+  }
+}
