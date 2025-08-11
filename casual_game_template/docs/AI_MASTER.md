@@ -1,8 +1,8 @@
 # AI開発マスターファイル
-最終更新: 2024-12-10
+最終更新: 2025-08-11
 
 ## 読み込み順序
-1. **CLAUDE.md** - AI開発ルール・品質基準・禁止事項（厳格に厳守）
+1. **[CLAUDE.md](CLAUDE.md)** - AI開発ルール・品質基準・禁止事項（厳格に厳守）
 2. **このファイル** - プロジェクト情報・技術仕様・実装ガイド
 
 ## 現在の実装状況（2025年8月時点）
@@ -12,6 +12,7 @@
 3. **ScoreSystem完成** - スコア管理・ランキング・コンボシステム実装完了
 4. **TapFireGame実装** - CasualGameTemplateの完全使用例・量産テンプレート完成
 5. **テスト環境完成** - 96.2%成功率（351/365）・ブラウザシミュレーション対応
+6. **🆕 QuickTemplateシステム** - 4種類のゲームテンプレート（5分で作成可能）
 
 ## 次期優先タスク
 1. **LevelSystem実装** - 難易度進行・ステージ管理システム
@@ -71,6 +72,14 @@
 | システム | ファイル | テスト | 備考 |
 |---------|---------|--------|------|
 | ScoreSystem | lib/framework/score/score_system.dart | 実装完了 | スコア計算・ランキング・コンボ対応 |
+
+### 🆕 QuickTemplateシステム（5分でゲーム作成可能）
+| テンプレート | ファイル | 実装例 | 主な機能 |
+|-------------|---------|--------|----------|
+| TapShooterTemplate | lib/framework/game_types/quick_templates/tap_shooter_template.dart | simple_tap_shooter.dart | 敵生成・タップ処理・スコア管理 |
+| Match3Template | lib/framework/game_types/quick_templates/match3_template.dart | simple_match3.dart | グリッド管理・マッチ判定・連鎖処理 |
+| EndlessRunnerTemplate | lib/framework/game_types/quick_templates/endless_runner_template.dart | simple_runner.dart | 自動スクロール・障害物・ジャンプ |
+| EscapeRoomTemplate | lib/framework/game_types/quick_templates/escape_room_template.dart | simple_escape_room.dart | インベントリ・パズル・ホットスポット |
 
 ### ❌ 未実装
 | システム | 説明 | 優先度 |
@@ -133,6 +142,33 @@ abstract class StorageProvider {
 ```
 
 ## 実装パターン
+
+### 🆕 QuickTemplateを使った5分ゲーム作成
+```dart
+// 1. テンプレートを継承
+class MyShooterGame extends QuickTapShooterTemplate {
+  // 2. 設定のみ実装（これだけで動作！）
+  @override
+  TapShooterConfig get gameConfig => const TapShooterConfig(
+    gameDuration: Duration(seconds: 60),
+    enemySpeed: 150.0,
+    maxEnemies: 6,
+    targetScore: 1500,
+  );
+  
+  // 3. オプション：イベントカスタマイズ
+  @override
+  void onScoreUpdated(int newScore) {
+    // カスタム処理
+  }
+}
+
+// 利用可能なテンプレート:
+// - QuickTapShooterTemplate: タップシューティング
+// - QuickMatch3Template: マッチ3パズル  
+// - QuickEndlessRunnerTemplate: エンドレスランナー
+// - QuickEscapeRoomTemplate: 脱出ゲーム
+```
 
 ### 新規画面コンポーネント（Flame公式準拠）
 ```dart
@@ -241,6 +277,14 @@ git push origin master                         # プッシュ
 lib/
 ├── framework/                 # フレームワーク本体
 │   ├── core/                 # ✅ ConfigurableGame基盤
+│   │   ├── configurable_game.dart      # 設定駆動ゲーム基底クラス
+│   │   └── casual_game_extensions.dart # 拡張機能
+│   ├── game_types/           # 🆕 ゲームタイプ別テンプレート
+│   │   └── quick_templates/  # 5分で作成可能なクイックテンプレート
+│   │       ├── tap_shooter_template.dart   # タップシューティング
+│   │       ├── match3_template.dart        # マッチ3パズル
+│   │       ├── endless_runner_template.dart # エンドレスランナー
+│   │       └── escape_room_template.dart   # 脱出ゲーム
 │   ├── animation/            # ✅ AnimationSystem（Flame Effects統合）
 │   ├── audio/                # ✅ AudioSystem（BGM/SFX）
 │   │   └── providers/        # FlameAudioProvider実装
@@ -249,20 +293,33 @@ lib/
 │   ├── state/                # ✅ StateSystem（状態管理）
 │   ├── timer/                # ✅ TimerSystem（タイマー）
 │   ├── ui/                   # ✅ UISystem（ボタン等）
+│   ├── score/                # ✅ ScoreSystem（スコア・ランキング）
 │   ├── persistence/          # ✅ PersistenceSystem（データ保存）
 │   ├── monetization/         # ✅ AdProvider（広告）
 │   │   └── providers/        # GoogleAdProvider、MockAdProvider
-│   └── analytics/            # ✅ AnalyticsProvider（分析）
-│       └── providers/        # FirebaseAnalyticsProvider
+│   ├── analytics/            # ✅ AnalyticsProvider（分析）
+│   │   └── providers/        # FirebaseAnalyticsProvider
+│   ├── game_services/        # ✅ GameServices（統合サービス）
+│   ├── templates/            # テンプレート例
+│   ├── test_utils/           # テストユーティリティ
+│   └── framework.dart        # フレームワークエクスポート
 │
 ├── game/                      # ゲーム実装
 │   ├── simple_game.dart      # メインゲームクラス（統合ポイント）
+│   ├── tap_fire_game.dart    # TapFireゲーム実装例
+│   ├── example_games/        # 🆕 QuickTemplate使用例
+│   │   ├── simple_tap_shooter.dart  # タップシューター実装例
+│   │   ├── simple_runner.dart       # ランナー実装例
+│   │   ├── simple_match3.dart       # マッチ3実装例
+│   │   └── simple_escape_room.dart  # 脱出ゲーム実装例
 │   ├── config/               # 設定
 │   │   └── game_config.dart  # 難易度設定等
 │   ├── screens/              # 画面コンポーネント
-│   │   ├── start_screen_component.dart     # スタート画面
-│   │   ├── playing_screen_component.dart   # プレイ画面
-│   │   └── game_over_screen_component.dart # ゲームオーバー画面
+│   │   └── playing_screen_component.dart   # プレイ画面
+│   ├── widgets/              # UIウィジェット
+│   │   ├── custom_game_ui.dart     # ゲームUI
+│   │   ├── custom_start_ui.dart    # スタート画面UI
+│   │   └── custom_settings_ui.dart # 設定画面UI
 │   └── framework_integration/  # フレームワーク統合
 │       ├── simple_game_states.dart         # 状態定義
 │       └── simple_game_configuration.dart  # 設定管理
@@ -285,6 +342,9 @@ test/                          # テスト（96.2%成功）
 - **品質基準変更時**: 「テスト定義・品質基準」を更新
 
 ## 最近の主な変更
+- 2025-08-11: QuickTemplateシステム実装完了（4種類のゲームテンプレート・5分作成可能）
+- 2025-08-11: プロジェクト構造整理（game_types/quick_templates追加）
+- 2025-08-11: AI_MASTER.md更新（QuickTemplate詳細追加・ファイル構成更新）
 - 2025-08-08: ScoreSystem完全実装（スコア管理・ランキング・コンボシステム・LocalStorageProvider）
 - 2025-08-08: TapFireGame実装完了（CasualGameTemplateの完全使用例・量産テンプレート）
 - 2025-08-08: CasualGameTemplateにScoreSystem統合（便利メソッド追加）

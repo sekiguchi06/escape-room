@@ -2,7 +2,6 @@ import 'package:flame/game.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/gestures.dart';
 
 import '../config/game_configuration.dart';
 import '../state/game_state_system.dart';
@@ -99,7 +98,7 @@ abstract class ConfigurableGame<TState extends GameState, TConfig> extends Flame
     // フレームワークの初期化を先に行う
     debugPrint('⚙️ About to call initializeFramework()');
     await initializeFramework();
-    debugPrint('⚙️ initializeFramework() completed - audioManager: ${audioManager != null}');
+    debugPrint('⚙️ initializeFramework() completed - audioManager available');
     
     // 親クラスのonLoadを呼び出す
     await super.onLoad();
@@ -154,14 +153,15 @@ abstract class ConfigurableGame<TState extends GameState, TConfig> extends Flame
       configuration: providerBundle.audioConfiguration,
     );
     
-    inputManager = FlameInputManager(
+    final flameInputManager = FlameInputManager(
       processor: providerBundle.inputProcessor,
       configuration: providerBundle.inputConfiguration,
     );
+    inputManager = flameInputManager;
     inputManager.initialize();
     
     // テスト用：inputManagerからのタップイベントをゲームのonTapDownに接続
-    (inputManager as FlameInputManager).addInputListener((event) {
+    flameInputManager.addInputListener((event) {
       // タップダウンイベント（シングルタップとダブルタップ両方を処理）
       if ((event.type == InputEventType.tap || event.type == InputEventType.doubleTap) && 
           event.position != null) {

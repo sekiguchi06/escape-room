@@ -29,6 +29,85 @@ class TapFireGame extends ConfigurableGame<GameState, TapFireConfig> {
   double _gameTimeRemaining = 0;
   double _nextFireballSpawn = 0;
   bool _gameActive = false;
+  // 公開プロパティ（main.dartのオーバーレイから参照）
+  int get score => _score;
+  double get gameTimeRemaining => _gameTimeRemaining;
+  bool get gameActive => _gameActive;
+
+  // 時間フォーマット用公開メソッド
+  String formatTime(double timeInSeconds) {
+    final minutes = timeInSeconds ~/ 60;
+    final seconds = (timeInSeconds % 60).round();
+    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+  }
+
+  // 公開メソッド（main.dartのオーバーレイから呼び出し）
+  @override
+  void resetGame() {
+    _resetGame();
+    _showGameUI();
+  }
+
+  void restartFromGameOver() {
+    _resetGame();
+    _showGameUI();
+  }
+
+  // ポーズ機能（Flame公式パターン）
+  @override
+  void pauseGame() {
+    if (_gameActive) {
+      pauseEngine();
+      _gameActive = false;
+      debugPrint('🔥 Game paused');
+    }
+  }
+
+  @override
+  void resumeGame() {
+    if (!_gameActive) {
+      resumeEngine();
+      _gameActive = true;
+      debugPrint('🔥 Game resumed');
+    }
+  }
+
+  // オーバーレイ管理メソッド
+  void _showStartUI() {
+    overlays.remove('gameUI');
+    overlays.remove('gameOverUI');
+    overlays.remove('settingsUI');
+    overlays.add('startUI');
+  }
+
+  void _showGameUI() {
+    overlays.remove('gameOverUI');
+    overlays.remove('startUI');
+    overlays.remove('settingsUI');
+    overlays.add('gameUI');
+  }
+
+  void _showGameOverUI() {
+    overlays.remove('gameUI');
+    overlays.remove('startUI');
+    overlays.remove('settingsUI');
+    overlays.add('gameOverUI');
+  }
+
+  void showSettingsUI() {
+    overlays.add('settingsUI');
+  }
+
+  void hideSettingsUI() {
+    overlays.remove('settingsUI');
+  }
+
+  void _updateUI() {
+    if (overlays.isActive('gameUI')) {
+      overlays.remove('gameUI');
+      overlays.add('gameUI');
+    }
+  }
 
   TapFireGame() : super(
     configuration: TapFireGameConfiguration.defaultConfig,
@@ -54,7 +133,7 @@ class TapFireGame extends ConfigurableGame<GameState, TapFireConfig> {
   @override
   Future<void> initializeGame() async {
     debugPrint('🔥 TapFire Game initializing...');
-    debugPrint('🔥 TapFire: audioManager null check: ${audioManager == null}');
+    debugPrint('🔥 TapFire: audioManager available');
     
     // 音声システムの初期化を追加
     try {
@@ -70,6 +149,9 @@ class TapFireGame extends ConfigurableGame<GameState, TapFireConfig> {
     // ゲーム状態リセット
     _resetGame();
     
+    // スタートUIオーバーレイを表示
+    _showStartUI();
+    
     debugPrint('🔥 TapFire Game initialized - Duration: ${config.gameDuration}s');
   }
 
@@ -77,7 +159,7 @@ class TapFireGame extends ConfigurableGame<GameState, TapFireConfig> {
   Future<void> _initializeAudio() async {
     try {
       debugPrint('🎵 TapFire: Starting audio initialization...');
-      debugPrint('🎵 TapFire: AudioManager available: ${audioManager != null}');
+      debugPrint('🎵 TapFire: AudioManager available');
       
       // DefaultAudioConfigurationを直接作成（FlameAudioは自動でassets/を付加）
       final audioConfig = DefaultAudioConfiguration(
@@ -152,6 +234,9 @@ class TapFireGame extends ConfigurableGame<GameState, TapFireConfig> {
     if (_gameTimeRemaining <= 0) {
       _endGame();
     }
+
+    // UI更新（定期的にオーバーレイを更新）
+    _updateUI();
   }
 
   void _spawnFireball() {
@@ -225,6 +310,9 @@ class TapFireGame extends ConfigurableGame<GameState, TapFireConfig> {
       'duration': config.gameDuration,
     });
     
+    // ゲームオーバーUIを表示（公式パターン）
+    _showGameOverUI();
+    
     debugPrint('🔥 Game Over! Final Score: $_score, Destroyed: $_fireballsDestroyed');
   }
 
@@ -232,61 +320,16 @@ class TapFireGame extends ConfigurableGame<GameState, TapFireConfig> {
   void render(Canvas canvas) {
     super.render(canvas);
     
-    // 背景
+    // 背景のみ描画 - UIはFlutterオーバーレイで完全処理
     canvas.drawRect(
       Rect.fromLTWH(0, 0, size.x, size.y),
       Paint()..color = Colors.black.withValues(alpha: 0.8),
     );
-    
-    // UI描画
-    _renderUI(canvas);
   }
 
-  void _renderUI(Canvas canvas) {
-    const textStyle = TextStyle(
-      color: Colors.white,
-      fontSize: 24,
-      fontWeight: FontWeight.bold,
-    );
 
-    // スコア表示
-    final scoreSpan = TextSpan(text: 'Score: $_score', style: textStyle);
-    final scorePainter = TextPainter(
-      text: scoreSpan,
-      textDirection: TextDirection.ltr,
-    );
-    scorePainter.layout();
-    scorePainter.paint(canvas, const Offset(20, 50));
 
-    // タイマー表示
-    final minutes = _gameTimeRemaining ~/ 60;
-    final seconds = (_gameTimeRemaining % 60).round();
-    final timeString = '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-    
-    final timeSpan = TextSpan(text: 'Time: $timeString', style: textStyle);
-    final timePainter = TextPainter(
-      text: timeSpan,
-      textDirection: TextDirection.ltr,
-    );
-    timePainter.layout();
-    timePainter.paint(canvas, Offset(size.x - 150, 50));
 
-    // ゲーム終了時のメッセージ
-    if (!_gameActive) {
-      final gameOverStyle = textStyle.copyWith(fontSize: 32);
-      final gameOverSpan = TextSpan(text: 'Game Over!\nTap to Restart', style: gameOverStyle);
-      final gameOverPainter = TextPainter(
-        text: gameOverSpan,
-        textDirection: TextDirection.ltr,
-        textAlign: TextAlign.center,
-      );
-      gameOverPainter.layout();
-      gameOverPainter.paint(canvas, Offset(
-        (size.x - gameOverPainter.width) / 2,
-        (size.y - gameOverPainter.height) / 2,
-      ));
-    }
-  }
 }
 
 /// ファイヤーボールコンポーネント

@@ -1,13 +1,13 @@
 # CLAUDE.md - AI開発ルール・品質基準・禁止事項
 
 **用途**: AI開発時の厳格なルール・品質基準・禁止事項（静的設定）
-**併読**: AI_MASTER.md（プロジェクト情報・実装進捗）を必ず併読すること
+**併読**: [AI_MASTER.md](AI_MASTER.md)（プロジェクト情報・実装進捗）を必ず併読すること
 
 ## 📌 プロジェクト概要（静的情報）
 - **目的**: AI支援による効率的なカジュアルゲーム開発ビジネス
 - **目標**: 月4本リリース、月収30-65万円  
 - **技術スタック**: Flutter + Flame + Claude Code + MCP
-- **統合ガイド**: `AI_MASTER.md`（実装進捗・技術仕様はこちらを参照）
+- **統合ガイド**: [AI_MASTER.md](AI_MASTER.md)（実装進捗・技術仕様はこちらを参照）
 
 ## 🚨 AIによる曖昧表現の絶対禁止
 
@@ -109,7 +109,7 @@
 
 ### 参照必須の公式ドキュメント
 ```
-必須参照: AI_MASTER.md「公式ドキュメント参照」セクション
+必須参照: [AI_MASTER.md](AI_MASTER.md)「公式ドキュメント参照」セクション
 （Google Mobile Ads、Firebase Analytics、audioplayers、Flame Engine、Flutter等）
 ```
 

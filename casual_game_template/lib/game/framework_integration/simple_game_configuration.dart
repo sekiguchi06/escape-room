@@ -161,16 +161,16 @@ class SimpleGameConfiguration extends GameConfiguration<GameState, SimpleGameCon
   static SimpleGameConfiguration get defaultConfig {
     return SimpleGameConfiguration(
       config: const SimpleGameConfig(
-        gameDuration: Duration(seconds: 5),
+        gameDuration: Duration(seconds: 10),
         stateTexts: {
-          'start': 'TAP TO START',
-          'playing': 'TIME: {time}',
-          'gameOver': 'GAME OVER\nTAP TO RESTART',
+          'start': '⚪ NORMAL: 10秒\nTAP TO START',
+          'playing': '⚪ NORMAL TIME: {time}',
+          'gameOver': '⚪ NORMAL OVER\nTAP TO RESTART',
         },
         stateColors: {
           'start': Colors.white,
           'playing': Colors.white,
-          'gameOver': Colors.red,
+          'gameOver': Colors.grey,
         },
         fontSizes: {
           'start': 24.0,
@@ -189,16 +189,16 @@ class SimpleGameConfiguration extends GameConfiguration<GameState, SimpleGameCon
   static SimpleGameConfiguration get easyConfig {
     return SimpleGameConfiguration(
       config: const SimpleGameConfig(
-        gameDuration: Duration(seconds: 10),
+        gameDuration: Duration(seconds: 15),
         stateTexts: {
-          'start': '🎮 EASY MODE\nTAP TO START',
-          'playing': '⏰ TIME: {time}',
-          'gameOver': '💀 GAME OVER\nTAP TO RESTART',
+          'start': '🟢 EASY: 15秒\nTAP TO START',
+          'playing': '🟢 EASY TIME: {time}',
+          'gameOver': '🟢 EASY COMPLETE\nTAP TO RESTART',
         },
         stateColors: {
           'start': Colors.green,
-          'playing': Colors.blue,
-          'gameOver': Colors.orange,
+          'playing': Colors.green,
+          'gameOver': Colors.lightGreen,
         },
         fontSizes: {
           'start': 28.0,
@@ -217,15 +217,15 @@ class SimpleGameConfiguration extends GameConfiguration<GameState, SimpleGameCon
   static SimpleGameConfiguration get hardConfig {
     return SimpleGameConfiguration(
       config: const SimpleGameConfig(
-        gameDuration: Duration(seconds: 3),
+        gameDuration: Duration(seconds: 5),
         stateTexts: {
-          'start': '🔥 HARD MODE\nTAP TO START',
-          'playing': '⚡ TIME: {time}',
-          'gameOver': '💥 GAME OVER\nTAP TO RESTART',
+          'start': '🔴 HARD: 5秒\nTAP TO START',
+          'playing': '🔴 HARD TIME: {time}',
+          'gameOver': '🔴 HARD OVER\nTAP TO RESTART',
         },
         stateColors: {
           'start': Colors.red,
-          'playing': Colors.yellow,
+          'playing': Colors.orange,
           'gameOver': Colors.deepOrange,
         },
         fontSizes: {

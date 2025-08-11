@@ -21,22 +21,111 @@ import '../framework/effects/particle_system.dart';
 import 'framework_integration/simple_game_states.dart';
 import 'framework_integration/simple_game_configuration.dart';
 
-// RouterComponent関連インポート（公式パブリックAPI：game.dartからエクスポート・名前衝突回避）
-import 'package:flame/game.dart' as flame show RouterComponent, Route, OverlayRoute;
-import 'screens/start_screen_component.dart';
-import 'screens/playing_screen_component.dart';
-import 'screens/game_over_screen_component.dart';
-import 'widgets/settings_menu_widget.dart';
-
 class SimpleGame extends ConfigurableGame<GameState, SimpleGameConfig> {
-  // RouterComponent関連（公式パブリックAPI使用）
-  late final flame.RouterComponent router;
-  PlayingScreenComponent? _playingScreen;
-  
   // 既存フィールド（必要最小限）
   late GameComponent _testCircle;
   late ParticleEffectManager _particleEffectManager;
   int _sessionCount = 0;
+  
+  // カスタムUI用の状態プロパティ
+  int _score = 0;
+  double _gameTime = 60.0;
+  bool _gameActive = false;
+
+  // 公開プロパティ（main.dartのオーバーレイから参照）
+  int get score => _score;
+  double get gameTimeRemaining => _gameTime;
+  bool get gameActive => _gameActive;
+
+  // 時間フォーマット用公開メソッド
+  String formatTime(double timeInSeconds) {
+    final minutes = timeInSeconds ~/ 60;
+    final seconds = (timeInSeconds % 60).round();
+    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+  }
+
+  // 公開メソッド（main.dartのオーバーレイから呼び出し）
+  @override
+  void resetGame() {
+    _score = 0;
+    // 現在の設定から実際のゲーム時間を取得（60秒固定ではなく）
+    final config = configuration.config;
+    _gameTime = config.gameDuration.inMilliseconds / 1000.0;
+    _gameActive = false;  // ゲーム未開始状態に設定
+    
+    // タイマーは作成するが開始しない
+    timerManager.addTimer('main', TimerConfiguration(
+      duration: config.gameDuration,
+      type: TimerType.countdown,
+      onComplete: () => _endGame(),
+    ));
+    // タイマーの開始はstartGame()で実行
+    
+    _showStartUI();  // スタートUIを表示
+  }
+
+  void restartFromGameOver() {
+    // リスタートはゲーム開始状態にする（スタートUIではなく）
+    _startGame();
+  }
+
+  // ポーズ機能（Flame公式パターン）
+  @override
+  void pauseGame() {
+    if (_gameActive) {
+      pauseEngine();
+      timerManager.getTimer('main')?.pause();
+      _gameActive = false;
+      debugPrint('🎮 Game paused');
+    }
+  }
+
+  @override
+  void resumeGame() {
+    if (!_gameActive) {
+      resumeEngine();
+      timerManager.getTimer('main')?.resume();
+      _gameActive = true;
+      debugPrint('🎮 Game resumed');
+    }
+  }
+
+  // オーバーレイ管理メソッド
+  void _showStartUI() {
+    overlays.remove('gameUI');
+    overlays.remove('gameOverUI');
+    overlays.remove('settingsUI');
+    overlays.add('startUI');
+  }
+
+  void _showGameUI() {
+    overlays.remove('gameOverUI');
+    overlays.remove('startUI');
+    overlays.remove('settingsUI');
+    overlays.add('gameUI');
+  }
+
+  void _showGameOverUI() {
+    overlays.remove('gameUI');
+    overlays.remove('startUI');
+    overlays.remove('settingsUI');
+    overlays.add('gameOverUI');
+  }
+
+  void showSettingsUI() {
+    overlays.add('settingsUI');
+  }
+
+  void hideSettingsUI() {
+    overlays.remove('settingsUI');
+  }
+
+  void _updateUI() {
+    if (overlays.isActive('gameUI')) {
+      overlays.remove('gameUI');
+      overlays.add('gameUI');
+    }
+  }
   
   SimpleGame() : super(
     configuration: SimpleGameConfiguration.defaultConfig,
@@ -85,18 +174,14 @@ class SimpleGame extends ConfigurableGame<GameState, SimpleGameConfig> {
     themeManager.setTheme('game');
     
     debugPrint('🔥 SimpleGame.initializeGame() completed');
+    
+    // スタートUIオーバーレイを表示
+    _showStartUI();
   }
 
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    
-    // RouterComponent初期化（公式パブリックAPI使用）
-    router = flame.RouterComponent(
-      routes: _createRoutes(),
-      initialRoute: 'start',
-    );
-    add(router);
     
     // パーティクルエフェクトマネージャーの初期化と追加
     _particleEffectManager = ParticleEffectManager();
@@ -104,79 +189,40 @@ class SimpleGame extends ConfigurableGame<GameState, SimpleGameConfig> {
     add(_particleEffectManager);
     
     // テスト用ゲームオブジェクト作成（統合テスト用）
-    // size is not ready in onLoad, defer to onMount
     _testCircle = GameComponent(
-      position: Vector2.zero(), // 初期値は0,0で後でonMountで設定
+      position: Vector2.zero(),
       size: Vector2(80, 80),
       anchor: flame.Anchor.center,
     );
     _testCircle.paint.color = Colors.blue;
     _testCircle.paint.style = PaintingStyle.fill;
-    add(_testCircle); // コンポーネントをゲームに追加
+    add(_testCircle);
   }
 
   @override
   void onMount() {
     super.onMount();
     
-    // RouterComponentが初期化済みなので、onMountでの画面作成は不要
-    // RouterComponentが自動的に初期ルートを表示
-    
     // テスト用ゲームオブジェクトの位置をsizeが利用可能になってから設定
     if (hasLayout) {
       _testCircle.position = Vector2(size.x / 2, size.y / 2 + 100);
     }
   }
-  
-  /// ルート作成メソッド（公式パブリックAPI使用・名前衝突回避）
-  Map<String, flame.Route> _createRoutes() {
-    return {
-      'start': flame.Route(() => StartScreenComponent()),
-      'playing': flame.Route(() {
-        _playingScreen = PlayingScreenComponent();
-        return _playingScreen!;
-      }),
-      'gameOver': flame.Route(() => GameOverScreenComponent(sessionCount: _sessionCount)),
-      'settings': flame.OverlayRoute(_buildSettingsDialog),
-    };
-  }
-  
-  /// Settings ダイアログビルダー
-  Widget _buildSettingsDialog(BuildContext context, Game game) {
-    return Container(
-      color: Colors.black.withValues(alpha: 0.8), // 背景マスク
-      child: Center(
-        child: SettingsMenuWidget(
-          onDifficultyChanged: (difficulty) {
-            _applyConfiguration(difficulty);
-            router.pop();
-          },
-          onClosePressed: () => router.pop(),
-        ),
-      ),
-    );
-  }
 
   @override
   void onTapDown(TapDownEvent event) {
-    final state = stateProvider.currentState;
-    final tapPosition = event.canvasPosition;
-    
-    if (state is SimpleGameStartState) {
-      // StartScreenでのタップでゲーム開始
-      debugPrint('🎮 Start screen tapped - starting game');
-      _startGame();
-    } else if (state is SimpleGamePlayingState) {
-      // PlayingScreenComponentのサークルタップ処理
-      if (_playingScreen != null && _playingScreen!.isMounted) {
-        _playingScreen!.handleCircleTap(tapPosition);
+    // ゲーム中のみタップ処理を有効化
+    if (_gameActive && stateProvider.currentState is SimpleGamePlayingState) {
+      final tapPosition = event.canvasPosition;
+      
+      // 青いサークル（_testCircle）のタップ判定
+      if (_testCircle.containsPoint(tapPosition)) {
+        _score += 10;
+        audioManager.playSfx('tap', volumeMultiplier: 0.8);
+        debugPrint('🎮 Circle tapped! Score: $_score');
+        _updateUI();
       }
-    } else if (state is SimpleGameOverState) {
-      // GameOverScreenでのタップでリスタート
-      debugPrint('🎮 Game over screen tapped - restarting game');
-      _restartGame();
     }
-    // 他の画面のタップ処理はRouterComponentが管理
   }
 
   @override
@@ -189,10 +235,11 @@ class SimpleGame extends ConfigurableGame<GameState, SimpleGameConfig> {
         final remaining = mainTimer.current.inMilliseconds / 1000.0;
         (stateProvider as SimpleGameStateProvider).updateTimer(remaining);
         
-        // PlayingScreenComponentのタイマー更新
-        if (_playingScreen != null && _playingScreen!.isMounted) {
-          _playingScreen!.updateTimer(remaining);
-        }
+        // カスタムUI用の時間更新
+        _gameTime = remaining;
+        
+        // UI更新
+        _updateUI();
         
         // タイマーが終了した場合、ゲームオーバー処理を実行
         if (remaining <= 0) {
@@ -225,13 +272,14 @@ class SimpleGame extends ConfigurableGame<GameState, SimpleGameConfig> {
     }
   }
 
-  // 設定適用（簡素化）
-  void _applyConfiguration(String configKey) {
+  // 手動難易度変更メソッド（CustomSettingsUIから呼び出し）
+  void applyDifficultyConfiguration(String configKey) {
     final newConfig = SimpleGameConfigPresets.getPreset(configKey);
     if (newConfig != null) {
       configuration.updateConfig(newConfig);
       audioManager.playSfx('tap', volumeMultiplier: 0.5);
-      debugPrint('🎮 Configuration applied: $configKey');
+      debugPrint('🎮 Manual configuration applied: $configKey');
+      hideSettingsUI(); // 設定画面を閉じる
     }
   }
 
@@ -248,13 +296,21 @@ class SimpleGame extends ConfigurableGame<GameState, SimpleGameConfig> {
     // セッション数を増加（ゲーム開始時のみ）
     _sessionCount++;
     
-    // セッション数に基づいて設定を自動切り替え
-    _applySessionBasedConfiguration();
+    // セッション数に基づいて設定を自動切り替え（手動設定がない場合のみ）
+    // 注: 手動設定が行われた場合は自動切り替えをスキップ
+    // _applySessionBasedConfiguration(); // 無効化 - 手動設定を優先
     
     // ゲーム開始音を再生
     audioManager.playSfx('success', volumeMultiplier: 1.0);
     
+    // カスタムUI用のゲーム状態設定
+    _gameActive = true;
+    _score = 0;
+    
+    // 現在の設定から実際のゲーム時間を取得
     final config = configuration.config;
+    _gameTime = config.gameDuration.inMilliseconds / 1000.0;
+    
     (stateProvider as SimpleGameStateProvider).startGame(config.gameDuration.inMilliseconds / 1000.0);
     
     timerManager.addTimer('main', TimerConfiguration(
@@ -265,14 +321,8 @@ class SimpleGame extends ConfigurableGame<GameState, SimpleGameConfig> {
     
     timerManager.getTimer('main')?.start();
     
-    // RouterComponentによる画面遷移（RouterComponentが初期化されている場合のみ）
-    try {
-      if (router.isMounted && router.routes.isNotEmpty) {
-        router.pushNamed('playing');
-      }
-    } catch (e) {
-      debugPrint('Router navigation skipped in test mode: $e');
-    }
+    // ゲームUIに切り替え
+    _showGameUI();
   }
 
   /// publicメソッドとしてstartGameを公開（StartScreenComponentから呼び出し用）
@@ -285,13 +335,21 @@ class SimpleGame extends ConfigurableGame<GameState, SimpleGameConfig> {
     // セッション数を増加（リスタート時も新セッション）
     _sessionCount++;
     
-    // セッション数に基づいて設定を自動切り替え
-    _applySessionBasedConfiguration();
+    // セッション数に基づいて設定を自動切り替え（手動設定がない場合のみ）
+    // 注: 手動設定が行われた場合は自動切り替えをスキップ
+    // _applySessionBasedConfiguration(); // 無効化 - 手動設定を優先
     
     // リスタート音を再生
     audioManager.playSfx('success', volumeMultiplier: 0.8);
     
+    // カスタムUI用のゲーム状態リセット
+    _gameActive = true;
+    _score = 0;
+    
+    // 現在の設定から実際のゲーム時間を取得
     final config = configuration.config;
+    _gameTime = config.gameDuration.inMilliseconds / 1000.0;
+    
     (stateProvider as SimpleGameStateProvider).restart(config.gameDuration.inMilliseconds / 1000.0);
     
     // タイマーを再作成
@@ -303,14 +361,8 @@ class SimpleGame extends ConfigurableGame<GameState, SimpleGameConfig> {
     
     timerManager.getTimer('main')?.start();
     
-    // RouterComponentによる画面遷移（RouterComponentが初期化されている場合のみ）
-    try {
-      if (router.isMounted && router.routes.isNotEmpty) {
-        router.pushNamed('playing');
-      }
-    } catch (e) {
-      debugPrint('Router navigation skipped in test mode: $e');
-    }
+    // ゲームUIに切り替え
+    _showGameUI();
   }
 
   void _endGame() {
@@ -319,31 +371,15 @@ class SimpleGame extends ConfigurableGame<GameState, SimpleGameConfig> {
     // ゲームオーバー音を再生
     audioManager.playSfx('error', volumeMultiplier: 0.9);
     
+    // カスタムUI用のゲーム状態更新
+    _gameActive = false;
+    _gameTime = 0.0;
+    
     // タイマー終了時は残り時間を0にしてゲームオーバー状態にする
     (stateProvider as SimpleGameStateProvider).updateTimer(0.0);
     
-    // ゲームオーバー画面遷移（動的にルートを更新）
-    _updateGameOverRoute();
-    
-    // Flame公式準拠: RouterComponentの安全な使用
-    try {
-      // RouterComponentにルートが正しく設定されているかチェック
-      if (router.routes.containsKey('gameOver')) {
-        router.pushNamed('gameOver');
-      } else {
-        // ルートが存在しない場合は何もしない（テスト環境対応）
-        debugPrint('gameOver route not found, skipping navigation');
-      }
-    } catch (e) {
-      // RouterComponent使用時のエラーをログに記録（テスト環境対応）
-      debugPrint('RouterComponent navigation failed: $e');
-    }
-  }
-  
-  /// GameOverルートを現在のセッション数で更新（公式パブリックAPI使用）
-  void _updateGameOverRoute() {
-    // 既存のルートを削除して新しいルートを追加
-    router.routes['gameOver'] = flame.Route(() => GameOverScreenComponent(sessionCount: _sessionCount));
+    // ゲームオーバーUIを表示
+    _showGameOverUI();
   }
   
   /// publicメソッドとしてrestartGameを公開（GameOverScreenComponentから呼び出し用）
@@ -355,7 +391,7 @@ class SimpleGame extends ConfigurableGame<GameState, SimpleGameConfig> {
   Future<void> _initializeAudio() async {
     try {
       debugPrint('🎵 Starting audio initialization...');
-      debugPrint('🎵 AudioManager available: ${audioManager != null}');
+      debugPrint('🎵 AudioManager available');
       
       await GameAudioIntegration.setupAudio(
         audioManager: audioManager,

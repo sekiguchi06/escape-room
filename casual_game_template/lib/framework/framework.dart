@@ -40,6 +40,12 @@ export 'timer/flame_timer_system.dart';
 // UI System
 export 'ui/ui_system.dart';
 
+// Quick Game Templates
+export 'game_types/quick_templates/tap_shooter_template.dart';
+export 'game_types/quick_templates/match3_template.dart';
+export 'game_types/quick_templates/endless_runner_template.dart';
+export 'game_types/quick_templates/escape_room_template.dart';
+
 /// フレームワークのバージョン情報
 class FrameworkInfo {
   static const String version = '1.0.0';
@@ -89,4 +95,92 @@ class FrameworkInitializer {
   
   /// 初期化状態を取得
   static bool get isInitialized => _initialized;
+}
+
+/// ゲーム作成ウィザード - 最速プロトタイプ作成
+class GameBuilder {
+  /// 5分でプロトタイプ作成
+  static String generateQuickGame({
+    required String gameName,
+    required GameType gameType,
+    Map<String, dynamic>? config,
+  }) {
+    final template = _getQuickTemplate(gameType);
+    return template.replaceAll('{{GAME_NAME}}', gameName)
+                  .replaceAll('{{CONFIG}}', _generateConfig(config ?? {}));
+  }
+  
+  /// 利用可能なゲームタイプ
+  static List<GameType> get availableGameTypes => GameType.values;
+  
+  static String _getQuickTemplate(GameType type) {
+    return switch(type) {
+      GameType.tapShooter => _tapShooterTemplate,
+      GameType.match3Puzzle => _match3Template,
+      GameType.endlessRunner => _runnerTemplate,
+      GameType.escapeRoom => _escapeRoomTemplate,
+    };
+  }
+  
+  static String _generateConfig(Map<String, dynamic> config) {
+    return config.entries
+        .map((e) => '${e.key}: ${e.value}')
+        .join(',\n    ');
+  }
+  
+  // テンプレート定義
+  static const String _tapShooterTemplate = '''
+import 'package:casual_game_template/framework/framework.dart';
+
+class {{GAME_NAME}} extends QuickTapShooterTemplate {
+  @override
+  TapShooterConfig get gameConfig => TapShooterConfig(
+    {{CONFIG}}
+  );
+}
+''';
+
+  static const String _match3Template = '''
+import 'package:casual_game_template/framework/framework.dart';
+
+class {{GAME_NAME}} extends QuickMatch3Template {
+  @override
+  Match3Config get gameConfig => Match3Config(
+    {{CONFIG}}
+  );
+}
+''';
+
+  static const String _runnerTemplate = '''
+import 'package:casual_game_template/framework/framework.dart';
+
+class {{GAME_NAME}} extends QuickEndlessRunnerTemplate {
+  @override
+  RunnerConfig get gameConfig => RunnerConfig(
+    {{CONFIG}}
+  );
+}
+''';
+
+  static const String _escapeRoomTemplate = '''
+import 'package:casual_game_template/framework/framework.dart';
+
+class {{GAME_NAME}} extends QuickEscapeRoomTemplate {
+  @override
+  EscapeRoomConfig get gameConfig => EscapeRoomConfig(
+    {{CONFIG}}
+  );
+}
+''';
+}
+
+/// ゲームタイプ列挙
+enum GameType {
+  tapShooter('タップシューティング'),
+  match3Puzzle('マッチ3パズル'),
+  endlessRunner('エンドレスランナー'),
+  escapeRoom('脱出ゲーム');
+  
+  const GameType(this.displayName);
+  final String displayName;
 }

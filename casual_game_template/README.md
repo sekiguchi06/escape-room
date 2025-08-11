@@ -2,6 +2,13 @@
 
 Flutter + Flameベースの汎用カジュアルゲーム開発フレームワーク
 
+## 📚 ドキュメント
+
+- **[AI_MASTER.md](docs/AI_MASTER.md)** - プロジェクト情報・技術仕様・実装ガイド
+- **[CLAUDE.md](docs/CLAUDE.md)** - AI開発ルール・品質基準・禁止事項
+- **[GAME_DEVELOPMENT_GUIDE.md](docs/GAME_DEVELOPMENT_GUIDE.md)** - ゲーム開発ガイド
+- **[GAME_TEMPLATE_GUIDE.md](docs/GAME_TEMPLATE_GUIDE.md)** - テンプレートガイド
+
 ## テスト実行
 
 ### 自動テスト（人間の操作不要）
@@ -13,13 +20,13 @@ flutter test test/framework_extended_test.dart
 flutter test test/system/simplified_system_test.dart
 
 # 自動ブラウザテスト
-./scripts/run_automated_browser_test.sh
+./test/scripts/run_automated_browser_test.sh
 ```
 
 ### 手動テスト（人間の操作が必要）
 ```bash
 # ブラウザで手動確認
-./scripts/run_manual_browser_test.sh
+./test/scripts/run_manual_browser_test.sh
 ```
 
 ## 自動テストの完了条件

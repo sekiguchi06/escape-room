@@ -107,13 +107,13 @@ class FlutterGameStateProvider<T extends GameState> extends ChangeNotifier {
   /// 
   /// Flutter公式準拠: ValueNotifierのvalueセッターと同様のパターン
   void forceSetState(T newState) {
-    final T oldState = _currentState;
+    // final T oldState = _currentState;
     _currentState = newState;
     
     // Flutter公式: 変更通知は必須
     notifyListeners();
     
-    debugPrint('Force state change: ${oldState.name} -> ${newState.name}');
+    // debugPrint('Force state change: ${oldState.name} -> ${newState.name}');
   }
   
   /// 新しいセッション開始

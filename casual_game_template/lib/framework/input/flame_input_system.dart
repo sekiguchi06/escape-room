@@ -284,7 +284,8 @@ class FlameInputProcessor implements InputProcessor {
       try {
         listener(event);
       } catch (e) {
-        debugPrint('❌ Input listener error: $e');
+        // 詳細ログ（通常時は無視）
+        // debugPrint('Input listener: $e');
       }
     }
   }

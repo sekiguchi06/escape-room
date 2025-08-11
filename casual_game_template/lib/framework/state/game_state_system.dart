@@ -110,14 +110,14 @@ class GameStateMachine<T extends GameState> {
   
   /// 強制的に状態を設定（遷移チェックなし）
   void forceSetState(T newState) {
-    final oldState = _currentState;
+    // final oldState = _currentState;
     _currentState = newState;
     
     for (final listener in _stateChangeListeners) {
       listener(newState);
     }
     
-    debugPrint('Force state change: ${oldState.name} -> ${newState.name}');
+    // debugPrint('Force state change: ${oldState.name} -> ${newState.name}');
   }
   
   /// 遷移リスナーを追加
