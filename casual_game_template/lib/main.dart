@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'game/tap_fire_game.dart';
 import 'game/simple_game.dart';
 import 'game/example_games/simple_tap_shooter.dart';
+import 'game/example_games/simple_escape_room.dart';
 import 'game/widgets/custom_game_ui.dart';
 import 'game/widgets/custom_start_ui.dart';
 import 'game/widgets/custom_settings_ui.dart';
@@ -49,6 +50,8 @@ class GameSelectionScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            // コメントアウト: 他のゲーム（App Store公開はEscape Gameのみ）
+            /*
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).push(
@@ -89,6 +92,27 @@ class GameSelectionScreen extends StatelessWidget {
                 );
               },
               child: const Text('Play Simple Tap Shooter'),
+            ),
+            */
+            // App Store公開用: Escape Room Game
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const GameScreen<SimpleEscapeRoom>(
+                      gameTitle: 'Escape Room Adventure',
+                      gameFactory: SimpleEscapeRoom.new,
+                    ),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red.shade700,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              child: const Text('🔓 Play Escape Room'),
             ),
           ],
         ),
@@ -155,6 +179,16 @@ class GameScreen<T extends Game> extends StatelessWidget {
             },
             onSettingsPressed: () {
               // 設定は後で実装
+            },
+          );
+        } else if (game is SimpleEscapeRoom) {
+          return CustomStartUI(
+            title: 'Escape Room Adventure',
+            onStartPressed: () {
+              game.startGame();
+            },
+            onSettingsPressed: () {
+              // 脱出ゲーム設定（後で実装）
             },
           );
         }
@@ -235,6 +269,18 @@ class GameScreen<T extends Game> extends StatelessWidget {
               game.resetGame();
             },
           );
+        } else if (game is SimpleEscapeRoom) {
+          return CustomGameUI(
+            score: game.puzzlesSolved,
+            timeRemaining: game.formatTime(game.timeRemaining),
+            isGameActive: game.gameActive,
+            onPausePressed: () {
+              // 脱出ゲームのポーズ機能（後で実装）
+            },
+            onRestartPressed: () {
+              game.resetGame();
+            },
+          );
         }
         return const SizedBox.shrink();
       },
@@ -262,6 +308,16 @@ class GameScreen<T extends Game> extends StatelessWidget {
         } else if (game is SimpleTapShooter) {
           return CustomGameOverUI(
             finalScore: game.score,
+            onRestartPressed: () {
+              game.resetGame();
+            },
+            onMenuPressed: () {
+              Navigator.of(context).pop();
+            },
+          );
+        } else if (game is SimpleEscapeRoom) {
+          return CustomGameOverUI(
+            finalScore: game.puzzlesSolved,
             onRestartPressed: () {
               game.resetGame();
             },
