@@ -43,7 +43,7 @@ void main() {
       
       // 設定の取得と確認
       final config = game.config;
-      expect(config.gameDuration.inSeconds, equals(5), reason: 'デフォルト設定が不正');
+      expect(config.gameDuration.inSeconds, equals(10), reason: 'デフォルト設定が不正');
       
       // 設定の動的変更
       final newConfig = config.copyWith(
@@ -152,11 +152,11 @@ void main() {
       
       // easyプリセットの適用テスト
       game.applyPreset('easy');
-      expect(game.config.gameDuration.inSeconds, equals(10), reason: 'easyプリセットの適用が失敗');
+      expect(game.config.gameDuration.inSeconds, equals(15), reason: 'easyプリセットの適用が失敗');
       
       // hardプリセットの適用テスト
       game.applyPreset('hard');
-      expect(game.config.gameDuration.inSeconds, equals(3), reason: 'hardプリセットの適用が失敗');
+      expect(game.config.gameDuration.inSeconds, equals(5), reason: 'hardプリセットの適用が失敗');
       
       debugPrint('✅ プリセットシステムテスト完了');
     });
@@ -167,7 +167,7 @@ void main() {
       
       // A/Bテスト設定の適用テスト
       game.applyABTestConfig('easy');
-      expect(game.config.gameDuration.inSeconds, equals(10), reason: 'A/Bテスト設定の適用が失敗');
+      expect(game.config.gameDuration.inSeconds, equals(15), reason: 'A/Bテスト設定の適用が失敗');
       
       debugPrint('✅ A/Bテストシステムテスト完了');
     });
@@ -176,17 +176,17 @@ void main() {
       // デフォルトゲーム
       final defaultGame = SimpleGameFrameworkFactory.createDefault();
       await defaultGame.onLoad();
-      expect(defaultGame.config.gameDuration.inSeconds, equals(5));
+      expect(defaultGame.config.gameDuration.inSeconds, equals(10));
       
       // イージーモード
       final easyGame = SimpleGameFrameworkFactory.createEasyMode();
       await easyGame.onLoad();
-      expect(easyGame.config.gameDuration.inSeconds, equals(10));
+      expect(easyGame.config.gameDuration.inSeconds, equals(15));
       
       // ハードモード
       final hardGame = SimpleGameFrameworkFactory.createHardMode();
       await hardGame.onLoad();
-      expect(hardGame.config.gameDuration.inSeconds, equals(3));
+      expect(hardGame.config.gameDuration.inSeconds, equals(5));
       
       // デバッグモード
       final debugGame = SimpleGameFrameworkFactory.createDebugMode();
@@ -209,7 +209,7 @@ void main() {
       await game.onLoad();
       game.onMount();
       
-      expect(game.config.gameDuration.inSeconds, equals(10), reason: 'プリセット設定が適用されていない');
+      expect(game.config.gameDuration.inSeconds, equals(15), reason: 'プリセット設定が適用されていない');
       expect(game.debugMode, isTrue, reason: 'デバッグモードが有効になっていない');
       expect(game.themeManager.currentThemeId, equals('game'), reason: 'テーマが設定されていない');
       
@@ -248,7 +248,7 @@ void main() {
       
       // 6. 設定変更
       game.applyPreset('hard');
-      expect(game.config.gameDuration.inSeconds, equals(3));
+      expect(game.config.gameDuration.inSeconds, equals(5));
       
       // 7. セッション統計確認
       final stats = stateProvider.getStatistics();

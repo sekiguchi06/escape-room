@@ -2,14 +2,13 @@ import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/collisions.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
+
 import 'dart:math';
 
 import '../../core/configurable_game.dart';
 import '../../state/game_state_system.dart';
 import '../../effects/particle_system.dart';
-import '../../audio/audio_system.dart';
-import '../../score/score_system.dart';
+
 import '../../timer/flame_timer_system.dart';
 
 /// タップシューティング設定
@@ -121,6 +120,7 @@ abstract class QuickTapShooterTemplate extends ConfigurableGame<TapShooterState,
   }
   
   /// ゲーム開始
+  @override
   void startGame() {
     stateProvider.changeState(TapShooterState.playing);
     _gameActive = true;
@@ -223,6 +223,7 @@ abstract class QuickTapShooterTemplate extends ConfigurableGame<TapShooterState,
   }
   
   // 公開メソッド（UI用）
+  @override
   void pauseGame() {
     if (_gameActive) {
       pauseEngine();
@@ -232,6 +233,7 @@ abstract class QuickTapShooterTemplate extends ConfigurableGame<TapShooterState,
     }
   }
   
+  @override
   void resumeGame() {
     if (stateProvider.currentState == TapShooterState.paused) {
       resumeEngine();
@@ -241,6 +243,7 @@ abstract class QuickTapShooterTemplate extends ConfigurableGame<TapShooterState,
     }
   }
   
+  @override
   void resetGame() {
     _endGame();
     setupGame();

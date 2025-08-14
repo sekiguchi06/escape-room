@@ -1,17 +1,14 @@
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
-import 'package:flame/parallax.dart';
 import 'package:flame/collisions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/foundation.dart';
 import 'dart:math';
 
 import '../../core/configurable_game.dart';
 import '../../state/game_state_system.dart';
 import '../../effects/particle_system.dart';
-import '../../audio/audio_system.dart';
-import '../../score/score_system.dart';
+
 import '../../timer/flame_timer_system.dart';
 
 /// エンドレスランナー設定
@@ -60,7 +57,6 @@ abstract class QuickEndlessRunnerTemplate extends ConfigurableGame<RunnerState, 
     with KeyboardHandler, TapCallbacks, HasCollisionDetection {
   // ゲーム要素
   late PlayerComponent _player;
-  late ParallaxComponent _background;
   late ParticleEffectManager _particleManager;
   final List<ObstacleComponent> _obstacles = [];
   
@@ -164,6 +160,7 @@ abstract class QuickEndlessRunnerTemplate extends ConfigurableGame<RunnerState, 
   }
   
   /// ゲーム開始
+  @override
   void startGame() {
     stateProvider.changeState(RunnerState.playing);
     _gameActive = true;
@@ -304,6 +301,7 @@ abstract class QuickEndlessRunnerTemplate extends ConfigurableGame<RunnerState, 
   }
   
   // 公開メソッド（UI用）
+  @override
   void pauseGame() {
     if (_gameActive) {
       pauseEngine();
@@ -313,6 +311,7 @@ abstract class QuickEndlessRunnerTemplate extends ConfigurableGame<RunnerState, 
     }
   }
   
+  @override
   void resumeGame() {
     if (stateProvider.currentState == RunnerState.paused) {
       resumeEngine();
@@ -322,6 +321,7 @@ abstract class QuickEndlessRunnerTemplate extends ConfigurableGame<RunnerState, 
     }
   }
   
+  @override
   void resetGame() {
     _endGame();
     setupGame();
@@ -425,6 +425,7 @@ class ObstacleComponent extends PositionComponent with CollisionCallbacks {
   
   @override
   void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
+    super.onCollision(intersectionPoints, other);
     // Flame公式の衝突コールバック
     if (other is PlayerComponent) {
       // プレイヤーとの衝突時は親のゲームに衝突イベントを通知
@@ -460,7 +461,7 @@ class CloudComponent extends PositionComponent {
     // 雲の見た目（シンプルな楕円）
     add(RectangleComponent(
       size: size,
-      paint: Paint()..color = Colors.white.withOpacity(0.7),
+      paint: Paint()..color = Colors.white.withValues(alpha: 0.7),
       position: Vector2.zero(),
     ));
   }

@@ -222,7 +222,7 @@ void main() {
           game.update(1/60);
         }
         
-        expect(timer!.current.inMilliseconds, lessThan(5000));
+        expect(timer!.current.inMilliseconds, lessThan(10000)); // 初期値(10000ms)より減少
         debugPrint('  ⏱️ タイマー: ${timer.current.inMilliseconds}ms残り');
         
         // === ゲーム終了 ===

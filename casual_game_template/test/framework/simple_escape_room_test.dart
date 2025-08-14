@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flame/components.dart';
 
-import '../../lib/framework/game_types/quick_templates/escape_room_template.dart';
-import '../../lib/game/example_games/simple_escape_room.dart';
+import 'package:casual_game_template/framework/game_types/quick_templates/escape_room_template.dart';
+
 
 /// シンプル脱出ゲーム機能の基本ユニットテスト
 /// flame_testを使わずFlutter標準テストフレームワークで実装

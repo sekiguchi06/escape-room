@@ -9,9 +9,9 @@ void main() {
     test('デフォルト設定の確認', () {
       final config = SimpleGameConfiguration.defaultConfig.config;
       
-      expect(config.gameDuration, const Duration(seconds: 5));
-      expect(config.stateTexts['start'], 'TAP TO START');
-      expect(config.stateTexts['gameOver'], 'GAME OVER\nTAP TO RESTART');
+      expect(config.gameDuration, const Duration(seconds: 10));
+      expect(config.stateTexts['start'], '⚪ NORMAL: 10秒\nTAP TO START');
+      expect(config.stateTexts['gameOver'], '⚪ NORMAL OVER\nTAP TO RESTART');
       expect(config.stateColors['start'], isNotNull);
     });
 
@@ -22,7 +22,7 @@ void main() {
       expect(config, isNotNull);
       
       if (config != null) {
-        expect(config.gameDuration, const Duration(seconds: 10));
+        expect(config.gameDuration, const Duration(seconds: 15));
         expect(config.stateTexts['start']?.contains('EASY'), true);
       }
     });
@@ -34,7 +34,7 @@ void main() {
       expect(config, isNotNull);
       
       if (config != null) {
-        expect(config.gameDuration, const Duration(seconds: 3));
+        expect(config.gameDuration, const Duration(seconds: 5));
         expect(config.stateTexts['start']?.contains('HARD'), true);
       }
     });

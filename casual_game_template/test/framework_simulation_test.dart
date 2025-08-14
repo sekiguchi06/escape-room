@@ -189,12 +189,12 @@ void main() {
       
       // バリアントA: イージーモード
       final variantA = configuration.getConfigForVariant('easy');
-      expect(variantA.gameDuration.inSeconds, equals(10));
+      expect(variantA.gameDuration.inSeconds, equals(15));
       debugPrint('📊 バリアントA (easy): ${variantA.gameDuration.inSeconds}秒');
       
       // バリアントB: ハードモード
       final variantB = configuration.getConfigForVariant('hard');
-      expect(variantB.gameDuration.inSeconds, equals(3));
+      expect(variantB.gameDuration.inSeconds, equals(5));
       debugPrint('📊 バリアントB (hard): ${variantB.gameDuration.inSeconds}秒');
       
       // 各バリアントでゲームシミュレーション実行

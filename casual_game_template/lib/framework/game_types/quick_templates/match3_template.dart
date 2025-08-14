@@ -6,8 +6,7 @@ import 'dart:math';
 import '../../core/configurable_game.dart';
 import '../../state/game_state_system.dart';
 import '../../effects/particle_system.dart';
-import '../../audio/audio_system.dart';
-import '../../score/score_system.dart';
+
 import '../../timer/flame_timer_system.dart';
 
 /// マッチ3パズル設定
@@ -72,6 +71,19 @@ abstract class QuickMatch3Template extends ConfigurableGame<Match3State, Match3C
   /// ゲーム固有設定（サブクラスで実装）
   Match3Config get gameConfig;
   
+  /// 状態プロバイダー作成（ConfigurableGameの抽象メソッド実装）
+  @override
+  GameStateProvider<Match3State> createStateProvider() {
+    return GameStateProvider<Match3State>(Match3State.menu);
+  }
+  
+  /// ゲーム初期化（ConfigurableGameの抽象メソッド実装）
+  @override
+  Future<void> initializeGame() async {
+    // マッチ3ゲーム固有の初期化処理
+    debugPrint('🎯 Match3 game initialization completed');
+  }
+  
   @override
   Future<void> onLoad() async {
     await super.onLoad();
@@ -114,6 +126,7 @@ abstract class QuickMatch3Template extends ConfigurableGame<Match3State, Match3C
   }
   
   /// ゲーム開始
+  @override
   void startGame() {
     stateProvider.changeState(Match3State.playing);
     _gameActive = true;
@@ -230,6 +243,7 @@ abstract class QuickMatch3Template extends ConfigurableGame<Match3State, Match3C
   }
   
   // 公開メソッド（UI用）
+  @override
   void pauseGame() {
     if (_gameActive) {
       pauseEngine();
@@ -239,6 +253,7 @@ abstract class QuickMatch3Template extends ConfigurableGame<Match3State, Match3C
     }
   }
   
+  @override
   void resumeGame() {
     if (stateProvider.currentState == Match3State.paused) {
       resumeEngine();
@@ -248,6 +263,7 @@ abstract class QuickMatch3Template extends ConfigurableGame<Match3State, Match3C
     }
   }
   
+  @override
   void resetGame() {
     _endGame();
     setupGame();

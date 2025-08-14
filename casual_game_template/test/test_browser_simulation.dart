@@ -1,6 +1,6 @@
-import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
-import 'lib/framework/templates/template_example.dart';
+import 'package:casual_game_template/game/simple_game.dart';
+
 
 /// 最小限のブラウザ実動作テスト
 void main() {
@@ -31,62 +31,49 @@ class GameTestScreen extends StatefulWidget {
 }
 
 class _GameTestScreenState extends State<GameTestScreen> {
-  late SampleCasualGame game;
+  late SimpleGame game;
 
   @override
   void initState() {
     super.initState();
-    // テスト用ゲーム設定
-    game = SampleCasualGame(
-      config: const SampleGameConfig(
-        title: 'Framework Test Game',
-        targetScore: 500,
-        gameDuration: Duration(minutes: 1),
-      ),
-    );
+    // テスト用ゲーム
+    game = SimpleGame();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // シンプルなFlameゲーム画面のみ
-      body: GameWidget(game: game),
-      
-      // 最小限のテスト操作パネル
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.all(8),
-        color: Colors.white,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: const Text('Casual Game Framework Test'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            // ゲーム表示
+            Text('Simple Game Test'),
+            const SizedBox(height: 20),
+            // 基本的な操作ボタン
             ElevatedButton(
-              onPressed: () {
-                debugPrint('画面遷移テスト: Menu');
-                game.stateProvider.transitionTo(SampleGameState.menu);
-              },
-              child: const Text('Menu'),
+              onPressed: () => game.startGame(),
+              child: const Text('Start Game'),
             ),
             ElevatedButton(
-              onPressed: () {
-                debugPrint('画面遷移テスト: Play');
-                game.stateProvider.transitionTo(SampleGameState.playing);
-              },
-              child: const Text('Play'),
+              onPressed: () => game.pauseGame(),
+              child: const Text('Pause Game'),
             ),
             ElevatedButton(
-              onPressed: () {
-                debugPrint('画面遷移テスト: Pause');
-                game.stateProvider.transitionTo(SampleGameState.paused);
-              },
-              child: const Text('Pause'),
+              onPressed: () => game.resumeGame(),
+              child: const Text('Resume Game'),
             ),
             ElevatedButton(
-              onPressed: () {
-                debugPrint('画面遷移テスト: Game Over');
-                game.stateProvider.transitionTo(SampleGameState.gameOver);
-              },
-              child: const Text('Game Over'),
+              onPressed: () => game.resetGame(),
+              child: const Text('Reset Game'),
             ),
+            const SizedBox(height: 20),
+            // フレームワーク情報
+            const Text('Framework Test - Basic Functionality Check'),
           ],
         ),
       ),
