@@ -1,0 +1,278 @@
+                                                                 Riverpodの使い方   7.4
+
+先ほどのサンプルで、FloatingActionButton ウィジェットの onPressed イベ
+ントでは watch を用いずに read メソッドを利用していたのはそのためです。
+
+
+Providerの値をフィルタする
+    頻繁に値が更新され、ウィジェットの再構築が不必要に発生する場合は
+select メソッドで値をフィルタすることもできます。たとえば、以下のよう
+な Point クラスを提供する Provider があるとします。
+
+class Point {
+    Point(this.x, this.y);
+
+    int x;
+    int y;
+}
+
+    ウィジェットでは x の値のみが必要な場合、select メソッドを利用して x
+の値のみを取得することができます。
+
+final x = ref.watch(pointProvider.select((point) => point.x));
+
+
+    このように select メソッドを利用すると、y の値が変化しても値は通知さ
+れません。ウィジェットの再構築を抑制したい場合などに便利です。
+
+
+
+    Providerのライフサイクル
+    コード生成を利用した場合、Provider は購読されなくなると自動的に破棄
+されます。たとえば、あるダイアログの状態を管理する Provider は、ダイア
+ログが閉じられると破棄され、再度開かれた際には状態がリセットされてい
+ることになります。
+    ただ、時にはアプリの起動中は状態を保持したいケースや、複数の画面を
+またいで状態を共有したいケースもあるでしょう。そのような場合は Provider
+を自動で破棄させないようにすることも可能です。
+
+@Riverpod(keepAlive: true)
+class CounterNotifier extends _$CounterNotifier {
+  @override
+  int build() => 0;
+
+    void increment() {
+      state = state + 1;
+
+
+
+                                                                                231
+第
+    7 状態管理とRiverpod
+          章
+
+
+
+
+                  }
+              }
+
+                  @riverpod アノテーションに代えて、@Riverpod にします。大文字から始ま
+              るアノテーションを利用し、keepAlive プロパティに true を設定します。こ
+              のようにすることで、Provider は自動的に破棄されなくなります。
+                  Provider を任意のタイミングで再構築したい場合は、refresh メソッドを利
+              用します。
+
+              ref.refresh(counterNotifierProvider);
+
+
+
+
+                  Providerにパラメータを渡す
+                  Provider にパラメータを渡す方法を解説します。関数ベースの Provider の
+              場合は、第二引数以降にパラメータを記述します。
+                  関数ベースの Provider は以下のようになります。
+
+              @riverpod
+              String greet(GreetRef ref, String str) {
+                return 'Hello $str';
+              }
+
+
+                  Provider にアクセスする際は以下のようにパラメータを渡します。
+                  @override
+                  Widget build(BuildContext context, WidgetRef ref) {
+                    final greet = ref.watch(greetProvider('Flutter'));
+
+                  クラスベースの Provider の場合は、build メソッドの引数にパラメータを記
+              述します。
+
+              @riverpod
+              class CounterNotifier extends _$CounterNotifier {
+                @override
+                int build(int num) {
+                  return num;
+                }
+
+
+                  void increment() async {
+                    state = state + 1;
+                  }
+              }
+
+
+
+    232
+                                                                          Riverpodの使い方   7.4
+
+    こちらも Provider にアクセスする際は以下のようにパラメータを渡します。
+
+class MyHomePage extends ConsumerWidget {
+    const MyHomePage({super.key, required this.title});
+
+    final String title;
+
+    @override
+    Widget build(BuildContext context, WidgetRef ref) {
+        final counterNotifier = counterNotifierProvider(3);       ❶
+        return Scaffold(
+          appBar: AppBar(
+            backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+             title: Text(title),
+          ),
+          body: Center(
+            child: Column(
+               mainAxisAlignment: MainAxisAlignment.center,
+               children: <Widget>[
+                 const Text(
+                    'You have pushed the button this many times:',
+                 ),
+                 Text(
+                    '${ref.watch(counterNotifier)}',    ❷
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
+               ],
+             ),
+          ),
+          floatingActionButton: FloatingActionButton(
+             onPressed: () {
+                ref.read(counterNotifier.notifier).increment();       ❸
+             },
+             tooltip: 'Increment',
+             child: const Icon(Icons.add),
+          ),
+        );
+    }
+}
+
+    CounterNotifier の例では、値を監視するために Provider にアクセスする❷
+と、カウンタをインクリメントするために Provider にアクセスする❸があり
+ますので、❶でプロバイダに初期値を渡し変数に置きました。
+
+
+
+
+                                                                                         233
+第
+    7 状態管理とRiverpod
+          章
+
+
+
+
+                7.5
+                まとめ
+
+                本章では Flutter の状態管理の概念と、Riverpod の使い方を解説しました。
+                Riverpod の役割を理解するために、冒頭で Flutter における状態管理につい
+              て解説しました。Riverpod は強力なパッケージですが、初学者には概要がつ
+                    （筆者自身がそうでした）主要なクラスの役割と関係性、関連
+              かみづらいので
+              パッケージを先に紹介し、Riverpod の全体像をつかんでもらうように解説を
+              進めました。
+                Riverpod は活発に開発が行われており、本章で紹介できなかった機能もあ
+              ります。より理解を深めるうえでは、村松龍之介さんの電子書籍『Flutter x
+              Riverpod でアプリ開発！実践入門』注 11 がお勧めです。Riverpod の更新に追従
+              しながら、新しい情報を、日本語で詳しく解説された貴重な書籍です。
+                次章では、Riverpod を状態管理に利用したアプリを実装していきます。
+
+
+
+
+              注 11 https://zenn.dev/riscait/books/flutter-riverpod-practical-introduction
+
+
+    234
+実践ハンズオン❷
+        第
+            8   章
+
+
+
+
+ ひらがな変換アプリを開発
+
+
+
+
+                    235
+第
+    8 実践ハンズオン❷
+          章
+              ひらがな変換アプリを開発
+
+
+
+
+                本章では再びハンズオン形式でアプリの実装に挑戦します。入力したテキ
+              ストをひらがなに変換するアプリです。第 7 章で学んだ Riverpod を採用し、
+              状態管理を行います。なお、本章でも fvm コマンドを省略して flutter コマン
+              ドを記載しています。ご自身の環境、コマンドを実行するディレクトリにあ
+              わせて読み替えてください。
+                図 8.1 が完成イメージです。
+
+              図 8.1   アプリの完成イメージ
+
+
+
+
+                8.1
+                開発するアプリの概要
+
+                このハンズオンで実装するアプリの概要を説明します。公開された Web API
+              を利用し、入力したテキストをひらがなに変換します。文字入力とバリデー
+              ション、Web API のリクエストに JSON の取り扱いと実用的な機能を盛り込ん
+              でいます。
+                1 つの画面で状態により表示を切り替えるように実装します。入力状態で
+                       （図 8.1 の左）、API リクエストを実行するとインジケー
+              変換ボタンをタップし
+                    （図 8.1 の中央）。API のレスポンスが返ると結果を表示します
+              タを表示します
+              （図 8.1 の右）。再入力ボタンをタップすると、再び入力状態に戻ります。
+
+    236
+                                  開発するアプリの概要   8.1
+
+
+  入力状態
+  テキストを入力する状態です（図 8.2）。テキストはバリデーションチェッ
+クを行い、空文字の場合はメッセージを表示します。「変換」ボタンをタップ
+すると、ひらがな変換のリクエストを行います。
+
+図 8.2   入力状態
+
+
+
+
+  レスポンス待ち状態
+  Web API のレスポンス待ちの状態です（図 8.3）。インジケータを表示するこ
+とで、ユーザーにリクエスト中であることを伝えます。
+
+
+
+
+                                               237
+第
+    8 実践ハンズオン❷
+          章
+              ひらがな変換アプリを開発
+
+
+
+
+              図 8.3   レスポンス待ちの状態
+
+
+
+
+                変換完了状態
+                API リクエストが完了し、変換結果のある状態です（図 8.4）。「再入力」ボタ
+              ンをタップすると、再び入力状態に戻ります。
+
+              図 8.4   変換完了状態
+
+
+
+
+    238
+

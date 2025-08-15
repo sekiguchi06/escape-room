@@ -1,0 +1,365 @@
+         第
+
+
+
+状態管理とRiverpod
+             7   章
+
+
+
+
+                     215
+第
+    7 状態管理とRiverpod
+          章
+
+
+
+
+               本章では Riverpod 注 1 というパッケージについて解説します。国内ではこのパ
+              ッケージを中心にアプリを設計される例が多く、後述の状態管理パッケージと
+              してはスタンダードな存在です。本章では Flutter アプリを開発するうえで重要
+              な状態管理の考え方を解説したうえで、Riverpod の使い方を紹介します。
+
+
+
+               7.1
+               Flutterアプリにおける状態管理
+
+               Flutter アプリの設計やアーキテクチャの文脈で状態管理という言葉がよく
+              使われます。広い意味では StatefulWidget も状態管理の一つと言えます。State
+              クラスが状態を持ち、setState メソッドで状態を更新すると、ウィジェット
+              を再構築します。このように、状態を更新したり、その更新を契機にウィジ
+              ェットを再構築する戦略を状態管理と呼びます。
+               では、StatefulWidget だけですべての状態を管理することを考えてみましょ
+              う。次のような制約が発生します。
+
+              ・状態を更新するロジックは State クラスを起点に実装しなければならない
+              ・末端のウィジェットに状態を伝えるためには、コンストラクタの引数で状態を
+               バケツリレーしなければならない
+
+
+               その結果、コードの修正が困難になったり、パフォーマンスの問題が発生
+              したりする可能性が高まります（パフォーマンスに問題が発生する理由につい
+              ては第 10 章で解説します）。
+               そこで多くの場合は状態管理のしくみというと、ウィジェットとロジック
+              を分離させる設計が可能であったり、階層をまたいでウィジェットを再構築
+              する機能を持っているものを指すことが多いです。
+               あらためて整理すると、以下のような特徴を持つパッケージを状態管理パ
+              ッケージと呼びます。
+
+              ・状態を更新するロジックとウィジェットを分離した設計が可能となる
+              ・状態を更新すると、階層の位置に関係なくウィジェットを再構築することがで
+               きる
+
+
+
+
+              注1   https://riverpod.dev/
+
+
+    216
+                                    Riverpodとはどのようなパッケージか   7.2
+
+
+ 7.2
+ Riverpodとはどのようなパッケージか
+
+ Riverpod の公式サイトは冒頭で「Riverpod は Flutter/Dart のリアクティブキャ
+ッシュフレームワークである」と紹介しています。これは Riverpod の状態管理
+                           （リアクティブ）
+パッケージとしての側面を表しています。状態変化に反応して
+                               （キャッ
+ウィジェットを更新するしくみが提供されており、その状態を保持する
+シュ）           （キャッシュ）
+  という意味です。状態の保持     に関してはウィジェットのライ
+フサイクルに左右されず、破棄のタイミングをコントロールすることができま
+（またはウィジェットのライフサイクルと合わせることも可能です）
+す                             。
+ また、状態管理パッケージとしての側面以外にも、クラスの依存関係を解
+決するためのしくみを提供しています。依存性の注入（Dependency Injection）、
+
+
+
+
+ Tips 宣言的UIとしてのFlutter
+   状態管理の重要性とともに、Flutter の大切な考え方を紹介します。
+   Flutter では、UI の設計図はウィジェットの親子関係であり、build メソッドの
+ 実装そのものです。そして、それ以外の場所で UI を変更する手段はありません。
+ これらの特徴から、Flutter は宣言的 UIフレームワークの一つに数えられます。
+   宣言的 UI フレームワークは従来までの UI フレームワークと違い、簡潔で保
+ 守性の高いコードを実現できます（しっかりと設計しなければこの限りではあり
+ ませんが）。iOS や Android のネイティブアプリ開発においても、宣言的 UI フレ
+ ームワークが台頭しています。
+   この宣言的 UI はしばしば以下のような式で表現されます。
+
+  UI = f(State)
+
+   これを Flutter に置き換えると、左辺の UI は画面の表示結果、右辺の f はウィ
+ ジェットの build メソッドです。build メソッドの中で参照する情報を State（状
+ 態）ととらえてください。
+   ウィジェットを設計実装するときに、この式を意識してください。この式が
+ 成立しないウィジェットは設計に問題があるサインです。f は関数なので、副
+ 作用を持ちません。f に同じ State（状態）を与えると、必ず同じ UI になるとい
+ うことです。
+   たとえば、ウィジェットクラスが final 以外のフィールドを持っている場合
+ は、この式が成立しない可能性があります。
+
+
+
+                                                            217
+第
+    7 状態管理とRiverpod
+          章
+
+
+
+
+              とりわけサービスロケーターパターンに近いものと筆者は認識しています。
+              アプリの設計、アーキテクチャについて検討した経験のある読者の方は、こ
+              れだけで強力なパッケージであることがおわかりいただけるかと思います。
+
+
+
+               Riverpodの主要なクラス
+               Riverpod の主要なクラスを紹介します。
+
+              ・Provider
+              ・Ref と WidgetRef
+              ・ConsumerWidget
+
+               この 3 つです。それぞれの役割と関係性をざっくりと説明します。
+               Provider が状態をキャッシュし、Ref や WidgetRef を介して状態を提供しま
+              す。ConsumerWidget はウィジェットのサブクラスです。ConsumerWidget の
+              build メソッドの引数には WidgetRef が渡され、それを介して状態を取得しウ
+              ィジェットを構築します。Provider の持つ状態が変化すると、build メソッド
+              が再度呼び出されます。
+                                              （Riverpod v2 の
+               また、Provider が提供するオブジェクトに大きな制限はない
+              時点ではジェネリックな型に制限があります）ので、扱い方によっては Ref を
+              介してクラスの依存関係を解決できるというわけです。
+
+
+
+               実装サンプル
+               Riverpod の実装例をお見せします。前項の 3 つのクラスの役割や関係性が
+              イメージできると思います。
+                                          （厳密にはこれだけでは動
+               以下の例が Provider を活用した最小の実装例です
+              作しません）。
+
+              final greetProvider = Provider((ref) {
+                return 'Hello, Flutter!!';              ❶
+              });
+
+              class HomePage extends ConsumerWidget {    ❷
+                const HomePage({super.key});
+
+                @override
+                Widget build(BuildContext context, WidgetRef ref) {
+
+
+    218
+                                                           Riverpodとはどのようなパッケージか   7.2
+
+         final greet = ref.watch(greetProvider);   ❸
+         return Center(
+             child: Text(greet)
+         );
+     }
+ }
+
+     greetProvider は Hello, Flutter!! という文字列を提供する Provider です
+（❶）
+  。クロージャ式の引数 ref は ProviderRef という Ref の実装クラスです。
+他の Provider とやりとりする場合には、ここで受け取った ref を使います。
+     greetProvider が 提 供 す る 文 字 列 を ウ ィ ジ ェ ッ ト で 利 用 す る に は
+                       （❷）。ConsumerWidget の build メソッド
+ConsumerWidget クラスを継承します
+には WidgetRef 型の引数が与えられ、この WidgetRef を通して Provider とやり
+とりします（❸）。greetProvider から文字列を受け取り、Text ウィジェット
+に渡しています。
+     次により実践的なサンプルを見てみましょう。Flutter のテンプレートプロ
+ジェクトを Riverpod を使ってアレンジします。
+     テンプレートプロジェクトはボタンをタップすると数字がカウントアップ
+するアプリでした。これを Riverpod で実現するため、int 型の数値を状態と
+して提供し、かつその値を変更可能な Provider を実装します。
+
+ ./lib/main.dart
+ // 省略
+ class CounterNotifier extends Notifier<int> {         ❶
+   @override
+   int build() => 0;    ❷
+
+
+     void increment() {
+       state = state + 1;     ❸
+     }
+ }
+
+ final counterNotifierProvider = NotifierProvider<CounterNotifier, int>(() {
+   return CounterNotifier();                                                   ❹
+ });
+ // 省略
+
+
+     状態を変更可能な Provider は Notifier というクラスを使います。カウンタ
+の値を保持し、インクリメントする CounterNotifier というクラスを実装し
+ました（❶）。初期値は build メソッドで返します（❷）。
+     Notifier クラスは自分の状態を state プロパティに保持しています。❶で
+
+                                                                                   219
+第
+    7 状態管理とRiverpod
+          章
+
+
+
+
+              Notifier<int> と渡している型パラメータが状態の型となります。increment
+              メソッドでは、その state プロパティにアクセスしてカウンタの値をインク
+              リ メ ン ト し ま す（❸）。こ う し て 実 装 し た CounterNotifier ク ラ ス を、
+              NotifierProvider で提供します（❹）。
+               続いてウィジェットの実装です。
+
+               ./lib/main.dart
+              // 省略
+              class MyHomePage extends ConsumerWidget {    ❶
+                const MyHomePage({super.key, required this.title});
+
+
+                final String title;
+
+                @override
+                Widget build(BuildContext context, WidgetRef ref) {
+                  final counter = ref.watch(counterNotifierProvider);        ❷
+                    return Scaffold(
+                      appBar: AppBar(
+                         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+                         title: Text(title),
+                      ),
+                      body: Center(
+                         child: Column(
+                           mainAxisAlignment: MainAxisAlignment.center,
+                           children: <Widget>[
+                             const Text(
+                                'You have pushed the button this many times:',
+                             ),
+                             Text(
+                                '$counter',    ❸
+                                style: Theme.of(context).textTheme.headlineMedium,
+                              ),
+                           ],
+                         ),
+                      ),
+                      floatingActionButton: FloatingActionButton(
+                         onPressed: () {
+                            ref.read(counterNotifierProvider.notifier).increment();   ❹
+                         },
+                         tooltip: 'Increment',
+                         child: const Icon(Icons.add),
+                      ),
+                    );
+                }
+              }
+              // 省略
+
+
+    220
+                                                 Riverpodの関連パッケージ   7.3
+
+  StatefulWidget を継承した MyHomePage クラスを、ConsumerWidget を継承す
+るように書き換えました（❶）。カウンタの値を counterNotifierProvider か
+ら取得し（❷）、Text ウィジェットに渡しています（❸）。FloatingActionButton
+ウィジェットのタップイベントでは、CounterNotifier を取得し increment メ
+ソッドを呼び出しています（❹）。
+  ❷のように WidgetRef の watch メソッドを使って状態を監視した場合、状態
+が変化すると build メソッドが再び呼び出されます。ウィジェットからカウ
+ンタをインクリメントするロジックがなくなり、シンプルになりました
+（WidgetRef の watch メソッドと read メソッドを使い分けていますが、その詳
+細は「Provider から値を取得する」で解説します）。
+
+
+
+ 7.3
+  Riverpodの関連パッケージ
+
+  Riverpod はいくつかのパッケージで構成されています。Riverpod の機能の
+全体像を把握する意味でも、概要を知っておきましょう。
+
+・基本機能を提供するパッケージ
+・Provider のコードを生成するパッケージ
+・静的解析を行うパッケージ
+
+  以上の 3 つに分けられます。
+
+
+
+  基本機能を提供するパッケージ
+  まずは Provider クラスなどの基本機能を提供するパッケージです。Riverpod
+を利用するために必ず必要です。以下の 3 つの中から選択します。
+
+・riverpod 注 2
+・flutter_riverpod 注 3
+・hooks_riverpod 注 4
+
+
+注2   https://pub.dev/packages/riverpod
+注3   https://pub.dev/packages/flutter_riverpod
+注4   https://pub.dev/packages/hooks_riverpod
+
+
+                                                                    221
+第
+    7 状態管理とRiverpod
+          章
+
+
+
+
+                最も基本的なパッケージは riverpod であり、Flutter に依存しません。
+                flutter_riverpod は riverpod をウィジェットなどと連携し、Flutter アプリで
+              利用するためのパッケージです。
+                hooks_riverpod は flutter_riverpod に加えて、flutter_hooks 注 5 というパッケ
+              ージと連携するためのパッケージです。flutter_hooks はウィジェットのライ
+              フサイクルに関連した実装を簡単に記述できるパッケージです。React の Hooks
+              をモチーフに実装されています。
+                通常、Flutter アプリ開発においては flutter_riverpod を、flutter_hooks が必
+              要な場合は hooks_riverpod を選択するとよいでしょう。
+
+
+
+                Providerのコードを生成するパッケージ
+                Riverpod を中心にアプリを開発していると、Provider に関連するコードを
+              ボイラープレートのように繰り返し記述することになります。そのため
+              Provider のコードを生成するためのパッケージを提供しています。これらの
+              パッケージは必須ではありませんが、利用することが推奨されています。
+
+              ・riverpod_generator 注 6
+              ・riverpod_annotation 注 7
+
+                riverpod_generator がコード生成を行うためのパッケージ、riverpod_annotation
+              はコード生成のためのアノテーションを提供します。実際には riverpod_generator
+              を利用するために build_runner パッケージも必要になります。
+                以下はコード生成を利用した場合と、利用しない場合の例です。
+
+              // コード生成を利用しない場合
+              final greetProvider = Provider((ref) {
+                return 'Hello, Flutter!!';
+              });
+
+              // コード生成を利用する場合
+              @riverpod
+              String greet(GreetRef ref) {
+                 return 'Hello, Flutter!!';
+              };
+
+
+
+              注5   https://pub.dev/packages/flutter_hooks
+              注6   https://pub.dev/packages/riverpod_generator
+              注7   https://pub.dev/packages/riverpod_annotation
+
+
+    222
+

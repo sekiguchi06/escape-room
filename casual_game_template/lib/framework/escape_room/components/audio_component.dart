@@ -1,4 +1,5 @@
 import 'package:flame/components.dart';
+import 'package:flutter/foundation.dart';
 
 /// 音声再生コンポーネント
 /// 🎯 目的: 音声管理機能を提供
@@ -14,7 +15,7 @@ class AudioComponent extends Component {
   void play(String soundKey) {
     if (_soundPaths.containsKey(soundKey)) {
       // スケルトン実装: 実際の音声再生は後フェーズ
-      print('Playing sound: $soundKey');
+      debugPrint('Playing sound: $soundKey');
     }
   }
   

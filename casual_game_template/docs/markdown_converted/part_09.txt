@@ -1,0 +1,417 @@
+                                             パターン   2.6
+
+final (name: n, price: p) = record;
+print('This $n is $p yen.');
+// => This cake is 300 yen.
+
+
+// フィールド名がないのでマッチしない
+final (String name, int price) = record;
+
+ フィールド名を変数名で推論させる記法もあります。
+
+final record = (name: 'cake', price: 300);
+// `:`に続けてフィールド名と同じ名前の変数を宣言
+final (:name, :price) = record;
+print('This $name is $price yen.');
+// => This cake is 300 yen.
+
+
+
+Object
+ その他のクラスをマッチさせることも可能です。クラスのゲッタから分解
+宣言できます。
+
+class SomeClass {
+  const SomeClass(this.x);
+  final int x;
+}
+
+final someInstance = SomeClass(123);
+final SomeClass(x: number) = someInstance;
+print('x = $number');
+// => x = 123
+
+ こちらもゲッタ名を変数名で推論させることができます。
+
+class SomeClass {
+  const SomeClass(this.x);
+  final int x;
+}
+
+final someInstance = SomeClass(123);
+final SomeClass(:x) = someInstance;
+print('x = $x');
+// => x = 123
+
+ このパターンはオブジェクト全体と一致する必要はありません。変数への
+バインドを省略すれば、クラスの一致だけでマッチさせることも可能です。
+
+final variable = // 省略
+switch (variable) {
+  case SomeClass():
+
+
+                                                     47
+第
+    2 Dartの言語仕様
+         章
+
+
+
+
+                   print('SomeClass');
+                 case String():
+                   print('String');
+             }
+
+
+
+
+                 Tips for-in文での分解宣言
+                   for-in 文で分解宣言を利用する例をここで紹介します。Record のリストを
+                 for-in 文で処理するときに、Record のフィールドを変数にバインドしてみまし
+                 ょう。
+
+                  final sweets = [
+                    (name: 'cake', price: 300),
+                    (name: 'dango', price: 250),
+                  ];
+
+                  for (final (:name, :price) in sweets) {
+                    print('name = $name, price = $price');
+                  }
+                  // => name = cake, price = 300
+                  // => name = dango, price = 250
+
+                   このように、in の前に分解宣言を使って変数にバインドすることができます。
+                   Map の場合はというと、Iterable のサブクラスではないため for-in 文でルー
+                 プを回すことができません。ただし、Map の entries プロパティを使えば、キー
+                 とバリューのペアを変数にバインドしてループを回すことができます。
+
+                  final map = {
+                     200 : 'OK',
+                     404 : 'Not Found',
+                     500 : 'Internal Server Error',
+                  };
+                  /* ◆ MapEntry
+                        キーとバリューを持ったMapの要素 */
+                  // entriesプロパティでIterable<MapEntry>を取得できる
+                  for (var MapEntry(key: key, value: value) in map.entries) {
+                     print('code: $key, $value');
+                  }
+                  // => code: 200, OK
+                  // => code: 404, Not Found
+                  // => code: 500, Internal Server Error
+
+
+                   これは「Map の分解宣言」というより、MapEntry を Object として分解宣言して
+                 いることになります。少しややこしいので、Tips として紹介しました。
+
+
+
+    48
+                                               パターン   2.6
+
+
+ パターンを補助する構文
+ ここまで紹介したパターンと組み合わせ使うことで効果を発揮する記述方
+法を紹介します注 3。
+
+
+キャスト
+ 分解宣言で変数に渡す際に、as 演算子を使い値をキャストします。キャス
+トに失敗すると実行時エラーとなります。
+
+final List<Object> list = [0, 'one'];
+final [number as int, str as String] = list;
+
+
+
+nullチェック
+ 値が非 null かどうかをチェックするパターンです。変数名の後ろに ? を付
+与します。when キーワードと組み合わせて非 null の場合にさらに条件を加え
+るような書き方ができます。
+
+  int? code = // 省略
+  switch (code) {
+    case final i? when i >= 0:
+      doSomething();
+    default:
+      print('code is null or negative');
+  }
+
+
+
+
+nullアサーション
+ null アサーションパターンは値が null だった場合に実行時エラーとなりま
+す。変数名の後ろに ! を付与します。
+
+  int? code = // 省略
+  switch (code) {
+    case final i! when i >= 0:
+      doSomething();
+    default:
+      print('code is negative');
+  }
+
+
+
+
+注3   本書ではパターンを補助する構文として紹介していますが、Dart の公式ドキュメントではパター
+     ンの一種として扱われています。
+
+
+                                                      49
+第
+    2 Dartの言語仕様
+         章
+
+
+
+
+             ワイルドカード
+                 _ と記述するとワイルドカードパターンとなります。変数にバインドさせ
+             ることなく、プレースホルダとして機能します。
+
+             final record = ('cake', 300);
+             final (name, _) = record;
+             print('name = $name');
+             // => name = cake
+
+                 ワイルドカードパターンに型注釈を付与すると、クラスの一致だけでマッ
+             チさせることも可能です。
+
+             final variable = // 省略
+             switch (variable) {
+               case SomeClass _:
+                   print('SomeClass');
+                 case String _:
+                   print('String');
+             }
+
+
+
+
+                 2.7
+                 例外処理
+
+                 Dart の例外処理です。他の多くの言語と同様に throw キーワードで例外を
+             スローし、try-catch 構文で例外を捕捉します。例外が捕捉されなければプ
+             ログラムは中断します。ただし、Flutter はフレームワークが例外を捕捉する
+             機構を持っているため、例外がスローされてもアプリは終了しません（意図的
+             に終了させることはできます）。
+
+             void doSomething() {
+               throw MyException();
+             }
+
+             try {
+               doSomething();
+             } catch (e) {
+               print(e);
+             }
+
+
+
+
+    50
+                                               例外処理    2.7
+
+
+ 例外の型 ── ErrorとException
+ Dart には Error 型と Exception 型があり、それぞれ throw キーワードで例外
+としてスローすることができます。
+ Error 型はプログラムの失敗によりスローされるものとされています。間
+違った関数の使い方や、無効な引数が渡された場合など、プログラム上の問
+題に使用されます。呼び出し元で捕捉する必要のないものです。
+ 一方、Exception 型は捕捉されることを目的にしたクラスで、エラーに関
+する情報を持たせるべきとされています。
+ Dart は以上 2 つのタイプのほかに任意のオブジェクトを例外としてスロー
+することも可能ですが、製品レベルのコードでは推奨されていません。
+
+
+
+ 例外の捕捉
+ 捕捉する例外の型を指定する場合は on キーワードを使用します。
+try {
+  doSomething();
+} on MyException {
+  print('catch MyException');
+}
+
+ 例外オブジェクトを受け取りたい場合は catch キーワードを使用します。
+catch の第一引数は例外オブジェクト、第二引数はスタックトレースです。第
+二引数は省略可能です。
+
+try {
+  doSomething();
+} catch(e, st) {
+  print('catch $e');
+  print('stackTrace $st');
+}
+
+ 捕捉する型を指定しつつ、例外オブジェクトを受け取る場合は on と catch
+を併用します。
+
+try {
+  doSomething();
+} on MyException catch(e) {
+  print('catch $e');
+}
+
+
+
+                                                        51
+第
+    2 Dartの言語仕様
+         章
+
+
+
+
+                 例外の再スロー
+                 例外処理の中で、呼び出し元へ例外を再スローする場合は rethrow キーワ
+             ードを使用します。
+
+             try {
+               doSomething();
+             } on MyException catch(e) {
+                 print('catch $e');
+                 rethrow; // 呼び出し元へ例外を再スロー
+             }
+
+
+
+
+                 finally句
+                 例外がスローされるかどうかにかかわらず、最後に実行したい処理を finally
+             句に記述できます。
+
+             try {
+               doSomething();
+             } on MyException catch(e) {
+               print('catch $e');
+             } finally {
+               doClean();
+             }
+
+
+                 例外に一致する catch 句がない場合は finally 句が実行されたあとに例外が
+                            でん ぱ
+             呼び出し元に伝播します。
+
+
+
+                 アサーション
+                 プログラムの開発中に思わぬバグが潜んでいないかチェックする機能です。
+             assert の第一引数へ bool 型の条件を渡します。条件が false の場合にプログ
+             ラムの実行を中断します。
+
+             final variable = nonNullObject();
+             assert(variable != null); // オブジェクトがnullでないことをチェック
+             assert(variable != null, 'variables should not be null'); // メッセージを付与する
+             こともできる
+
+
+                 Flutter では debug ビルドのときにだけ assert 文が処理されます。その特徴
+             を利用し、debug ビルドのときだけ実行したい処理を以下のように記述する
+
+    52
+                                                           例外処理   2.7
+
+ことも可能です。
+
+assert(() {
+  print('debug mode');
+  return true;
+}());
+
+
+
+
+ Flutterの例外処理
+ Flutter アプリはフレームワークが例外を捕捉する機構を持っており、例外
+がスローされてもプログラムが終了するとは限りません。
+ フレームワークは 2 つの例外ハンドラを提供しています。
+ Flutter のフレームワーク自身がトリガするコールバック（レンダリング処
+理やウィジェットの build メソッドなど）で発生した例外は FlutterError.
+onError にルーティングされます。デフォルトではログをコンソールに出力
+する動作ですが、コールバックを上書きして独自に処理することも可能です。
+
+void main() {
+  FlutterError.onError = (details) {
+     // do something
+  };
+  runApp(const MyApp());
+}
+
+ それ以外の Flutter 内で発生した例外（ボタンのタップイベントハンドラな
+ど）は PlatformDispatcher でハンドリングします。
+
+void main() {
+  PlatformDispatcher.instance.onError = (error, stack) {
+     print(error);
+     return true; // 例外を処理した場合はtrueを返す
+  };
+  runApp(const MyApp());
+}
+
+
+
+
+                                                                  53
+第
+    2 Dartの言語仕様
+         章
+
+
+
+
+                 2.8
+                 コメント
+
+                 Dart のコメント、およびドキュメントコメントについて解説します。
+                 単一行のコメントは //、複数行のコメントは /* で開始し */ で終了します。
+             // 引数を2倍にする
+             int doubleValue(int value) {
+               return value * 2;
+             }
+
+             /*
+                 以下のように書くこともできる
+                 int doubleValue(int value) => value * 2;
+             */
+
+                 ドキュメントコメントもサポートしています。/// または /** で開始するコ
+                                  （/// を採用することが推奨
+             メントはドキュメントコメントとして扱われます
+                   。クラスや関数、引数名などを [ ] で囲うとその定義へジャン
+             されています）
+             プできるようになります。
+
+             ///
+             /// 引数の値を2倍にして返す
+             ///
+             /// この関数は、引数の値を2倍にして返す関数です。
+             /// 引数を半分にする仮数を返す関数として[half]関数があります。
+             int doubleValue(int value) {
+               return value * 2;
+             }
+
+             /**
+               * 引数の値を半分にして返す
+               *
+               * この関数は、引数の値を半分にして返す関数です。
+               * 引数を2倍にする関数として[doubleValue]関数があります。
+               */
+             double half(double value) {
+                 return value / 2;
+             }
+
+
+
+
+    54
+

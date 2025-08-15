@@ -1,5 +1,7 @@
+import 'package:flutter/foundation.dart';
 import '../core/interaction_result.dart';
 import 'interaction_strategy.dart';
+import '../core/escape_room_game.dart';
 
 /// パズル戦略
 /// 🎯 目的: パズル要求型のインタラクション行動
@@ -7,12 +9,15 @@ class PuzzleStrategy implements InteractionStrategy {
   final String requiredItemId;
   final String successMessage;
   final String failureMessage;
+  final String? rewardItemId;  // パズル解決時に得られるアイテム
   bool _isSolved = false;
+  EscapeRoomGame? _game;
   
   PuzzleStrategy({
     required this.requiredItemId,
     required this.successMessage,
     required this.failureMessage,
+    this.rewardItemId,
   });
   
   @override
@@ -31,8 +36,21 @@ class PuzzleStrategy implements InteractionStrategy {
     
     if (hasRequiredItem) {
       _isSolved = true;
+      
+      // 必要なアイテムをインベントリから消費
+      if (_game != null) {
+        _game!.removeItemFromInventory(requiredItemId);
+      }
+      
+      // 報酬アイテムを決定
+      final itemsToAdd = <String>[];
+      if (rewardItemId != null) {
+        itemsToAdd.add(rewardItemId!);
+      }
+      
       return InteractionResult.success(
         message: successMessage,
+        itemsToAdd: itemsToAdd,
         shouldActivate: true,
       );
     } else {
@@ -43,10 +61,22 @@ class PuzzleStrategy implements InteractionStrategy {
   @override
   String get strategyName => 'Puzzle';
   
-  /// 必要アイテム保有チェック（スケルトン実装）
+  /// 必要アイテム保有チェック
   bool _checkRequiredItem() {
-    // 後フェーズでインベントリシステムと連携
-    return true; // テスト用
+    if (_game == null) {
+      // ゲーム参照がない場合はfalseを返す（適切な動作）
+      debugPrint('⚠️ PuzzleStrategy: No game reference, cannot check inventory');
+      return false;
+    }
+    
+    final hasItem = _game!.hasItemInInventory(requiredItemId);
+    debugPrint('🔍 Checking inventory for $requiredItemId: $hasItem');
+    return hasItem;
+  }
+  
+  /// ゲーム参照を設定
+  void setGame(EscapeRoomGame game) {
+    _game = game;
   }
   
   /// 状態リセット（テスト用）

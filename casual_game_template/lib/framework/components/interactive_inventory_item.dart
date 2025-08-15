@@ -176,7 +176,9 @@ class InteractiveInventoryItem extends StatefulInteractiveElement {
   Future<void> _renderIconText(String iconText) async {
     try {
       // 既存スプライトを削除
-      _spriteComponent?.removeFromParent();
+      if (children.whereType<SpriteComponent>().isNotEmpty) {
+        children.whereType<SpriteComponent>().first.removeFromParent();
+      }
       
       // テキストコンポーネントとして描画
       final iconComponent = TextComponent(
@@ -193,14 +195,20 @@ class InteractiveInventoryItem extends StatefulInteractiveElement {
       add(iconComponent);
       
       // 成功時は背景を透明に
-      _backgroundComponent?.paint.color = Colors.transparent;
+      final backgroundComponent = children.whereType<RectangleComponent>().firstOrNull;
+      if (backgroundComponent != null) {
+        backgroundComponent.paint.color = Colors.transparent;
+      }
       
       debugPrint('✅ Successfully rendered icon for $id: $iconText');
       
     } catch (e) {
       debugPrint('❌ Failed to render icon for $id: $iconText -> $e');
       // エラー時は背景矩形を表示
-      _backgroundComponent?.paint.color = Colors.grey.withValues(alpha: 0.3);
+      final backgroundComponent = children.whereType<RectangleComponent>().firstOrNull;
+      if (backgroundComponent != null) {
+        backgroundComponent.paint.color = Colors.grey.withValues(alpha: 0.3);
+      }
     }
   }
   

@@ -422,3 +422,276 @@ class StateTransitionAnimator<T extends GameState> {
   }
 }
 */
+
+/// 脱出ゲーム専用状態
+/// 移植ガイド準拠実装
+enum EscapeRoomState implements GameState {
+  exploring,    // 部屋探索中
+  inventory,    // インベントリ確認中
+  puzzle,       // パズル解答中
+  escaped,      // 脱出成功
+  timeUp;       // 時間切れ
+  
+  @override
+  String get name => switch (this) {
+    EscapeRoomState.exploring => 'exploring',
+    EscapeRoomState.inventory => 'inventory', 
+    EscapeRoomState.puzzle => 'puzzle',
+    EscapeRoomState.escaped => 'escaped',
+    EscapeRoomState.timeUp => 'timeUp',
+  };
+  
+  @override
+  String get description => switch (this) {
+    EscapeRoomState.exploring => '部屋を探索中',
+    EscapeRoomState.inventory => 'インベントリ確認中',
+    EscapeRoomState.puzzle => 'パズル解答中', 
+    EscapeRoomState.escaped => '脱出成功！',
+    EscapeRoomState.timeUp => '時間切れ',
+  };
+  
+  @override
+  Map<String, dynamic> toJson() => {'name': name, 'description': description};
+}
+
+/// 状態遷移ロジック拡張
+/// 移植ガイド準拠実装・UI統合対応
+class EscapeRoomStateProvider extends GameStateProvider<EscapeRoomState> {
+  String? _currentPuzzleId;
+  String? _selectedItemId;
+  Map<String, dynamic> _gameData = {};
+  
+  // UI統合用コールバック
+  void Function()? _onInventoryToggle;
+  void Function(String puzzleId)? _onPuzzleStart;
+  void Function()? _onPuzzleComplete;
+  void Function()? _onEscapeSuccess;
+  
+  EscapeRoomStateProvider() : super(EscapeRoomState.exploring) {
+    _setupEscapeRoomTransitions();
+  }
+  
+  /// 現在のパズルID
+  String? get currentPuzzleId => _currentPuzzleId;
+  
+  /// 選択中のアイテムID
+  String? get selectedItemId => _selectedItemId;
+  
+  /// ゲームデータ
+  Map<String, dynamic> get gameData => Map.unmodifiable(_gameData);
+  
+  /// UI統合コールバック設定
+  void setUICallbacks({
+    void Function()? onInventoryToggle,
+    void Function(String puzzleId)? onPuzzleStart,
+    void Function()? onPuzzleComplete,
+    void Function()? onEscapeSuccess,
+  }) {
+    _onInventoryToggle = onInventoryToggle;
+    _onPuzzleStart = onPuzzleStart;
+    _onPuzzleComplete = onPuzzleComplete;
+    _onEscapeSuccess = onEscapeSuccess;
+  }
+  
+  /// 脱出ゲーム専用状態遷移を設定
+  void _setupEscapeRoomTransitions() {
+    stateMachine.defineTransitions([
+      // exploring → inventory
+      StateTransition<EscapeRoomState>(
+        fromState: EscapeRoomState,
+        toState: EscapeRoomState,
+        condition: (from, to) => from == EscapeRoomState.exploring && to == EscapeRoomState.inventory,
+        onTransition: (from, to) {
+          debugPrint('🎒 Inventory opened');
+          _onInventoryToggle?.call();
+        },
+      ),
+      
+      // inventory → exploring
+      StateTransition<EscapeRoomState>(
+        fromState: EscapeRoomState,
+        toState: EscapeRoomState,
+        condition: (from, to) => from == EscapeRoomState.inventory && to == EscapeRoomState.exploring,
+        onTransition: (from, to) {
+          debugPrint('🎒 Inventory closed');
+          _onInventoryToggle?.call();
+        },
+      ),
+      
+      // exploring → puzzle
+      StateTransition<EscapeRoomState>(
+        fromState: EscapeRoomState,
+        toState: EscapeRoomState,
+        condition: (from, to) => from == EscapeRoomState.exploring && to == EscapeRoomState.puzzle,
+        onTransition: (from, to) {
+          debugPrint('🧩 Puzzle started: $_currentPuzzleId');
+          if (_currentPuzzleId != null) {
+            _onPuzzleStart?.call(_currentPuzzleId!);
+          }
+        },
+      ),
+      
+      // puzzle → exploring
+      StateTransition<EscapeRoomState>(
+        fromState: EscapeRoomState,
+        toState: EscapeRoomState,
+        condition: (from, to) => from == EscapeRoomState.puzzle && to == EscapeRoomState.exploring,
+        onTransition: (from, to) {
+          debugPrint('🧩 Puzzle completed: $_currentPuzzleId');
+          _onPuzzleComplete?.call();
+          _currentPuzzleId = null;
+        },
+      ),
+      
+      // exploring → escaped
+      StateTransition<EscapeRoomState>(
+        fromState: EscapeRoomState,
+        toState: EscapeRoomState,
+        condition: (from, to) => from == EscapeRoomState.exploring && to == EscapeRoomState.escaped,
+        onTransition: (from, to) {
+          debugPrint('🎉 Escape success!');
+          _onEscapeSuccess?.call();
+        },
+      ),
+      
+      // any → timeUp
+      StateTransition<EscapeRoomState>(
+        fromState: EscapeRoomState,
+        toState: EscapeRoomState,
+        condition: (from, to) => to == EscapeRoomState.timeUp,
+        onTransition: (from, to) {
+          debugPrint('⏰ Time up!');
+        },
+      ),
+    ]);
+  }
+  
+  /// インベントリ表示（UI統合対応）
+  void showInventory() {
+    if (canTransitionTo(EscapeRoomState.inventory)) {
+      transitionTo(EscapeRoomState.inventory);
+    } else {
+      debugPrint('❌ Cannot show inventory from current state: ${currentState.name}');
+    }
+  }
+  
+  /// インベントリ非表示（UI統合対応）
+  void hideInventory() {
+    if (currentState == EscapeRoomState.inventory && 
+        canTransitionTo(EscapeRoomState.exploring)) {
+      transitionTo(EscapeRoomState.exploring);
+    } else {
+      debugPrint('❌ Cannot hide inventory from current state: ${currentState.name}');
+    }
+  }
+  
+  /// インベントリ切り替え（UI統合対応）
+  void toggleInventory() {
+    switch (currentState) {
+      case EscapeRoomState.exploring:
+        showInventory();
+        break;
+      case EscapeRoomState.inventory:
+        hideInventory();
+        break;
+      default:
+        debugPrint('❌ Cannot toggle inventory from state: ${currentState.name}');
+    }
+  }
+  
+  /// パズル開始（UI統合対応）
+  void startPuzzle(String puzzleId) {
+    if (currentState == EscapeRoomState.exploring && 
+        canTransitionTo(EscapeRoomState.puzzle)) {
+      _currentPuzzleId = puzzleId;
+      transitionTo(EscapeRoomState.puzzle);
+    } else {
+      debugPrint('❌ Cannot start puzzle from current state: ${currentState.name}');
+    }
+  }
+  
+  /// パズル完了（UI統合対応）
+  void completePuzzle() {
+    if (currentState == EscapeRoomState.puzzle && 
+        canTransitionTo(EscapeRoomState.exploring)) {
+      transitionTo(EscapeRoomState.exploring);
+    } else {
+      debugPrint('❌ Cannot complete puzzle from current state: ${currentState.name}');
+    }
+  }
+  
+  /// パズルキャンセル（UI統合対応）
+  void cancelPuzzle() {
+    if (currentState == EscapeRoomState.puzzle) {
+      debugPrint('🧩 Puzzle cancelled: $_currentPuzzleId');
+      _currentPuzzleId = null;
+      transitionTo(EscapeRoomState.exploring);
+    }
+  }
+  
+  /// アイテム選択（状態管理）
+  void selectItem(String itemId) {
+    _selectedItemId = itemId;
+    debugPrint('🎁 Item selected: $itemId');
+    notifyListeners(); // Observer Pattern通知
+  }
+  
+  /// アイテム選択解除
+  void deselectItem() {
+    _selectedItemId = null;
+    debugPrint('🎁 Item deselected');
+    notifyListeners(); // Observer Pattern通知
+  }
+  
+  /// ゲームデータ更新（パズル進行等）
+  void updateGameData(String key, dynamic value) {
+    _gameData[key] = value;
+    debugPrint('💾 Game data updated: $key = $value');
+    notifyListeners(); // Observer Pattern通知
+  }
+  
+  /// 脱出成功
+  void escapeSuccess() {
+    if (canTransitionTo(EscapeRoomState.escaped)) {
+      transitionTo(EscapeRoomState.escaped);
+    } else {
+      debugPrint('❌ Cannot escape from current state: ${currentState.name}');
+    }
+  }
+  
+  /// 時間切れ
+  void timeUp() {
+    if (canTransitionTo(EscapeRoomState.timeUp)) {
+      transitionTo(EscapeRoomState.timeUp);
+    }
+  }
+  
+  /// 現在の状態が操作可能かチェック
+  bool get canInteract => currentState == EscapeRoomState.exploring;
+  
+  /// インベントリが表示中かチェック
+  bool get isInventoryVisible => currentState == EscapeRoomState.inventory;
+  
+  /// パズル中かチェック
+  bool get isPuzzleActive => currentState == EscapeRoomState.puzzle;
+  
+  /// ゲーム終了状態かチェック
+  bool get isGameEnded => currentState == EscapeRoomState.escaped || 
+                         currentState == EscapeRoomState.timeUp;
+  
+  /// デバッグ情報取得（Observer Pattern状態確認）
+  @override
+  Map<String, dynamic> getDebugInfo() {
+    final baseInfo = super.getDebugInfo();
+    return {
+      ...baseInfo,
+      'currentPuzzleId': _currentPuzzleId,
+      'selectedItemId': _selectedItemId,
+      'gameDataSize': _gameData.length,
+      'canInteract': canInteract,
+      'isInventoryVisible': isInventoryVisible,
+      'isPuzzleActive': isPuzzleActive,
+      'isGameEnded': isGameEnded,
+    };
+  }
+}

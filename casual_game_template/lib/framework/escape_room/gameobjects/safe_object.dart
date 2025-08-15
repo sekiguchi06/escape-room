@@ -21,6 +21,7 @@ class SafeObject extends InteractableGameObject {
       requiredItemId: 'key',
       successMessage: '金庫が開いた！重要な書類を発見した',
       failureMessage: '金庫は鍵がかかっている。鍵が必要だ',
+      rewardItemId: 'code',  // 金庫から得られるアイテム
     ));
   }
   

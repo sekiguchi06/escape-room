@@ -1,0 +1,371 @@
+                                     パッケージやツールを導入する   4.1
+
+
+# 指定なし
+shared_preferences: any       ❻
+
+
+# 未指定
+shared_preferences:       ❼
+
+
+ 通常は❶のようなキャレット構文でバージョン番号を指定することが推奨
+されています。キャレット構文は、「指定したバージョンから、互換性のある
+最新のバージョンまで」の範囲を意味します。互換性の有無はセマンティック
+バージョニングというルールで決められており、この❶の例では 2.1.0 以上、
+3.0.0 未満を意味します。❷〜❹のように等号、不等号を組み合わせてバージ
+ョンの範囲を指定することも可能です。
+ ❺以降は推奨されない書き方になります。❺のようにバージョンを固定す
+ることもできますが、依存関係の解決が困難になる可能性があります。❻は
+すべてのバージョンを許可します。❼も同じ意味となります。
+ 最終的に解決されたバージョン番号は pubspec.lock に記録されます。チー
+ム開発を行う際には pubspec.lock を共有することで、メンバー間で同じバー
+ジョンで開発することを保証できます。
+
+
+
+ パッケージバージョンの更新方法
+ 導入しているパッケージの最新バージョンや、更新の可否は以下のコマン
+ドで確認できます。
+
+$ flutter pub outdated
+
+
+ 出力は図 4.2 のようになります。
+
+
+
+  Tips セマンティックバージョニングについて
+    pub はセマンティックバージョニングというルールに従って依存関係を解決
+  します。セマンティックバージョニングは、major.minor.patch の 3 つの数字で
+  バージョンを表現します。互換性のない変更があった際には major バージョン
+  が上がります。ただし、1.0.0 未満は特別でいかなる変更も起こり得るとされて
+  います。Dart のパッケージにおいては、慣習的に 1.0.0 未満で互換性のない変
+  更があった場合は minor バージョンを上げることとしています。
+
+
+
+                                                      111
+第
+    4 アプリの日本語化対応、アセット管理、環境変数
+          章
+
+
+
+
+              図 4.2     flutter pub outdated の出力例
+              Showing outdated packages.
+              [*] indicates versions that are not the latest available.
+
+              Package Name              Current   Upgradable Resolvable   Latest
+
+              direct dependencies:
+              shared_preferences        *2.1.0    2.1.1       2.1.1       2.1.1
+
+
+
+                出力されたバージョン番号は表 4.2 のような意味を表します。
+
+              表 4.2     バージョン番号の意味
+
+              バージョン名         解説
+              Current        pubspec.lock に記述されている現在のバージョン
+              Upgradable     pubspec.yaml に記述された範囲で解決可能な最新バージョン
+              Resolvable     pubspec.yaml の制約にかかわらず解決可能な最新バージョン
+              Latest         最新の安定リリースバージョン
+
+
+
+                図 4.2 の出力結果からパッケージ shared_preferences は、pubspec.yaml に記
+              述された範囲で最新の 2.1.1 に更新できるようです。
+               「Upgradable」
+                          のバージョンへ更新するには以下のコマンドを実行します。
+
+              $ flutter pub upgrade shared_preferences
+
+
+                更新されたパッケージとバージョンはターミナルに出力されます。
+              Resolving dependencies...
+              > shared_preferences 2.1.1 (was 2.0.0)
+
+                前項のキャレット構文を利用していれば互換性を保ったまま最新バージョ
+              ンに更新されますが、念のため関連するコードの動作確認やリリースノート
+              の確認を行いましょう。
+               「Resolvable」のバージョンへ更新するには --major-versions オプションを
+              付与します。pubspec.yaml も自動的に更新されますので注意してください。
+
+              $ flutter pub upgrade --major-versions shared_preferences
+
+
+               「Resolvable」のバージョンが「Latest」と異なる場合は、以下のコマンドを実
+              行し依存関係を調査してみましょう。競合する依存関係によって最新のバー
+              ジョンを利用できない場合があります。
+
+
+
+    112
+                                                       アプリを日本語に対応させる   4.2
+
+$ flutter pub deps
+
+
+
+ 以下は出力例です。パッケージの依存関係がツリー状に表示されます。こ
+こから競合する依存関係を探し、利用可能なバージョンを調整します。
+
+Dart SDK 2.19.5
+Flutter SDK 3.7.8
+flutter_playground 1.0.0+1
+└── shared_preferences 2.1.1
+    ├── flutter...
+    ├── shared_preferences_android 2.1.4
+    │   ├── flutter...
+    │   └── shared_preferences_platform_interface...
+    ├── shared_preferences_foundation 2.2.2
+    │   ├── flutter...
+    │   └── shared_preferences_platform_interface...
+    └── shared_preferences_platform_interface 2.2.0
+        ├── flutter...
+        └── plugin_platform_interface 2.1.4
+            └── meta...
+
+
+
+
+ 4.2
+ アプリを日本語に対応させる
+
+ Flutter は他の多くの UI フレームワークと同様に国際化するための機能が提
+供されています。「私の開発するアプリは日本語のみをサポートするから関係
+ないや」と思った読者の方はお待ちください。Flutter はデフォルト言語が英
+語で開発されているため、特に対応しなければ意図せず英語が表示されたり、
+英語圏の日付フォーマットが適用されたりします。そのため、日本向けのア
+プリを開発するためには、日本向けのローカライズが必要なのです。本章で
+は意図せず英語表示されるケースの紹介と、日本向けのローカライズ方法な
+どを紹介します。
+ Dart のソースコード以外に、プロジェクトの設定ファイルを変更する必要
+があります。本節の解説は新しいプロジェクトを作成し、そのプロジェクト
+に変更を加えながら進めていきます。プロジェクトの作成方法は第 1 章を参
+照してください。
+
+
+
+                                                                       113
+第
+    4 アプリの日本語化対応、アセット管理、環境変数
+          章
+
+
+
+
+                  意図せず英語表示されるケース
+                  それでは意図せず英語表示されるケースについて具体例を見ていきましょう。
+
+
+              フレームワークが提供する表示文字列
+                  ウィジェットの中には、Flutter フレームワークから表示文字列を提供する
+              ものがあります。Flutter はデフォルト言語が英語で開発されているため、特
+              別に対応しなければ英語でしか表示されません。例を見てみましょう。
+
+              ./lib/main.dart
+              import 'package:flutter/material.dart';
+
+              void main() {
+                  runApp(
+                      /* ◆ MaterialApp
+                      マテリアルデザインに準拠したテーマの提供や
+                      画面遷移の機能を内包したWidget */
+                      const MaterialApp(
+                         home: HomeScreen(),
+                      ),
+                  );
+              }
+
+              class HomeScreen extends StatelessWidget {
+                const HomeScreen({super.key});
+
+
+                  @override
+                  Widget build(BuildContext context) {
+                    /* ◆ Scaffold
+                    マテリアルデザインの基本的なレイアウトを提供するWidget */
+                    return Scaffold(
+                      body: Center(
+                        child: Column(
+                          // 子Widgetを中央へ寄せるためのパラメータ
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                             /* ◆ TextField
+                             ユーザーがテキスト入力するウィジェット */
+                             const TextField(),
+                          ],
+                           ),
+                        ),
+                      );
+                  }
+              }
+
+
+    114
+                                      アプリを日本語に対応させる   4.2
+
+  アプリを実行し、テキストフィールドに任意の文字を入力後、テキストフ
+ィールドをロングタップしてみましょう。すると、コンテキストメニューが
+表示されます（図 4.3）。
+
+図 4.3   英語のコンテキストメニューが表示される様子
+
+
+
+
+  コンテキストメニューは「Paste」や「Select All」などの項目が表示されます。
+これらの項目は、ローカライズする実装をしていないので、端末の言語設定
+を変更しても日本語に切り替わりません。
+
+
+日付フォーマット
+  続いて、現在日付を文字で表示する実装を試してみます。日時情報を扱う
+DateTime クラス、日付フォーマットを扱う DateFormat クラスを使います。
+  先ほどのサンプルに追加する形で実装します。DateFormat は intl パッケージ
+に含まれていますので、まずはこのパッケージを導入します。プロジェクトの
+ディレクトリで、ターミナルから以下のコマンドを実行してください。
+# intlパッケージを導入
+$ flutter pub add intl:any
+
+  ここではバージョンを指定せずに any を指定しています。通常、any でのバ
+ージョン指定は推奨されませんが、intl に関しては後述の flutter_localizations
+パッケージと併用し、flutter_localizations に依存したバージョンを採用する
+
+                                                      115
+第
+    4 アプリの日本語化対応、アセット管理、環境変数
+          章
+
+
+
+
+              ため、any を指定することが一般的です。この後 flutter_localizations を導入す
+              るので、ここでは any を指定しておきます。
+                  続いて、DateFormat クラスを使って現在日付をフォーマットした文字列を
+              表示するコードを追加します（❶）。
+
+               ./lib/main.dart
+              import 'package:flutter/material.dart';
+              import 'package:intl/intl.dart'; // intlパッケージをインポート
+
+              void main() {
+                  runApp(
+                    const MaterialApp(
+                       home: HomeScreen(),
+                    ),
+                  );
+              }
+
+              class HomeScreen extends StatelessWidget {
+                const HomeScreen({super.key});
+
+                  @override
+                  Widget build(BuildContext context) {
+                    return Scaffold(
+                       body: Center(
+                          child: Column(
+                             mainAxisAlignment: MainAxisAlignment.center,
+                             children: [
+                                const TextField(),
+                                Text(
+                                   DateFormat.yMEd().format(DateTime.now()),   ❶
+                                ),
+                             ],
+                          ),
+                       ),
+                    );
+                  }
+              }
+
+
+                  すると表示結果は図 4.4 のようになります。
+
+
+
+
+    116
+                                                             アプリを日本語に対応させる          4.2
+
+図 4.4   フォーマットされた日付が表示される様子
+
+
+
+
+  フォーマットされた日付文字列が表示されました。ただ、日本語圏では年
+→月→日の順で表示するのが一般的ですが、この表示は英語圏で一般的な月
+→日→年の順で表示されています。また、曜日も英語表記になっています。
+
+
+
+  アプリを日本にローカライズする
+  それでは Flutter アプリを日本語化する手順を紹介します。
+
+
+フレームワークが提供する表示文字列を日本語化する
+  フレームワークが提供する表示文字列はデフォルトでは英語のみでした。
+これらの翻訳情報は flutter_localizations パッケージとして提供されています。
+さっそく、パッケージを導入してみましょう。プロジェクトのディレクトリ
+で、ターミナルから以下のコマンドを実行してください。
+# flutter_localizationsパッケージを導入
+$ flutter pub add flutter_localizations --sdk=flutter
+
+  続いて、MaterialApp ウィジェットにいくつかパラメータを付与します。
+
+ ./lib/main.dart
+import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart'; // flutter_loc
+alizationsパッケージをインポート
+
+
+
+                                                                                    117
+第
+    4 アプリの日本語化対応、アセット管理、環境変数
+          章
+
+
+
+
+              import 'package:intl/intl.dart';
+
+              void main() {
+                  runApp(
+                    const MaterialApp(
+                      localizationsDelegates: [
+                         GlobalWidgetsLocalizations.delegate,
+                         GlobalMaterialLocalizations.delegate,    ❶
+                         GlobalCupertinoLocalizations.delegate,
+                       ],
+                       supportedLocales: [
+                         Locale('ja', 'JP'),   ❷
+                       ],
+                       home: HomeScreen(),
+                    ),
+                  );
+              }
+
+
+                  localizationsDelegates パラメータへ、表示文字列の翻訳情報などを持って
+              いる delegate を渡します（❶）
+                                 。マテリアルデザインに準拠したウィジェットで扱
+              う翻訳情報は、GlobalMaterialLocalizations.delegateに含まれています。iOS
+              スタイルのウィジェットで扱う翻訳情報は、GlobalCupertinoLocalizations.
+              delegateに含まれています。また、GlobalWidgetsLocalizations.delegateは、
+              テキストの方向（左から右、または右から左）を扱います。これらの delegate は、
+              flutter_localizations パッケージが提供しているものです。
+                  supportedLocales パラメータは、アプリがサポートするロケールを渡しま
+              す（❷）。Locale クラスのパラメータは、言語と地域で IANA（Internet Assigned
+              Numbers Authority）言語サブタグレジストリに準拠しています。今回は日本語
+              のみをサポートするので、ja と JP を渡します。
+                  それではアプリを実行してみましょう（図 4.5）。
+
+
+
+
+    118
+

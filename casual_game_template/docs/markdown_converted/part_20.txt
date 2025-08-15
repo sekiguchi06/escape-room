@@ -1,0 +1,267 @@
+                                                プロジェクトにアセットを追加する   4.3
+
+  パッケージを導入するためにプロジェクトのディレクトリで、ターミナル
+から以下のコマンドを実行してください。
+# flutter_svgパッケージを導入
+$ flutter pub add flutter_svg
+
+  flutter_gen は flutter_svg と組み合わせて利用することを想定して、オプシ
+ョンを用意しています。pubspec.yaml のトップレベルに flutter_gen セクシ
+ョンを追加します。
+
+ ./pubspec.yaml
+flutter_gen:
+   integrations:
+     flutter_svg: true
+
+
+  続いてプロジェクトに SVG 形式のアセットを追加します。assets フォルダ
+に図 4.15 の SVG 画像を配置します。
+
+
+
+図 4.15   SVG 形式のアイコン
+
+
+
+
+     ~/project_root
+     └── assets
+         └── check.svg
+
+
+  アセットを追加したら、コードを生成するコマンドを実行します。
+
+$ flutter packages pub run build_runner build
+
+
+  SVG 画像を描画するコードを書いてみましょう。
+ ./lib/main.dart
+import 'package:flutter/material.dart';
+import 'gen/assets.gen.dart';
+
+void main() {
+  runApp(
+    const MaterialApp(
+       home: HomeScreen(),
+    ),
+
+
+                                                                   135
+第
+    4 アプリの日本語化対応、アセット管理、環境変数
+          章
+
+
+
+
+                  );
+              }
+
+              class HomeScreen extends StatelessWidget {
+                  const HomeScreen({super.key});
+
+                  @override
+                  Widget build(BuildContext context) {
+                    return Scaffold(
+                        body: Center(
+                          child: Assets.check.svg(
+                             width: 72,
+                                                     ❶
+                             height: 72,
+                           ),
+                        ),
+                      );
+                  }
+              }
+
+
+
+                  SVG 画像を描画するコードに書き換えました（❶）。これで端末の解像度を
+              気にすることなく、画像アセットを扱うことができます。このコードを実行
+              すると、図 4.16 のように SVG 画像が表示されます。
+
+
+
+              図 4.16       SVG 画像を描画した様子
+
+
+
+
+    136
+                                                dart-define-from-file ── 環境変数を扱う   4.4
+
+その他のアセット
+    flutter_gen は画像アセットだけでなく、フォントや JSON ファイルなどのア
+セットにも対応しています。また、オプションで組み合わせて利用できるパ
+ッケージも flutter_svg 以外にいくつか用意されています。アプリで扱うアセ
+ットの種類が増えた場合は、pub.dev 注 3 を参照しサポートされているか確認し
+てみましょう。
+    また、既知の問題があるようで、ソースコードを自動生成する際にエラー
+が発生した際も同様に pub.dev を参照してください。
+
+
+
+    4.4
+    dart-define-from-file ── 環境変数を扱う
+
+    アプリを設計する際に、コードと設定を分離することは重要です。たとえ
+ば開発環境と本番環境で API のエンドポイントが異なる場合、環境を切り替
+えるためにコードを書き換えるのは良い運用とは言えません。ログレベルな
+ども同様です。こういった設定情報は環境変数として扱うことで、コードと
+分離することができます。
+
+
+
+    環境変数をJSON形式で記述する
+    Flutter の dart-define-from-file というしくみを利用することで、環境変
+数をコードから参照できます。例として、プロジェクトルートに define/env.
+json というファイルを作成し、以下の内容を記述します。
+
+ ./define/env.json
+{
+    "apiEndpoint": "https://example.com/api",
+    "logLevel": 1,
+    "enableDebugMenu": true
+}
+
+    このファイルのパスを Flutter のコマンドへ渡すことで、コードから参照で
+きるようになります。Android Studio で実行する場合は、「Run」➡「Edit
+Configurations」を選択し、「Run/Debug Configrations」ウィンドウを開きます
+
+
+注3    https://pub.dev/packages/flutter_gen
+
+
+                                                                                   137
+第
+    4 アプリの日本語化対応、アセット管理、環境変数
+          章
+
+
+
+
+              （図 4.17）
+                     。「Additional run args」に --dart-define-from-file= に続いて、
+              JSON ファイルのパスを記述します。今回の場合は --dart-define-from-
+              file=define/env.json となります。
+
+              図 4.17   Run/Debug Configrations ウィンドウ
+
+
+
+
+                環境変数をコードから参照する
+                Dart のコードから環境変数を参照するには、以下のように記述します。
+               const endpoint = String.fromEnvironment('apiEndpoint');
+               const logLevel = int.fromEnvironment('logLevel');
+               const enableDebugMenu = bool.fromEnvironment('enableDebugMenu');
+
+                String 型、int 型、bool 型のそれぞれに対応した fromEnvironment メソッ
+              ドを呼び出します。引数には環境変数のキーを指定します。
+                このとき必ず const 変数に代入するか、呼び出し側に const キーワードを付
+              与する必要があるので注意してください。これを忘れると環境変数が取得で
+              きず、デフォルト値が返されます。キーが間違っている場合も同様です。デ
+              フォルト値は fromEnvironment メソッドの第二引数で指定するか、未指定の
+              場合は表 4.3 の値が返されます。
+
+
+
+
+    138
+                                          まとめ   4.5
+
+表 4.3    fromEnvironment() のデフォルト値
+
+型         デフォルト値
+String    空文字
+int       0
+bool      false
+
+
+
+
+  4.5
+  まとめ
+
+    アプリのローカライズ、アセットの管理、環境変数の扱い方を紹介しました。
+    Flutter は、たとえ日本語だけをサポートするアプリであっても、しっかり
+と対応しなければ意図せず英語が表示されてしまうことがあります。ローカ
+ライズ対応は少々手間ですが、はじめに整えておくことでメッセージの管理
+にも役立ちます。
+    アセットはパス文字列にタイプミスの懸念があるので flutter_gen を利用し
+て安全に扱うことが望ましいです。また、解像度別の画像を用意するのは手
+間がかかりますので、SVG 形式のファイルを使うのがお勧めです。
+    コードと設定を分離する手法として、環境変数を扱う方法を紹介しました。
+    本章で紹介した内容は、製品レベルのアプリを開発、保守していくうえで
+重要な要素です。もちろん要件によっては不要な要素もあるでしょうが、採
+用するか否かをはじめに検討しておくことで、後々の開発がスムーズに進む
+ことでしょう。
+
+
+
+
+                                                139
+       第
+
+
+
+テーマとルーティング
+           5   章
+
+
+
+
+                   141
+第
+    5 テーマとルーティング
+          章
+
+
+
+
+               本章では Flutter フレームワークの機能を紹介します。その中でも
+                                                 「テーマ」
+              「画面遷移」この 2 点に的を絞って解説します。筆者の経験上、この 2 つの要
+              素はおおよそどのようなアプリを開発する場合にも知識として必要になり、
+              後工程での方針変更は手間がかかることがあります。
+               前章は、はじめに整えておくべき要素を紹介しました。本章では、はじめに
+              設計しておくとよい要素として、フレームワークの 2 つの要素を紹介します。
+               なお、本章では解説に重きを置くため、関連したコードの断片を掲載して
+              いますので、省略されている部分がある点に留意してください。完全なサン
+              プルコードの場合は、その旨を明記しています。手もとで動作確認する際
+              は、./lib/main.dart を書き換えてください。
+
+
+
+               5.1
+               テーマ ── アプリ全体のヴィジュアルを管理
+
+               アプリ全体を通した色やフォントを定義し、適用する方法を解説します。
+              アプリの UI で一貫した世界観を演出したり、視覚的にわかりやすいことは重
+              要です。
+               本節では「アプリ全体を通した色やフォントの定義」をテーマと呼ぶことに
+              し、テーマに関する 2 つの機能を解説します。1 つ目はアプリのテーマを自動
+              的に計算し適用する機能、2 つ目はアプリ独自のテーマを管理し適用する機
+              能です。
+
+
+
+               フレームワークによるテーマの自動計算機能
+               まずはテーマの自動計算機能を確認しましょう。Flutter のテンプレートプ
+              ロジェクトで動作を確認します。第 1 章で解説した方法で新たにプロジェク
+              トを作成し、アプリを実行します。
+
+              import 'package:flutter/material.dart';
+
+
+              void main() {
+                runApp(const MyApp());
+              }
+
+              class MyApp extends StatelessWidget {
+
+
+
+    142
+

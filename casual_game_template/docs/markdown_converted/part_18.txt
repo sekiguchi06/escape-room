@@ -1,0 +1,366 @@
+                                                                 アプリを日本語に対応させる   4.2
+
+図 4.5      コンテキストメニューが日本語になった様子
+
+
+
+
+  テキストフィールドのコンテキストメニューは日本語になりました。しか
+し、現在日時の表記は英語のままです。
+
+
+日付フォーマットを日本語化する
+  DateFormat など intl パッケージの API は、独自のデフォルトロケールにし
+たがって動作します。このデフォルトロケールは、Intl.defaultLocale で取
+得や設定ができます。
+
+ ./lib/main.dart
+class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
+
+
+   @override
+   Widget build(BuildContext context) {
+     // Intl.defaultLocale = 'ja';    ❶
+        Intl.defaultLocale = Localizations.localeOf(context).toString();   ❷
+        return Scaffold(
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const TextField(),
+                Text(
+                   DateFormat.yMEd().format(DateTime.now()),
+                ),
+
+
+                                                                                 119
+第
+    4 アプリの日本語化対応、アセット管理、環境変数
+          章
+
+
+
+
+                             ],
+                           ),
+                        ),
+                      );
+                  }
+              }
+
+                  ❶のように、デフォルトロケールに固定値を設定することも可能ですが、の
+              ちに複数の言語に対応することになったときのために❷のように設定すること
+              もできます。❷は Localizations クラスからロケールを取得してデフォルトロ
+              ーケルを設定しています。Localizations クラスから取得できるロケールは、端
+              末の言語設定をベースに MaterialApp ウィジェットの supportedLocales パラメ
+              ータで渡したロケールの中から最適なロケールが選択されます。今回のケース
+              では、supportedLocales に Locale('ja', 'JP')のみ設定しているので、端末の
+              言語設定がなんであれ ja_JP が返却されます。
+                                                 （図
+                  デフォルトローケルを設定したので、再度アプリを実行してみましょう
+              4.6）。
+
+              図 4.6        日付の表記が日本語になった様子
+
+
+
+
+                  現在日時の表記が日本語になりました。これでアプリを日本語化する対応
+              は完了ですが、iOS アプリをアプリストアに公開する際はもう一つ対応が必
+              要です。
+
+
+
+
+    120
+                                                             アプリを日本語に対応させる         4.2
+
+iOSアプリの対応言語を設定する
+ 次に設定する内容は、主にアプリストア
+                  （App Store）に表示されるアプリの
+対応言語に影響します。修正するファイルは、ios/Runner/Info.plist です。
+ Info.plist はアプリの構成情報を記述する XML 形式のファイルです。
+CFBundleLocalizations キーにサポートする言語を記述します。
+
+./ios/Runner/Info.plist
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/
+PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- 省略 -->
+    <key>CFBundleLocalizations</key>
+    <array>
+        <string>ja</string>
+    </array>
+</dict>
+</plist>
+
+ 今回は日本語のみをサポートするので、ja を設定します。このキーには、
+MaterialApp ウィジェットの supportedLocales パラメータで渡したロケール
+と同じ言語を記述することが、Flutter として推奨されています。
+
+
+
+ メッセージをローカライズする
+ 続いて、アプリ内で表示する独自の文字列（本項では
+                        「メッセージ」と呼ぶこ
+とにします）
+     をローカライズする方法を紹介します。筆者は日本語のみをサポ
+ートするアプリの場合も、ここで紹介する方法を使ってメッセージを扱うこ
+とがあります。メッセージの管理がしやすいことや、将来的に複数言語に対
+応する際にコストが下がるからです。
+ メッセージのローカライズについても intl パッケージが提供しています。
+arb ファイルという JSON 形式のファイルにメッセージを記述し、コードジェ
+ネレータを使って、Dart のコードに変換します。さっそくやってみましょう。
+
+
+コードジェネレータを設定する
+ pubspec.yaml を編集し、コードジェネレータを有効にします。
+
+
+
+
+                                                                                   121
+第
+    4 アプリの日本語化対応、アセット管理、環境変数
+          章
+
+
+
+
+               ./pubspec.yaml
+               flutter:
+                   generate: true      ❶
+
+
+                   コードジェネレータの設定は、flutter セクションに記述します（❶）。生
+              成されたコードをプロジェクトから参照できるように以下のコマンドを実行
+              します。
+
+               $ flutter pub get
+
+
+                   続いて、ローカライズの構成ファイルを作成します。プロジェクトルート
+              に l10n.yaml というファイルを作成し、以下の内容を記述します。「l10n」は
+              「Localization」の略です（はじまりが
+                                     「L」、終わりが「n」で、その間が 10 文字あ
+                「l10n」
+              るので    ）。
+
+               ./l10n.yaml
+               template-arb-file: app_ja.arb   ❶
+               output-class: L10n     ❷
+               nullable-getter: false    ❸
+
+
+                   ❶は arb ファイルのテンプレートファイルです。後述の属性を記述するフ
+              ァイルを指定します。
+                   ❷はコードジェネレータが生成するローカライズクラスのクラス名を指定
+                       「AppLocalizations」ですが、筆者はタイプ数を減らすた
+              します。デフォルトは
+               「L10n」
+              めに    に変更することが多いです。
+                   ❸は、ローカライズクラスのゲッタが null 許容型かどうかを指定します。
+              Flutter の後方互換性のためにデフォルトは null 許容型となっていますので、
+              可能であれば false にしておきましょう。
+
+
+              arbファイルを作成する
+                   続いて、lib/l10n ディレクトリを作成し、その中に app_ja.arb というファ
+              イルを作成します。
+
+               ./lib/l10n/app_ja.arb
+               {
+                   "helloWorld": "こんにちは世界！",
+                   "@helloWorld": {
+                     "description": "お決まりの挨拶"
+                   }
+               }
+
+
+
+    122
+                                                             アプリを日本語に対応させる   4.2
+
+ キーhelloWorld に対して、日本語のメッセージを記述しました。キーの先
+頭 に @ を付 け る と、そ のキ ーは 属性 を 記述 す る キ ー と し て 扱わ れ ま す。
+helloWorld の description 属性   として " お決まりの挨拶 " と記述してお
+                           （説明）
+きました。
+ そして次のコマンドを実行します。
+
+$ flutter gen-l10n
+
+
+ すると、.dart_tool/flutter_gen/gen_l10n ディレクトリに arb ファイルを
+もとに生成された Dart ファイル（app_localizations.dart）が出力されます。
+このファイルにメッセージを扱うためのコードが記述されています。次項で
+このファイルをインポートしてメッセージを表示するコードを書いてみまし
+ょう。
+
+
+ローカライズされたメッセージを表示する
+ それではメッセージを表示するコードを書いてみましょう。
+
+ ./lib/main.dart
+import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';    ❶
+// import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:intl/intl.dart';
+
+void main() {
+  runApp(
+    const MaterialApp(
+      /*
+      localizationsDelegates: [
+         GlobalMaterialLocalizations.delegate,
+         GlobalWidgetsLocalizations.delegate,
+         GlobalCupertinoLocalizations.delegate,
+      ],
+      */
+      localizationsDelegates: L10n.localizationsDelegates,    ❷
+      /*
+      supportedLocales: [
+         Locale('ja'),
+      ],
+      */
+      supportedLocales: L10n.supportedLocales,    ❸
+       home: HomeScreen(),
+    ),
+  );
+
+
+                                                                             123
+第
+    4 アプリの日本語化対応、アセット管理、環境変数
+          章
+
+
+
+
+              }
+
+              class HomeScreen extends StatelessWidget {
+                  const HomeScreen({super.key});
+
+                  @override
+                  Widget build(BuildContext context) {
+                      Intl.defaultLocale = Localizations.localeOf(context).toString();
+                      final l10n = L10n.of(context);    ❹
+                      return Scaffold(
+                        body: Center(
+                           child: Column(
+                             mainAxisAlignment: MainAxisAlignment.center,
+                             children: [
+                               const TextField(),
+                                Text(
+                                  DateFormat.yMEd().format(DateTime.now()),
+                                ),
+                                Text(l10n.helloWorld),    ❺
+                             ],
+                           ),
+                        ),
+                      );
+                  }
+              }
+
+
+
+                  まず生成されたコードをインポートします（❶）。次に MaterialApp のパラ
+              メータを調整します。localizationsDelegates と supportedLocales を、コー
+              ド生成されたものに置き換えます（❷、❸）。
+                  L10n.localizationsDelegates は flutter_localizations が提供する delegate に
+              加え、❹で取得しているローカライズファイルをロードする delegate も含ま
+              れています。L10n.supportedLocales は arb ファイルが用意された言語が格納
+              されています。
+                  続いて、生成されたローカライズクラスを取得します（❹）。クラス名は
+              l10n.yaml ファイルの output-class で指定した L10n です。
+                  このクラスは arb ファイルのキーに対応するプロパティを持ちます。先ほ
+              ど作成した arb ファイルには helloWorld というキーを記述しましたので、L10n
+              クラスは helloWorld というプロパティを持ちます。それを取り出して Text ウ
+              ィジェットに渡しているのが❺です。
+                  エディタで helloWorld プロパティにカーソルを合わせると、arb ファイル
+              の description 属性の値が表示されます（図 4.7）。
+
+    124
+                                               アプリを日本語に対応させる   4.2
+
+図 4.7   メッセージが表示される様子
+
+
+
+
+    以上でローカライズされたメッセージの設定が完了しました。
+
+
+
+    arbファイルの扱い方
+    そのほか便利な arb ファイルの記述方法や、複数の言語に対応する方法を
+紹介します。
+
+
+プレースホルダ
+    arb ファイルにはプレースホルダという機能があります。例として検索機能
+のあるアプリを考えてみましょう。検索結果の件数を表示するメッセージを
+表示するとします。
+
+ ./lib/l10n/app_ja.arb
+{
+    // 省略
+    "numOfSearchResult": "検索結果は{count}件です。",
+    "@numOfSearchResult": {
+      "description": "検索結果"
+    }
+}
+
+
+    {count} の部分がプレースホルダです。キーnumOfSearchResult に対応する
+メソッドが生成され、引数として count を受け取ります。動作を確認する際
+
+                                                               125
+第
+    4 アプリの日本語化対応、アセット管理、環境変数
+          章
+
+
+
+
+              は、以下のコマンドを実行してローカライズクラスを再生成してください。
+
+              $ flutter gen-l10n
+
+              Text(l10n.numOfSearchResult(1)),
+              // => 検索結果は1件です。
+
+
+                  プレースホルダは属性で型を指定したほうが安全です（図 4.8）。
+
+              図 4.8   プレースホルダを利用してメッセージをした様子
+
+
+
+
+               ./lib/l10n/app_ja.arb
+              {
+                  // 省略
+                  "numOfSearchResult": "検索結果は{count}件です。",
+                  "@numOfSearchResult": {
+                    "description": "検索結果",
+                    "placeholders": {
+                      "count": {
+                        "type": "int"
+                      }
+                    }
+                  }
+              }
+
+
+
+              単数形と複数形の対応
+                  日本語ではあまり意識しませんが、英語のように単数形と複数形でメッセ
+              ージを変える言語もあります。これを実現するための機能があります。
+
+    126
+

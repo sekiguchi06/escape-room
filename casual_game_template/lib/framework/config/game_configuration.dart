@@ -269,3 +269,87 @@ class ConfigurationHistoryEntry<TConfig> {
     required this.reason,
   });
 }
+
+/// 脱出ゲーム専用設定
+/// 移植ガイド準拠実装
+class EscapeRoomConfig {
+  final Duration timeLimit;
+  final int maxInventoryItems;
+  final List<String> requiredItems;
+  final String roomTheme;
+  final int difficultyLevel;
+  
+  const EscapeRoomConfig({
+    this.timeLimit = const Duration(minutes: 10),
+    this.maxInventoryItems = 8,
+    this.requiredItems = const ['key', 'code', 'tool'],
+    this.roomTheme = 'office',
+    this.difficultyLevel = 1,
+  });
+  
+  /// 設定のコピー作成
+  EscapeRoomConfig copyWith({
+    Duration? timeLimit,
+    int? maxInventoryItems,
+    List<String>? requiredItems,
+    String? roomTheme,
+    int? difficultyLevel,
+  }) {
+    return EscapeRoomConfig(
+      timeLimit: timeLimit ?? this.timeLimit,
+      maxInventoryItems: maxInventoryItems ?? this.maxInventoryItems,
+      requiredItems: requiredItems ?? this.requiredItems,
+      roomTheme: roomTheme ?? this.roomTheme,
+      difficultyLevel: difficultyLevel ?? this.difficultyLevel,
+    );
+  }
+  
+  /// JSONシリアライゼーション
+  Map<String, dynamic> toJson() {
+    return {
+      'timeLimit': timeLimit.inMinutes,
+      'maxInventoryItems': maxInventoryItems,
+      'requiredItems': requiredItems,
+      'roomTheme': roomTheme,
+      'difficultyLevel': difficultyLevel,
+    };
+  }
+  
+  /// JSONからの復元
+  factory EscapeRoomConfig.fromJson(Map<String, dynamic> json) {
+    return EscapeRoomConfig(
+      timeLimit: Duration(minutes: json['timeLimit'] ?? 10),
+      maxInventoryItems: json['maxInventoryItems'] ?? 8,
+      requiredItems: List<String>.from(json['requiredItems'] ?? ['key', 'code', 'tool']),
+      roomTheme: json['roomTheme'] ?? 'office',
+      difficultyLevel: json['difficultyLevel'] ?? 1,
+    );
+  }
+  
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is EscapeRoomConfig &&
+      other.timeLimit == timeLimit &&
+      other.maxInventoryItems == maxInventoryItems &&
+      other.requiredItems.toString() == requiredItems.toString() &&
+      other.roomTheme == roomTheme &&
+      other.difficultyLevel == difficultyLevel;
+  }
+  
+  @override
+  int get hashCode {
+    return Object.hash(
+      timeLimit,
+      maxInventoryItems,
+      requiredItems,
+      roomTheme,
+      difficultyLevel,
+    );
+  }
+  
+  @override
+  String toString() {
+    return 'EscapeRoomConfig(timeLimit: $timeLimit, maxItems: $maxInventoryItems, items: $requiredItems, theme: $roomTheme, difficulty: $difficultyLevel)';
+  }
+}

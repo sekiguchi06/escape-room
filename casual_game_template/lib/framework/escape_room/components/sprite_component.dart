@@ -1,4 +1,5 @@
 import 'package:flame/components.dart';
+import 'package:flutter/foundation.dart';
 
 /// 画像表示コンポーネント
 /// 🎯 目的: スプライト管理機能を提供
@@ -12,9 +13,9 @@ class SpriteRenderComponent extends Component {
     for (final entry in spritePaths.entries) {
       try {
         _sprites[entry.key] = await Sprite.load(entry.value);
-        print('Loaded sprite: ${entry.key} from ${entry.value}');
+        debugPrint('Loaded sprite: ${entry.key} from ${entry.value}');
       } catch (e) {
-        print('Failed to load sprite: ${entry.key} from ${entry.value}, error: $e');
+        debugPrint('Failed to load sprite: ${entry.key} from ${entry.value}, error: $e');
       }
     }
   }
@@ -55,7 +56,7 @@ class SpriteRenderComponent extends Component {
         _spriteComponent!.size = (parent as PositionComponent).size;
       }
       add(_spriteComponent!);
-      print('Updated sprite to state: $_currentState');
+      debugPrint('Updated sprite to state: $_currentState');
     }
   }
   

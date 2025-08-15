@@ -1,0 +1,317 @@
+                                                          画像編集画面を作成する   6.7
+
+図 6.10   画像編集画面
+
+
+
+
+  アイコンを追加する ── flutter_genによるアセット管理
+  先ほど IconButton ウィジェットに Flutter フレームワーク組み込みのアイコ
+ンを設定しましたが、アプリ独自のアイコンに置き換えてみましょう。
+  アセットを扱うために flutter_gen を利用します。パッケージを導入するた
+めにプロジェクトのディレクトリで、ターミナルから以下のコマンドを実行
+してください。
+
+# build_runnerパッケージとflutter_gen_runnerパッケージを導入
+$ flutter pub add --dev build_runner flutter_gen_runner
+# flutter_svgパッケージを導入
+$ flutter pub add flutter_svg
+
+
+  flutter_gen を使用するために flutter_gen_runner と build_runner パッケージを
+導入しました。SVG ファイルを扱うために flutter_svg パッケージも導入しました。
+  flutter_gen で SVG ファイルを有効にするため、pubspec.yaml に以下の設定
+を追加します。
+ ./pubspec.yaml
+# 省略
+flutter_gen:
+  integrations:
+    flutter_svg: true
+
+  続いてプロジェクトに独自のアイコンをアセットとして追加します。今回
+
+                                                                        207
+第
+    6 実践ハンズオン❶
+          章
+              画像編集アプリを開発
+
+
+
+
+              は iconmonstr というサイトからアイコンを利用させてもらいます。
+
+              ・https://iconmonstr.com/
+
+                イメージを検索して、SVG ファイルをダウンロードします。今回は「Refresh
+              - Lined」と「Layout Vertical - Lined」というアイコンをダウンロードし、それぞ
+              れ rotate_icon.svg と flip_icon.svg という名前で保存します。
+                ダウンロードしたファイルを以下のように assets フォルダに配置します。
+                  ~/project_root
+                  └── assets
+                      ├── flip_icon.svg
+                      └── rotate_icon.svg
+
+                pubspec.yaml にて、assets キーを追加します。
+
+               ./pubspec.yaml
+              # 省略
+
+              flutter:
+                # 省略
+                assets:
+                  - assets/
+
+
+                アセットの追加が完了したら、以下のコマンドを実行してアイコンを扱う
+              コードを生成します。
+
+              $ flutter packages pub run build_runner build
+
+
+                それでは追加したアイコンをコードに反映させましょう。
+
+               ./lib/edit_snap_screen.dart
+              import 'package:edit_snap/gen/assets.gen.dart';    ❶
+              // 省略
+              class _ImageEditScreenState extends State<ImageEditScreen> {
+
+                @override
+                Widget build(BuildContext context) {
+                  final l10n = L10n.of(context);
+                  return Scaffold(
+                    appBar: AppBar(
+                       backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+                       title: Text(l10n.imageEditScreenTitle),
+                    ),
+                    body: Center(
+                       child: Column(
+                         mainAxisAlignment: MainAxisAlignment.center,
+
+
+    208
+                                                           画像編集画面を作成する   6.7
+
+               children: [
+                  Image.memory(widget.imageBitmap),
+                  IconButton(
+                    onPressed: () {},
+                    icon: Assets.rotateIcon.svg(
+                      width: 24,
+                                                       ❷
+                       height: 24,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () {},
+                    icon: Assets.flipIcon.svg(
+                       width: 24,
+                                                   ❸
+                       height: 24,
+                    ),
+                  ),
+               ],
+             ),
+          ),
+        );
+    }
+}
+
+
+
+                              （❶）
+    flutter_gen が生成したコードをインポートし 、IconButtonウィジェットの
+                                           （❷、
+iconプロパティに flutter_gen で生成したコードからアイコンを設定しました
+❸）
+ 。アプリを実行してアイコンが変更されていることを確認しましょう
+                               （図6.11）
+                                     。
+
+図 6.11       アイコンを変更した画像編集画面
+
+
+
+
+                                                                         209
+第
+    6 実践ハンズオン❶
+          章
+              画像編集アプリを開発
+
+
+
+
+               画像を編集する処理を実装する
+               画像を回転、反転させる処理を実装します。
+
+              ./lib/edit_snap_screen.dart
+              // 省略
+              import 'package:image/image.dart' as image_lib;    ❶
+
+
+              // 省略
+
+              class _ImageEditScreenState extends State<ImageEditScreen> {
+
+                late Uint8List _imageBitmap;      ❷
+
+
+                @override
+                void initState() {
+                  super.initState();
+                                                         ❸
+                    _imageBitmap = widget.imageBitmap;
+                }
+
+
+                void _rotateImage() {    ❹
+                  // 画像データをデコードする
+                  final image = image_lib.decodeImage(_imageBitmap);
+                  if (image == null) return;
+                  // 画像を時計回りに90°回転する
+                  final rotateImage = image_lib.copyRotate(image, angle: 90);
+                  // 画像をエンコードして状態を更新する
+                  setState(() {
+                    _imageBitmap = image_lib.encodeBmp(rotateImage);
+                  });
+                }
+
+
+                void _flipImage() {     ❺
+                  // 画像データをデコードする
+                  final image = image_lib.decodeImage(_imageBitmap);
+                  if (image == null) return;
+                  // 画像を水平方向に反転する
+                  final flipImage = image_lib.copyFlip(
+                     image,
+                     direction: image_lib.FlipDirection.horizontal,
+                  );
+                  // 画像をエンコードして状態を更新する
+                  setState(() {
+                     _imageBitmap = image_lib.encodeBmp(flipImage);
+                  });
+                }
+
+
+
+    210
+                                                                    画像編集画面を作成する   6.7
+
+    @override
+    Widget build(BuildContext context) {
+      final l10n = L10n.of(context);
+        return Scaffold(
+          appBar: AppBar(
+            backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+             title: Text(l10n.imageEditScreenTitle),
+          ),
+          body: Center(
+             child: Column(
+               mainAxisAlignment: MainAxisAlignment.center,
+               children: [
+                  Image.memory(_imageBitmap),      ❻
+                  IconButton(
+                    onPressed: () => _rotateImage(),       ❼
+                    icon: Assets.rotateIcon.svg(
+                      width: 24,
+                      height: 24,
+                    ),
+                  ),
+                  IconButton(
+                     onPressed: () => _flipImage(),    ❽
+                     icon: Assets.flipIcon.svg(
+                        width: 24,
+                        height: 24,
+                     ),
+                  ),
+               ],
+             ),
+          ),
+        );
+    }
+}
+
+    画像の加工処理を実装するために image パッケージをインポートしました
+（❶）
+  。ここでも Image ウィジェットと名前が競合するため、as キーワードに
+続けて image_lib という別名を付けています。
+    ウィジェットの State クラスである _ImageEditScreenState に、画像のバイ
+ト列を格納するためのクラス変数 _imageBitmap を定義しました（❷）。_
+imageBitmap の初期化は initState メソッドにて ImageEditScreen 画面のフィ
+ールド imageBitmap から画像のバイト列を取得することで行います（❸）。
+initState メソッドは StatefulWidget のライフサイクルメソッドの一つで、ウ
+ィジェットが生成されたときに一度だけ呼び出されるメソッドなので State
+クラスの初期化処理に適しています。
+
+                                                                                  211
+第
+    6 実践ハンズオン❶
+          章
+              画像編集アプリを開発
+
+
+
+
+                画像を回転させる処理（❹）と画像を反転させる処理（❺）はそれぞれ image
+              パッケージを利用して実装しました。加工済みの画像データを _imageBitmap
+                                                （❻）
+              に格納し、setState メソッドを呼び出すことで画面を再描画します  。そ
+                                              （❼、
+              れぞれのメソッドはボタンがタップされたときに呼び出すようにしました
+              ❽）。
+                これで画像を編集する処理が実装できました。アプリを実行し、画像を回
+              転、反転させてみましょう（図 6.12）。
+
+              図 6.12   画像を編集した様子
+
+
+
+
+                6.8
+                まとめ
+
+                画像ライブラリから取得した画像を回転、反転させて編集するアプリを作
+              成しました。画像の取得には image_picker パッケージを、画像の加工には
+              image パッケージを利用しました。
+                第 4 章で学んだアプリ開発の土台づくりを踏まえ、アプリをしっかりと日
+              本語化し、アプリ内のメッセージは arb ファイルに集約しました。アイコン
+              をアセットとしてプロジェクトに追加し、flutter_gen を利用して安全にアイ
+              コンを扱うコードを生成しました。
+                第 5 章で学んだ内容として、簡易的にテーマをアレンジすることにも挑戦
+
+    212
+                                                        まとめ   6.8
+
+しました。画面遷移はシンプルな要件のため、Navigator 1.0 の API で十分に
+対応できました。
+
+
+
+
+ Tips WidgetとStateのライフサイクルについて
+   _ImageEditScreenState クラスでは、わざわざ ImageEditScreen ウィジェット
+ のフィールド imageBitmap から画像のバイト列を取得していました（❸）。この
+ _imageBitmap の初期化処理は、以下のように _ImageEditScreenState クラスの
+ コンストラクタで受け取る実装も考えられます。
+
+  ./lib/edit_snap_screen.dart
+  class _ImageEditScreenState extends State {
+
+    _ImageEditScreenState(this._imageBitmap);
+
+
+    final Uint8List _imageBitmap;
+  // 省略
+
+   しかし、このように State クラスのコンストラクタでデータを受け取ること
+ は推奨されません。理由はウィジェットよりも State のライフサイクルが長い
+ ためです。ウィジェットが異なるパラメータで再生成されたときに、State は
+ 再生成されずにそのまま使い回されることがあります。そのとき、ウィジェッ
+ トと State の間で状態の不一致が発生する可能性があります。詳しくは第 9 章を
+ ご覧ください。
+
+
+
+                                                              213
+

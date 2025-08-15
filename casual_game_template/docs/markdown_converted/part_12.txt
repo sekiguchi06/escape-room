@@ -1,0 +1,443 @@
+                                            クラス   2.12
+
+enum Shape {
+    circle, triangle, square,
+}
+
+
+    フィールドやメソッド、constant コンストラクタを持った高機能な Enum も
+宣言できます。通常のクラスに似た構文ですが、いくつかの条件があります。
+
+・1 つ以上のインスタンスすべてが冒頭で宣言されていなくてはならない
+・インスタンス変数は final でなければならない
+                         （mixin で追加されるものも同様）
+・コンストラクタは constant コンストラクタまたは factory コンストラクタが宣
+ 言可能
+・他のクラスを継承することはできない
+・index、hashCode、== 演算子をオーバーライドすることはできない
+・values という名前のメンバを宣言することができない
+
+
+// フィールドやfactoryコンストラクタを持ったEnum
+enum Shape {
+  circle(corner: 0),
+  triangle(corner: 3),
+  square(corner: 4);
+
+    final int corner;
+
+    const Shape({
+      required this.corner,
+    });
+
+    factory Shape.ellipse() {
+      return circle;
+    }
+}
+
+// factoryコンストラクタからインスタンスを取得
+final ellipse = Shape.ellipse();
+// フィールドにアクセス
+print(ellipse.corner);
+// => 0
+
+
+
+Enumの利用
+    Enum の型名に続きドット（.）のあとに列挙子名でアクセスすることができ
+ます。
+
+
+
+                                                   71
+第
+    2 Dartの言語仕様
+         章
+
+
+
+
+             final myShape = Shape.circle;
+             assert(myShape == Shape.circle);
+
+               各列挙子には宣言された順に index が振られ、ゲッタから取得できます。ま
+             た列挙子の名前を String 型で取得できる name プロパティも生成されます。
+             final myShape = Shape.circle;
+             print(myShape.index);
+             // => 0
+             print(myShape.name);
+             // => circle
+
+               Enum の型にはすべての列挙子をリストで得られる values プロパティも生
+             成されます。
+
+             Shape.values.forEach((shape) {
+               print(shape.name);
+             });
+             // => circle
+             // => triangle
+             // => square
+
+
+
+
+              クラス修飾子
+               クラス修飾子はクラスやミックスインに付与し、インスタンス化や継承に
+             制限を与えます。その効果はさまざまありますが、本書では以下のように分
+             類してみました。
+
+
+             ・タイプ 1
+              インスタンス化、extends キーワードによる継承、implements キーワードによる実
+              装、これらに制限を与える
+             ・タイプ 2
+              タイプ 1 以外の効果を持つ修飾子（タイプ 1 の効果を併せ持つ場合もある）
+
+
+               以下はクラス修飾子の一覧です。
+
+             ・abstract
+             ・base
+             ・final
+             ・interface
+             ・sealed
+
+
+    72
+                                                             クラス   2.12
+
+・mixin
+
+
+abstract
+    abstract 修飾子はタイプ 1 です。
+
+    インスタンス化           extends キーワードによる継承   implements キーワードによる実装
+         ×                      〇                   〇
+
+
+    abstract 修飾子を使って宣言されたクラスは本体のない関数を宣言できま
+す。またクラスをインスタンス化できなくなります。
+
+abstract class Animal {
+    String greet(); // 本体のないabstract関数
+}
+
+
+class Dog extends Animal {
+  @override
+  String greet() => 'bowwow';
+}
+
+
+// インスタンス化はできない
+// final animal = Animal();
+
+Animal dog = Dog();
+print(dog.greet());
+// => bowwow
+
+
+base
+    base 修飾子はタイプ 1 です（表は自身が宣言されたライブラリ以外での制限
+を示しています）。
+
+    インスタンス化           extends キーワードによる継承   implements キーワードによる実装
+         〇                      〇                   ×
+
+
+    base 修飾子を使って宣言されたクラスは自身が宣言されたライブラリ以外
+では implements キーワードを使った実装を禁止します。
+
+ ライブラリ1
+base class Animal {
+  String greet() {
+    return 'hello';
+  }
+}
+
+
+                                                                    73
+第
+    2 Dartの言語仕様
+         章
+
+
+
+
+             ライブラリ2
+
+
+             // クラスの継承はOK。Dogクラスにもbase修飾子を付与しなければならない理由は後述。
+             base class Dog extends Animal {
+             }
+
+
+             // クラスの実装はNG、コンパイルエラー
+             // base class Cat implements Animal {
+             //     @override
+             // String greet() => 'mew';
+             // }
+
+             final animal = Animal(); // インスタンス化はOK
+
+
+             final dog = Dog();
+             print(dog.greet());
+             // => hello
+
+
+                 implements キーワードを使ったクラスの実装が自身のライブラリ内に限定さ
+             れるため、プライベートメソッドも含めて実装を強制することになります。base
+             修飾子を使う目的はプライベートメソッドまで含めて全体の整合性を保つこと
+             にあります。そのため、base 修飾子を使って宣言されたクラスはライブラリ外
+             でもbase 修飾子か、同じように実装を制限するクラス修飾子を付与しなければ
+             なりません。上の例では Dog クラスにもbase 修飾子を付与しています。
+
+             ライブラリ1
+
+
+             base class Animal {
+               void _sleep() {
+                 print('sleep');
+               }
+
+                 String greet() {
+                   return 'hello';
+                 }
+             }
+
+
+             // 同一ライブラリ内であればクラスの実装OK
+             base class Cat implements Animal {
+
+                 // 同一ライブラリ内なのでプライベートメソッドもオーバーライドが強制される
+                 @override
+                 void _sleep() {
+                   // 省略
+                 }
+
+
+    74
+                                                              クラス   2.12
+
+
+    @override
+    String greet() {
+      return 'mew';
+    }
+}
+
+
+
+
+interface
+    interface 修飾子はタイプ 1 です（表は自身が宣言されたライブラリ以外で
+の制限を示しています）。
+
+    インスタンス化            extends キーワードによる継承   implements キーワードによる実装
+         〇                      ×                    〇
+
+
+    interface 修飾子を使って宣言されたクラスは自身が宣言されたライブラ
+リ以外では extends キーワードを使ったクラスの継承を禁止します。
+
+ ライブラリ1
+interface class Animal {
+  String greet() {
+    return 'hello';
+  }
+}
+
+
+ ライブラリ2
+
+
+// クラスの継承はNG
+// class Dog extends Animal {
+// }
+
+
+// クラスの実装はOK
+class Cat implements Animal {
+  @override
+  String greet() => 'mew';
+}
+
+
+final animal = Animal(); // インスタンス化はOK
+
+final cat = Cat();
+print(cat.greet());
+// => mew
+
+
+    implements キーワードを使い、すべてのメソッドを実装する必要がありま
+す。常に同じライブラリで実装された既知の実装が呼び出されることが保証
+
+                                                                     75
+第
+    2 Dartの言語仕様
+         章
+
+
+
+
+             できます。
+
+
+             abstractとinterfaceの組み合わせ
+               abstractとinterface の 2 つの修飾子を組み合わせると実装を持たない純粋
+             なインタフェースを定義することが可能になります。interface 修飾子の効果
+             として、外部のライブラリでは implements キーワードを使ったクラス実装が強
+             制され、abstract 修飾子の効果として実装を持たない関数を宣言できます。
+
+
+             final
+               final 修飾子はタイプ 1 です（表は自身が宣言されたライブラリ以外での制
+             限を示しています）
+                     。
+
+               インスタンス化              extends キーワードによる継承   implements キーワードによる実装
+                     〇                        ×                   ×
+
+
+               final 修飾子を使って宣言されたクラスは、自身が宣言されたライブラリ
+             以外ではすべてのサブタイプ化を禁止します。extends キーワードを使った
+             クラスの継承、implements キーワードを使ったクラスの実装の両方が禁止さ
+             れます。
+
+              ライブラリ1
+             final class Animal {
+               String greet() {
+                 return 'hello';
+               }
+             }
+
+
+              ライブラリ2
+
+
+             // クラスの継承はNG
+             // base class Dog extends Animal {
+             // }
+
+             // クラスの実装もNG
+             // base class Cat implements Animal {
+             // @override
+             // String greet() => 'mew';
+             // }
+
+
+
+             final animal = Animal(); // インスタンス化はOK
+
+
+
+    76
+                                                              クラス   2.12
+
+mixin
+    mixin 修飾子はタイプ 2 です。
+    mixin 修飾子を使って宣言されたクラスはミックスインのように扱うこと
+が可能でありながら、クラスなのでインスタンス化することができます。た
+だし、ミックスインと同様に extends は使えずコンストラクタも宣言できま
+せん。
+
+mixin class Horse { // `mixin class`で宣言
+}
+
+mixin Bird {
+}
+
+class Pegasus with Bird, Horse { // `with`キーワードでHorseをmixin
+
+}
+
+final horse = Horse(); // Horseはインスタンス化可能
+
+
+sealed
+    sealed 修飾子はタイプ 2 です。sealed 修飾子を使うとサブタイプを Enum
+のように扱うことができます。sealed 修飾子を使って宣言されたクラスは、
+自身が宣言されたライブラリ以外ではすべてのサブタイプ化を禁止します。
+この点は final と共通していますが、さらにクラス自身が暗黙的に abstract
+class として扱われます。
+ ライブラリ1
+sealed class Shape {
+  abstract int corner;
+}
+
+
+// Shape shape = Shape(); インスタンス化はNG
+
+class Rectangle extends Shape {
+  @override
+  int corner = 4;
+}
+
+class Triangle extends Shape {
+    @override
+    int corner = 3;
+}
+
+
+
+
+                                                                     77
+第
+    2 Dartの言語仕様
+         章
+
+
+
+
+             class Circle extends Shape {
+                 @override
+                 int corner = 0;
+             }
+
+
+                 switch 文ですべてのサブタイプが網羅されていなければ、コンパイラが警
+             告を出します。
+
+             ライブラリ2
+
+
+             // サブクラス化はNG
+             // class Rectangle extends Shape {
+             // @override
+             //     int corner = 4;
+             // }
+
+             final Shape shape = getShepe();
+
+             switch (shape) {
+               case Rectangle():
+                 print('Rectangle');
+               case Triangle():
+                 print('Triangle');
+               case Circle():
+                 print('Circle');
+             }
+
+
+
+
+                 2.13
+                 非同期処理
+
+                 Dart の非同期処理です。Future 型と Stream 型、スレッドのようなしくみの
+             アイソレートについて解説します。
+
+
+
+                 Future型
+                 Dart には非同期処理の結果を取り扱う Future 型があります。
+             import 'dart:io';
+
+             void main() {
+
+
+    78
+

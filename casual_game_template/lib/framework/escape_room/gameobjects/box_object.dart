@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'interactable_game_object.dart';
 import '../strategies/item_provider_strategy.dart';
 import '../components/dual_sprite_component.dart';
+import '../../ui/japanese_message_system.dart';
 
 /// 箱オブジェクト - AI生成画像使用
 /// 🎯 目的: 工具アイテムの提供
@@ -19,7 +20,7 @@ class BoxObject extends InteractableGameObject {
     // アイテム提供戦略を設定
     setInteractionStrategy(ItemProviderStrategy(
       itemId: 'tool',
-      message: '箱の中から古い工具を発見した！',
+      message: JapaneseMessageSystem.getMessage('box_discovery_message'),
     ));
   }
   

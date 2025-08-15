@@ -1,13 +1,13 @@
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 
 /// ホットスポットコンポーネント
 /// 脱出ゲームでクリック可能なオブジェクトを表現
-class HotspotComponent extends PositionComponent with TapCallbacks {
+class HotspotComponent extends SpriteComponent with TapCallbacks {
   final String id;
   late final Function(String) onTap;
-  SpriteComponent? _spriteComponent;
   
   HotspotComponent({
     required this.id,
@@ -24,7 +24,7 @@ class HotspotComponent extends PositionComponent with TapCallbacks {
     // 初期状態では背景矩形のみ表示
     final background = RectangleComponent(
       size: size,
-      paint: Paint()..color = Colors.grey.withOpacity(0.3),
+      paint: Paint()..color = Colors.grey.withValues(alpha: 0.3),
       position: Vector2.zero(),
     );
     add(background);
@@ -35,11 +35,11 @@ class HotspotComponent extends PositionComponent with TapCallbacks {
     try {
       // assets/を除いたパスでロード
       final cleanPath = imagePath.replaceFirst('assets/', '');
-      print('🖼️ Loading hotspot image: $imagePath -> $cleanPath');
+      debugPrint('🖼️ Loading hotspot image: $imagePath -> $cleanPath');
       sprite = await Sprite.load(cleanPath);
-      print('✅ Successfully loaded hotspot image: $cleanPath');
+      debugPrint('✅ Successfully loaded hotspot image: $cleanPath');
     } catch (e) {
-      print('❌ Failed to load image: $imagePath -> $e');
+      debugPrint('❌ Failed to load image: $imagePath -> $e');
       // 画像読み込み失敗時は代替画像または矩形を表示
       sprite = null;
     }
@@ -52,7 +52,7 @@ class HotspotComponent extends PositionComponent with TapCallbacks {
     } else {
       // スプライトがない場合は枠線付きの矩形を描画
       final paint = Paint()
-        ..color = Colors.grey.withOpacity(0.3)
+        ..color = Colors.grey.withValues(alpha: 0.3)
         ..style = PaintingStyle.fill;
       
       final borderPaint = Paint()

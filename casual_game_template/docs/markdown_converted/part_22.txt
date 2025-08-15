@@ -1,0 +1,435 @@
+                                                        テーマ ── アプリ全体のヴィジュアルを管理   5.1
+
+
+class _MyAppState extends State<MyApp> {
+    bool _isDarkMode = false;
+
+    void _toggleDarkMode() {
+        setState(() {
+          _isDarkMode = !_isDarkMode;
+        });
+    }
+
+    @override
+    Widget build(BuildContext context) {
+        return MaterialApp(
+          title: 'Flutter Demo',
+          theme: ThemeData(
+            colorSchemeSeed: Colors.green,
+             extensions: const [MyTheme(themeColor: Color(0xFF0000FF))],
+          ),
+          darkTheme: ThemeData(
+             colorSchemeSeed: Colors.green,
+             brightness: Brightness.dark,
+             extensions: const [MyTheme(themeColor: Color(0xFFFF0000))],
+          ),
+          themeMode: _isDarkMode ? ThemeMode.dark : ThemeMode.light,
+          home: Scaffold(
+             body: const Center(
+                child: ThemedWidget(),
+             ),
+
+              floatingActionButton: FloatingActionButton(
+                 onPressed: () {
+                    _toggleDarkMode();
+                 },
+                 child: const Icon(Icons.settings_brightness),
+              ),
+          ),
+        );
+    }
+}
+
+
+class ThemedWidget extends StatelessWidget {
+  const ThemedWidget({super.key});
+
+
+    @override
+    Widget build(BuildContext context) {
+        final myTheme = Theme.of(context).extension<MyTheme>()!;
+        final color = myTheme.themeColor;
+
+
+                                                                                 151
+第
+    5 テーマとルーティング
+          章
+
+
+
+
+                      return Container(width: 100, height: 100, color: color);
+                  }
+              }
+
+
+
+
+                  Tips Cupertino（クパチーノ）デザイン
+                      ここまで MaterialApp ウィジェットを使い、マテリアルデザインをベースに
+                  した機能を紹介してきました。Flutter はこれ以外にも、iOS のルック＆フィー
+                  ルを再現したウィジェットがあります。テーマの扱いに関しては MaterialApp
+                  ウ ィ ジ ェ ッ ト の 代 わ り に C u p e r t i n o A p p ウ ィ ジ ェ ッ ト を 使 い、
+                  CupertinoThemeData クラスでアプリのテーマを管理します。
+                      iOS のルック＆フィールを再現したウィジェットの中には、CupertinoApp ウ
+                  ィジェットが先祖になければ利用できないものもありますので注意してくださ
+                  い。同様に、マテリアルデザインのウィジェットも先祖に MaterialApp ウィジ
+                  ェットがあり、ThemeData クラスが提供されていないと利用できないものがあ
+                  ります。
+                      Flutter 公式では、iOS 以外のプラットフォームにもアプリを提供する場合は
+                  マテリアルデザインを採用することを推奨しています。なお、本書は引き続き
+                  マテリアルデザインをベースに解説を進めていきます。
+
+
+
+
+                  5.2
+                  ナビゲーションとルーティング
+                  ── 画面遷移を実現する3つの手法
+
+
+                  Flutter の画面遷移は、画面の履歴をスタック構造のコンテナで管理するこ
+              とで実現しています。スタックへプッシュ（追加）することで新たな画面に遷
+              移し、ポップ（取り除く）ことで元の画面に戻ります（図 5.4）。
+
+
+
+
+    152
+                               ナビゲーションとルーティング ── 画面遷移を実現する3つの手法   5.2
+
+図 5.4   画面スタックのイメージ
+
+
+
+            画面❶         進む       画面❷     戻る     画面❶
+
+
+
+
+                        Push     画面❷     Pop
+
+            画面❶                  画面❶            画面❶
+
+
+
+  Flutter の提供する画面遷移の全体像を理解するうえで、重要な歴史的背景
+があります。2020 年、Flutter は Web アプリをサポートする際にブラウザと連
+携する新たな API を提供しました。新しい API 群は Navigator 2.0 と呼ばれてい
+ （便宜上、Navigator 2.0 より前から存在する API 群を Navigator 1.0 と呼びま
+ます
+ 。これらの API は置き換えではなく追加の形で提供されました。そのため理
+す）
+解を難しくしている以下のようなポイントがあると筆者は感じています。
+
+・Navigator 1.0 から提供されている一部のクラスへ、Navigator 2.0 の機能が追
+ 加されている
+・Navigator 1.0 と Navigator 2.0 とでネーミングに統一感がない
+・Navigator 1.0 と Navigator 2.0 は併用が可能
+
+
+  続いて、表 5.1 で用語を整理しましょう。
+
+表 5.1   用語の一覧
+
+用語                 意味
+Navigator ウィジェット   スタックを管理するウィジェット。Navigator 1.0 から存在する
+Route クラス          スタックで管理される画面の単位。Navigator 1.0 から存在する
+Router ウィジェット      プラットフォームと連携した画面遷移を実現する中心的なウィジェ
+                   ット。Navigator 2.0 で追加された
+Page クラス           Route クラスを生成する軽量なオブジェクト。Navigator 2.0 で追加
+                   された
+
+
+  Flutter の画面スタックを管理しているのは Navigator ウィジェットです。
+Flutter ではスタックで管理される画面の単位は Route クラスです。画面スタ
+ックへ Route クラスのインスタンスをプッシュ／ポップすることで画面遷移
+を実現します。この方法は Navigator 1.0 から提供されています。
+  Router ウィジェットは Navigator 2.0 で提供され、プラットフォームと連携
+
+                                                                  153
+第
+    5 テーマとルーティング
+          章
+
+
+
+
+              した画面遷移を実現する中心的なウィジェットです。プラットフォームとの
+              連携とはブラウザの「進む」
+                          「戻る」ボタンを契機にした画面遷移、アプリ内の
+              画面遷移とアドレスバーの URL との連動などを指します。
+               また、Navigator 1.0 の API では画面を 1 つずつプッシュ／ポップして履歴を
+              積み上げていくのに対して、Navigator 2.0 の API では画面履歴を一度に書き
+              換えてしまうことが可能です（図 5.5）。たとえば、設定画面からユーザー情
+              報画面に遷移するアプリで、ユーザー情報画面をブックマークしていたとし
+              ましょう。ブラウザでブックマークからユーザー情報画面を開いたとき、ブ
+              ラウザの「戻る」ボタンを押すと設定画面が現れるといったことを実現できる
+              のが Navigator 2.0 の API です。
+               このとき、Route クラスのインスタンスを複数生成するのではなく、軽量
+              な Page クラスが用いられます。Page クラスには自身を一意に判定する key プ
+              ロパティがあり、画面履歴書き換え時の最適化に利用されます。この最適化
+              はウィジェットとエレメント（Element）の関係に似ています（ウィジェットと
+                  （Element）の関係は第 9 章で解説します）。
+              エレメント
+               iOS/Android をターゲットとしたモバイルアプリの場合、Navigator 1.0 の
+              API で十分なケースも多いです。また、Navigator 2.0 を利用した実装は複雑
+              で、ラップされたライブラリを利用するのがよいでしょう。
+
+
+
+               NavigatorウィジェットとRouteクラスによる画面遷移
+               ── Navigator 1.0
+
+               それでは Navigator ウィジェットと Route クラスを利用した Navigator 1.0 の
+              画面遷移を見てみましょう。繰り返しになりますが、Flutter ではスタックで管
+              理される画面の 1 単位を Route クラスで表現します。Navigator ウィジェットに
+              対して、Route クラスのインスタンスをプッシュすることで新しい画面に遷移
+              し、ポップすることで元の画面に戻ります。通常、Navigator ウィジェットは
+              MaterialApp ウィジェットが内部でインスタンス化したものを利用します。
+               簡単なサンプルを見てみましょう
+                             （理解を優先して、コードは簡略化してい
+                。
+              ます）
+
+              class FirstScreen extends StatelessWidget {
+
+                @override
+                Widget build(BuildContext context) {
+                  /* ◆ ElevatedButton
+                  マテリアルデザインのボタン */
+
+    154
+                                      ナビゲーションとルーティング ── 画面遷移を実現する3つの手法    5.2
+
+図 5.5        Navigator 1.0 と Navigator 2.0 の違い
+
+                                       Navigator 1.0
+                               履歴を一つずつ積み上げていく
+
+
+
+         ホーム                    設定                     ユーザー         設定
+          画面
+                     進む         画面
+                                           進む          情報画面
+                                                              戻る    画面
+
+
+
+
+                                                   ユーザー
+                                                   情報画面
+                     Push       設定         Push        設定     Pop   設定
+                                画面                     画面           画面
+         ホーム                    ホーム                    ホーム          ホーム
+          画面                     画面                     画面           画面
+
+
+
+                                       Navigator 2.0
+                               履歴を一つずつ積み上げていく
+                                （Navigator 1.0 と同じ）
+
+
+                                  履歴を一度に書き換える
+
+
+
+                                           ユーザー               設定
+                                           情報画面
+                                                       戻る     画面
+
+                 ブラウザの
+                 ブックマーク
+                 から
+                                           ユーザー
+                                           情報画面
+                                           設定           Pop   設定
+                                           画面                 画面
+                                           ホーム                ホーム
+                                            画面                 画面
+
+
+        return ElevatedButton(
+          child: const Text('次へ'),
+          onPressed: () {
+            final navigatorState = Navigator.of(context); ❶
+            /* ◆ MaterialPageRoute
+            実行するプラットフォームに適した画面遷移アニメーションを提供するRoute */
+            final route = MaterialPageRoute(
+              builder: (context) => const SecondScreen(), ❸ ❷
+             );
+             navigatorState.push(route);   ❹
+          },
+        );
+
+
+                                                                          155
+第
+    5 テーマとルーティング
+          章
+
+
+
+
+                  }
+
+              }
+
+
+                  FirstScreen 画面のボタンをタップすると、SecondScreen 画面に遷移する
+              サンプルです。ボタンをタップすると、Navigator ウィジェットの静的メソ
+              ッド of から NavigatorState クラスのインスタンスを取り出します（❶）。
+                  次に Route クラスのインスタンスを生成します
+                                          （❷）。MaterialPageRoute ク
+              ラスはプラットフォームに合わせて画面遷移のアニメーションを提供してく
+              れ（iOS であれば右から左へスライドイン、Android であればズームイン）、ほ
+              と ん ど の 場 合 は こ れ を 使 用 し ま す。ク ラ ス 名 に「Page」と あ り ま す が、
+              Navigator 2.0 の Page クラスではないので注意しましょう。
+                  ❸の引数 builder へは、遷移先のウィジェットを生成する関数型を渡しま
+              す。こうして生成した Route クラスを NavigatorState クラスへプッシュする
+              ことで画面遷移します（❹）。
+                  このサンプルでは理解しやすいように、NavigatorState を変数に格納して
+              いますが、実際には、
+              Navigator.of(context).push(
+                 MaterialPageRoute(
+                    builder: (_) => const SecondScreen(),
+                 ),
+              );
+
+              と 1 つの文で記述されることが多いです。
+                  または、Navigator ウィジェットの静的メソッド push を直接呼び出しても
+              結果は同じです。
+
+              Navigator.push(
+                 context,
+                 MaterialPageRoute(
+                    builder: (_) => const SecondScreen(),
+                 ),
+              );
+
+                  続いて、遷移した先から元の画面に戻る方法を見てみましょう
+                                             （こちらもコ
+              ードは簡略化しています）。
+
+              class SecondScreen extends StatelessWidget {
+
+
+                  @override
+                  Widget build(BuildContext context) {
+
+
+
+    156
+                                        ナビゲーションとルーティング ── 画面遷移を実現する3つの手法   5.2
+
+        return ElevatedButton(
+          child: const Text('戻る'),
+          onPressed: () {
+             Navigator.of(context).pop();     ❶
+          },
+        );
+    }
+
+}
+
+    SecondScreen 画面で「戻る」タップすると、元の画面に戻るサンプルです。
+NavigatorState クラスの pop メソッドを呼び出し、元の FirstScreen 画面へ
+戻ります（❶）。
+    上記のサンプルは理解を優先してコードを簡略化しているため、あまり一般
+的な実装ではなく外観も不恰好です。以下が完全な動作サンプルとなります。
+
+./lib/main.dart
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MaterialApp(
+    home: FirstScreen(),
+  ));
+}
+
+// アプリ起動時に表示されるFirstScreenウィジェット
+class FirstScreen extends StatelessWidget {
+  const FirstScreen({super.key});
+
+    @override
+    Widget build(BuildContext context) {
+      return Scaffold(
+        /* ◆ AppBar
+        画面上部のヘッダ部分となるWidget */
+        appBar: AppBar(
+           title: const Text('FirstScreen'),
+        ),
+        body: Center(
+           child: ElevatedButton(
+             child: const Text('次へ'),
+             onPressed: () {
+                 Navigator.of(context).push(
+                    MaterialPageRoute(
+                       builder: (_) => const SecondScreen(),
+                    ),
+                 );
+
+
+                                                                           157
+第
+    5 テーマとルーティング
+          章
+
+
+
+
+                             },
+                           ),
+                        ),
+                      );
+                  }
+              }
+
+
+              // 画面遷移先として用意したSecondScreenウィジェット
+              class SecondScreen extends StatelessWidget {
+                  const SecondScreen({super.key});
+
+                  @override
+                  Widget build(BuildContext context) {
+                      return Scaffold(
+                        appBar: AppBar(
+                           title: const Text('SecondScreen'),
+                        ),
+                        body: Center(
+                           child: ElevatedButton(
+                              child: const Text('戻る'),
+                              onPressed: () {
+                                 Navigator.of(context).pop();
+                              },
+                           ),
+                        ),
+                      );
+                  }
+              }
+
+
+              画面間でのデータの受け渡し
+                  続いて画面間でデータを受け渡す方法を見ていきましょう。数値を表示す
+              る FirstScreen 画面と、数値を受け取り変更する SecondScreen 画面を用意し
+              ます。SecondScreen 画面で変更された数値は FirstScreen 画面に反映させる
+              ので、FirstScreen 画面は StatefulWidget を継承します（図 5.6）。
+
+              図 5.6        画面間でのデータの受け渡し
+
+                                           数値を渡す
+                                 First                          Second
+                                Screen                          Screen   数値を変更する
+
+                                         変更した結果を返す
+
+
+                  まずは FirstScreen 画面を見てみましょう。
+
+
+
+    158
+

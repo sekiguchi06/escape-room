@@ -1,7 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flame/components.dart';
 
-import 'package:casual_game_template/framework/game_types/quick_templates/escape_room_template.dart';
+import 'package:casual_game_template/framework/state/game_state_system.dart';
+import 'package:casual_game_template/framework/components/inventory_manager.dart';
+import 'package:casual_game_template/framework/config/game_configuration.dart';
 
 
 /// シンプル脱出ゲーム機能の基本ユニットテスト

@@ -1,5 +1,4 @@
 /// Framework root export file
-library framework;
 
 // Core exports (存在するもののみ)
 export 'core/configurable_game.dart';
@@ -26,3 +25,21 @@ export 'escape_room/gameobjects/interactable_game_object.dart';
 export 'escape_room/gameobjects/bookshelf_object.dart';
 export 'escape_room/gameobjects/safe_object.dart';
 export 'escape_room/gameobjects/box_object.dart';
+
+// UI System (新規インベントリシステム + モーダルシステム)
+export 'ui/ui_system.dart';
+export 'ui/mobile_layout_system.dart';
+export 'ui/escape_room_modal_system.dart';
+export 'ui/modal_config.dart';
+export 'ui/modal_display_strategy.dart';
+// export 'ui/modal_ui_builder.dart'; // ModalUIElements重複のため無効化
+export 'ui/modal_manager.dart';
+export 'ui/number_puzzle_input_component.dart';
+export 'ui/inventory_ui_component.dart';
+export 'ui/inventory_item_component.dart';
+export 'ui/inventory_state_notifier.dart';
+export 'ui/responsive_layout_calculator.dart';
+export 'ui/mobile_portrait_layout.dart';
+export 'ui/japanese_message_system.dart';
+// Commented out due to ModalType conflict
+// export 'ui/escape_room_ui_components.dart';

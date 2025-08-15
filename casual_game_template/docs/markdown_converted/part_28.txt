@@ -1,0 +1,399 @@
+                                                                   画像選択画面を作成する     6.6
+
+# imageパッケージとimage_pickerパッケージを導入
+$ flutter pub add image image_picker
+
+
+
+iOSネイティブの設定を行う
+    続いて iOS ネイティブの設定を行います。画像ライブラリにアクセスする
+iOS アプリは、その用途を伝える説明文を記述する必要があります。ios/
+Runner/Info.plist を開き、NSPhotoLibraryUsageDescription キーの下に説
+明文を追加します。
+
+ ./ios/Runner/Info.plist
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/
+PropertyList-1.0.dtd">
+<plist version="1.0">
+  <!-- 省略 -->
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>編集する画像を選択します。</string>
+</dict>
+</plist>
+
+
+
+
+画像を取得する処理を実装する
+    それでは画像を取得する処理を実装します。
+
+ ./lib/image_select_screen.dart
+import 'package:flutter/foundation.dart';    ❶
+import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:image_picker/image_picker.dart';    ❷
+import 'package:image/image.dart' as image_lib;    ❸
+
+
+class ImageSelectScreen extends StatefulWidget {
+  const ImageSelectScreen({super.key});
+
+    @override
+    State<ImageSelectScreen> createState() => _ImageSelectScreenState();
+}
+
+class _ImageSelectScreenState extends State<ImageSelectScreen> {
+
+    /* ◆ ImagePicker
+    image_pickerパッケージが提供するクラス
+    画像ライブラリやカメラにアクセスする機能を持つ */
+    final ImagePicker _picker = ImagePicker(); ❹
+
+
+                                                                                   199
+第
+    6 実践ハンズオン❶
+          章
+              画像編集アプリを開発
+
+
+
+
+                /* ◆ Uint8List
+                8bit 符号なし整数のリスト */
+                Uint8List? _imageBitmap; ❺
+
+
+                Future<void> _selectImage() async {       ❻
+                  /* ◆ XFile
+                    ファイルの抽象化クラス */
+                    // 画像を選択する
+                    final XFile? imageFile = await _picker.pickImage(source: ImageSource.gallery);   ❼
+
+
+                    // ファイルオブジェクトから画像データを取得する
+                    final imageBitmap = await imageFile?.readAsBytes();        ❽
+                    assert(imageBitmap != null);
+                    if (imageBitmap == null) return;
+
+                    // 画像データをデコードする
+                    final image = image_lib.decodeImage(imageBitmap);      ❾
+                    assert(image != null);
+                    if (image == null) return;
+
+                    /* ◆ Image
+                    画像データとメタデータを内包したクラス */
+                    final image_lib.Image resizedImage;
+                    if (image.width > image.height) {
+                      // 横長の画像なら横幅を500pxにリサイズする
+                      resizedImage = image_lib.copyResize(image, width: 500);
+                                                                                     ❿
+                    } else {
+                      // 縦長の画像なら縦幅を500pxにリサイズする
+                      resizedImage = image_lib.copyResize(image, height: 500);
+                    }
+
+                    // 画像をエンコードして状態を更新する
+                    setState(() {
+                      _imageBitmap = image_lib.encodeBmp(resizedImage);        ⓫
+                    });
+                }
+
+                @override
+                Widget build(BuildContext context) {
+              // 省略
+
+               まず、必要なパッケージ群をインポートします。flutter/foundation.dart
+              は、画像データとして Uint8List 型を使用するためにインポートしました（❶）。
+              image_picker/image_picker.dart は画像ライブラリへのアクセスするパッケ
+              ージ、image/image.dart は画像データを扱うパッケージを使用するためにイ
+              ンポートしました（❷、❸）。image パッケージの Image クラスは、画像を表示
+
+    200
+                                                                   画像選択画面を作成する   6.6
+
+する Image ウィジェットと名前が競合します。そのため as キーワードに続け
+                       （❸）。こうすると image_lib.Image と
+て image_lib という別名を付けています
+記述すると image パッケージの Image クラスを参照できます。
+ _ImageSelectScreenState クラスでは、画像を取得するためにパッケージ
+image_picker が提供する ImagePicker クラスをインスタンス化しました（❹）。
+このクラスは画像ライブラリやカメラへアクセスする機能を提供します。実
+際の画像選択処理は _selectImage メソッドで実装しました（❻）。
+ ImagePicker クラスにて画像を取得すると、画像データは XFile というファ
+イルを抽象化したクラスで返されます（❼）。XFile クラスから画像のバイト
+列を取得し（❽）、image パッケージの decodeImage メソッドで画像データをデ
+コードします（❾）。iOS Simulator は初期状態で画像ライブラリにいくつか写
+真が登録されていますが、これらの画像はサイズが大きいため、そのままで
+は表示に時間がかかる場合があります。今回は❿でリサイズして扱いやすく
+しています。
+ 最後に画像データをバイト列に戻し、状態を更新します（⓫）。
+
+
+画像取得処理をWidgetに組み込む
+ 前項で実装した画像取得処理を Widget と組み合わせてみましょう。
+
+ ./lib/image_select_screen.dart
+
+
+// 省略
+
+
+class _ImageSelectScreenState extends State<ImageSelectScreen> {
+
+  final ImagePicker _picker = ImagePicker();
+  Uint8List? _imageBitmap;
+
+
+  Future<void> _selectImage() async {
+    // 省略
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = L10n.of(context);
+    final imageBitmap = _imageBitmap;    ❶
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: Text(l10n.imageSelectScreenTitle),
+
+
+
+                                                                                 201
+第
+    6 実践ハンズオン❶
+          章
+              画像編集アプリを開発
+
+
+
+
+                      ),
+                      body: Center(
+                        child: Column(
+                           mainAxisAlignment: MainAxisAlignment.center,
+                           children: [
+                             if (imageBitmap != null) Image.memory(imageBitmap),   ❷
+                              ElevatedButton( // 「画像を選ぶ」ボタン
+                                onPressed: () => _selectImage(), ❸
+                                child: Text(l10n.imageSelect),
+                              ),
+                              if (imageBitmap != null)    ❹
+                                ElevatedButton( // 「画像を編集する」ボタン
+                                  onPressed: () {
+                                  },
+                                  child: Text(l10n.imageEdit),
+                                ),
+                           ],
+                         ),
+                      ),
+                    );
+                }
+
+
+                build メソッドでは、画像のバイト列を変数 imageBitmap に格納しました
+              （❶）。クラス変数の _imageBitmap は null 許容型です。一時変数に置き、if 文
+              で null チェックをすることでタイププロモーションが働き、非 null 許与型の
+              ように扱えるようになります（❷）。
+                imageBitmap が null でない、すなわち画像が選択されたあとであれば画像を
+              表示し（❸）
+                   、「画像を編集する」ボタンを表示します（❹）。
+                動作を確認してみましょう。画像を選択すると図 6.9 のように画像が表示
+              されます。
+
+
+
+
+    202
+                                      画像編集画面を作成する   6.7
+
+図 6.9   画像選択後の画像選択画面
+
+
+
+
+    6.7
+    画像編集画面を作成する
+
+    画像を回転、反転させる編集画面を作成します。
+
+
+
+    メッセージを追加する
+    まず編集画面で使用する文字列を arb ファイルに追加します。
+
+ ./lib/l10n/app_ja.arb
+{
+    // 省略
+    // （一つ上の行の末尾にカンマを追加してください）
+    "imageEditScreenTitle": "画像を編集"
+}
+
+    arb ファイルに追加したらコードジェネレータを実行します。
+$ flutter gen-l10n
+
+
+
+
+                                                    203
+第
+    6 実践ハンズオン❶
+          章
+              画像編集アプリを開発
+
+
+
+
+                  レイアウトを作成する
+                  次にコードを記述するファイルを作成します。ファイル名は edit_snap_
+              screen.dart としましょう。画像編集画面も StatefulWidget を継承したクラス
+              で実装します。
+
+              ./lib/edit_snap_screen.dart
+              import 'package:flutter/foundation.dart';
+              import 'package:flutter/material.dart';
+              import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+
+              class ImageEditScreen extends StatefulWidget {
+                const ImageEditScreen({super.key, required this.imageBitmap});
+
+
+                  final Uint8List imageBitmap;    ❶
+
+
+                  @override
+                  State<ImageEditScreen> createState() => _ImageEditScreenState();
+              }
+
+
+              class _ImageEditScreenState extends State<ImageEditScreen> {
+
+                  @override
+                  Widget build(BuildContext context) {
+                    final l10n = L10n.of(context);
+                    return Scaffold(
+                      appBar: AppBar(
+                         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+                         title: Text(l10n.imageEditScreenTitle),
+                      ),
+                      body: Center(
+                         child: Column(
+                           mainAxisAlignment: MainAxisAlignment.center,
+                           children: [
+                             Image.memory(widget.imageBitmap),    ❷
+                            /* ◆ IconButton
+                            アイコンを表示するボタン */
+                            IconButton(
+                              onPressed: () {},
+                              icon: const Icon(Icons.rotate_left), // フレームワーク組み込みのア
+              イコンを設定
+                            ),                                                            ❸
+                            IconButton(
+                               onPressed: () {},
+                              icon: const Icon(Icons.flip), // フレームワーク組み込みのアイコンを設定
+                            ),
+
+
+    204
+                                                                    画像編集画面を作成する   6.7
+
+                ],
+              ),
+           ),
+         );
+     }
+ }
+
+     表示する画像はウィジェットのコンストラクタで受け取るようにしました
+（❶）
+  。レイアウトは上部に AppBar ウィジェットがあり、画像を表示する Image
+ウィジェット（❷）と IconButton ウィジェット（❸）が垂直方向に並びます。
+IconButton ウィジェットには Flutter フレームワーク組み込みのアイコンを設
+定しました。
+
+
+
+     画像編集画面への遷移を実装する
+     続いて、画像編集画面に遷移する処理を実装します。
+
+ ./lib/image_select_screen.dart
+ import 'package:flutter/foundation.dart';
+ import 'package:flutter/material.dart';
+ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+ import 'package:edit_snap/edit_snap_screen.dart';    ❶
+
+
+ // 省略
+
+
+ class _ImageSelectScreenState extends State<ImageSelectScreen> {
+
+     // 省略
+
+     @override
+     Widget build(BuildContext context) {
+       final l10n = L10n.of(context);
+       final imageBitmap = _imageBitmap;
+       return Scaffold(
+         appBar: AppBar(
+            backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+            title: Text(l10n.imageSelectScreenTitle),
+         ),
+         body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (imageBitmap != null) Image.memory(imageBitmap),
+                ElevatedButton( // 「画像を選ぶ」ボタン
+
+
+                                                                                  205
+第
+    6 実践ハンズオン❶
+          章
+              画像編集アプリを開発
+
+
+
+
+                                  onPressed: () => _selectImage(),
+                                  child: Text(l10n.imageSelect),
+                                ),
+                                if (imageBitmap != null)
+                                  ElevatedButton( // 「画像を編集する」ボタン
+                                    onPressed: () {
+                                       Navigator.of(context).push(
+                                         MaterialPageRoute(
+                                           builder: (context) => ImageEditScreen(
+                                              imageBitmap: imageBitmap,             ❷
+                                            ),
+                                         ),
+                                       );
+                                     },
+                                     child: Text(l10n.imageEdit),
+                                  ),
+                             ],
+                           ),
+                        ),
+                      );
+                  }
+              }
+
+
+
+                  ImageEditScreen 画面を参照するため image_select_screen.dart をインポ
+              ートしました（❶）
+                      。「画像を編集する」ボタンの onPressed コールバックで画
+              像編集画面に遷移する処理を実装しました（❷）。こちらも Navigator 1.0 の API
+              を採用し、MaterialPageRoute クラスを使用した画面遷移です。
+                  これで画像編集画面に遷移する処理が実装できました。アプリを実行し、
+              画像編集画面へ遷移させてみましょう。図 6.10 のように表示されます。
+
+
+
+
+    206
+

@@ -1,0 +1,395 @@
+                                                                 プロジェクトを作成する   8.2
+
+
+ 開発の土台づくり
+ 第 4 章で解説した「開発の土台づくり」の要素です。アプリの日本語化など
+第 6 章のハンズオンで実装した機能は省略します。Web API の呼び出しに必
+要なアプリケーション ID を環境変数として扱います。
+ 導入するパッケージは「8.3 アプリで使用するパッケージを導入する」で解
+説します。
+
+
+
+ テーマと画面遷移の方針
+ テーマは Material Design 3 のテーマを使用し、すべてデフォルトのままに
+します。画面遷移はありません。
+
+
+
+ 8.2
+ プロジェクトを作成する
+
+ プロジェクトを作成します。第 1 章の
+                   「1.1 プロジェクトの作成」
+                                 で示した手順
+に従って、プロジェクトを作成してください。プロジェクト名は「hiragana_
+converter」としましょう。プロジェクト作成直後は lib/main.dart にテンプレー
+トになるアプリコードが書かれていますので、まずは以下のように修正します。
+
+./lib/main.dart
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Hiragana Converter',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
+
+
+                                                                               239
+第
+    8 実践ハンズオン❷
+          章
+              ひらがな変換アプリを開発
+
+
+
+
+                        ),
+                        home: const HomeScreen(),
+                      );
+                  }
+              }
+
+              class HomeScreen extends StatelessWidget {
+                  const HomeScreen({super.key});
+
+                  @override
+                  Widget build(BuildContext context) {
+                      return Container();
+                  }
+              }
+
+
+                  テンプレートプロジェクトの不要なコードを削除したこの状態から作業を
+              開始しましょう。
+
+
+
+                  8.3
+                  アプリで使用するパッケージを導入する
+
+                  まずはじめに、アプリで使用するパッケージを一気に導入してしまいまし
+              ょう。
+                  パッケージを導入するためにプロジェクトのディレクトリで、ターミナル
+              から以下のコマンドを実行してください。
+
+              # httpパッケージを導入❶
+              $ flutter pub add http
+              # JSONのシリアライズ、デシリアライズを行うパッケージを導入❷
+              $ flutter pub add json_annotation
+              $ flutter pub add --dev json_serializable
+              # Riverpodを導入❸
+              $ flutter pub add flutter_riverpod riverpod_annotation
+              $ flutter pub add --dev riverpod_generator custom_lint riverpod_lint
+              # コード生成のためにbuild_runnerを導入❹
+              $ flutter pub add --dev build_runner
+
+                  Web API を呼び出すために http というパッケージを導入します（❶）。この
+              パッケージは HTTP リクエストを簡単に扱うことのできるパッケージです。
+                  Web API のリクエストとレスポンスは JSON 形式でやりとりします。JSON
+              を取り扱うため、json_annotation と json_serializable パッケージを導入します
+
+    240
+                                           入力状態のウィジェットを実装する   8.4
+
+（❷）
+  。これらのパッケージは Dart のオブジェクトと Map の相互変換を行うコ
+ードを自動生成してくれるパッケージです。
+ そのほか、状態管理に Riverpod を採用するため❸を導入します。Riverpod
+と json_serializable はコード生成を行うため、build_runner パッケージも導入
+します（❹）
+     。
+
+
+
+ riverpod_lintを設定する
+ 第 7 章で紹介した riverpod_lint の設定を行います。riverpod_lint は custom_
+lint パッケージを利用して実現しています。以下のように analysis_options.
+yaml へ custom_lint を有効化する記述を追加します。
+
+ ./analysis_options.yaml
+analyzer:
+  plugins:
+    - custom_lint
+
+
+
+
+ 8.4
+ 入力状態のウィジェットを実装する
+
+ 第 5 章で作成したアプリは Navigation API を使っていくつかの画面を行き来
+するアプリでした。本章のハンズオンは 1 つの画面で状態により表示を切り替
+えるように実装していきます。上記の 2 つの違いは、プログラム上どちらが良
+いということはなく、ユーザーにどのような体験を提供するかによります。
+
+
+
+ レイアウトを作成する
+ まずはテキストを入力するレイアウトを作成します。lib フォルダの配下
+に input_form.dart という新しいファイルを追加し、以下のコードを記述し
+ます。
+
+ ./lib/input_form.dart
+import 'package:flutter/material.dart';
+
+class InputForm extends StatefulWidget {
+
+
+
+                                                              241
+第
+    8 実践ハンズオン❷
+          章
+              ひらがな変換アプリを開発
+
+
+
+
+                  const InputForm({super.key});
+
+                  @override
+                  State<InputForm> createState() => _InputFormState();
+              }
+
+              class _InputFormState extends State<InputForm> {
+                  @override
+                  Widget build(BuildContext context) {
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                           /* ◆ Padding
+                           余白を与えて子要素を配置するWidget */
+                           Padding( ❶
+                             padding: const EdgeInsets.symmetric(horizontal: 16),
+                             child: TextField(
+                               maxLines: 5,
+                               decoration: const InputDecoration(
+                                                                       ❷
+                                  hintText: '文章を入力してください',
+                               ),
+                              ),
+                           ),
+                           /* ◆ SizedBox
+                           サイズを指定できるWidget */
+                           const SizedBox(height: 20),    ❸
+                           ElevatedButton(
+                              onPressed: () {},
+                              child: const Text(
+                                                    ❹
+                                 '変換',
+                              ),
+                           ),
+                        ],
+                      );
+                  }
+              }
+
+                  StatefulWidget を継承した InputForm クラスを実装しました。TextField ウ
+                  （❷）
+              ィジェット                       （❹）を Column ウィジェットで
+                    と ElevatedButton ウィジェット
+              囲い、垂直にレイアウトしました。
+                  TextField ウィジェットはユーザーが入力可能なテキストフィールドです。
+              maxLines プロパティは一度に表示する行数の指定です。今回は 5 を設定しま
+              したので 5 行分のテキストを表示し、それ以上入力するとスクロールします。
+              decoration プロパティは TextField ウィジェットのさまざまな装飾を指定す
+              るプロパティです。今回は未入力の場合に「文章を入力してください」
+                                             と表示
+
+    242
+                                                             入力状態のウィジェットを実装する    8.4
+
+するヒントテキストを指定しました。
+    TextField ウィジェットが横いっぱいに広がらないように、Paddingウィジェ
+ットで余白を設けました（❶）
+             。現時点では Padding ウィジェットに constant コ
+ンストラクタを使うようワーニングが表示されますが、のちほど修正します。
+    ❸ の S i z e d B o x ウ ィ ジ ェ ッ ト は T e x t F i e l d ウ ィ ジ ェ ッ ト（❷）と
+                    （❹）の間に余白を設けるために使用しています。
+ElevatedButton ウィジェット
+
+
+
+    レイアウトを表示する
+    このままでは、アプリを実行しても InputForm ウィジェットは表示されま
+せん。main.dart を以下のように修正します。
+
+./lib/main.dart
+import 'package:flutter/material.dart';
+import 'package:hiragana_converter/input_form.dart';        ❶
+
+
+// 省略
+
+class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
+
+    @override
+    Widget build(BuildContext context) {
+      return Scaffold(
+         appBar: AppBar(
+            backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+            title: const Text('Hiragana Converter'),
+                                                                             ❷
+         ),
+         body: const InputForm(),
+      );
+    }
+}
+
+    先ほど実装した InputForm ウィジェットを参照するため、input_form.dart
+をインポートしました（❶）。HomeScreen 画面では Scaffold ウィジェットを返
+すように修正しました（❷）。body には先ほど作成した InputForm ウィジェッ
+トを指定しています。
+    これでアプリを実行すると、図 8.5 のように InputForm ウィジェットが表示
+されます。
+
+
+
+
+                                                                                 243
+第
+    8 実践ハンズオン❷
+          章
+              ひらがな変換アプリを開発
+
+
+
+
+              図 8.5    InputForm Widget の表示（図 8.2 再掲）
+
+
+
+
+                  入力値のバリデーションを行う
+                  TextField ウィジェットに与えられた文字列が空でないことをバリデーシ
+              ョンします。こういったケースでは Form ウィジェットと FormField ウィジェ
+              ットを組み合わせて使うと便利です。
+
+               ./lib/input_form.dart
+              import 'package:flutter/material.dart';
+
+              class InputForm extends StatefulWidget {
+                const InputForm({super.key});
+
+
+                  @override
+                  State<InputForm> createState() => _InputFormState();
+              }
+
+              class _InputFormState extends State<InputForm> {
+
+
+                  final _formKey = GlobalKey<FormState>();    ❶
+
+
+                  @override
+                  Widget build(BuildContext context) {
+                    /* ◆ Form
+                    TextFormFieldやFormFieldを
+                    グループ化して管理するWidget */
+                    return Form(    ❷
+
+
+    244
+                                                                 入力状態のウィジェットを実装する   8.4
+
+          key: _formKey,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+             children: [
+               Padding(
+                 padding: const EdgeInsets.symmetric(horizontal: 16),
+                  /* ◆ TextFormField
+                  テキスト入力フォームを実現するWidget */
+                  child: TextFormField( ❸
+                    maxLines: 5,
+                    decoration: const InputDecoration(
+                      hintText: '文章を入力してください',
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                          return '文章が入力されていません';
+                                                                 ❹
+                      }
+                      return null;
+                    },
+                  ),
+               ),
+               const SizedBox(height: 20),
+               ElevatedButton(
+                  onPressed: () {
+                     final formState = _formKey.currentState!;
+                     formState.validate();    ❺
+                  },
+                  child: const Text(
+                     '変換',
+                  ),
+               ),
+             ],
+          ),
+        );
+    }
+}
+
+    _InputFormState クラスの build メソッドで返すウィジェット全体を Form
+ウィジェットで包み（❷）、Form ウィジェットの key プロパティには（❶）で用
+意した GlobalKey を渡しています。また、TextField ウィジェットは FormField
+ウィジェットのサブクラスである TextFormField ウィジェットに置き換えま
+した（❸）
+    。TextFormField ウィジェットは constant コンストラクタを持ちませ
+ん。よって、先ほどまで Padding ウィジェットの constant コンストラクタを
+呼び出す旨のワーニングは解消されます。
+    Form ウィジェットに関する操作は Form ウィジェットの State を経由して行
+
+                                                                                    245
+第
+    8 実践ハンズオン❷
+          章
+              ひらがな変換アプリを開発
+
+
+
+
+              います（Form ウィジェットは StatefulWidget です）。ElevatedButton ウィジェ
+              ットの onPressed コールバックで、GlobalKey から Form ウィジェットの State
+              を取得し validate メソッドを呼び出しています（❺）。validate メソッドが呼
+              び出されると、Form ウィジェットの子孫にある FormField ウィジェットでバ
+              リ デ ー シ ョ ン が 行 わ れ ま す。ち ょ う ど、TextField ウ ィ ジ ェ ッ ト を
+              TextFormField ウィジェットに書き換えたところでした。
+                TextFormField ウィジェットは validator コールバックで文字の空チェック
+                    （❹）
+              を行っています  。
+                以上のように Form ウィジェット、FormField ウィジェットを用いてバリデ
+              ーション機能を実装できます（図 8.6）。
+
+              図 8.6   バリデーションが機能している様子
+
+
+
+
+                8.5
+                入力文字を取得する
+
+                バリデーションを通過した入力文字を Web API のパラメータとして扱える
+              ように取得します。方法はいくつかありますが、今回は TextEditingController
+              を利用します。
+
+               ./lib/input_form.dart
+              import 'package:flutter/material.dart';
+
+
+    246
+

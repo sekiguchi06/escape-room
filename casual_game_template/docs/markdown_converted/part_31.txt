@@ -1,0 +1,430 @@
+                                              Riverpodの関連パッケージ   7.3
+
+  上記の例だけを見ると大きな変化はないように見えるかもしれませんが、
+コード生成を利用するとさまざまなメリットがあります。
+
+・Provider に関するコードを記述する際の意思決定が減る
+・Provider へ渡すパラメータの制限がなくなる
+・Provider の変更がホットリロードできる
+
+  本章冒頭のサンプルコードはコード生成を利用しないものになっています
+が、以降はコード生成を利用する前提で解説していきます。
+
+
+
+  静的解析を行うパッケージ
+  Riverpod のコード特有の問題を静的解析で検出、自動修正するためのパッ
+ケージが提供されています。パッケージは必須ではありませんが、利用する
+ことが推奨されています。
+
+・riverpod_lint 注 8
+
+  サードパーティパッケージが独自の Lint ルールを提供するためのツールと
+して、custom_lint 注 9 というパッケージが提供されており、riverpod_lint はこ
+の custom_lint を利用しています。そのため、riverpod_lint を利用するために
+は custom_lint もインストールする必要があります。
+  riverpod_generator でコード生成を行う際の記述ミスを検出するルールがい
+くつか用意されていますので、riverpod_generator と併せて利用することをお
+勧めします。
+
+
+
+  関連パッケージまとめ
+  関連パッケージをいくつか紹介しました。結局、どれが必要でどれが不要
+なのか迷った方は pubspec.yaml を以下の内容にして開始するとよいでしょう。
+hooks パッケージは利用せず、コード生成と静的解析は利用する構成です。バ
+ージョンの指定は割愛しています。
+
+
+
+
+注8   https://pub.dev/packages/riverpod_lint
+注9   https://pub.dev/packages/custom_lint
+
+
+                                                                 223
+第
+    7 状態管理とRiverpod
+          章
+
+
+
+
+               ./pubspec.yaml
+              dependencies:
+                # 省略
+                flutter_riverpod:
+                riverpod_annotation:
+
+              dev_dependencies:
+                # 省略
+                riverpod_generator:
+                build_runner:
+                custom_lint:
+                riverpod_lint:
+
+               コマンドラインから導入する場合は以下のコマンドを実行します。
+
+              $ flutter pub add flutter_riverpod riverpod_annotation
+              $ flutter pub add --dev riverpod_generator build_runner custom_lint riverpod_lint
+
+
+
+
+               7.4
+               Riverpodの使い方
+
+               それでは Riverpod の使い方をサンプルコードと併せて解説していきます。
+
+
+
+               Providerの種類
+               コード生成を利用する前提ですと、状態を外部から「変更不可能」
+                                            な関数ベ
+              ースの Provider と、状態を外部から「変更可能」なクラスベースの Provider の
+              2 つに分類することができます。
+
+
+              関数ベースのProvider
+               まずは関数ベースの Provider の使い方を解説します。本章の冒頭で紹介し
+              たサンプルの greetProvider をコード生成を利用して実装します。
+
+               ./lib/main.dart
+              part 'main.g.dart';
+
+
+              @riverpod
+              String greet(GreetRef ref) {
+                return 'Hello World!!';
+              }
+
+
+
+    224
+                                                    Riverpodの使い方   7.4
+
+・@riverpod アノテーションを付与する
+・第一引数に Ref 型のオブジェクトを受け取る
+
+
+    この 2 つのルールを守れば、関数ベースの Provider を実装できます。
+    @riverpod アノテーションを付与することで、コード生成の対象となりま
+す。生成したコードを参照するために part 命令文を記述します。ファイル名
+は編集したファイル名に .g.dart を付与します。たとえば、main.dart に
+Provider を定義した場合は main.g.dart となります。生成される Provider の名
+前 は、関 数 名 に Provider を 付 与 し た も の に な り ま す。今 回 の 例 で は
+greetProvider という名前になります。
+    第一引数には Ref 型のオブジェクトを受け取ります。この Ref 型の名前はラ
+ージキャメルケースの関数名に Ref を付与したものが生成されます。今回は
+関数名が greet なので、GreetRef という名前になります。他に引数が必要な
+場合は第二引数以降に記述します。
+    関数の戻り値の型は Provider が提供する型になります。
+    実装が完了したらのコード生成のために、以下のコマンドを実行します。
+
+$ flutter packages pub run build_runner build
+
+
+クラスベースのProvider
+    続いてクラスベースの Provider の使い方を解説します。本章の冒頭で紹介
+したサンプルの CounterNotifier をコード生成を利用して実装します。
+
+ ./lib/main.dart
+// 省略
+
+part 'main.g.dart';
+
+
+@riverpod
+class CounterNotifier extends _$CounterNotifier {
+  @override
+  int build() => 0;
+
+
+    void increment() {
+      state = state + 1;
+    }
+}
+
+
+    クラスベースの Provider を実装する際のルールは以下の 3 つです。
+
+
+
+                                                                   225
+第
+    7 状態管理とRiverpod
+          章
+
+
+
+
+              ・@riverpod アノテーションを付与する
+              ・_$ ＋クラス名の型を継承する
+              ・初期値を build メソッドで返す
+
+
+               クラスベースの場合も @riverpod アノテーションを付与してコード生成の
+              対象とします。part 命令文が必要な点は関数ベースの場合と同じです。
+              Notifier クラスは、_$ ＋クラス名の型を継承します。このクラスはコード生
+              成によって作られます。今回の例では _$CounterNotifier というクラスにな
+              ります。初期値は build メソッドで返します。Notifier クラスの state プロ
+              パティには、この build メソッドの戻り値が設定されます。
+               実装が完了したらのコード生成のために、以下のコマンドを実行します。
+
+              $ flutter packages pub run build_runner build
+
+
+               Widget の実装をもう一度見てみましょう。
+              ./lib/main.dart
+              // 省略
+
+              class MyHomePage extends ConsumerWidget {
+                const MyHomePage({super.key, required this.title});
+
+                final String title;
+
+
+                @override
+                Widget build(BuildContext context, WidgetRef ref) {
+                  final counter = ref.watch(counterNotifierProvider);      ❶
+                  return Scaffold(
+                    appBar: AppBar(
+                       backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+                       title: Text(title),
+                    ),
+                    body: Center(
+                       child: Column(
+                         mainAxisAlignment: MainAxisAlignment.center,
+                         children: <Widget>[
+                           const Text(
+                              'You have pushed the button this many times:',
+                           ),
+                           Text(
+                              '$counter',
+                              style: Theme.of(context).textTheme.headlineMedium,
+                           ),
+
+
+    226
+                                                                         Riverpodの使い方   7.4
+
+               ],
+             ),
+          ),
+          floatingActionButton: FloatingActionButton(
+             onPressed: () {
+               ref.read(counterNotifierProvider.notifier).increment();   ❷
+             },
+             tooltip: 'Increment',
+             child: const Icon(Icons.add),
+          ),
+        );
+    }
+}
+
+
+    CounterNotifier の状態、すなわちカウンタの値を取得する場合は counter
+NotifierProviderを監視します（❶）
+                        。CounterNotifier の状態を変更する場合
+は、counterNotifierProvider のnotifierプロパティをrefに渡し、increment
+          （❷）
+メソッドを呼び出します （ここでは WidgetRefの watchメソッドとreadメソッ
+                「Provider から値を取得する」
+ドを使い分けていますが、その詳細は                       。
+                                  で解説します）
+
+
+
+    非同期処理を行うProvider
+    Future 型や Stream 型を提供する Provider について解説します。
+@riverpod
+Future<String> asyncGreet(AsyncGreetRef ref) async {
+  await Future.delayed(const Duration(seconds: 1));
+  return 'Hello World';
+}
+
+    戻り値を Future 型とし、async キーワードを付ける以外は先ほどの関数ベ
+ースの Provider と同じです。クラスベースの Provider の場合は build メソッ
+ドの戻り値を Future 型とし、async キーワードを付けるだけです。
+
+@riverpod
+class CounterNotifier extends _$CounterNotifier {
+  @override
+  Future<int> build() async {
+    await Future.delayed(const Duration(seconds: 1));
+    return 0;
+  }
+// 省略
+}
+
+    このように Provider を生成すると、Provider が提供する型が AsyncValue と
+
+                                                                                        227
+第
+    7 状態管理とRiverpod
+          章
+
+
+
+
+              いう型になります。AsyncValue 型は Riverpod が提供するクラスで非同期の値
+              を安全に扱える便利クラスです。loading、error、data の 3 つの状態を表現
+              できます。非同期処理が実行中であったり、エラーが発生したりした場合な
+              ど、状態に応じて場合分けできて便利です。
+                  asyncGreetProvider を監視するウィジェットの実装例を見てみましょう。
+
+              class HomePage extends ConsumerWidget {
+                  const HomePage({Key? key}) : super(key: key);
+
+                  @override
+                  Widget build(BuildContext context, WidgetRef ref) {
+                    final AsyncValue<String> greet = ref.watch(asyncGreetProvider);   ❶
+                      return Center(
+                        child: greet.when(
+                            loading: () => const Text('Loading'),
+                                                                        ❷
+                            data: (greet) => Text(greet),
+                            error: (e, st) => Text(e.toString())),
+                      );
+                  }
+              }
+
+
+                  ❶でasyncGreetProviderの値を監視します。asyncGreetProviderの状態が変
+              化するたびにHomePageウィジェットのbuild メソッドが呼び出されます。Async
+                                                          （❷）
+              Valueクラスの whenメソッド注 10 を活用して、状態別の UI を構築しています 。
+                  クラスベースの Provider で、state を更新する際にも AyncValue 型を用いま
+              す。先ほどの CounterNotifier クラスを例に、非同期処理中でなければ値を
+              インクリメントするように実装してみましょう。
+
+              @riverpod
+              class CounterNotifier extends _$CounterNotifier {
+                @override
+                Future<int> build() async {
+                  await Future<void>.delayed(const Duration(seconds: 1));
+                  return 0;
+                }
+
+                  void increment() async {
+                    final currentValue = state.valueOrNull;
+                    if (currentValue == null) {
+                                                                    ❶
+                      return;
+                    }
+
+
+
+              注 10 今後は when メソッドではなく、Dart 3 にて導入された switch 式へ移行する方針が示されています。
+
+
+    228
+                                                                      Riverpodの使い方   7.4
+
+
+        state = const AsyncLoading();    ❷
+        await Future<void>.delayed(const Duration(seconds: 1));
+        state = AsyncValue.data(currentValue + 1);    ❸
+    }
+}
+
+                     （❶）
+    state から現在の値を取得します 。valueOrNull プロパティは AsyncValue
+クラスの値を取得するメソッドです。AsyncValue が data の場合は値を取得で
+                                       （意図的に前回値
+きますが、loading や error の場合は基本的に null が返ります
+                                   。ここ
+をキャッシュさせておく方法もあり、null が返らないケースもあります）
+では、AsyncValue が data 以外の場合は何もせずに処理を終了します。続いて
+                        （❷）
+state を AsyncLoading に変更し 、最後に state を AsyncValue.data に変更、
+値をインクリメントします
+           （❸）
+             。
+
+
+非同期なProviderとRaw型
+    AsyncValue でラップされた非同期処理が扱いづらい場合もあります。たと
+えば、他の Provider の非同期処理の結果をもとに、データを処理する Provider
+を実装する場合です。
+
+@riverpod
+Future<int> fakeFirstApi(FakeFirstApiRef ref) async {        ❶
+  await Future.delayed(const Duration(seconds: 1));
+  return 1;
+}
+
+
+@riverpod
+Future<int> fakeSecondApi(FakeSecondApiRef ref) async {           ❷
+  await Future.delayed(const Duration(seconds: 1));
+  return 2;
+}
+
+
+@riverpod
+Future<int> fakeSumApi(FakeSumApiRef ref) async {    ❸
+  final AsyncValue<int> firstApiResult = ref.watch(fakeFirstApiProvider);
+  final AsyncValue<int> secondApiResult = ref.watch(fakeSecondApiProvider);
+// 省略
+}
+
+
+    ❸ の fakeSumApi は、❶ と ❷ の 結 果 を 合 算 し て 返 す Provider で す。
+fakeFirstApi と fakeSecondApi はともに非同期処理に結果を返す Provider で、
+AsyncValue 型で値が提供されます。このような場合、AsyncValue 型をそのま
+
+                                                                                     229
+第
+    7 状態管理とRiverpod
+          章
+
+
+
+
+              ま扱うと、コードが複雑になります。fakeFirstApi と fakeSecondApi の結果
+              が Future 型であれば、await キーワードを使ってシンプルに実装できそうで
+              す。このような場合は Provider の提供する型を Raw 型でラップします。
+
+              @riverpod
+              Raw<Future<int>> fakeFirstApi(FakeFirstApiRef ref) async {     ❶
+                await Future.delayed(const Duration(seconds: 1));
+                  return 1;
+              }
+
+              @riverpod
+              Raw<Future<int>> fakeSecondApi(FakeSecondApiRef ref) async {       ❷
+                  await Future.delayed(const Duration(seconds: 1));
+                  return 2;
+              }
+
+              @riverpod
+              Future<int> fakeSumApi(FakeSumApiRef ref) async {
+                final int firstApiResult = await ref.watch(fakeFirstApiProvider);
+                final int secondApiResult = await ref.watch(fakeSecondApiProvider);   ❸
+                return firstApiResult + secondApiResult;
+              }
+
+
+                                                                （❶、❷）
+                  fakeFirstApi と fakeSecondApi の戻り値を Raw でラップしました    。
+              すると、fakeSumApi では await キーワードを使って結果を int 型で受け取り、
+              シンプルに実装できます（❸）。
+
+
+
+                  Providerから値を取得する
+                  Provider から値を取得するには、WidgetRef の watch メソッドと read メソッ
+              ドを使います。watch メソッドは文字どおり Provider の値を監視します。ウィ
+              ジェットの build メソッドで監視した場合には、Provider の値が変化するとウ
+              ィジェットの build メソッドが再度呼び出されます。read メソッドはその時
+              点での Provider の値を取得するのみです。
+                  Provider から値を取得する際は、可能な限り watch メソッドを利用すること
+              が推奨されています。watch メソッドを利用することで、アプリ全体が状態
+              変化に自動で反応し、メンテナンス性の高いアプリを実現できるとされてい
+              ます。
+                  一方、値を監視する必要のないボタンのタップイベントや、State のライフ
+              サイクルイベントなどでは read メソッドを利用することが推奨されています。
+
+    230
+

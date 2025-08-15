@@ -19,6 +19,43 @@
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="A new Flutter project.">
+  
+  <!-- 日本語フォント文字化け対策：WebFont読み込み -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* Flutter Web CanvasKit 日本語フォント最適化設定 */
+    @font-face {
+      font-family: 'Noto Sans JP';
+      src: url('assets/fonts/NotoSansJP-Regular.ttf') format('truetype');
+      font-weight: 400;
+      font-display: swap;
+    }
+    
+    /* 調査結果に基づく最適化フォント設定 */
+    *, html, body {
+      font-family: system-ui, -apple-system, "BlinkMacSystemFont", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "Noto Sans JP", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", "MS PGothic", sans-serif !important;
+    }
+    
+    /* Canvas要素（CanvasKit用）への日本語フォント */
+    canvas {
+      font-family: system-ui, -apple-system, "BlinkMacSystemFont", "Noto Sans JP", "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif !important;
+    }
+    
+    /* Flutter Web要素への統一設定 */
+    flutter-view, flt-scene-host, flt-semantics-host, flt-glass-pane {
+      font-family: system-ui, -apple-system, "BlinkMacSystemFont", "Noto Sans JP", "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif !important;
+    }
+    
+    /* 文字レンダリング最適化 */
+    * {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+    }
+  </style>
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
@@ -33,6 +70,19 @@
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
+  <!-- 日本語フォント文字化け対策：HTMLレンダラー強制設定 -->
   <script src="flutter_bootstrap.js" async></script>
+  <script>
+    window.addEventListener('flutter-initialized', () => {
+      console.log('✅ HTMLレンダラー強制使用設定完了');
+    });
+    
+    // 新形式での初期化設定
+    if (typeof window.flutterEngine !== 'undefined') {
+      window.flutterEngine.initializeEngine({
+        renderer: "html"
+      });
+    }
+  </script>
 </body>
 </html>

@@ -1,0 +1,441 @@
+                                     ナビゲーションとルーティング ── 画面遷移を実現する3つの手法   5.2
+
+ができません。また、ディープリンクで中間の画面を生成すると、Web アプリ
+として実行した際にブラウザの進む／戻るボタンの挙動が不自然になります。
+そのため、Flutter は名前付きルートを推奨しないとしています。
+ なお、実際にディープリンクとして動作させるにはネイティブの設定や、構
+成ファイルのホスティングが必要になります。
+
+
+
+ Routerウィジェットによる画面遷移 ── Navigator 2.0
+ 続いて Router ウィジェットを使った画面遷移を見ていきましょう。いよい
+よ Navigator 2.0 の登場です。画面履歴を一度に書き換えるような挙動を確認
+することができます。Router ウィジェットを利用した実装は複雑になるため
+ラップしたパッケージを使うのがよいでしょう。本書では go_router パッケー
+ジを紹介します。先ほどの名前付きルートで画面遷移するサンプルを go_router
+パッケージを使って書き換えてみましょう。
+ パッケージを導入するためにプロジェクトのディレクトリで、ターミナル
+から以下のコマンドを実行してください。
+
+# go_routerパッケージを導入
+$ flutter pub add go_router
+
+
+
+go_routerによる画面スタックの書き換えを体験する
+ 次に MaterialApp ウィジェットのコンストラクタを修正します。
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
+
+void main() {
+  runApp(
+     MaterialApp.router(     ❶
+        routerConfig: _router,
+     ),
+  );
+}
+
+final _router = GoRouter(        ❷
+  routes: [
+    GoRoute(    ❹
+      path: '/',
+      builder: (context, state) => const FirstScreen(),
+                                                          ❸
+    ),
+
+
+
+                                                                        167
+第
+    5 テーマとルーティング
+          章
+
+
+
+
+                   GoRoute(
+                     path: '/second',
+                     builder: (context, state) => const SecondScreen(),
+                   ),
+                   GoRoute(
+                     path: '/third',                                       ❸
+                     builder: (context, state) => const ThirdScreen(),
+                   ),
+                ],
+              );
+
+
+               MaterialApp ウィジェットの router という名前付きコンストラクタを利用
+                                         （❶）
+              すると、内部で Router ウィジェットが生成されます  。routerConfig パラ
+              メータは、Router ウィジェットを利用する際に必要な関連オブジェクトをバ
+              ンドルして渡すことのできる便利なパラメータです。
+               続いて、go_router パッケージを扱っていきましょう。似た名前のクラスが
+              連続するので注意してください。GoRouter クラス（❷）は RouterConfig クラス
+              のサブクラスで、router コンストラクタ（❶）の routerConfig パラメータに渡
+              すことができます。GoRoute クラス（❹）は遷移先のパスや Page クラスの生成
+              方法を保持するクラスです。
+               GoRouter クラス（❷）の routes パラメータにリスト型で渡します（❸）。path
+              パラメータには遷移先のパスを、builder パラメータにはウィジェットを生
+              成する関数型を渡します。
+               続いて、画面遷移の実装を修正します。
+
+              class FirstScreen extends StatelessWidget {
+                const FirstScreen({super.key});
+
+                @override
+                Widget build(BuildContext context) {
+                  return Scaffold(
+                    appBar: AppBar(
+                       title: const Text('FirstScreen'),
+                    ),
+                    body: Center(
+                       child: Column(
+                         mainAxisAlignment: MainAxisAlignment.center,
+                         children: [
+                           ElevatedButton(
+                             child: const Text('FirstからSecondへ'),
+                             onPressed: () {
+                               // Navigator.of(context).pushNamed('/second');
+
+
+    168
+                                         ナビゲーションとルーティング ── 画面遷移を実現する3つの手法     5.2
+
+                       GoRouter.of(context).go('/second');    ❶
+                    },
+                  ),
+                  ElevatedButton(
+                    child: const Text('FirstからThirdへ'),
+                    onPressed: () {
+                       // Navigator.of(context).pushNamed('/second/third');
+                       GoRouter.of(context).go('/third');    ❷
+                    },
+                  ),
+               ],
+             ),
+          ),
+        );
+    }
+}
+
+class SecondScreen extends StatelessWidget {
+  const SecondScreen({super.key});
+
+    @override
+    Widget build(BuildContext context) {
+      return Scaffold(
+        appBar: AppBar(
+           title: const Text('SecondScreen'),
+        ),
+        body: Center(
+           child: Column(
+             mainAxisAlignment: MainAxisAlignment.center,
+             children: [
+               ElevatedButton(
+                 child: const Text('SecondからThirdへ'),
+                 onPressed: () {
+                   // Navigator.of(context).pushNamed('/second/third');
+                   GoRouter.of(context).go('/third');     ❸
+                     },
+                  ),
+                  ElevatedButton(
+                     child: const Text('戻る'),
+                     onPressed: () {
+                        Navigator.of(context).pop();   ❹
+                     },
+                  ),
+               ],
+             ),
+          ),
+        );
+
+
+                                                                              169
+第
+    5 テーマとルーティング
+          章
+
+
+
+
+                  }
+              }
+
+              class ThirdScreen extends StatelessWidget {
+                  const ThirdScreen({super.key});
+
+                  @override
+                  Widget build(BuildContext context) {
+                    return Scaffold(
+                        appBar: AppBar(
+                          title: const Text('ThirdScreen'),
+                        ),
+                        body: Center(
+                           child: Column(
+                             mainAxisAlignment: MainAxisAlignment.center,
+                             children: [
+                               ElevatedButton(
+                                  child: const Text('戻る'),
+                                  onPressed: () {
+                                     Navigator.of(context).pop();   ❺
+                                  },
+                                ),
+                             ],
+                           ),
+                        ),
+                      );
+                  }
+              }
+
+
+                  ❶〜❸の部分を修正しました。GoRouter クラスの静的メソッド of からイン
+              スタンスを取り出し、go メソッドを呼び出して画面遷移します。go メソッド
+              の引数には遷移先のパスを渡します。さっそく、動作を確認してみましょう。
+                  FirstScreen 画 面 か ら SecondScreen 画 面 へ、SecondScreen 画 面 か ら
+              ThirdScreen 画面へは問題なく遷移します。しかし、画面左上のバックボタ
+              ンが表示されません。また、SecondScreen 画面の「戻る」ボタン、ThirdScreen
+              画面の
+                「戻る」
+                   ボタンをタップするとアサーションエラーが発生します。
+
+
+              GoRouteで入れ子構造を作る
+                  前項の動作は GoRouter クラスの go メソッドが画面スタックに新しい画面を
+              プッシュしているわけではなく、画面スタックを置き換えているためです。
+              FirstScreen 画面から SecondScreen 画面へ遷移（❶）した際に画面スタックは
+              FirstScreen 画面のみの状態から SecondScreen 画面のみへ書き換えられたの
+
+    170
+                                   ナビゲーションとルーティング ── 画面遷移を実現する3つの手法        5.2
+
+ （図 5.8）。
+です
+
+図 5.8      go メソッドでのスタックの変化
+
+
+                                        Second
+                                        Screen
+
+
+                                                        Stack が空になってしまう！
+
+
+                                                       pop
+         First        go
+        Screen
+                                        Second
+                                        Screen
+
+
+
+
+                                          Third
+                      go                 Screen
+         First
+        Screen
+
+                                                        Stack が空になってしまう！
+
+
+                                                       pop
+
+                                          Third
+                                         Screen
+
+
+  よって、NavigatorState クラスの pop メソッド（❹、❺）を実行すると戻る
+画面が存在しないため、アサーションエラーが発生したのです。
+  この問題を解決するために、ルートの構成を変更します。
+final _router = GoRouter(
+  routes: [
+    GoRoute(
+       path: '/',
+       builder: (context, state) => const FirstScreen(),
+       routes: [
+          GoRoute(
+             path: 'second',
+                                                                  ❶
+             builder: (context, state) => const SecondScreen(),
+          ),
+       ],
+    ),
+    // GoRoute(
+    //     path: '/second',
+    //     builder: (context, state) => const SecondScreen(),
+    // ),
+    GoRoute(
+
+
+
+                                                                           171
+第
+    5 テーマとルーティング
+          章
+
+
+
+
+                     path: '/third',
+                     builder: (context, state) => const ThirdScreen(),
+                   ),
+                ],
+              );
+
+               SecondScreen 画面への GoRoute を、FirstScreen 画面の GoRoute の routes パ
+              ラメータに移動しました（❶）。このように、GoRoute は入れ子構造にするこ
+              とができます。
+               同様に、ThirdScreen 画面への GoRoute も SecondScreen 画面の GoRoute の入
+              れ子にしましょう。
+
+              final _router = GoRouter(
+                routes: [
+                  GoRoute(
+                     path: '/',
+                     builder: (context, state) => const FirstScreen(),
+                     routes: [
+                        GoRoute(
+                           path: 'second',
+                           builder: (context, state) => const SecondScreen(),
+                           routes: [
+                              GoRoute(
+                                 path: 'third',
+                                 builder: (context, state) => const ThirdScreen(),
+                              ),
+                           ],
+                        ),
+                     ],
+                   ),
+                   // GoRoute(
+                   //    path: '/third',
+                   //    builder: (context, state) => const ThirdScreen(),
+                   // ),
+                ],
+              );
+
+
+               ThirdScreen 画面への GoRoute も移動しました。これによって、ThirdScreen
+              画面へのパスが変化しますので、画面遷移処理も修正します。
+
+              class FirstScreen extends StatelessWidget {
+                const FirstScreen({super.key});
+
+                @override
+                Widget build(BuildContext context) {
+                  return Scaffold(
+
+
+    172
+                                        ナビゲーションとルーティング ── 画面遷移を実現する3つの手法   5.2
+
+          appBar: AppBar(
+             title: const Text('FirstScreen'),
+          ),
+          body: Center(
+             child: Column(
+               mainAxisAlignment: MainAxisAlignment.center,
+               children: [
+                  ElevatedButton(
+                    child: const Text('FirstからSecondへ'),
+                    onPressed: () {
+                      GoRouter.of(context).go('/second');
+                    },
+                  ),
+                  ElevatedButton(
+                    child: const Text('FirstからThirdへ'),
+                    onPressed: () {
+                      // GoRouter.of(context).go('/third');
+                       GoRouter.of(context).go('/second/third');   ❶
+                    },
+                  ),
+               ],
+             ),
+          ),
+        );
+    }
+}
+
+
+class SecondScreen extends StatelessWidget {
+  const SecondScreen({super.key});
+
+
+    @override
+    Widget build(BuildContext context) {
+      return Scaffold(
+        appBar: AppBar(
+           title: const Text('SecondScreen'),
+        ),
+        body: Center(
+           child: Column(
+             mainAxisAlignment: MainAxisAlignment.center,
+             children: [
+               ElevatedButton(
+                 child: const Text('SecondからThirdへ'),
+                 onPressed: () {
+                   // GoRouter.of(context).go('/third');
+                   GoRouter.of(context).go('/second/third');       ❷
+                    },
+                  ),
+
+
+                                                                           173
+第
+    5 テーマとルーティング
+          章
+
+
+
+
+                                ElevatedButton(
+                                  child: const Text('戻る'),
+                                  onPressed: () {
+                                     // Navigator.of(context).pop();
+                                     GoRouter.of(context).pop();       ❸
+                                  },
+                                ),
+                             ],
+                           ),
+                        ),
+                      );
+                  }
+              }
+
+              class ThirdScreen extends StatelessWidget {
+                  const ThirdScreen({super.key});
+
+                  @override
+                  Widget build(BuildContext context) {
+                    return Scaffold(
+                      appBar: AppBar(
+                         title: const Text('ThirdScreen'),
+                      ),
+                      body: Center(
+                         child: Column(
+                           mainAxisAlignment: MainAxisAlignment.center,
+                           children: [
+                             ElevatedButton(
+                               child: const Text('戻る'),
+                               onPressed: () {
+                                 // Navigator.of(context).pop();
+                                 GoRouter.of(context).pop();     ❹
+                                  },
+                                ),
+                             ],
+                           ),
+                        ),
+                      );
+                  }
+              }
+
+                  ThirdScreen 画面への遷移処理を修正しました（❶、❷）。それでは動作確
+              認してみましょう。
+                  画面左上のバックボタンは表示され、SecondScreen 画面の「戻る」ボタン、
+              ThirdScreen 画面の「戻る」ボタンをタップしてもアサーションエラーは発生
+              しません。さらに、FirstScreen 画面から ThirdScreen 画面への遷移し、「戻
+
+    174
+

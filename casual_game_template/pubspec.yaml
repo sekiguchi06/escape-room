@@ -74,6 +74,7 @@ flutter:
   assets:
     - assets/audio/
     - assets/fonts/
+    - assets/images/
     - assets/images/hotspots/
 
   # An image asset can refer to one or more resolution-specific "variants", see

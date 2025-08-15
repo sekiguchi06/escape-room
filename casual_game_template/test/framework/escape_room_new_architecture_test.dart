@@ -132,7 +132,7 @@ void main() {
       test('ゲーム初期化', () {
         final game = EscapeRoomGame();
         
-        expect(game.gameObjects, isEmpty);
+        expect(game.controller.gameObjects, isEmpty);
       });
       
       test('GameObject検索機能', () async {

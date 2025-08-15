@@ -5,11 +5,14 @@ import '../core/base_game_object.dart';
 import '../core/interactable_interface.dart';
 import '../core/interaction_result.dart';
 import '../strategies/interaction_strategy.dart';
+import '../strategies/puzzle_strategy.dart';
 import '../components/dual_sprite_component.dart';
+import '../core/escape_room_game.dart';
+import '../../ui/japanese_message_system.dart';
 
 /// インタラクション可能ゲームオブジェクト
 /// 🎯 目的: 戦略パターンを使用したインタラクション制御
-class InteractableGameObject extends BaseGameObject implements InteractableInterface {
+class InteractableGameObject extends BaseGameObject with TapCallbacks implements InteractableInterface {
   // コンポーネント
   DualSpriteComponent? dualSpriteComponent;
   
@@ -18,6 +21,7 @@ class InteractableGameObject extends BaseGameObject implements InteractableInter
   
   // 状態
   bool isActivated = false;
+  
   
   InteractableGameObject({required super.objectId});
   
@@ -37,7 +41,20 @@ class InteractableGameObject extends BaseGameObject implements InteractableInter
     await loadAssets();
     setupComponents();
     
+    // 戦略にゲーム参照を設定（ここで実行）
+    _setupStrategyGameReference();
+    
     debugPrint('Loaded $objectId successfully');
+  }
+  
+  /// 戦略にゲーム参照を設定
+  void _setupStrategyGameReference() {
+    if (_interactionStrategy is PuzzleStrategy) {
+      final game = findGame();
+      if (game is EscapeRoomGame) {
+        (_interactionStrategy as PuzzleStrategy).setGame(game);
+      }
+    }
   }
   
   /// 初期化処理（サブクラスでオーバーライド）
@@ -62,7 +79,7 @@ class InteractableGameObject extends BaseGameObject implements InteractableInter
   @override
   InteractionResult performInteraction() {
     if (_interactionStrategy == null) {
-      return InteractionResult.failure('インタラクション戦略が設定されていません');
+      return InteractionResult.failure(JapaneseMessageSystem.getMessage('interaction_strategy_not_set'));
     }
     
     final result = _interactionStrategy!.execute();
@@ -79,9 +96,29 @@ class InteractableGameObject extends BaseGameObject implements InteractableInter
     if (canInteract()) {
       final result = performInteraction();
       
-      // UI表示は後フェーズで実装
-      if (result.message.isNotEmpty) {
-        print('Message: ${result.message}');
+      // インタラクション結果を処理
+      if (result.success) {
+        // アイテムをインベントリに追加
+        for (final itemId in result.itemsToAdd) {
+          final game = findGame();
+          if (game is EscapeRoomGame) {
+            game.addItemToInventory(itemId);
+            // UIManagerでインベントリ表示を更新
+            game.uiManager.refreshInventoryUI();
+          } else {
+            debugPrint('⚠️ Warning: Could not access EscapeRoomGame for inventory');
+          }
+        }
+        
+        // モーダル表示
+        if (result.message.isNotEmpty) {
+          final game = findGame();
+          if (game is EscapeRoomGame) {
+            game.showInteractionModal(objectId, result.message);
+          }
+        }
+      } else {
+        debugPrint('❌ Interaction failed: ${result.message}');
       }
     }
   }

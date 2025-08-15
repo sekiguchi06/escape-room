@@ -1,0 +1,365 @@
+                                                ネイティブAPIのバージョンと最低サポートOSのバージョン   11.1
+
+app/build.gradle に記述します。android エントリの compileSdkVersion が
+該当します。
+ Android は gradle というビルドツールを使用しており、Android プロジェクト
+を構成するために Android Gradle Plugin というプラグインを使用しています。
+gradle のバージョン、Android Gradle Plugin のバージョン、compileSdkVersion
+のそれぞれは互いに依存関係があります。compileSdkVersion のみを変更する
+とビルドできないこともあります。
+ また、compileSdkVersion を変更する際は Android の公式ドキュメント注 2 を
+参照し、動作の変更点をチェックしましょう。
+
+
+
+ ターゲットSDKバージョン
+ ターゲット SDK バージョンは Android のみに存在する概念です。アプリを
+動作させたい SDK バージョンを指定します。SDK のバージョンによって見た
+目や挙動が変わることがありますので、どのバージョンで動作させる想定な
+のかを明示する設定になります。
+ この値は android/app/build.gradle に記述します。android エントリ、
+defaultConfig 内の targetSdkVersion が該当します。必要な部分だけを抜粋
+すると以下のようになります。
+
+ ./android/app/build.gradle
+android {
+    defaultConfig {
+        targetSdkVersion 30
+    }
+}
+
+ Google Play Store では、この targetSdkVersion を毎年新しいバージョンに
+引き上げることを必須要件として開発者に課しています。targetSdkVersion
+を更新しなければ、アプリをアップデートできなくなったり、新しい OS の
+Android からはストアでアプリを検索できなくなったりします。
+
+
+
+
+注2   https://developer.android.com/about/versions?hl=ja
+
+
+                                                                                311
+第
+    11 Flutterアプリ開発に必要なネイティブの知識
+          章
+
+
+
+
+               11.2
+               アプリの設定変更
+
+               ホーム画面に表示されるアプリの名前などアプリ設定に関わる内容を紹介
+              します。
+
+
+
+               アプリ名
+               ホーム画面に表示されるアプリ名は iOS/Android ネイティブ部分の設定にな
+              ります。
+
+
+              iOSのアプリ名を変更する
+               ios/Runner/Info.plist の CFBundleDisplayName を変更します。
+
+               ./ios/Runner/Info.plist
+              <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/
+              PropertyList-1.0.dtd">
+              <plist version="1.0">
+              <dict>
+                  <key>CFBundleDisplayName</key>
+                  <string>アプリ名</string>
+                  <!-- 省略 -->
+              </dict>
+              </plist>
+
+
+
+
+              Androidのアプリ名を変更する
+               android/app/src/main/AndroidManifest.xml を編集します。マニフェストフ
+              ァイルと呼ばれ、アプリの情報を Android のビルドツールや OS に提供するため
+              のファイルです。アプリ名は application タグの android:label に設定します。
+
+               ./android/app/src/main/AndroidManifest.xml
+              <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+                  package="com.example"><!-- packageの値は環境によって変わります -->
+                  <application
+                      android:label="アプリ名"
+                      android:name="${applicationName}"
+                      android:icon="@mipmap/ic_launcher">
+                      <!-- 省略 -->
+                  </application>
+
+
+    312
+                                          アプリの設定変更   11.2
+
+</manifest>
+
+
+
+
+  アプリアイコン
+  アプリアイコンの設定方法について解説します。
+
+
+iOSのアプリアイコンを変更する
+  iOS のアプリアイコンは Xcode のアセットカタログから設定します。Xcode
+                                         「Runner」
+で ios/Runner.xcworkspace を開きます。左側のナビゲーターから       の
+配下にある「Assets」を選択します。
+                        （図 11.4）
+ 「AppIcon」がアプリアイコンの設定箇所です       。「AppIcon」をアプリ
+アイコンのアセットとして扱うことは Build Settings で設定されています。
+
+図 11.4   AppIcon を選択した様子
+
+
+
+
+  デフォルトではさまざまなサイズのアイコン画像を要求されます。2x や 3x
+などのバリエーションは、Flutter のアセットと同じくディスプレイの解像度
+によって使い分けられます。大きな画像を 1 つ指定して自動的にリサイズさ
+せることも可能で、右側のインスペクタで「Single Size」     （図 11.5）
+                                を選択します       。
+この場合、細かな線が消えてしまうこともあるので注意してください。
+
+
+
+                                                     313
+第
+    11 Flutterアプリ開発に必要なネイティブの知識
+          章
+
+
+
+
+              図 11.5   アイコンのインスペクタ
+
+
+
+
+              Androidのアプリアイコンを変更する
+                Android のアイコンはシンプルな画像のほか、バックグラウンドとフォアグ
+              ラウンドの 2 つのレイヤで構成されるアダプティブアイコンと呼ばれるもの
+              があります。アダプティブアイコンは OS バージョン 8.0 以降で導入され、
+              Android のモデルによってアイコンの表示が変わります。円形、角丸四角形、
+              操作によってアイコンだけが動いて見えるアニメーションが加わるなどさま
+              ざまです。
+                アダプティブアイコンの作成は必須ではありませんが、設定されていると
+              アプリのブランディングに役立ちます。サイズや余白のレギュレーションが
+              細かく定められているので、アダプティブアイコンを作成する場合は公式の
+              アダプティブアイコンの資料注 3 を参照してください。
+                アイコンの指定はマニフェストファイルで行います。application タグの
+              android:icon に設定します。
+
+
+              注3   https://developer.android.com/guide/practices/ui_guidelines/icon_design_adaptive
+
+
+    314
+                                                                       アプリの設定変更   11.2
+
+ ./android/app/src/main/AndroidManifest.xml
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+     package="com.example"><!-- packageの値は環境によって変わります -->
+     <application
+         android:label="アプリ名"
+         android:name="${applicationName}"
+         android:icon="@mipmap/ic_launcher">
+         <!-- 省略 -->
+     </application>
+
+  デフォルト値の @mipmap/ic_launcher は android/app/src/main/res 配下に
+ある mipmap から始まるフォルダの ic_launcher.png という名前の画像を指定
+しています。mipmap から始まるフォルダは、mipmap-mdpi や mipmap-hdpi など
+のようにサイズごとに分かれていて、こちらもディスプレイの解像度によっ
+て使い分けられます。論理解像度に対して物理解像度の倍率で表現すると表
+11.1 のようになります。
+
+表 11.1   フォルダ名と倍率の対応表
+
+フォルダ名                 倍率
+mipmap-mdpi           1.0
+mipmap-hdpi           1.5
+mipmap-xhdpi          2.0
+mipmap-xxhdpi         3.0
+mipmap-xxxhdpi        4.0
+
+
+
+アプリアイコンを手軽に生成するパッケージ
+  iOS と Android それぞれにアプリアイコンファイルを作成し、設定するのは
+手間がかかります。そこで、アプリアイコンを手軽に生成するパッケージを
+紹介します。flutter_launcher_icons というパッケージです。
+  flutter_launcher_icons の導入は pub コマンドで行います。アプリの実行に必
+要なコードではないので、--dev オプションを付けてインストールします。
+
+$ flutter pub add --dev flutter_launcher_icons
+
+
+  アプリアイコンの設定情報は pubspec.yaml または任意の YAML ファイルに
+記述します。以下はその一例です。
+
+ ./pubspec.yaml
+# 省略
+flutter_launcher_icons:
+
+
+                                                                                  315
+第
+    11 Flutterアプリ開発に必要なネイティブの知識
+          章
+
+
+
+
+                image_path: "icon.png" # アイコン画像のパス
+                ios: true # iOSのアイコンを生成し、デフォルトのものと置き換えるか
+                android: true # Androidのアイコンを生成し、デフォルトのものと置き換えるか
+
+
+               pubspec.yaml に設定を記述したら、以下のコマンドを実行します。
+
+              $ flutter pub run flutter_launcher_icons
+
+
+               もし、任意の YAML ファイルに設定を記述した場合は、-f オプションでフ
+              ァイルを指定します。
+
+              $ flutter pub run flutter_launcher_icons -f path/to/config.yaml
+
+
+               以上の操作を行うことで、iOS と Android それぞれにアイコンが設定されま
+              す。flutter_launcher_icons の詳細な設定項目などは pub.dev 注 4 をご覧ください。
+
+
+
+               スプラッシュ画面
+               スプラッシュ画面とは、アプリ起動時に一瞬表示される画面のことです。
+
+
+              iOSとAndroidで異なるスプラッシュ画面の位置付け
+               スプラッシュ画面は iOS と Android で位置付けが異なります。
+               iOS はアプリがすばやく起動することが重視されています。アプリの最初
+              の画面と似たスプラッシュ画面を表示することで、すばやく起動したように
+              感じさせることが推奨されています。表示時間をコントロールすることはで
+              きません。表現やブランディングの機会ではなく、文字を含めることは避け
+              るようにガイドラインで定められています。
+               一方、Android のスプラッシュ画面はアプリアイコンを中央に表示する標準
+              レイアウトが提供され、ブランディングを意識して、アニメーションや色をカ
+              スタマイズ可能となっています。表示時間をコントロールすることも可能です。
+
+
+              iOSのスプラッシュ画面
+               iOS のスプラッシュ画面は Storyboard という XML 形式のファイルで作成しま
+              す。使用する Storyboard は ios/Runner/Info.plist の UILaunchStoryboardName
+              に設定します。
+
+
+              注4   https://pub.dev/packages/flutter_launcher_icons
+
+
+    316
+                                                                              アプリの設定変更   11.2
+
+ ./ios/Runner/Info.plist
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/
+PropertyList-1.0.dtd">
+<plist version="1.0">
+     <dict>
+         <key>UILaunchStoryboardName</key>
+         <string>LaunchScreen</string>
+    </dict>
+</plist>
+
+ デフォルトでは LaunchScreen となっており、ios/Runner/Base.lproj/
+LaunchScreen.storyboard を指しています。
+ この Storyboard を編集することでスプラッシュ画面をカスタマイズできま
+す。Storyboard は Xcode で編集します。さまざまなデバイスサイズに対応さ
+せるには Auto Layout という制約でレイアウトを計算するしくみが不可欠で
+す。本書では Auto Layout の解説は割愛しますが、筆者の印象では Auto Layout
+の習得難易度はやや高めです。
+
+
+Androidのスプラッシュ画面
+ Android では OS バージョン 12 を境に標準のスプラッシュ画像が導入されま
+した。アプリを実行する Android が OS バージョン 12 以上であれば、アプリア
+イコンが中央に表示されるスプラッシュ画面が自動的に表示されます。OS バ
+ージョン 12 未満の場合は、androidx.core:core-splashscreen という下位互
+換ライブラリを使用することで同様のスプラッシュ画面を実現できます。
+ Android のスプラッシュ画面は、中央のアイコン、背景色、終了アニメーシ
+ョンなどをカスタマイズできます。本書で詳細な実現方法は割愛します。詳
+しくは Android の公式ドキュメント注 5 を参照してください。
+
+
+スプラッシュ画面を手軽に実現するパッケージ
+ iOS と Android でスプラッシュ画面の位置付けが異なること、また実現方法
+もまったくバラバラであることを解説しました。それぞれのプラットフォー
+ムに合わせてスプラッシュ画面を実装するのは骨の折れる作業です。Flutter
+のパッケージで iOS と Android のスプラッシュ画面を自動生成する flutter_
+native_splash というパッケージがありますので、強いこだわりがなければこ
+
+
+注5   https://developer.android.com/about/versions/12/features/splash-screen?hl=ja
+
+
+                                                                                         317
+第
+    11 Flutterアプリ開発に必要なネイティブの知識
+          章
+
+
+
+
+              のパッケージを使用するのが手軽でよいと筆者は考えています。
+               このパッケージは iOS であればスプラッシュ画面に相当する Storyboard を自動
+              生成します。Android の場合は OS バージョン 12 以上であれば標準のスプラッシ
+              ュ画面を使用し、OS バージョン 12 未満は独自にスプラッシュ画面を生成します。
+               プロジェクトのディレクトリで、ターミナルから以下のコマンドを実行し
+              てください。
+              # flutter_native_splashパッケージを導入
+              $ flutter pub add flutter_native_splash
+
+               スプラッシュ画像に関する設定は pubspec.yaml または任意の YAML ファイ
+              ルに記述します。以下はその一例です。
+
+              ./pubspec.yaml
+              # 省略
+              flutter_native_splash:
+                color: "#00FFFF" # スプラッシュ画面の背景色
+                image: icon.png # スプラッシュ画面の中央に表示する画像
+
+                android_12: # Android 12以上の標準スプラッシュ画面の設定
+                  color: "#FF00FF"
+
+                android_gravity: left # Androidのアイコンの画像の位置
+                ios_content_mode: left # iOSのアイコンの画像の位置
+
+
+               pubspec.yaml に設定を記述したら、以下のコマンドを実行します。
+
+              $ dart run flutter_native_splash:create
+
+
+               もし、任意の YAML ファイルに設定を記述した場合は、--path オプション
+              でファイルを指定します。
+
+              $ dart run flutter_native_splash:create --path=path/to/config.yaml
+
+
+               iOS に関しては Storyboard を自動生成するので、アイコン画像や背景のほか、
+              アイコンの位置などもカスタム可能となっています。一方、Android に関しては
+              OS バージョン 12 以上であれば標準のスプラッシュ機能を使用するので、設定項
+              目が分かれています。上記の例ですと、Android12 未満の場合は背景色は#00FFFF
+              が採用され、アイコンの位置は左寄せになります。Android12 以上の場合は背景
+              色は#FF00FFが採用され、アイコンの位置は変更不可のため中央になります。
+
+
+
+
+    318
+

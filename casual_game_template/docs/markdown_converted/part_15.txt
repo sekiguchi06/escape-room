@@ -1,0 +1,370 @@
+                                                    DartPadでアプリ開発を体験しよう   3.1
+
+図 3.1    DartPad でアプリを実行した様子
+
+
+
+
+  ここでサンプルコードについて解説します。最初のimport から始まる行はパ
+ッケージ（パッケージについては第 4 章で解説します）からライブラリに定義され
+たクラスや関数を利用可能にするものです。ここでは Flutter のマテリアルデザイ
+ンに準拠したアプリを開発するためのクラスや関数をインポートしています。
+  続いて Dart コードのエントリポイントとなる main 関数があります。そし
+                                             く けい
+                            （矩形の描画）
+て、runApp 関数注 1 の引数は Container      、Center
+                                         （中央配置のレイ
+アウト）                            （図 3.2）
+    、Text（文字の描画）の 3 つが階層構造になっています      。
+
+図 3.2    ウィジェットの階層構造
+ Container(
+    color: Colors.blue,
+    child:
+      const Center(
+         child:
+           Text(
+            'Hello, world!',
+              textDirection: TextDirection.ltr,
+           ),
+      ),
+ ),
+
+
+  この 3 つはすべてウィジェット（Widget）と呼ばれるオブジェクトです。
+Flutter アプリの UI はこのウィジェットの階層構造（ウィジェットツリー）をも
+
+
+注1      runApp 関数は引数に与えられたウィジェットを画面全体に適用する関数です。
+
+
+                                                                          95
+第
+    3 フレームワークの中心となるWidgetの実装体験
+         章
+             StatelessWidget、StatefulWidget
+
+
+
+
+             とに作られます。ほとんどのウィジェットは次の 2 つのクラスに分類できま
+             す。状態を持たない StatelessWidget と、状態を持つ StatefulWidget です。
+
+
+
+                 3.2
+                 状態を持たないWidget ── StatelessWidget
+
+                 状態を持たないウィジェットクラスを StatelessWidget と言います。まず
+             は次のサンプルコードを DartPad で実行してみましょう。
+
+             import 'package:flutter/material.dart';
+
+             void main() {
+                 runApp(
+                   Center(
+                      child: Container(
+                         color: Colors.yellow,
+                         width: 100,
+                         height: 100,
+                         child: const Center(
+                            child: Text(
+                               'mouse',
+                               textDirection: TextDirection.ltr,
+                            ),
+                         ),
+                      ),
+                   ),
+                 );
+             }
+
+
+
+
+    96
+                                                     状態を持たないWidget ── StatelessWidget   3.2
+
+図 3.3   黄色いネズミを配置した実行結果
+
+
+
+
+  画面中央に黄色の四角形、「mouse」というテキストを配置しました（図 3.3）。
+  同じ要領で他の動物を追加してみたいと思います。runApp 関数に直接引数
+で渡されている Center ウィジェットを Column という垂直なレイアウトをする
+           （❶）。続いて、Column の children 配列に、赤いト
+ウィジェットに変更します
+カゲを追加します（❷）。
+
+import 'package:flutter/material.dart';
+
+
+void main() {
+  runApp(
+    Column(       ❶
+      children: [
+        Container(
+           color: Colors.yellow,
+           width: 100,
+           height: 100,
+           child: const Center(
+              child: Text(
+                 'mouse',
+                 textDirection: TextDirection.ltr,
+              ),
+           ),
+        ),
+        Container(
+           color: Colors.red,
+                                                      ❷
+           width: 100,
+           height: 100,
+
+
+
+                                                                                         97
+第
+    3 フレームワークの中心となるWidgetの実装体験
+         章
+             StatelessWidget、StatefulWidget
+
+
+
+
+                            child: const Center(
+                               child: Text(
+                                 'lizard',
+                                 textDirection: TextDirection.ltr,   ❷
+                               ),
+                            ),
+                          ),
+                       ],
+                     ),
+                 );
+             }
+
+
+                 図 3.4 のように黄色いネズミと赤いトカゲが並びました。
+
+             図 3.4        黄色いネズミと赤いトカゲが並んだ実行結果
+
+
+
+
+                 独自のStatelessWidgetを定義する
+                 ここで、Column の子ウィジェットがテキストと色以外が同じ冗長なものに
+             なりました。テキストと色をパラメータにウィジェットを構成する機能があ
+             ると共通化できそうです。
+                 StatelessWidget を利用して実現してみましょう。
+             import 'package:flutter/material.dart';
+
+             void main() {
+
+
+
+    98
+                                                    状態を持たないWidget ── StatelessWidget   3.2
+
+    runApp(
+      const Column(
+        children: [
+           AnimalView(
+              text: 'mouse',
+              color: Colors.yellow,
+           ),
+                                      ❶
+           AnimalView(
+             text: 'lizard',
+              color: Colors.red,
+           ),
+         ],
+      ),
+    );
+}
+
+class AnimalView extends StatelessWidget {
+    const AnimalView({super.key, required this.text, required this.color});
+
+
+    final String text;
+    final Color color;
+
+    @override
+    Widget build(BuildContext context) {
+      return Container(
+          color: color,
+          width: 100,                                                          ❷
+          height: 100,
+          child: Center(
+             child: Text(
+                text,
+                textDirection: TextDirection.ltr,
+             ),
+          ),
+      );
+    }
+}
+
+
+    StatelessWidget を継承した AnimalView クラスを実装しました（❷）。Column
+の子ウィジェットが再利用可能になったことによって runApp の引数がシンプ
+      （❶）。
+ルになりました
+    AnimalView クラスはクラス変数にテキストと色を持ち、コンストラクタ引
+数で渡されます。
+    オーバーライドした build メソッドでこのウィジェットの UI を構成します。
+    ちなみにコンストラクタの第一引数の Key は、フレームワークがウィジェ
+
+                                                                                       99
+第
+    3 フレームワークの中心となるWidgetの実装体験
+          章
+              StatelessWidget、StatefulWidget
+
+
+
+
+                                           （第 9 章で
+              ットのライフサイクルを判断する際に用いられるオブジェクトです
+                      。多くのケースでは省略（null）で問題ありません。ウィジ
+              詳しく解説します）
+              ェットのコンストラクタは名前付き引数、第一引数を Key 型とすることが慣
+              習とされています。
+
+
+
+                  3.3
+                  状態を持つウィジェット ── StatefulWidget
+
+                  状態を持ち、自身で表示を更新ができるウィジェットクラスを StatefulWidget
+              と言います。サンプルコードを DartPad で実行してみましょう。解説のためサ
+              ンプルコードは StatelessWidget からスタートします。
+
+              import 'package:flutter/material.dart';
+
+              void main() {
+                runApp(
+                   const Center(
+                      child: Counter(),
+                   ),
+                );
+              }
+
+              class Counter extends StatelessWidget {
+                const Counter({super.key});
+
+
+                  final _count = 0;
+
+                  @override
+                  Widget build(BuildContext context) {
+                    return Container(
+                      color: Colors.red,
+                      width: 100,
+                      height: 100,
+                      child: Center(
+                         child: Text(
+                            '$_count',
+                            textDirection: TextDirection.ltr,
+                         ),
+                      ),
+                      );
+                  }
+              }
+
+
+    100
+                                          状態を持つウィジェット ── StatefulWidget   3.3
+
+  赤い四角形の中にテキスト「0」が描画されました（図 3.5）。
+
+図 3.5    赤い四角形の中に 0 が描画された実行結果
+
+
+
+
+  Widgetのタップ操作を検知する
+  今回のサンプルは、赤い四角形をタップすると数字がカウントアップする
+アプリにしたいと思います。タップ操作を検知するために Container ウィジ
+ェットを GestureDetector ウィジェットで包みます（❶）。
+
+import 'package:flutter/material.dart';
+
+
+void main() {
+  runApp(
+     const Center(
+        child: Counter(),
+     ),
+  );
+}
+
+class Counter extends StatelessWidget {
+  const Counter({super.key});
+
+
+   final _count = 0;
+
+   @override
+   Widget build(BuildContext context) {
+     return GestureDetector(    ❶
+        onTap: () {
+           print('tapped!');
+        },
+
+
+
+                                                                          101
+第
+    3 フレームワークの中心となるWidgetの実装体験
+          章
+              StatelessWidget、StatefulWidget
+
+
+
+
+                        child: Container(
+                           color: Colors.red,
+                           width: 100,
+                           height: 100,
+                           child: Center(
+                             child: Text(
+                                '$_count',
+                                textDirection: TextDirection.ltr,
+                             ),
+                           ),
+                        ),
+                      );
+                  }
+              }
+
+
+                                               （図 3.6）
+                  赤い四角形をタップするとコンソールにメッセージが表示されます      。
+
+              図 3.6        コンソールに出力されるメッセージ
+
+
+
+
+                  StatefulWidgetを継承する
+                  続いて、タップした際に数字をカウントアップするように変更を加えたい
+              と思います。
+                  クラス変数 _count は final で宣言されているため変更することはできませ
+              ん。仮に _count を int _count = 0; のように宣言したとしても、変化した _
+              count の値に追従して画面が更新されることはありません。このようなケー
+              スでは StatefulWidget を採用します。
+
+              import 'package:flutter/material.dart';
+
+
+              void main() {
+                runApp(
+                  const Center(
+                     child: Counter(),
+                  ),
+
+
+
+    102
+

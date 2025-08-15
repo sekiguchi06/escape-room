@@ -1,0 +1,410 @@
+                                                                         入力文字を取得する   8.5
+
+
+class InputForm extends StatefulWidget {
+    const InputForm({super.key});
+
+    @override
+    State<InputForm> createState() => _InputFormState();
+}
+
+
+class _InputFormState extends State<InputForm> {
+
+    final _formKey = GlobalKey<FormState>();
+    /* ◆ TextEditingController
+    TextField Widgetの入力文字や選択文字を取得、変更する機能を持つ */
+    final _textEditingController = TextEditingController(); ❶
+
+
+    @override
+    Widget build(BuildContext context) {
+      return Form(
+        key: _formKey,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: TextFormField(
+                controller: _textEditingController,    ❷
+                  maxLines: 5,
+                  decoration: const InputDecoration(
+                     hintText: '文章を入力してください',
+                  ),
+                  validator: (value) {
+                     if (value == null || value.isEmpty) {
+                       return '文章が入力されていません';
+                     }
+                     return null;
+                  },
+               ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+               onPressed: () {
+                  final formState = _formKey.currentState!;
+                  if (!formState.validate()) {
+                    return;
+                  }
+                  debugPrint('text = ${_textEditingController.text}');    ❸
+                },
+
+
+                                                                                     247
+第
+    8 実践ハンズオン❷
+          章
+              ひらがな変換アプリを開発
+
+
+
+
+                                child: const Text(
+                                  '変換',
+                                ),
+                             ),
+                           ],
+                        ),
+                      );
+                  }
+
+                  @override
+                  void dispose() {
+                      _textEditingController.dispose();          ❹
+                      super.dispose();
+                  }
+              }
+
+
+
+                  クラスメンバに TextEditingController を加え（❶）、TextFormField ウィジ
+              ェットにパラメータとして渡しました（❷）。これで TextEditingController
+              から TextFormField ウィジェットの入力文字が取得できます。
+                  バリデーションを通過した後、入力文字をログに出力するコードを追加し
+              ました（❸）
+                   。
+                  TextEditingController クラスは不要になったら忘れずに dispose メソッド
+                    （❹）
+              を呼び出します  。これにより、メモリリークのリスクを回避します。
+                  _InputFormState クラスの dispose メソッドは State のライフサイクルメソ
+              ッドの一つで、StatefulWidget が破棄されるときに呼び出されます。InputForm
+              ウィジェットは setState を呼び出して自身の状態を更新することはありませ
+              んが、dispose メソッドをオーバーライドして TextEditingController クラス
+              を破棄するために StatefulWidget を継承しました。
+
+
+
+                  8.6
+                  ひらがな化するWeb APIを呼び出す実装をする
+
+                  入力文字のひらがな変換には goo ラボのひらがな化 API 注 1 を利用させてもら
+              います。API の利用には利用登録とアプリケーション ID の取得が必要になり
+
+
+
+
+              注1      https://labs.goo.ne.jp/api/jp/hiragana-translation/
+
+
+    248
+                                                 ひらがな化するWeb APIを呼び出す実装をする   8.6
+
+ます。詳しくは公式 Web サイト注 2 をご覧ください。
+
+
+
+    リクエスト、
+         レスポンスオブジェクトを定義する
+    API のリクエストパラメータは JSON 形式で送信します。json_serializable パ
+ッケージを利用して、JSON を型安全に扱いやすくするためのデータ型を定義
+します。lib フォルダの配下に data.dart という新しいファイルを追加し、以
+下のコードを記述します。
+
+ ./lib/data.dart
+import 'package:json_annotation/json_annotation.dart';        ❶
+
+
+part 'data.g.dart';        ❷
+
+
+@JsonSerializable(fieldRename: FieldRename.snake)      ❸
+class Request {    ❹
+  const Request({
+    required this.appId,
+    required this.sentence,
+    this.outputType = 'hiragana',    ❺
+    });
+
+    final String appId;
+    final String sentence;
+    final String outputType;
+
+
+    Map<String, Object?> toJson() => _$RequestToJson(this);       ❻
+}
+
+    Request クラスを定義しました（❹）。@JsonSerializable アノテーションを
+付与することで、json_serializable パッケージが JSON のシリアライズ、デシ
+リアライズのコードを生成します（❸）。❶ではアノテーションを参照するた
+め、json_annotation.dart をインポートしています。
+    Request クラスのフィールドは、appId、sentence、outputType と 3 つ定義
+し、Dart の慣習にのっとってキャメルケースで命名しました。しかし、API
+のリクエストパラメータはスネークケースです。@JsonSerializable アノテ
+ーションの fieldRename プロパティに FieldRename.snake を指定することで、
+JSON をシリアライズ、デシリアライズする際に、フィールド名をスネークケ
+ースに変換するよう指定しています。
+
+
+注2    https://labs.goo.ne.jp/apiusage/
+
+
+                                                                            249
+第
+    8 実践ハンズオン❷
+          章
+              ひらがな変換アプリを開発
+
+
+
+
+               今回のアプリでは outputType は固定値なので、コンストラクタのデフォル
+                      （❺）。
+              ト値を設定しました
+               Request クラスを Map 形式に変換するための toJson メソッドを定義しまし
+              （❻）
+              た  。メソッドの本体は json_serializable パッケージが生成し、_$ ＋クラス
+              名＋ ToJson という命名規則になります。このメソッドを参照するため、part
+              命令文で data.g.dart をインポートしています（❷）。
+               実装が完了したらコード生成のために、以下のコマンドを実行してくださ
+              い。
+
+              $ flutter packages pub run build_runner build
+
+
+               同じように、レスポンスオブジェクトも定義します。data.dart に以下の
+              コードを追加します。
+
+               ./lib/data.dart
+
+
+              // 省略
+
+              @JsonSerializable(fieldRename: FieldRename.snake)
+              class Response {
+
+                const Response({
+                  required this.converted,
+                });
+
+                final String converted;
+
+                factory Response.fromJson(Map<String, Object?> json) => _$ResponseFromJson(jso
+              n);    ❶
+              }
+
+               Response クラスを定義しました。converted フィールドは変換後のひらが
+              な文字列が入ります。Response クラスのインスタンスを JSON から生成する
+                                       （❶）。こちらも json_serializable
+              ための factory コンストラクタを定義しました
+              パッケージが生成します。
+               実装が完了したらのコード生成のために、以下のコマンドを実行しておき
+              ましょう。
+
+              $ flutter packages pub run build_runner build
+
+
+
+
+    250
+                                                            ひらがな化するWeb APIを呼び出す実装をする   8.6
+
+
+    アプリケーションIDを設定する
+    API のリクエストにはアプリケーション ID が必要です。goo ラボのひらが
+な化 API 注 3 のページから利用登録を行い、アプリケーション ID を取得してく
+ださい。今回はアプリケーション ID をハードコーディングせずに、環境変数
+を利用する方法として第 4 章で解説した dart-define-from-file のしくみで扱
+うことにします。
+    define/env.json という JSON ファイルを作成し、以下のようにアプリケー
+ション ID を記述します（YOUR_APP_ID の代わりに取得した ID を入れる）。
+
+ ./define/env.json
+{
+    "appId": "YOUR_APP_ID"
+}
+
+
+    そして、アプリの実行引数に --dart-define-from-file=define/env.json
+を指定します。詳しい方法は第 4 章をご覧ください。
+    なお、今回は設定とコードを分離する設計の観点で、dart-define-from-
+file のしくみを利用しています。セキュリティの観点では、認証キーを dart-
+define-from-file で扱うことがベストプラクティスとは言えません。アプリ
+のセキュリティについてはリバースエンジニアリング、ルート化、中間者攻
+撃による通信の改ざんなど、さまざまな脅威があります。どの程度コストを
+かけてセキュアに扱うかは要件しだいと筆者は考えます。
+    本書ではこれ以上の解説は割愛しますが、少なくとも「認証キーは dart-
+define-from-file で渡すのがベストプラクティス」という誤解を招かないよ
+うに……という思いでここで補足しておきます。
+
+
+
+    Web APIを呼び出す
+    InputForm ウィジェットの「変換」ボタンをタップしたときに Web API を呼
+び出すように実装します。
+
+ ./lib/input_form.dart
+import 'dart:convert';         ❶
+
+
+import 'package:flutter/material.dart';
+
+
+注3    https://labs.goo.ne.jp/api/jp/hiragana-translation/
+
+
+                                                                                       251
+第
+    8 実践ハンズオン❷
+          章
+              ひらがな変換アプリを開発
+
+
+
+
+              import 'package:hiragana_converter/data.dart';      ❷
+              import 'package:http/http.dart' as http;    ❸
+
+
+              // 省略
+
+                       ElevatedButton(
+                         onPressed: () async {       ❹
+                            final formState = _formKey.currentState!;
+                            if (!formState.validate()) {
+                                return;
+                            }
+                            final url = Uri.parse('https://labs.goo.ne.jp/api/hiragana');
+                                                                                            ❺
+                            final headers = {'Content-Type': 'application/json'};
+                            final request = Request(
+                              appId: const String.fromEnvironment('appId'),
+                                                                              ❻
+                                sentence: _textEditingController.text,
+                            );
+
+
+                            final result = await http.post(
+                               url,
+                               headers: headers,                         ❼
+                               body: jsonEncode(request.toJson()),
+                            );
+
+
+                            final response = Response.fromJson(
+                               jsonDecode(result.body) as Map<String, Object?>,
+                                                                                    ❽
+                            );
+                            debugPrint('変換結果: ${response.converted}');
+                         },
+                         child: const Text(
+                            '変換',
+                         ),
+                       ),
+
+              // 省略
+
+
+
+                InputForm ウィジェットの「変換」ボタンをタップしたときに呼び出される
+              コールバックで、Web API を呼び出すコードを追加しました。最初に HTTP
+              リクエストの URL やリクエストヘッダを生成します（❺）。次に先ほど定義し
+              たリクエストオブジェクトを生成します（❻）。Request クラスを参照するた
+              め、d a t a . d a r t を イ ン ポ ー ト し て い ま す（❷）。a p p I d は S t r i n g .
+              fromEnvironment を使って環境変数から取得しています。実行引数が設定さ
+              れていれば、環境変数には define/env.json の内容が反映されます。
+                続いて、http パッケージの post メソッドを呼び出して Web API を呼び出し
+
+    252
+                                ひらがな化するWeb APIを呼び出す実装をする   8.6
+
+ （❼）
+ます 。今回は http パッケージをインポートする際に as キーワードで http
+という別名を付けています（❸）。request オブジェクトは toJson メソッドで
+Map に変換し、そこからさらに jsonEncode 関数で JSON 文字列に変換してい
+ます。jsonEncode 関数を参照するため、組み込みパッケージの dart:convert
+          （❶）。post メソッドの戻り値は Future なので、await
+をインポートしています
+キーワードを付けて非同期処理の完了を待ち、onPressed コールバックに async
+       （❹）。
+を付与しています
+  最後に、API のレスポンスをデシリアライズして、変換結果をログに出力
+しています（❽）。JSON 文字列を jsonDecode 関数で Map に変換し、そこから
+Response オブジェクトを生成しています。
+  これでアプリを実行して、入力文字の変換結果をログに出力できるように
+なりました。Android Studio であれば、「View」➡「Tool Windows」➡「Run」を選
+択し、ログを確認できます（図 8.7）。
+
+図 8.7   変換結果をログに出力した様子
+
+
+
+
+                                                           253
+第
+    8 実践ハンズオン❷
+          章
+              ひらがな変換アプリを開発
+
+
+
+
+                  8.7
+                  アプリの状態を管理する
+
+                  Web API のレスポンスを受け取り結果を表示したり、レスポンスを待つ間
+              にインジケータを表示したりと、アプリの表示切り替えのために状態を管理
+              します。
+
+
+
+                  状態を表現するクラスを作成する
+                  まずはアプリの状態を sealed class で表現してみましょう。lib フォルダの
+              配下に app_state.dart という新しいファイルを追加し、以下のコードを記述
+              します。
+
+              ./lib/app_state.dart
+              sealed class AppState {
+                const AppState();          ❶
+              }
+
+
+              class Input extends AppState {
+                const Input(): super();          ❷
+              }
+
+              class Loading extends AppState {
+                const Loading(): super();            ❸
+              }
+
+
+              class Data extends AppState {
+                const Data(this.sentence);
+                                                 ❹
+                  final String sentence;
+              }
+
+
+                                                              （❶）
+                  アプリの状態を表現する、AppState という sealed class を定義しました  。
+              AppState を継承した Input、Loading、Data という 3 つのクラスを定義しまし
+              （❷、❸、❹）
+              た     。Input は入力状態、Loading は Web API のレスポンス待ちの
+              状態、Data は Web API のレスポンスを受け取った状態を表現します。
+                  続いて、lib フォルダの配下に app_notifier_provider.dart という新しい
+              ファイルを追加し、以下のコードを記述します。
+
+
+
+    254
+

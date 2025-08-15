@@ -1,0 +1,377 @@
+                                                        テーマ ── アプリ全体のヴィジュアルを管理              5.1
+
+    const MyApp({super.key});
+
+    // This widget is the root of your application.
+    @override
+    Widget build(BuildContext context) {
+      return MaterialApp(
+          title: 'Flutter Demo',
+          theme: ThemeData(
+            // This is the theme of your application.
+             //
+             // TRY THIS: Try running your application with "flutter run". You'll see
+             // the application has a purple toolbar. Then, without quitting the app,
+             // try changing the seedColor in the colorScheme below to Colors.green
+             // and then invoke "hot reload" (save your changes or press the "hot
+             // reload" button in a Flutter-supported IDE, or press "r" if you used
+             // the command line to start the app).
+             //                                                                         ❶
+             // Notice that the counter didn't reset back to zero; the application
+             // state is not lost during the reload. To reset the state, use hot
+             // restart instead.
+             //
+             // This works for code too, not just values: Most code changes can be
+             // tested with just a hot reload.
+             colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),    ❷
+             useMaterial3: true,
+          ),
+          home: const MyHomePage(title: 'Flutter Demo Home Page'),
+        );
+    }
+}
+
+
+    ❶で ThemeData クラスのインスタンスを作成し、MaterialApp ウィジェット
+に渡しています。英語のコメントにもあるように、カラーを変更して動作を
+確認してみましょう。
+    今回は❷の deepPurple を blue に変更してください。ソースコードを保存す
+ると、ホットリロード機能でアプリの外観が変化します。もし、変化しなけ
+れば Android Studio のホットリロードボタンをクリックしてみましょう。
+    アプリの外観が紫を基調としたテーマから青に変化したことが確認できる
+と思います。ThemeData クラスはアプリのテーマ情報を持つクラスです。
+ThemeData クラスの代表的なプロパティに、色のパラメータを持つ colorScheme
+と、文字のパラメータを持つ textTheme があります。
+    ColorScheme クラスはマテリアルデザインのルールにのっとり、テーマの
+色のパラメータを計算します。さらに、計算済みの色を一部カスタマイズす
+
+                                                                                            143
+第
+    5 テーマとルーティング
+          章
+
+
+
+
+              ることもできます。
+
+              class MyApp extends StatelessWidget {
+                  const MyApp({super.key});
+
+                  @override
+                  Widget build(BuildContext context) {
+                    return MaterialApp(
+                        title: 'Flutter Demo',
+                        // theme: ThemeData(
+                        //    colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+                        // ),
+                        theme: ThemeData(
+                          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue)
+                              .copyWith(background: Colors.blueGrey),    ❶
+                           useMaterial3: true,
+                        ),
+                        home: const MyHomePage(title: 'Flutter Demo Home Page'),
+                      );
+                  }
+              }
+
+
+                  ColorScheme クラスの copyWith メソッドを使い、カラーを変更したコピー
+              を作成します。この例では背景カラーを変更しています（❶、図 5.1）。
+
+              図 5.1        background カラーが変更された様子
+
+
+
+
+                  続いて textTheme について見てみましょう。
+
+    144
+                                                      テーマ ── アプリ全体のヴィジュアルを管理   5.1
+
+class MyApp extends StatelessWidget {
+    const MyApp({super.key});
+
+    @override
+    Widget build(BuildContext context) {
+      return MaterialApp(
+          title: 'Flutter Demo',
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue)
+                 .copyWith(background: Colors.blueGrey),
+             textTheme: const TextTheme(
+               bodyMedium: TextStyle(
+                 color: Colors.white,
+                                                ❶
+                 fontWeight: FontWeight.w600,
+               ),
+             ),
+             useMaterial3: true,    ❷
+          ),
+          home: const MyHomePage(title: 'Flutter Demo Home Page'),
+        );
+    }
+}
+
+
+
+    ThemeData クラスへ TextTheme を渡しました（❶）。ここでは bodyMedium と
+いうテキストスタイルの色とフォントウェイトを変更しています（図 5.2）。
+
+図 5.2        TextTheme が変更された様子
+
+
+
+
+                                                                               145
+第
+    5 テーマとルーティング
+          章
+
+
+
+
+               アプリのデザインを細かくカスタマイズするには、ColorScheme のリファ
+              レンス注 1 と TextTheme のリファレンス注 2、それと併せてマテリアルデザインの
+              ドキュメント注 3 を参照してください。
+               また最後に useMaterial3 というコンストラクタのパラメータについても触
+                   （❷）
+              れておきます                            （以降、M3）
+                      。このパラメータは Material Design 3      のテーマ
+              を利用するかどうかを指定します。M3 は Google が提唱するマテリアルデザ
+              インの新しいバージョンで、従来のものよりも表現力が豊かでアクセシビリ
+              ティが高いデザインとなっています。
+               M3 はオプトインの形で段階的に導入されてきましたが、Flutter 3.16 をも
+              って M3 がデフォルトになりました。今後は useMaterial3 フラグは削除され、
+              従来までの Material Design 2 のコードは削除される予定です。
+
+
+              ダークモード対応
+               ここ数年の iOS や Android はユーザー設定や時間帯に応じて暗い外観に切り
+              替わるダークモード機能を持っています（iOS はダークモード、Android では
+              ダークテーマと言いますが、本書では両方を指してダークモードと呼ぶこと
+                  。MaterialApp ウィジェットや ThemeData クラスを使うことで簡単
+              とします）
+              にダークモードに対応できます。サンプルをお見せしましょう。
+
+              class MyApp extends StatelessWidget {
+                const MyApp({super.key});
+
+                // This widget is the root of your application.
+                @override
+                Widget build(BuildContext context) {
+                  return MaterialApp(
+                    title: 'Flutter Demo',
+                    theme: ThemeData(
+                       colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+                       useMaterial3: true,
+                    ),
+                    darkTheme: ThemeData(
+                       colorSchemeSeed: Colors.deepPurple,
+                                                             ❶
+                       brightness: Brightness.dark,    ❷
+                    ),
+                    home: const MyHomePage(title: 'Flutter Demo Home Page'),
+
+
+
+              注1   https://api.flutter.dev/flutter/material/ColorScheme-class.html
+              注2   https://api.flutter.dev/flutter/material/TextTheme-class.html
+              注3   https://m3.material.io/styles/color/the-color-system/color-roles
+
+
+    146
+                                                  テーマ ── アプリ全体のヴィジュアルを管理   5.1
+
+        );
+    }
+}
+
+
+    MaterialApp ウィジェットの darkTheme パラメータにダークモード用の
+ThemeData ク ラ ス を 渡 し ま す（❶）。ThemeData ク ラ ス は brightness に
+Brightness.dark を指定することで、ダークモード用のテーマを自動計算し
+てくれます（❷）。MaterialApp ウィジェットがシステムのダークモード設定
+を監視しているので、スマートフォンがダークモードに切り替わるとアプリ
+の外観もダークモードに変化します。
+    それでは実際にアプリを実行し、ダークモードを切り替えてみましょう。
+iOS Simulator の場合は、設定アプリから「Developer」➡「Dark Appearance」の
+順に選択し、スイッチでモードを切り替えます（図 5.3）。
+
+図 5.3        モード切り替えでアプリの外観が変化する様子
+
+
+
+
+    アプリ独自のテーマ管理
+    マテリアルデザインにのっとったテーマについては、MaterialApp ウィジェ
+ットや ThemeData クラスを用いることで実現できることがわかりました。一方
+で、アプリ独自のテーマを管理する方法として Theme Extension があります。
+
+class MyTheme extends ThemeExtension<MyTheme> {
+  const MyTheme({
+
+
+                                                                           147
+第
+    5 テーマとルーティング
+          章
+
+
+
+
+                      required this.themeColor,
+                  });
+
+                  final Color? themeColor;        ❶
+
+
+                  @override
+                  MyTheme copyWith({Color? themeColor}) {
+                      return MyTheme(
+                        themeColor: themeColor ?? this.themeColor,    ❷
+                      );
+                  }
+
+
+                  @override
+                  MyTheme lerp(MyTheme? other, double t) {
+                    if (other is! MyTheme) {
+                          return this;
+                      }
+                                                                                    ❸
+                      return MyTheme(
+                         themeColor: Color.lerp(themeColor, other.themeColor, t),
+                      );
+                  }
+              }
+
+
+
+                  ThemeExtension クラスを継承した MyTheme クラスを実装しました。MyTheme
+              ク ラ ス で は t h e m e C o l o r と い う カ ラ ー を 扱 う こ と に し ま す（❶）。
+              ThemeExtension は抽象クラスで、サブクラスでは 2 つのメソッドを実装しな
+              ければなりません。
+                  ❷の copyWith メソッドは任意のフィールドを変更したコピーをインスタン
+              ス化するメソッドです。
+                  ❸の lerp メソッドはテーマの変化を線形補間するメソッドです。このメソ
+              ッドを実装しておくことで、テーマ変更時にアニメーション処理されるよう
+              になります。たとえば、ダークモードへの切り替えタイミングが該当します。
+                  こうして実装したMyThemeクラスはThemeDataクラスのパラメータに渡します。
+
+              class MyApp extends StatelessWidget {
+                const MyApp({super.key});
+
+                  // This widget is the root of your application.
+                  @override
+                  Widget build(BuildContext context) {
+                    return MaterialApp(
+                      title: 'Flutter Demo',
+                      theme: ThemeData(
+
+
+    148
+                                                   テーマ ── アプリ全体のヴィジュアルを管理   5.1
+
+          colorSchemeSeed: Colors.deepPurple,
+          extensions: const [MyTheme(themeColor: Color(0xFF0000FF))],   ❶
+        ),
+        darkTheme: ThemeData(
+          colorSchemeSeed: Colors.deepPurple,
+          brightness: Brightness.dark,
+          extensions: const [MyTheme(themeColor: Color(0xFFFF0000))],   ❷
+        ),
+
+    ThemeData クラスの extensions パラメータに ThemeExtension クラスを継承
+した MyTheme クラスのインスタンスを渡します（❶）。extensions パラメータ
+は List 型なので、複数の Theme Extension を設定することも可能です。
+ThemeData クラスのパラメータなので、ダークモード用に別の MyTheme クラス
+を指定することも容易です（❷）。
+    続いて、MyTheme クラスのテーマを適用したウィジェットを実装します。
+ThemedWidget という正方形を描画するウィジェットです。
+./lib/main.dart
+class ThemedWidget extends StatelessWidget {
+  const ThemedWidget({super.key});
+
+    @override
+    Widget build(BuildContext context) {
+      final themeData = Theme.of(context);    ❶
+      final myTheme = themeData.extension<MyTheme>()!;    ❷
+      final color = myTheme.themeColor;
+      return Container(width: 100, height: 100, color: color);
+    }
+}
+
+    Theme ウィジェットの of メソッドを使い、ThemeData クラスのインスタンス
+を取得します（❶）。さらに、ThemeData クラスの extension メソッドを使い、
+MyTheme クラスのインスタンスを取得します（❷）。
+    Theme というウィジェットがここで初めて登場しましたが、MaterialApp ウ
+ィジェットが内部で生成しているウィジェットで、ThemeData クラスのイン
+スタンスを持っています。Theme ウィジェットの子孫であれば、どのウィジ
+ェットも of メソッドを使って ThemeData クラスのインスタンスを取得するこ
+とができるのです。さらにこの ThemedWidget のように、build メソッドの中
+で Theme ウィジェットの of メソッドを呼び出すと、テーマが変更されたとき
+に再描画されるしくみも備わっています（詳しくは第 9 章で解説します）。こ
+のしくみのおかげで、ダークモードへの切り替え時に色がアニメーションす
+る様子を確認できます。
+
+                                                                            149
+第
+    5 テーマとルーティング
+          章
+
+
+
+
+              Theme Extensionを利用したアプリのサンプル
+                  最後に、Theme Extension を利用したサンプルの全体を掲載します。この
+              サンプルではシステムのダークテーマ設定を利用せず、アプリ独自にダーク
+              テーマ設定を持つようにしました。Theme Extension を継承したクラスで lerp
+              メソッドを実装したことにより、テーマ変更時に色がアニメーションする様
+              子が確認できます。
+
+              ./lib/main.dart
+              import 'package:flutter/material.dart';
+
+              class MyTheme extends ThemeExtension<MyTheme> {
+                  const MyTheme({
+                    required this.themeColor,
+                  });
+
+
+                  final Color? themeColor;
+
+                  @override
+                  MyTheme copyWith({Color? themeColor}) {
+                    return MyTheme(
+                       themeColor: themeColor ?? this.themeColor,
+                    );
+                  }
+
+                  @override
+                  MyTheme lerp(MyTheme? other, double t) {
+                    if (other is! MyTheme) {
+                       return this;
+                    }
+                    return MyTheme(
+                       themeColor: Color.lerp(themeColor, other.themeColor, t),
+                    );
+                  }
+              }
+
+
+              void main() {
+                runApp(const MyApp());
+              }
+
+              class MyApp extends StatefulWidget {
+                const MyApp({super.key});
+
+                  @override
+                  State<StatefulWidget> createState() => _MyAppState();
+              }
+
+
+
+    150
+

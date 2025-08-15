@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'interactable_game_object.dart';
 import '../strategies/item_provider_strategy.dart';
 import '../components/dual_sprite_component.dart';
+import '../../ui/japanese_message_system.dart';
 
 /// 本棚オブジェクト - AI生成画像使用
 /// 🎯 目的: 鍵アイテムの提供
@@ -19,7 +20,7 @@ class BookshelfObject extends InteractableGameObject {
     // アイテム提供戦略を設定
     setInteractionStrategy(ItemProviderStrategy(
       itemId: 'key',
-      message: '本の間から古い鍵を発見した！',
+      message: JapaneseMessageSystem.getMessage('bookshelf_discovery_message'),
     ));
   }
   

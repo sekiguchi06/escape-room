@@ -26,6 +26,7 @@ class CasualGameApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
+        fontFamily: 'Noto Sans JP', // 日本語フォント設定（文字化け対策）
       ),
       home: ChangeNotifierProvider<SimpleGameStateProvider>(
         create: (_) => SimpleGameStateProvider(),

@@ -1,0 +1,377 @@
+     第
+
+
+
+Dartの言語仕様
+         2   章
+
+
+
+
+                 23
+第
+    2 Dartの言語仕様
+         章
+
+
+
+
+              Flutter の開発には Dart 注 1 というプログラミング言語を用います。Swift や
+             Kotlin、Java と同じように静的型付け言語、クラスベースのオブジェクト指
+             向言語です。2023 年にメジャーアップデートされた Dart 3 ではすべてのコー
+             ドが null 安全になったほか、Record やパターンマッチングなどの新機能が追
+             加されました。これらの新機能も解説します。
+              本章はできるだけ Dart の言語仕様を広く網羅することを目指しましたので
+             分量が多くなっています。これは「新しいフレームワークに触れるときは、使
+             用言語を頭にたたき込んでから」という筆者のスタイルを反映しています。と
+             はいえ、勉強スタイルは人それぞれですので、本章は必要に応じて読み飛ば
+             していただいてもかまいません。
+
+
+
+              2.1
+              変数宣言
+
+              Dart の変数宣言の記述方法はいくつかあります。一つずつ見ていきましょう。
+
+
+
+              変数と型推論
+
+             int age = 0;
+
+
+              この例では int 型の age という変数を整数リテラル 0 で初期化しました。こ
+             こ で の int の よ う に 変 数 の 型 を 宣 言 す る 部 分 を Dart で は 型 注 釈（Type
+             Annotation）と呼びます。
+              Dart は型推論の機能があります。型注釈を省略し代わりに var と記述する
+             ことで、変数の型を推論させることができます。
+
+             var age = 0;
+
+
+
+
+              定数 ── finalとconst
+              変更する予定のない変数は、定数を利用することが推奨されています。定
+
+
+             注1   https://dart.dev/
+
+
+    24
+                                                           変数宣言   2.1
+
+数として宣言するには final 修飾子を付けます。するとその変数への再代入
+はコンパイルエラーとなります。
+
+final int age = 37;
+age = 38;
+// => Error: Can't assign to the final variable 'num'.注2
+
+ また、この場合も型注釈を省略して型推論させることができます。
+
+final age = 37;
+
+
+ final のほか、const という修飾子でも定数を宣言できます。
+const int age = 37;
+const age = 37; // constも型推論可能
+
+ こちらはコンパイル時定数として扱われます。そのため、クラス変数など
+は const 宣言することはできません（静的なクラス変数であれば可能）。
+ また、final で宣言されたクラスのフィールドは変更可能ですが、const で
+宣言されたクラスのフィールドは変更不可です。クラスについては「2.12 ク
+ラス」で詳しく解説します。
+
+
+
+ いろいろな初期値の与え方
+ 変数は必ずしも宣言時に初期化される必要はありません。利用時までに初
+期化されていれば OK です。初期化済みかどうかは Dart コンパイラが判断し
+てくれます。
+final flag = DateTime.now().hour.isEven;
+
+final int number; // 宣言時に初期化しない（この場合もfinalで宣言可能）
+if (flag) {
+    number = 0;
+} else {
+    number = 255;
+}
+print(number); // 必ず初期化されているのでOK
+
+ 以下のように利用時までに初期化が保証されていないコードはコンパイル
+エラーとなります。
+
+
+
+注2   本書では、コードやコマンドのコンパイル結果や実行結果などを「// =>」というコメント表記で示
+     しています。
+
+
+                                                                  25
+第
+    2 Dartの言語仕様
+         章
+
+
+
+
+             final userName = 'steve';
+
+             int number; // 宣言時に初期化しない
+             if (userName == 'joe') {
+               number = 0;
+             } else if (userName == 'john') {
+               number = 255;
+             } // else ケースがない
+
+             print(number);
+             // => Error: Non-nullable variable 'num' must be assigned before it can be used.
+
+
+             遅延初期化
+              変数の初期化を Dart コンパイラが必ずしも正しく判断できない場合もあり
+             ます。たとえば、グローバル変数の初期化などがそれにあたります。
+              そのようなときは late 修飾子を付与することでコンパイラのチェックを回
+             避できます。
+
+             late String globalVariable; // 宣言時に初期化しない
+
+             void main() {
+               globalVariable = 'initialized';
+               print(globalVariable);
+               // => initialized
+             }
+
+
+              final late のように late 修飾子と final 修飾子を併用し、一度初期化され
+             たら変更不可にすることもできます。
+              また late 修飾子は、宣言時に初期化処理を記述すると、変数にアクセスさ
+             れるまで初期化処理を遅延することができます。以下の例では変数 variable
+             にアクセスするまで、初期値を計算する highCostFunction は実行されません。
+
+             late String variable = highCostFunction();
+
+
+              使用されるかどうかわからない変数や、初期化処理の実行コストが高い場
+             合に用いると効果的です。
+              late 修飾子を使う場合は、未初期化の変数にアクセスすると実行時エラー
+             となりますので利用には注意が必要です。
+
+
+
+
+    26
+                                          組み込み型   2.2
+
+
+ 2.2
+ 組み込み型
+
+ Dart の代表的な組み込み型を紹介します。
+
+
+
+ 数値型
+ 数値型を表現する型は整数型として int クラス、浮動小数型として double
+クラス、以上の 2 つが用意されています。どちらも共通のスーパークラス num
+を継承しています。
+
+
+int ── 整数型
+ 符号付整数型として int クラスが提供されています。bit サイズはプラット
+フォームごとに異なります。昨今の iOS と Android を対象とするなら 64bit の
+みと考えて差し支えないでしょう。
+ 以下は int クラスとして推論される整数リテラルです。
+
+final x = 1;
+final hex = 0xFF; // 16進数リテラル
+final exponent = 1e5; // 指数リテラル
+
+
+
+double ── 浮動小数型
+ 64bit 浮動小数型として double クラスが提供されています。
+ 以下は double クラスとして推論される小数リテラルです。
+
+final y = 1.1;
+final exponents = 1.42e5; // 指数表記も可
+
+
+
+
+ String ── 文字列型
+ 文字列型として String クラスが提供されています（その他、本書では詳し
+く解説しませんが、UTF-16 コードポイントのコレクションとして Runes クラ
+ス、（書記素クラスタによる）部分文字のコレクションとして Characters クラ
+スがあります）。
+ String クラスとして推論される文字列リテラルは、ダブルクオートとシン
+
+                                                   27
+第
+    2 Dartの言語仕様
+         章
+
+
+
+
+             グルクオートどちらも対応しています。
+             final str1 = 'Hello, Dart!';
+             final str2 = "Hello, Dart!";
+
+              文字列リテラルに変数の値を挿入することもできます。変数名の前に $ を
+             置きます。式の結果を挿入する場合は ${} で式を囲います。
+             final name = 'dart';
+
+             final str1 = 'Hello, $name!';
+             print(str1);
+             // => Hello, dart!
+
+             final str2 = 'Hello, ${name.toUpperCase()}!';
+             print(str2);
+             // => Hello, DART!
+
+              隣接する文字列リテラルは自動的に連結されます。+ 演算子で連結を明示
+             することもできます。
+
+             final message1 = 'Hello, ' 'Dart!';
+             print(message1);
+             // => Hello, Dart!
+
+
+             final message2 = 'Hello, ' // 改行してもOK
+               'Dart!';
+             print(message2);
+             // => Hello, Dart!
+
+
+             final message3 = 'Hello, ' +
+               'Dart!';
+             print(message3);
+             // => Hello, Dart!
+
+              複数行の文字列を定義するには三重のダブルクオート、または三重のシン
+             グルクオートが便利です。
+
+             final message1 = "<div>\n <p>Hello, Dart!</p>\n</div>";
+
+             final message2 = """
+             <div>
+               <p>Hello, Dart!</p>
+             </div>
+             """;
+
+
+             final message3 = '''
+             <div>
+
+
+    28
+                                                                          組み込み型     2.2
+
+   <p>Hello, Dart!</p>
+ </div>
+ ''';
+
+
+  文字列リテラルの前に r を置くことで、改行文字などの特殊文字の解釈が
+無効にできます。
+
+ final message1 = 'Hello,\nDart!';
+ print(message1);
+ // => Hello,
+ // => Dart!
+
+ final message2 = r'Hello,\nDart!';
+ print(message2);
+ // => Hello,\nDart!
+
+
+
+
+  bool ── 論理型
+  論理型として bool クラスが提供されます。
+  bool 型のリテラルとして true と false があります。
+   final flag1 = true;
+   final flag2 = false;
+
+
+
+
+  List ── 配列
+  配列に相当する順序付きコレクションには、Dart では List クラスが用意さ
+れています。リテラル表現は以下です。各要素をカンマ（,）
+                           で区切り、大括弧
+（[ ]）で囲います。
+ final list1 = [0, 1, 2, 3];
+ final list2 = [0, 1, 2, 3,]; // 末尾にカンマを付与してもOK
+
+  List の要素の型は推論され、型の異なる要素を追加しようとするとコンパ
+イル時にエラーとなります。
+
+ final intList = [0, 1, 2, 3];
+ intList.add(4); // OK
+ intList.add('abc'); // => Error: The argument type 'String' can't be assigned to
+ the parameter type 'int'.
+
+
+  List の要素の型を明示するには以下のように型注釈を記述します。
+
+
+                                                                                    29
+第
+    2 Dartの言語仕様
+         章
+
+
+
+
+             final list = <int>[0, 1, 2, 3];
+
+
+
+              なお、List には可変長と固定長の 2 種類が存在します。リテラルで作られ
+             るのは可変長 List になります。List の名前付きコンストラクタ unmodifiable
+             を使うと、その List は固定長となります（名前付きコンストラクタは「2.12 ク
+             ラス」で解説します）。固定長 List の要素数を変更しようとすると実行時エラ
+             ーとなります。
+
+             final baseList = [0, 1, 2, 3,];
+             final fixedLengthList = List.unmodifiable(baseList); // baseListを元に固定長の新
+             しいインスタンスを生成
+             fixedLengthList.add(4); // 実行時エラー
+
+
+
+
+              Set ── 集合
+              順序が保持されない、要素が重複しないコレクションとして Set クラスが
+             用意されています。リテラル表現は以下です。各要素をカンマ（,）
+                                           で区切り、
+             中括弧（{ }）で囲います。
+             final map1 = { 'Apple', 'Orange', 'Grape' };
+             final map2 = { 'Apple', 'Orange', 'Grape', }; // 末尾にカンマを付与してもOK
+
+              Set の要素の型は推論され、型の異なる要素を追加しようとするとコンパイ
+             ル時にエラーとなります。
+
+             final fruits = { 'Apple', 'Orange', 'Grape' };
+             fruits.add('Cherry'); // OK
+             fruits.add(123); // => Error: The argument type 'int' can't be assigned to the pa
+             rameter type 'String'.
+
+
+              Set の要素の型を明示するには以下のように型注釈を記述します。
+             final fruits = <String>{ 'Apple', 'Orange', 'Grape' };
+
+
+
+
+              Map ── 連想配列
+              連想配列や辞書に相当する key-value ペアとして Map クラスが用意されてい
+             ます。他の多くの言語と同様にキーは重複しません。キーとバリューの型に
+             制限はありません。リテラル表現は以下です。キーとバリューはコロン（:）、
+
+    30
+

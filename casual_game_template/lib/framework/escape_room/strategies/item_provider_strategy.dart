@@ -1,5 +1,6 @@
 import '../core/interaction_result.dart';
 import 'interaction_strategy.dart';
+import '../../ui/japanese_message_system.dart';
 
 /// アイテム提供戦略
 /// 🎯 目的: アイテムを提供するインタラクション行動
@@ -15,21 +16,25 @@ class ItemProviderStrategy implements InteractionStrategy {
   
   @override
   bool canInteract() {
-    return !_hasProvided;
+    return true; // 繰り返しタップ可能
   }
   
   @override
   InteractionResult execute() {
-    if (!canInteract()) {
-      return InteractionResult.failure('既にアイテムを取得済みです');
+    if (!_hasProvided) {
+      _hasProvided = true;
+      return InteractionResult.success(
+        message: message,
+        itemsToAdd: [itemId],
+        shouldActivate: true,
+      );
+    } else {
+      return InteractionResult.success(
+        message: '${JapaneseMessageSystem.getMessage('already_examined_prefix')}: $message',
+        itemsToAdd: [],
+        shouldActivate: false,
+      );
     }
-    
-    _hasProvided = true;
-    return InteractionResult.success(
-      message: message,
-      itemsToAdd: [itemId],
-      shouldActivate: true,
-    );
   }
   
   @override

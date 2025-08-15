@@ -1,0 +1,402 @@
+                                         ナビゲーションとルーティング ── 画面遷移を実現する3つの手法                5.2
+
+ ボタンをタップすると SecondScreen 画面が表示されます。これは GoRouter
+る」
+クラスの go メソッドが GoRoute クラスの入れ子構造をそのまま画面スタック
+に再現するためです。ThirdScreen 画面の GoRoute は SecondScreen 画面の
+GoRoute の routes に追加されていました。そのため、❶を実行すると、画面
+スタックは図 5.9 のようになるのです。
+
+図 5.9     go メソッドでのスタックの変化
+
+
+
+                               First                           Third
+                              Screen                          Screen
+
+
+                                                go
+
+                                                               Third
+                                                              Screen
+                                                              Second
+                                                              Screen
+                              First                            First
+                             Screen                           Screen
+
+
+
+
+  加えて、元の画面に戻る処理は GoRouter クラスの pop メソッドに書き換え
+ました（❸、❹）。go_router パッケージでは、Navigator ウィジェットを入れ
+子構造で利用する機能があり、この pop メソッドはそのようなケースを考慮
+して実装されています。Navigator ウィジェットを入れ子構造にするには
+ShellRoute 注 4 クラスを利用します。今回のサンプルでは ShellRoute クラスを
+採用していないため GoRouter クラスの pop メソッド、NavigatorState クラス
+の pop メソッド、どちらを使っても結果は同じになります。
+
+
+goとpushの違い
+  先ほどの例では GoRouter クラスの go メソッドで画面遷移を行いましたが、
+画面遷移の要件がより複雑な図 5.10 のような場合を考えてみましょう。
+
+
+
+
+注4      https://pub.dev/documentation/go_router/latest/go_router/ShellRoute-class.html
+
+
+                                                                                         175
+第
+    5 テーマとルーティング
+          章
+
+
+
+
+              図 5.10   複雑な画面遷移の要件
+
+                                                     ∞
+                                                    さらに
+                                                    FirstScreenへ
+                                                                             さらに
+
+                                                                                                ∞
+                                   First            SecondScreenへ   Second   SecondScreenへ
+                                  Screen                            Screen
+
+
+
+                                                         Third
+                                        ThirdScreenへ    Screen         ThirdScreenへ
+               FirstScreenへ
+                                                                                              Third
+                                                                                             Screen
+
+                              Second
+
+                                                                             ∞
+                 First        Screenへ      Second    さらにSecondScreenへ
+                Screen                     Screen
+
+
+
+
+                 ThirdScreenへ                  ThirdScreenへ
+
+
+
+                                     Third                           Third
+                                    Screen                          Screen
+
+
+
+
+                これを GoRoute クラスの入れ子構造で表現するのは困難です。このような
+              ケースにも対応できるよう、go_router パッケージは画面スタックにプッシュ
+              するメソッドも提供しています。この機能を使い、図 5.10 のような画面遷移
+              を実現してみましょう。まずは、FirstScreen 画面から修正します。
+
+              class FirstScreen extends StatelessWidget {
+                const FirstScreen({super.key});
+
+
+                 @override
+                 Widget build(BuildContext context) {
+                   return Scaffold(
+                     appBar: AppBar(
+                        title: const Text('FirstScreen'),
+                     ),
+                     body: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            ElevatedButton(
+                               child: const Text('FirstからFirstへ'),
+                               onPressed: () {
+                                                                       ❶
+                                  GoRouter.of(context).push('/');
+                               },
+                            ),
+
+
+    176
+                                         ナビゲーションとルーティング ── 画面遷移を実現する3つの手法   5.2
+
+                   ElevatedButton(
+                     child: const Text('FirstからSecondへ'),
+                     onPressed: () {
+                        // GoRouter.of(context).go('/second');
+                        GoRouter.of(context).push('/second');    ❷
+                     },
+                   ),
+                   ElevatedButton(
+                     child: const Text('FirstからThirdへ'),
+                     onPressed: () {
+                       // GoRouter.of(context).go('/second/third');
+                        GoRouter.of(context).push('/second/third');   ❸
+                     },
+                   ),
+                ],
+              ),
+           ),
+         );
+     }
+ }
+
+
+     FirstScreen 画面から FirstScreen 画面へ遷移するボタンを追加しました
+（❶）
+  。また SecondScreen 画面、ThirdScreen 画面への遷移処理を go メソッド
+から push メソッドに変更しました（❷、❸）。
+     続いて、SecondScreen 画面を修正します。
+
+ class SecondScreen extends StatelessWidget {
+   const SecondScreen({super.key});
+
+     @override
+     Widget build(BuildContext context) {
+       return Scaffold(
+         appBar: AppBar(
+            title: const Text('SecondScreen'),
+         ),
+         body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                   child: const Text('SecondからSecondへ'),
+                   onPressed: () {
+                                                                 ❶
+                      GoRouter.of(context).push('/second');
+                   },
+                ),
+                ElevatedButton(
+
+
+                                                                            177
+第
+    5 テーマとルーティング
+          章
+
+
+
+
+                                   child: const Text('SecondからThirdへ'),
+                                   onPressed: () {
+                                     // GoRouter.of(context).go('/second/third');
+                                      GoRouter.of(context).push('/second/third');   ❷
+                                   },
+                                 ),
+                                 ElevatedButton(
+                                   child: const Text('戻る'),
+                                   onPressed: () {
+                                      GoRouter.of(context).pop();
+                                   },
+                                 ),
+                              ],
+                            ),
+                         ),
+                       );
+                   }
+               }
+
+
+
+                   SecondScreen 画面から SecondScreen 画面へ遷移するボタンを追加しました
+              （❶）。ThirdScreen 画面への遷移処理を go メソッドから push メソッドに変更
+              しました（❷）
+                    。
+                   それでは動作を確認してみましょう。おおむね期待どおりに動作している
+              ように見えますが、FirstScreen 画面から ThirdScreen 画面へ遷移した際に中
+              間の SecondScreen 画面がスタックに積まれなくなってしまいました（図 5.11）。
+
+              図 5.11        push メソッドでのスタックの変化
+
+
+
+                                                    First              Third
+                                                   Screen             Screen
+
+
+                                                            push
+
+
+
+
+                                                                       Third
+                                                                      Screen
+                                                 First                 First
+                                                Screen                Screen
+
+
+
+
+                   GoRouter クラスの push メソッドは Navigator 1.0 の push メソッドと同様に、
+              1 つ の Route ク ラ ス を ス タ ッ ク に プ ッ シ ュ す る こ と し か で き ま せ ん。
+              FirstScreen 画面から ThirdScreen 画面への遷移処理は、GoRouter クラスの
+
+    178
+                                        ナビゲーションとルーティング ── 画面遷移を実現する3つの手法   5.2
+
+go メソッドに戻してみましょう。
+
+class FirstScreen extends StatelessWidget {
+    const FirstScreen({super.key});
+
+    @override
+    Widget build(BuildContext context) {
+      return Scaffold(
+          appBar: AppBar(
+             title: const Text('FirstScreen'),
+          ),
+          body: Center(
+            child: Column(
+               mainAxisAlignment: MainAxisAlignment.center,
+               children: [
+                  ElevatedButton(
+                    child: const Text('FirstからFirstへ'),
+                    onPressed: () {
+                       GoRouter.of(context).push('/');
+                    },
+                  ),
+                  ElevatedButton(
+                     child: const Text('FirstからSecondへ'),
+                     onPressed: () {
+                        GoRouter.of(context).push('/second');
+                     },
+                  ),
+                  ElevatedButton(
+                     child: const Text('FirstからThirdへ'),
+                     onPressed: () {
+                        // GoRouter.of(context).push('/second/third');
+                        GoRouter.of(context).go('/second/third');    ❶
+                    },
+                  ),
+               ],
+             ),
+          ),
+        );
+    }
+}
+
+
+    FirstScreen 画面から ThirdScreen 画面への遷移処理を go メソッドに戻し
+ました（❶）
+     。これで、ThirdScreen 画面へ遷移し、「戻る」ボタンをタップす
+ると SecondScreen 画面が表示されるようになりました。しかし、図 5.12 のよ
+うに遷移すると一部の FirstScreen 画面がスタックから消えてしまいます。
+
+
+
+                                                                           179
+第
+    5 テーマとルーティング
+          章
+
+
+
+
+              図 5.12     go メソッドでのスタックの変化
+
+
+
+                        First           First           First         Third
+                       Screen          Screen          Screen        Screen
+
+
+                                push            push            go
+
+
+                                                        First         Third
+                                                       Screen        Screen
+                                        First           First        Second
+                                       Screen          Screen        Screen
+                        First           First           First         First
+                       Screen          Screen          Screen        Screen
+
+
+
+                go メソッドは GoRoute の入れ子構造をそのまま画面スタックに再現するの
+              でした。そのため、push メソッドで複数の FirstScreen 画面をスタックに積
+              んだとしても、その後 go メソッドで遷移するとスタックが書き換えられ、
+              FirstScreen 画面は 1 つしかスタックに残らないのです。
+                画面スタックをどのように変化させたいのかを意識して、適切なメソッド
+              を選択しましょう。
+
+
+
+                5.3
+                まとめ
+
+                Flutter フレームワークが提供する「テーマ」と「画面遷移」に関する機能を紹
+              介しました。
+                MaterialApp ウィジェットや ThemeData クラスを使うことで、マテリアルデ
+              ザインにのっとったアプリを簡単に作ることができます。ThemeData クラス
+              がテーマを自動計算してくれるので、テーマのカスタマイズやダークモード
+              対応も容易です。
+                アプリ独自のテーマ、世界観を演出するなら、Theme Extension を使うの
+              がよいでしょう。
+                アプリの画面遷移の実装方法を学ぶために、Navigator 1.0 と Navigator 2.0
+              の違いを確認しました。シンプルな画面遷移であれば Navigator 1.0 の push メ
+              ソッド、pop メソッドで対応できるケースも十分あるでしょう。複雑な画面
+              遷移を実装する場合は Navigator 2.0 が候補に挙がります。本章では、例とし
+              て go_router パッケージを使った画面遷移の実装を紹介しました。
+
+    180
+       第
+
+
+
+実践ハンズオン❶
+           6   章
+
+
+
+
+  画像編集アプリを開発
+
+
+
+
+                   181
+第
+    6 実践ハンズオン❶
+          章
+              画像編集アプリを開発
+
+
+
+
+                本章では Flutter アプリをハンズオン形式で実装していきます。簡単な画像
+              編集アプリを作成する過程で、第 4 章や第 5 章で学んだ内容を実践します。本
+              章のハンズオンでは iOS Simulator を使用します。あわせてもらえばすべて
+              の工程を体験できます。なお、本章でも fvm コマンドを省略して flutter コマ
+              ンドを記載しています。ご自身の環境、コマンドを実行するディレクトリに
+              あわせて読み替えてください。
+                図 6.1 が完成イメージです。
+
+              図 6.1   アプリの完成イメージ
+
+                      StartScreen   SnapSelectScreen   EditSnapScreen
+                      ウィジェット          ウィジェット            ウィジェット
+
+
+
+
+                6.1
+                開発するアプリの概要
+
+                このハンズオンで実装するアプリの概要を説明します。スマートフォンの
+              画像ライブラリから取得した画像を回転、反転させて編集するアプリです。
+              画面は全部で 3 つあります。
+
+
+
+                スタート画面
+                               （図 6.2）。現在の日付が表示され、
+                アプリ起動後に表示される画面です                  「開
+              始する」ボタンをタップすると画像選択画面に遷移します。
+
+    182
+

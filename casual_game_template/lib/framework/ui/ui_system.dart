@@ -2,6 +2,7 @@ import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
 import 'flutter_theme_system.dart';
+import 'japanese_message_system.dart';
 
 /// UI階層の優先度定義
 class UILayerPriority {
@@ -11,6 +12,14 @@ class UILayerPriority {
   static const int modal = 300;
   static const int overlay = 400;
   static const int tooltip = 500;
+}
+
+/// インベントリUI階層の優先度定義
+class InventoryUILayerPriority extends UILayerPriority {
+  static const int inventoryBackground = UILayerPriority.ui + 10;     // 210
+  static const int inventoryItems = UILayerPriority.ui + 20;          // 220  
+  static const int selectedItem = UILayerPriority.ui + 30;            // 230
+  static const int itemTooltip = UILayerPriority.tooltip;             // 500
 }
 
 /// UIレイアウトマネージャー
@@ -184,7 +193,7 @@ class TextUIComponent extends UIComponent<String> {
     
     _textComponent = TextComponent(
       text: _text,
-      textRenderer: TextPaint(style: theme.getTextStyle(_styleId)),
+      textRenderer: JapaneseFontSystem.getTextPaint(18, Colors.black),
       position: Vector2.zero(),
     );
     _textComponent.anchor = Anchor.center;
@@ -201,7 +210,7 @@ class TextUIComponent extends UIComponent<String> {
     
     if (isMounted) {
       _textComponent.text = _text;
-      _textComponent.textRenderer = TextPaint(style: theme.getTextStyle(_styleId));
+      _textComponent.textRenderer = JapaneseFontSystem.getTextPaint(18, Colors.black);
     }
   }
   
@@ -209,7 +218,7 @@ class TextUIComponent extends UIComponent<String> {
   void applyTextStyle(String styleId) {
     _styleId = styleId;
     if (isMounted) {
-      _textComponent.textRenderer = TextPaint(style: theme.getTextStyle(_styleId));
+      _textComponent.textRenderer = JapaneseFontSystem.getTextPaint(18, Colors.black);
     }
   }
   
@@ -228,27 +237,21 @@ class TextUIComponent extends UIComponent<String> {
   void onThemeChanged() {
     super.onThemeChanged();
     if (isMounted) {
-      _textComponent.textRenderer = TextPaint(style: theme.getTextStyle(_styleId));
+      _textComponent.textRenderer = JapaneseFontSystem.getTextPaint(18, Colors.black);
     }
   }
   
   /// テキストの色を動的に変更
   void setTextColor(Color color) {
     if (isMounted) {
-      final currentStyle = theme.getTextStyle(_styleId);
-      _textComponent.textRenderer = TextPaint(
-        style: currentStyle.copyWith(color: color),
-      );
+      _textComponent.textRenderer = JapaneseFontSystem.getTextPaint(18, color);
     }
   }
   
   /// テキストサイズを動的に変更
   void setTextSize(double size) {
     if (isMounted) {
-      final currentStyle = theme.getTextStyle(_styleId);
-      _textComponent.textRenderer = TextPaint(
-        style: currentStyle.copyWith(fontSize: size),
-      );
+      _textComponent.textRenderer = JapaneseFontSystem.getTextPaint(size, Colors.black);
     }
   }
 }
