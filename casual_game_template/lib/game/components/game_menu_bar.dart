@@ -6,6 +6,13 @@ class GameMenuBar extends StatelessWidget {
   final VoidCallback? onAddItem;
   
   const GameMenuBar({super.key, this.onAddItem});
+  
+  /// メニューバーの高さを取得（他のコンポーネントから参照用）
+  static double getHeight(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final safeAreaTop = mediaQuery.padding.top;
+    return safeAreaTop + 60 + 24; // SafeArea + height + margin
+  }
 
   @override
   Widget build(BuildContext context) {

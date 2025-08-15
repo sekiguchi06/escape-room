@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'item_detail_modal.dart';
+import 'room_navigation_system.dart';
 
 /// インベントリ管理ウィジェット
 class InventoryWidget extends StatefulWidget {
@@ -7,6 +8,28 @@ class InventoryWidget extends StatefulWidget {
 
   @override
   State<InventoryWidget> createState() => _InventoryWidgetState();
+  
+  /// インベントリ領域の高さを取得（他のコンポーネントから参照用）
+  static double getHeight(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final screenWidth = mediaQuery.size.width;
+    
+    // 全体のパディングを画面幅の比率で計算
+    final horizontalPadding = screenWidth * 0.02;
+    final verticalPadding = screenWidth * 0.015;
+    
+    // 7個のボタン/アイテムのための計算
+    const totalItems = 7;
+    const itemSpacing = 2.0;
+    
+    // 利用可能な幅から全アイテムの幅を計算
+    final availableWidth = screenWidth - (horizontalPadding * 2);
+    final totalSpacing = itemSpacing * (totalItems - 1);
+    final itemSize = (availableWidth - totalSpacing) / totalItems;
+    
+    // エリア全体の高さを計算
+    return itemSize + (verticalPadding * 2);
+  }
 }
 
 class _InventoryWidgetState extends State<InventoryWidget> {
@@ -97,10 +120,19 @@ class _InventoryWidgetState extends State<InventoryWidget> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 // 左移動ボタン（正方形）
-                _buildSquareButton(
-                  icon: Icons.arrow_back,
-                  size: itemSize,
-                  onPressed: () => debugPrint('🔙 Previous room'),
+                ListenableBuilder(
+                  listenable: RoomNavigationSystem(),
+                  builder: (context, _) {
+                    final canMoveLeft = RoomNavigationSystem().canMoveLeft;
+                    return _buildSquareButton(
+                      icon: Icons.arrow_back,
+                      size: itemSize,
+                      onPressed: canMoveLeft 
+                          ? () => RoomNavigationSystem().moveLeft()
+                          : null,
+                      isEnabled: canMoveLeft,
+                    );
+                  },
                 ),
                 
                 SizedBox(width: itemSpacing),
@@ -111,10 +143,19 @@ class _InventoryWidgetState extends State<InventoryWidget> {
                 SizedBox(width: itemSpacing),
                 
                 // 右移動ボタン（正方形）
-                _buildSquareButton(
-                  icon: Icons.arrow_forward,
-                  size: itemSize,
-                  onPressed: () => debugPrint('🔜 Next room'),
+                ListenableBuilder(
+                  listenable: RoomNavigationSystem(),
+                  builder: (context, _) {
+                    final canMoveRight = RoomNavigationSystem().canMoveRight;
+                    return _buildSquareButton(
+                      icon: Icons.arrow_forward,
+                      size: itemSize,
+                      onPressed: canMoveRight 
+                          ? () => RoomNavigationSystem().moveRight()
+                          : null,
+                      isEnabled: canMoveRight,
+                    );
+                  },
                 ),
               ],
             ),
@@ -128,7 +169,8 @@ class _InventoryWidgetState extends State<InventoryWidget> {
   Widget _buildSquareButton({
     required IconData icon,
     required double size,
-    required VoidCallback onPressed,
+    required VoidCallback? onPressed,
+    bool isEnabled = true,
   }) {
     return Container(
       width: size,
@@ -136,8 +178,8 @@ class _InventoryWidgetState extends State<InventoryWidget> {
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.brown[600],
-          foregroundColor: Colors.white,
+          backgroundColor: isEnabled ? Colors.brown[600] : Colors.grey[400],
+          foregroundColor: isEnabled ? Colors.white : Colors.grey[600],
           padding: EdgeInsets.zero,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(6),

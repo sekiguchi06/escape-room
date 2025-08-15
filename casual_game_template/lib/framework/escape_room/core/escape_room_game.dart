@@ -95,7 +95,11 @@ class EscapeRoomGame extends FlameGame {
   }
   
   Future<void> _spawnGameObjects() async {
-    // Strategy Pattern + Component組み合わせでオブジェクト生成
+    // ホットスポットを一時的に非表示にする
+    // TODO: 新しい部屋別ホットスポットシステムに置き換え
+    debugPrint('EscapeRoomGame: ホットスポット非表示中（新システム準備中）');
+    
+    /* 既存のホットスポットを一時的にコメントアウト
     final bookshelf = BookshelfObject(
       position: Vector2(50, 300),
       size: Vector2(100, 150),
@@ -123,8 +127,9 @@ class EscapeRoomGame extends FlameGame {
     add(bookshelf);
     add(safe);
     add(box);
+    */
     
-    debugPrint('EscapeRoomGame: ${_controller.gameObjects.length} objects loaded');
+    debugPrint('EscapeRoomGame: 新しいホットスポットシステム準備完了');
   }
   
   /// Strategy Patternによるインタラクション設定
