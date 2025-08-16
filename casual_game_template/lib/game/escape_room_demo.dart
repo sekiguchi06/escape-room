@@ -3,17 +3,15 @@ import 'package:flutter/services.dart';
 import 'package:flame/game.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../framework/escape_room/core/escape_room_game.dart';
-import '../framework/escape_room/state/escape_room_state_riverpod.dart';
 import 'components/inventory_widget.dart';
 import 'components/game_menu_bar.dart';
 import 'components/ad_area.dart';
-import 'components/game_background.dart';
-import 'components/smooth_game_background.dart';
 import 'components/room_with_hotspots.dart';
 import 'components/lighting_system.dart';
 import 'components/room_navigation_system.dart';
 import 'components/room_indicator.dart';
-import 'components/hotspot_display.dart';
+import 'components/flutter_particle_system.dart';
+import 'components/global_tap_detector.dart';
 
 /// 新アーキテクチャ Escape Room デモ
 /// 🎯 目的: 縦画面固定設定付きブラウザ動作確認
@@ -57,7 +55,7 @@ class _EscapeRoomDemoState extends ConsumerState<EscapeRoomDemo> {
     // ProviderContainerをゲームに設定
     _game.setProviderContainer(ProviderScope.containerOf(context));
     return Scaffold(
-      body: Column(
+        body: Column(
         children: [
           // 1. ゲーム表示領域（動的高さ）
           Expanded(
@@ -105,6 +103,7 @@ class _EscapeRoomDemoState extends ConsumerState<EscapeRoomDemo> {
                                 topReservedHeight: 0,
                                 bottomReservedHeight: 12,
                                 gameSize: gameSize,
+                                game: _game, // ゲームインスタンスを渡す
                               );
                             },
                           );
@@ -129,6 +128,8 @@ class _EscapeRoomDemoState extends ConsumerState<EscapeRoomDemo> {
                         child: RoomIndicator(),
                       ),
                     ),
+                    
+                    
                   ],
                 );
               },
