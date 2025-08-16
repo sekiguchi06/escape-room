@@ -152,8 +152,8 @@ class InventoryUIComponent extends PositionComponent with HasVisibility {
       return;
     }
     
-    final positions = layoutCalculator.calculateItemPositions(items.length);
-    final itemSize = layoutCalculator.calculateItemSize(items.length);
+    final positions = _layoutCalculator.calculateItemPositions(items.length);
+    final itemSize = _layoutCalculator.calculateItemSize(items.length);
     
     for (int i = 0; i < items.length; i++) {
       final itemId = items[i];
@@ -223,13 +223,16 @@ class InventoryUIComponent extends PositionComponent with HasVisibility {
   
   /// アイテム状態を更新
   void _updateItemStates() {
+    // アイテムコンポーネントを再構築（アイテム追加/削除時）
+    _setupItemComponents();
+    
     // 選択状態を更新
     for (final component in _itemComponents) {
       if (component is InventoryItemComponent) {
-        final isSelected = component.itemId == stateNotifier.selectedItemId;
+        final isSelected = component.itemId == _stateNotifier.selectedItemId;
         component.updateSelectionState(isSelected);
       } else if (component is ClickableInventoryItem) {
-        final isSelected = component.itemId == stateNotifier.selectedItemId;
+        final isSelected = component.itemId == _stateNotifier.selectedItemId;
         component.updateSelectionState(isSelected);
       }
     }

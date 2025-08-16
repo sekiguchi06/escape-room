@@ -49,5 +49,7 @@
 	<string>ca-app-pub-3940256099942544~1458002511</string>
 	<key>NSUserTrackingUsageDescription</key>
 	<string>このアプリは、より良い広告体験を提供するためにアプリ間でのアクティビティを追跡します。</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>このアプリはFlutterデバッグサービスのためにローカルネットワークへのアクセスが必要です。</string>
 </dict>
 </plist>

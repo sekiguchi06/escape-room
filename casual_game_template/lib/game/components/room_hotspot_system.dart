@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'room_navigation_system.dart';
+import '../../gen/assets.gen.dart';
 
 /// ホットスポットデータ
 class HotspotData {
   final String id;
-  final String imagePath;
+  final AssetGenImage asset;
   final String name;
   final String description;
   final Offset position;
@@ -13,7 +14,7 @@ class HotspotData {
 
   const HotspotData({
     required this.id,
-    required this.imagePath,
+    required this.asset,
     required this.name,
     required this.description,
     required this.position,
@@ -51,7 +52,7 @@ class RoomHotspotSystem extends ChangeNotifier {
     return [
       HotspotData(
         id: 'prison_shackles',
-        imagePath: 'assets/images/hotspots/new/prison_shackles.png',
+        asset: Assets.images.hotspots.prisonShackles,
         name: '鉄の足枷',
         description: '錆びた鉄の足枷が壁に掛けられている。昔の囚人が使っていたものだろうか。',
         position: const Offset(0.2, 0.3),
@@ -60,7 +61,7 @@ class RoomHotspotSystem extends ChangeNotifier {
       ),
       HotspotData(
         id: 'prison_bucket',
-        imagePath: 'assets/images/hotspots/new/prison_bucket.png',
+        asset: Assets.images.hotspots.prisonBucket,
         name: '古い桶',
         description: '水が入った古い木の桶。底に何かが沈んでいるようだ。',
         position: const Offset(0.7, 0.6),
@@ -69,7 +70,7 @@ class RoomHotspotSystem extends ChangeNotifier {
       ),
       HotspotData(
         id: 'prison_bed',
-        imagePath: 'assets/images/hotspots/new/prison_bed.png',
+        asset: Assets.images.hotspots.prisonBed,
         name: '石のベッド',
         description: '藁が敷かれた石のベッド。マットレスの下に何かが隠されているかも。',
         position: const Offset(0.5, 0.7),
@@ -84,7 +85,7 @@ class RoomHotspotSystem extends ChangeNotifier {
     return [
       HotspotData(
         id: 'entrance_fountain',
-        imagePath: 'assets/images/hotspots/new/entrance_fountain.png',
+        asset: Assets.images.hotspots.entranceFountain,
         name: '石の泉',
         description: '古い石造りの泉。水の音が静寂を破っている。',
         position: const Offset(0.3, 0.5),
@@ -93,7 +94,7 @@ class RoomHotspotSystem extends ChangeNotifier {
       ),
       HotspotData(
         id: 'entrance_door',
-        imagePath: 'assets/images/hotspots/new/entrance_door.png',
+        asset: Assets.images.hotspots.entranceDoor,
         name: '重厚な扉',
         description: '鉄の金具で補強された重い木の扉。しっかりと閉ざされている。',
         position: const Offset(0.7, 0.4),
@@ -102,7 +103,7 @@ class RoomHotspotSystem extends ChangeNotifier {
       ),
       HotspotData(
         id: 'entrance_emblem',
-        imagePath: 'assets/images/hotspots/new/entrance_emblem.png',
+        asset: Assets.images.hotspots.entranceEmblem,
         name: '紋章',
         description: '城の紋章が刻まれた石の装飾。何かの暗号になっているかもしれない。',
         position: const Offset(0.5, 0.2),
@@ -117,7 +118,7 @@ class RoomHotspotSystem extends ChangeNotifier {
     return [
       HotspotData(
         id: 'library_desk',
-        imagePath: 'assets/images/hotspots/new/library_desk.png',
+        asset: Assets.images.hotspots.libraryDesk,
         name: '古い机',
         description: '巻物や書類が散らばった古い木の机。重要な情報が隠されているかも。',
         position: const Offset(0.2, 0.6),
@@ -126,7 +127,7 @@ class RoomHotspotSystem extends ChangeNotifier {
       ),
       HotspotData(
         id: 'library_candelabra',
-        imagePath: 'assets/images/hotspots/new/library_candelabra.png',
+        asset: Assets.images.hotspots.libraryCandelabra,
         name: '燭台',
         description: '金色に輝く美しい燭台。ろうそくが静かに燃えている。',
         position: const Offset(0.7, 0.3),
@@ -135,7 +136,7 @@ class RoomHotspotSystem extends ChangeNotifier {
       ),
       HotspotData(
         id: 'library_chair',
-        imagePath: 'assets/images/hotspots/new/library_chair.png',
+        asset: Assets.images.hotspots.libraryChair,
         name: '革の椅子',
         description: '使い込まれた革の肘掛け椅子。座布団の下に何かが隠されているかも。',
         position: const Offset(0.5, 0.7),
@@ -150,7 +151,7 @@ class RoomHotspotSystem extends ChangeNotifier {
     return [
       HotspotData(
         id: 'alchemy_cauldron',
-        imagePath: 'assets/images/hotspots/new/alchemy_cauldron.png',
+        asset: Assets.images.hotspots.alchemyCauldron,
         name: '錬金術の大釜',
         description: '泡立つ薬液が入った大きな釜。魔法の実験に使われていたようだ。',
         position: const Offset(0.3, 0.5),
@@ -159,7 +160,7 @@ class RoomHotspotSystem extends ChangeNotifier {
       ),
       HotspotData(
         id: 'alchemy_bottles',
-        imagePath: 'assets/images/hotspots/new/alchemy_bottles.png',
+        asset: Assets.images.hotspots.alchemyBottles,
         name: 'ポーション瓶',
         description: '色とりどりの液体が入ったガラス瓶。それぞれ異なる効果がありそうだ。',
         position: const Offset(0.7, 0.3),
@@ -168,7 +169,7 @@ class RoomHotspotSystem extends ChangeNotifier {
       ),
       HotspotData(
         id: 'alchemy_spellbook',
-        imagePath: 'assets/images/hotspots/new/alchemy_spellbook.png',
+        asset: Assets.images.hotspots.alchemySpellbook,
         name: '魔法書',
         description: '古代の文字で書かれた魔法書。ページが光っている。',
         position: const Offset(0.5, 0.7),
@@ -183,7 +184,7 @@ class RoomHotspotSystem extends ChangeNotifier {
     return [
       HotspotData(
         id: 'treasure_chest',
-        imagePath: 'assets/images/hotspots/new/treasure_chest.png',
+        asset: Assets.images.hotspots.treasureChest,
         name: '黄金の宝箱',
         description: '宝石で装飾された豪華な宝箱。中には何が入っているのだろうか。',
         position: const Offset(0.3, 0.6),
@@ -192,7 +193,7 @@ class RoomHotspotSystem extends ChangeNotifier {
       ),
       HotspotData(
         id: 'treasure_crown',
-        imagePath: 'assets/images/hotspots/new/treasure_crown.png',
+        asset: Assets.images.hotspots.treasureCrown,
         name: '王冠',
         description: '宝石がちりばめられた美しい王冠。王族の象徴だ。',
         position: const Offset(0.7, 0.3),
@@ -201,7 +202,7 @@ class RoomHotspotSystem extends ChangeNotifier {
       ),
       HotspotData(
         id: 'treasure_goblet',
-        imagePath: 'assets/images/hotspots/new/treasure_goblet.png',
+        asset: Assets.images.hotspots.treasureGoblet,
         name: '聖杯',
         description: 'ルビーで飾られた金の聖杯。神聖な力を感じる。',
         position: const Offset(0.5, 0.5),

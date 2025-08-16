@@ -11,13 +11,11 @@ export 'timer/flame_timer_system.dart';
 
 // Game types quick templates (存在するもののみ)
 export 'game_types/quick_templates/match3_template.dart';
-export 'game_types/quick_templates/endless_runner_template.dart';
 export 'game_types/quick_templates/tap_shooter_template.dart';
 
 // Components (存在するもののみ)
 export 'components/inventory_manager.dart';
 export 'components/interaction_manager.dart';
-export 'components/interactive_hotspot.dart';
 
 // Escape Room新アーキテクチャ
 export 'escape_room/core/escape_room_game.dart';

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flame/game.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'l10n/app_localizations.dart';
 
+import 'framework/ui/image_preloader.dart';
 import 'game/tap_fire_game.dart';
 import 'game/simple_game.dart';
 import 'game/example_games/simple_tap_shooter.dart';
@@ -10,10 +13,16 @@ import 'game/escape_room_demo.dart';
 import 'game/widgets/custom_game_ui.dart';
 import 'game/widgets/custom_start_ui.dart';
 import 'game/widgets/custom_settings_ui.dart';
-import 'game/framework_integration/simple_game_states.dart';
+import 'game/framework_integration/simple_game_states_riverpod.dart';
 
 void main() {
-  runApp(const CasualGameApp());
+  runApp(
+    const ProviderScope(
+      child: PreloadedApp(
+        child: CasualGameApp(),
+      ),
+    ),
+  );
 }
 
 class CasualGameApp extends StatelessWidget {
@@ -28,23 +37,32 @@ class CasualGameApp extends StatelessWidget {
         visualDensity: VisualDensity.adaptivePlatformDensity,
         fontFamily: 'Noto Sans JP', // 日本語フォント設定（文字化け対策）
       ),
-      home: ChangeNotifierProvider<SimpleGameStateProvider>(
-        create: (_) => SimpleGameStateProvider(),
-        child: const GameSelectionScreen(),
-      ),
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('ja'), // 日本語
+        Locale('en'), // 英語
+      ],
+      home: const GameSelectionScreen(),
     );
   }
 }
 
-class GameSelectionScreen extends StatelessWidget {
+class GameSelectionScreen extends ConsumerWidget {
   const GameSelectionScreen({super.key});
   
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final localizations = AppLocalizations.of(context);
+    final gameState = ref.watch(simpleGameStateProvider);
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text('Casual Game Template'),
+        title: Text(localizations?.appTitle ?? 'Casual Game Template'),
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
       ),
@@ -111,7 +129,7 @@ class GameSelectionScreen extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                 textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-              child: const Text('🔓 Play Escape Room'),
+              child: Text(localizations?.escapeGameTitle ?? '🔓 Play Escape Room'),
             ),
           ],
         ),

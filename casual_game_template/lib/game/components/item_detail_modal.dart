@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'lighting_system.dart';
+import '../../gen/assets.gen.dart';
 
 /// アイテム詳細表示モーダル
 class ItemDetailModal {
@@ -40,8 +41,7 @@ class ItemDetailModal {
                 padding: const EdgeInsets.all(3), // 3pxの余白
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: Image.asset(
-                    _getItemImagePath(itemId),
+                  child: _getItemImage(itemId, 
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
                       // 画像が見つからない場合の代替表示
@@ -96,9 +96,25 @@ class ItemDetailModal {
     }
   }
 
-  /// アイテム画像パスを取得
-  static String _getItemImagePath(String itemId) {
-    return 'assets/images/items/$itemId.png';
+  /// アイテムアセットマップ（型安全性とスケーラビリティの両立）
+  static final Map<String, AssetGenImage> _itemAssets = {
+    'key': Assets.images.items.key,
+    'lightbulb': Assets.images.items.lightbulb,
+    'book': Assets.images.items.book,
+    'coin': Assets.images.items.coin,
+    'gem': Assets.images.items.gem,
+  };
+
+  /// アイテム画像を取得（型安全なflutter_gen使用）
+  static Image _getItemImage(String itemId, {
+    BoxFit? fit,
+    ImageErrorWidgetBuilder? errorBuilder,
+  }) {
+    final asset = _itemAssets[itemId] ?? Assets.images.items.key; // デフォルト
+    return asset.image(
+      fit: fit,
+      errorBuilder: errorBuilder,
+    );
   }
 
   /// アイテムアイコンを取得

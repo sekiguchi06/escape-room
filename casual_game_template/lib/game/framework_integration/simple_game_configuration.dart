@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../framework/config/game_configuration.dart';
 import '../../framework/state/game_state_system.dart';
+import '../../config/env_config.dart';
 
 /// SimpleGame用の設定クラス（フレームワーク統合）
 class SimpleGameConfig {
@@ -18,9 +19,10 @@ class SimpleGameConfig {
     required this.stateColors,
     required this.fontSizes,
     required this.fontWeights,
-    this.enableDebugMode = false,
-    this.enableAnalytics = true,
-  });
+    bool? enableDebugMode,
+    bool? enableAnalytics,
+  }) : enableDebugMode = enableDebugMode ?? EnvConfig.enableDebugMenu,
+       enableAnalytics = enableAnalytics ?? true;
   
   /// JSON変換
   Map<String, dynamic> toJson() {

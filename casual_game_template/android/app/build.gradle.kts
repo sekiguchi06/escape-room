@@ -24,8 +24,9 @@ android {
         applicationId = "com.example.casual_game_template"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        // Set explicit SDK versions according to Flutter 2025 recommendations
+        minSdk = 24  // Flutter minimum supported SDK (Android 7.0+)
+        targetSdk = 36  // Latest target SDK for 2025 (Flutter 3.35.0 maximum)
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
@@ -33,8 +34,15 @@ android {
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
+            // For production releases, configure proper signing credentials
+            // Create keystore: keytool -genkey -v -keystore android/app/upload-keystore.jks
+            // Configure key.properties file with keystore credentials
             signingConfig = signingConfigs.getByName("debug")
+            
+            // Release optimizations
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
 }

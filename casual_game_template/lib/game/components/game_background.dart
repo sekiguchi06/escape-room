@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
+import '../../gen/assets.gen.dart';
 
 /// ゲーム背景コンポーネント
 /// VTR風の拡大ぼかし背景 + メイン画像の複合表示
 class GameBackground extends StatelessWidget {
-  final String imagePath;
+  final AssetGenImage asset;
   final double topReservedHeight;
   final double aspectRatio;
   
   const GameBackground({
     super.key,
-    required this.imagePath,
+    required this.asset,
     this.topReservedHeight = 84.0, // メニューバー領域
     this.aspectRatio = 5 / 8, // デフォルト5:8比率
   });
@@ -60,8 +61,7 @@ class GameBackground extends StatelessWidget {
               child: Container(
                 width: mainImageWidth,
                 height: mainImageHeight,
-                child: Image.asset(
-                  imagePath,
+                child: asset.image(
                   fit: BoxFit.cover,
                 ),
               ),
@@ -83,7 +83,7 @@ class GameBackground extends StatelessWidget {
             child: Container(
               decoration: BoxDecoration(
                 image: DecorationImage(
-                  image: AssetImage(imagePath),
+                  image: asset.provider(),
                   fit: BoxFit.cover,
                 ),
               ),
@@ -109,7 +109,7 @@ class GameBackground extends StatelessWidget {
 
 /// ゲーム背景設定
 class GameBackgroundConfig {
-  final String imagePath;
+  final AssetGenImage asset;
   final double aspectRatio;
   final double topReservedHeight;
   final double blurSigma;
@@ -117,7 +117,7 @@ class GameBackgroundConfig {
   final double scaleRatio;
   
   const GameBackgroundConfig({
-    required this.imagePath,
+    required this.asset,
     this.aspectRatio = 5 / 8,
     this.topReservedHeight = 84.0,
     this.blurSigma = 15.0,
@@ -127,7 +127,7 @@ class GameBackgroundConfig {
   
   /// 設定のコピー作成
   GameBackgroundConfig copyWith({
-    String? imagePath,
+    AssetGenImage? asset,
     double? aspectRatio,
     double? topReservedHeight,
     double? blurSigma,
@@ -135,7 +135,7 @@ class GameBackgroundConfig {
     double? scaleRatio,
   }) {
     return GameBackgroundConfig(
-      imagePath: imagePath ?? this.imagePath,
+      asset: asset ?? this.asset,
       aspectRatio: aspectRatio ?? this.aspectRatio,
       topReservedHeight: topReservedHeight ?? this.topReservedHeight,
       blurSigma: blurSigma ?? this.blurSigma,
@@ -145,15 +145,15 @@ class GameBackgroundConfig {
   }
   
   /// 脱出ゲーム用デフォルト設定
-  static const escapeRoom = GameBackgroundConfig(
-    imagePath: 'assets/images/escape_room_bg.png',
+  static final escapeRoom = GameBackgroundConfig(
+    asset: Assets.images.escapeRoomBg,
     aspectRatio: 5 / 8,
     topReservedHeight: 84.0,
   );
   
   /// 脱出ゲーム用夜モード設定（照明オフ）
-  static const escapeRoomNight = GameBackgroundConfig(
-    imagePath: 'assets/images/escape_room_bg_night.png',
+  static final escapeRoomNight = GameBackgroundConfig(
+    asset: Assets.images.escapeRoomBgNight,
     aspectRatio: 5 / 8,
     topReservedHeight: 84.0,
   );
@@ -198,7 +198,7 @@ class ResponsiveGameBackground extends StatelessWidget {
             child: Container(
               decoration: BoxDecoration(
                 image: DecorationImage(
-                  image: AssetImage(config.imagePath),
+                  image: config.asset.provider(),
                   fit: BoxFit.cover,
                 ),
               ),
@@ -246,8 +246,7 @@ class ResponsiveGameBackground extends StatelessWidget {
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(8), // 軽い角丸
-          child: Image.asset(
-            config.imagePath,
+          child: config.asset.image(
             fit: BoxFit.cover,
             filterQuality: FilterQuality.high,
           ),

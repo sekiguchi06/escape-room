@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../monetization_system.dart';
+import '../../../config/env_config.dart';
 
 /// Google Mobile Ads SDKを使用したAdProviderの実装
 class GoogleAdProvider implements AdProvider {
@@ -392,8 +393,19 @@ class GoogleAdProvider implements AdProvider {
       }
     }
     
-    // 設定からIDを取得
-    return _config?.adUnitIds[adType] ?? _testBannerId;
+    // 環境変数からIDを取得（プラットフォーム別）
+    switch (adType) {
+      case AdType.banner:
+        return EnvConfig.getBannerAdUnitId();
+      case AdType.interstitial:
+        return EnvConfig.getInterstitialAdUnitId();
+      case AdType.rewarded:
+        // リワード広告は現在未実装なのでバナーを返す
+        return EnvConfig.getBannerAdUnitId();
+      case AdType.native:
+      case AdType.appOpen:
+        return EnvConfig.getBannerAdUnitId(); // フォールバック
+    }
   }
   
   void _notifyListeners(AdEventData event) {

@@ -2,6 +2,7 @@ import 'package:flame/game.dart';
 import 'package:flame/components.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../gameobjects/interactable_game_object.dart';
 import '../gameobjects/bookshelf_object.dart';
 import '../gameobjects/safe_object.dart';
@@ -13,6 +14,7 @@ import '../../ui/escape_room_modal_system.dart';
 import '../../ui/modal_config.dart';
 import '../../ui/japanese_message_system.dart';
 import '../ui/portrait_ui_builder.dart';
+import '../state/escape_room_state_riverpod.dart';
 import 'escape_room_game_controller.dart';
 import 'escape_room_ui_manager.dart';
 
@@ -22,14 +24,21 @@ class EscapeRoomGame extends FlameGame {
   late EscapeRoomGameController _controller;
   late EscapeRoomUIManager _uiManager;
   late InventoryManager _inventoryManager;
-  late EscapeRoomStateProvider _stateProvider;
+  late EscapeRoomStateNotifier _stateNotifier;
   late PortraitLayoutComponent _layoutComponent;
+  late ProviderContainer _container;
   bool _isInitialized = false;
   
   // Controllers for layer separation
   EscapeRoomGameController get controller => _controller;
   EscapeRoomUIManager get uiManager => _uiManager;
   PortraitLayoutComponent get layoutComponent => _layoutComponent;
+  EscapeRoomStateNotifier get stateNotifier => _stateNotifier;
+  
+  /// Riverpod用のProviderContainerを設定
+  void setProviderContainer(ProviderContainer container) {
+    _container = container;
+  }
   
   @override
   Color backgroundColor() => const Color(0x00000000); // 背景を透明にして外部画像を表示
@@ -45,13 +54,14 @@ class EscapeRoomGame extends FlameGame {
   
   /// コントローラーとマネージャーを初期化
   Future<void> _initializeControllers() async {
-    // 状態管理プロバイダーを初期化
-    _stateProvider = EscapeRoomStateProvider();
+    // Riverpod状態管理を初期化
+    _stateNotifier = _container.read(escapeRoomStateProvider.notifier);
     
     // インベントリマネージャーを初期化
     _inventoryManager = InventoryManager(
       maxItems: 5,
       onItemSelected: (itemId) {
+        _stateNotifier.selectItem(itemId);
         debugPrint('🎒 Selected item: $itemId');
       },
     );
@@ -81,23 +91,22 @@ class EscapeRoomGame extends FlameGame {
     debugPrint('🚪 EscapeRoomState Test Starting...');
     
     // テスト1: exploring → inventory → exploring
-    _stateProvider.showInventory();
-    _stateProvider.hideInventory();
+    _stateNotifier.showInventory();
+    _stateNotifier.hideInventory();
     
     // テスト2: exploring → puzzle → exploring
-    _stateProvider.startPuzzle('browser_test_puzzle');
-    _stateProvider.completePuzzle();
+    _stateNotifier.startPuzzle('browser_test_puzzle');
+    _stateNotifier.completePuzzle();
     
     // テスト3: exploring → escaped
-    _stateProvider.escapeSuccess();
+    _stateNotifier.escapeSuccess();
     
     debugPrint('🚪 EscapeRoomState Test Completed!');
   }
   
   Future<void> _spawnGameObjects() async {
-    // ホットスポットを一時的に非表示にする
-    // TODO: 新しい部屋別ホットスポットシステムに置き換え
-    debugPrint('EscapeRoomGame: ホットスポット非表示中（新システム準備中）');
+    // 新しい部屋別ホットスポットシステムが有効
+    // ホットスポット表示は HotspotDisplay ウィジェットが担当
     
     /* 既存のホットスポットを一時的にコメントアウト
     final bookshelf = BookshelfObject(
@@ -129,7 +138,6 @@ class EscapeRoomGame extends FlameGame {
     add(box);
     */
     
-    debugPrint('EscapeRoomGame: 新しいホットスポットシステム準備完了');
   }
   
   /// Strategy Patternによるインタラクション設定

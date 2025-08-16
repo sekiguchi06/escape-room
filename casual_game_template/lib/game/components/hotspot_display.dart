@@ -56,8 +56,7 @@ class _HotspotDisplayState extends State<HotspotDisplay> {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(8),
-            child: Image.asset(
-              hotspot.imagePath,
+            child: hotspot.asset.image(
               fit: BoxFit.contain,
               errorBuilder: (context, error, stackTrace) {
                 // 画像が見つからない場合のフォールバック
@@ -82,7 +81,7 @@ class _HotspotDisplayState extends State<HotspotDisplay> {
   void _onHotspotTapped(HotspotData hotspot) {
     // デバッグ情報を出力
     debugPrint('🎯 ホットスポットタップ: ${hotspot.id}');
-    debugPrint('🖼️ 画像パス: ${hotspot.imagePath}');
+    debugPrint('🖼️ 画像パス: ${hotspot.asset.path}');
     
     // カスタムコールバックがある場合は実行
     if (hotspot.onTap != null) {
@@ -122,12 +121,11 @@ class _HotspotDisplayState extends State<HotspotDisplay> {
                 padding: const EdgeInsets.all(3), // 3pxの余白
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: Image.asset(
-                    hotspot.imagePath,
+                  child: hotspot.asset.image(
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
                       // デバッグ情報を出力
-                      debugPrint('❌ 画像読み込みエラー: ${hotspot.imagePath}');
+                      debugPrint('❌ 画像読み込みエラー: ${hotspot.asset.path}');
                       debugPrint('❌ エラー詳細: $error');
                       
                       // 画像が見つからない場合の代替表示

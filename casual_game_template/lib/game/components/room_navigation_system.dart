@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'game_background.dart';
+import '../../gen/assets.gen.dart';
 
 /// 部屋の種類
 enum RoomType {
@@ -95,7 +96,7 @@ class RoomNavigationSystem extends ChangeNotifier {
     // 照明がオフの場合は夜モードを使用（中央の部屋のみ）
     if (!isLightOn && _currentRoom == RoomType.center) {
       return baseConfig.copyWith(
-        imagePath: _getNightImagePath(),
+        asset: _getNightImageAsset(),
       );
     }
     
@@ -107,13 +108,13 @@ class RoomNavigationSystem extends ChangeNotifier {
     switch (_currentRoom) {
       case RoomType.leftmost:
         return GameBackgroundConfig(
-          imagePath: 'assets/images/room_leftmost.png',
+          asset: Assets.images.roomLeftmost,
           aspectRatio: 5 / 8,
           topReservedHeight: 84.0,
         );
       case RoomType.left:
         return GameBackgroundConfig(
-          imagePath: 'assets/images/room_left.png',
+          asset: Assets.images.roomLeft,
           aspectRatio: 5 / 8,
           topReservedHeight: 84.0,
         );
@@ -121,32 +122,32 @@ class RoomNavigationSystem extends ChangeNotifier {
         return GameBackgroundConfig.escapeRoom; // 既存の中央部屋
       case RoomType.right:
         return GameBackgroundConfig(
-          imagePath: 'assets/images/room_right.png',
+          asset: Assets.images.roomRight,
           aspectRatio: 5 / 8,
           topReservedHeight: 84.0,
         );
       case RoomType.rightmost:
         return GameBackgroundConfig(
-          imagePath: 'assets/images/room_rightmost.png',
+          asset: Assets.images.roomRightmost,
           aspectRatio: 5 / 8,
           topReservedHeight: 84.0,
         );
     }
   }
 
-  /// 夜モードの画像パスを取得
-  String _getNightImagePath() {
+  /// 夜モードのアセットを取得（型安全）
+  AssetGenImage _getNightImageAsset() {
     switch (_currentRoom) {
       case RoomType.leftmost:
-        return 'assets/images/room_leftmost_night.png';
+        return Assets.images.roomLeftmostNight;
       case RoomType.left:
-        return 'assets/images/room_left_night.png';
+        return Assets.images.roomLeftNight;
       case RoomType.center:
-        return 'assets/images/escape_room_bg_night.png'; // 既存
+        return Assets.images.escapeRoomBgNight; // 既存
       case RoomType.right:
-        return 'assets/images/room_right_night.png';
+        return Assets.images.roomRightNight;
       case RoomType.rightmost:
-        return 'assets/images/room_rightmost_night.png';
+        return Assets.images.roomRightmostNight;
     }
   }
 

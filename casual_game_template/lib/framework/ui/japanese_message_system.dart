@@ -8,7 +8,7 @@ class JapaneseMessageSystem {
   static final Map<String, String> messages = {
     'game_start': 'ゲーム開始',
     'inventory_full': 'インベントリが満杯です',
-    'item_obtained': 'アイテムを入手しました',
+    'item_obtained': '{item}を入手しました',
     'puzzle_solved': 'パズルを解きました！',
     'escape_success': '脱出成功！',
     'time_up': '時間切れです',

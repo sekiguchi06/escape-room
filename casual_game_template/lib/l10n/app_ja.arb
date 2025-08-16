@@ -1,0 +1,67 @@
+{
+  "@@locale": "ja",
+  "appTitle": "カジュアルゲームテンプレート",
+  "@appTitle": {
+    "description": "アプリケーションのタイトル"
+  },
+  "escapeGameTitle": "🔓 脱出ゲームをプレイ",
+  "@escapeGameTitle": {
+    "description": "脱出ゲームボタンのタイトル"
+  },
+  "playTapFireGame": "Tap Fire Gameをプレイ",
+  "@playTapFireGame": {
+    "description": "タップファイアゲームボタン"
+  },
+  "playSimpleGame": "Simple Gameをプレイ",
+  "@playSimpleGame": {
+    "description": "シンプルゲームボタン"
+  },
+  "playTapShooter": "Simple Tap Shooterをプレイ",
+  "@playTapShooter": {
+    "description": "タップシューターボタン"
+  },
+  "gameOver": "ゲームオーバー",
+  "@gameOver": {
+    "description": "ゲーム終了メッセージ"
+  },
+  "clear": "クリア！",
+  "@clear": {
+    "description": "ゲームクリアメッセージ"
+  },
+  "play": "プレイ",
+  "@play": {
+    "description": "プレイボタン"
+  },
+  "settings": "設定",
+  "@settings": {
+    "description": "設定ボタン"
+  },
+  "back": "戻る",
+  "@back": {
+    "description": "戻るボタン"
+  },
+  "restart": "リスタート",
+  "@restart": {
+    "description": "リスタートボタン"
+  },
+  "pause": "一時停止",
+  "@pause": {
+    "description": "一時停止ボタン"
+  },
+  "resume": "再開",
+  "@resume": {
+    "description": "再開ボタン"
+  },
+  "menu": "メニュー",
+  "@menu": {
+    "description": "メニューボタン"
+  },
+  "score": "スコア",
+  "@score": {
+    "description": "スコア表示"
+  },
+  "timeRemaining": "残り時間",
+  "@timeRemaining": {
+    "description": "残り時間表示"
+  }
+}

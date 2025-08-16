@@ -1,0 +1,67 @@
+{
+  "@@locale": "en",
+  "appTitle": "Casual Game Template",
+  "@appTitle": {
+    "description": "Application title"
+  },
+  "escapeGameTitle": "🔓 Play Escape Room",
+  "@escapeGameTitle": {
+    "description": "Escape game button title"
+  },
+  "playTapFireGame": "Play Tap Fire Game",
+  "@playTapFireGame": {
+    "description": "Tap fire game button"
+  },
+  "playSimpleGame": "Play Simple Game",
+  "@playSimpleGame": {
+    "description": "Simple game button"
+  },
+  "playTapShooter": "Play Simple Tap Shooter",
+  "@playTapShooter": {
+    "description": "Tap shooter button"
+  },
+  "gameOver": "Game Over",
+  "@gameOver": {
+    "description": "Game over message"
+  },
+  "clear": "Clear!",
+  "@clear": {
+    "description": "Game clear message"
+  },
+  "play": "Play",
+  "@play": {
+    "description": "Play button"
+  },
+  "settings": "Settings",
+  "@settings": {
+    "description": "Settings button"
+  },
+  "back": "Back",
+  "@back": {
+    "description": "Back button"
+  },
+  "restart": "Restart",
+  "@restart": {
+    "description": "Restart button"
+  },
+  "pause": "Pause",
+  "@pause": {
+    "description": "Pause button"
+  },
+  "resume": "Resume",
+  "@resume": {
+    "description": "Resume button"
+  },
+  "menu": "Menu",
+  "@menu": {
+    "description": "Menu button"
+  },
+  "score": "Score",
+  "@score": {
+    "description": "Score display"
+  },
+  "timeRemaining": "Time Remaining",
+  "@timeRemaining": {
+    "description": "Time remaining display"
+  }
+}
