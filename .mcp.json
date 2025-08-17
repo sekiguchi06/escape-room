@@ -1,8 +1,19 @@
 {
   "mcpServers": {
+    "browsermcp": {
+      "command": "npx",
+      "args": ["@browsermcp/mcp@latest"],
+      "installMethod": "npm",
+      "description": "Browser automation and web scraping MCP server"
+    },
+    "atlassian": {
+      "url": "https://mcp.atlassian.com/v1/sse",
+      "type": "sse",
+      "description": "Atlassian Jira and Confluence integration"
+    },
     "global-image-generation": {
       "command": "node",
-      "args": ["/Users/sekiguchi/git/proto/ai-services/server/server.js"],
+      "args": ["/Users/sekiguchi/ai-services/MCPServers/global-image-generation/server.js"],
       "type": "stdio",
       "env": {
         "NODE_ENV": "production"
