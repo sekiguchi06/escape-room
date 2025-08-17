@@ -20,7 +20,7 @@ import 'package:casual_game_template/game/framework_integration/simple_game_stat
 import 'package:casual_game_template/game/framework_integration/simple_game_configuration.dart';
 
 /// 統合テスト用のテストゲームクラス
-class IntegrationTestGame extends ConfigurableGame<GameState, SimpleGameConfig> {
+class IntegrationTestGame extends ConfigurableGameBase<GameState, SimpleGameConfig> {
   late SimpleGameStateProvider _stateProvider;
   late SimpleGameConfiguration _configuration;
   
@@ -128,15 +128,15 @@ void main() {
         expect(game.stateProvider, isNotNull);
         expect(game.configuration, isNotNull);
         expect(game.timerManager, isNotNull);
-        expect(game.themeManager, isNotNull);
+        expect(game.managers.themeManager, isNotNull);
         debugPrint('  ✅ 基本システム初期化成功');
         
         // 3. 拡張システム初期化確認
-        expect(game.audioManager, isNotNull);
-        expect(game.inputManager, isNotNull);
-        expect(game.dataManager, isNotNull);
-        expect(game.monetizationManager, isNotNull);
-        expect(game.analyticsManager, isNotNull);
+        expect(game.managers.audioManager, isNotNull);
+        expect(game.managers.inputManager, isNotNull);
+        expect(game.managers.dataManager, isNotNull);
+        expect(game.managers.monetizationManager, isNotNull);
+        expect(game.managers.analyticsManager, isNotNull);
         debugPrint('  ✅ 拡張システム初期化成功');
         
         // 4. Flameコンポーネント確認
@@ -176,14 +176,14 @@ void main() {
         
         // 3. 入力システムとの連携確認
         final inputEvents = <InputEventData>[];
-        game.inputManager.addInputListener((event) {
+        game.managers.inputManager.addInputListener((event) {
           inputEvents.add(event);
         });
         
         // 実際のFlameイベントをシミュレート  
         final tapPosition = Vector2(100, 100);
-        game.inputManager.handleTapDown(tapPosition);
-        game.inputManager.handleTapUp(tapPosition);
+        game.managers.inputManager.handleTapDown(tapPosition);
+        game.managers.inputManager.handleTapUp(tapPosition);
         
         // 少し待ってからイベント確認
         await Future.delayed(const Duration(milliseconds: 50));
@@ -191,7 +191,7 @@ void main() {
         debugPrint('  ✅ 入力システム連携確認: ${inputEvents.length}イベント受信');
         
         // 4. 分析システムとの連携確認
-        await game.analyticsManager.trackEvent('integration_test', parameters: {
+        await game.managers.analyticsManager.trackEvent('integration_test', parameters: {
           'test_type': 'system_integration',
           'components': game.children.length,
         });
@@ -214,8 +214,8 @@ void main() {
         final tapPosition = Vector2(200, 300);
         
         // 3. 入力マネージャー経由でタップ処理（Flameイベント回避）
-        game.inputManager.handleTapDown(tapPosition);
-        game.inputManager.handleTapUp(tapPosition);
+        game.managers.inputManager.handleTapDown(tapPosition);
+        game.managers.inputManager.handleTapUp(tapPosition);
         
         // 4. フレームワーク処理の確認（非同期処理を待機）
         await Future.delayed(const Duration(milliseconds: 10));
@@ -241,8 +241,8 @@ void main() {
         
         // ゲーム開始
         final startPosition = Vector2(100, 100);
-        game.inputManager.handleTapDown(startPosition);
-        game.inputManager.handleTapUp(startPosition);
+        game.managers.inputManager.handleTapDown(startPosition);
+        game.managers.inputManager.handleTapUp(startPosition);
         
         await Future.delayed(const Duration(milliseconds: 10));
         
@@ -291,7 +291,7 @@ void main() {
           
           // 4. システムへの影響確認
           expect(game.timerManager, isNotNull);
-          expect(game.audioManager, isNotNull);
+          expect(game.managers.audioManager, isNotNull);
           debugPrint('  ✅ システム影響確認');
         }
         
@@ -312,7 +312,7 @@ void main() {
         
         // システムが引き続き正常動作することを確認
         expect(game.isInitialized, isTrue);
-        expect(game.audioManager, isNotNull);
+        expect(game.managers.audioManager, isNotNull);
         
         debugPrint('  ✅ 極端値での安定性確認');
         debugPrint('🎉 エラーハンドリング統合テスト成功！');
@@ -326,8 +326,8 @@ void main() {
         // 連続でタップイベントを発生
         for (int i = 0; i < 10; i++) {
           final position = Vector2(i * 10.0, i * 10.0);
-          game.inputManager.handleTapDown(position);
-          game.inputManager.handleTapUp(position);
+          game.managers.inputManager.handleTapDown(position);
+          game.managers.inputManager.handleTapUp(position);
         }
         
         // システムが正常動作することを確認
@@ -346,10 +346,10 @@ void main() {
         await game.onLoad();
         
         // システム初期化確認
-        expect(game.audioManager, isNotNull);
-        expect(game.dataManager, isNotNull);
-        expect(game.monetizationManager, isNotNull);
-        expect(game.analyticsManager, isNotNull);
+        expect(game.managers.audioManager, isNotNull);
+        expect(game.managers.dataManager, isNotNull);
+        expect(game.managers.monetizationManager, isNotNull);
+        expect(game.managers.analyticsManager, isNotNull);
         
         // リソース解放実行
         game.onRemove();

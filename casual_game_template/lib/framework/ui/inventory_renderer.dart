@@ -1,10 +1,8 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'responsive_layout_calculator.dart';
 import 'ui_system.dart';
 import 'japanese_message_system.dart';
-import 'html_text_overlay.dart';
 
 /// インベントリレンダリング専用クラス
 /// 表示ロジック専任での責任分離
@@ -25,7 +23,7 @@ class InventoryRenderer {
     return RectangleComponent(
       size: inventoryArea,
       position: inventoryPos,
-      paint: Paint()..color = Colors.black.withOpacity(0.9),
+      paint: Paint()..color = Colors.black.withValues(alpha: 0.9),
     )..priority = InventoryUILayerPriority.inventoryBackground;
   }
 

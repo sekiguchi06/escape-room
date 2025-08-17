@@ -1,5 +1,3 @@
-/// Framework root export file
-
 // Core exports (存在するもののみ)
 export 'core/configurable_game.dart';
 
@@ -10,8 +8,7 @@ export 'state/game_state_system.dart';
 export 'timer/flame_timer_system.dart';
 
 // Game types quick templates (存在するもののみ)
-export 'game_types/quick_templates/match3_template.dart';
-export 'game_types/quick_templates/tap_shooter_template.dart';
+// match3_template.dart moved to match3_game project
 
 // Components (存在するもののみ)
 export 'components/inventory_manager.dart';
@@ -41,3 +38,9 @@ export 'ui/mobile_portrait_layout.dart';
 export 'ui/japanese_message_system.dart';
 // Commented out due to ModalType conflict
 // export 'ui/escape_room_ui_components.dart';
+
+// Performance Optimization (パフォーマンス最適化)
+export 'ui/navigation_utils.dart';
+export 'ui/key_optimization.dart';
+export 'ui/state_optimization.dart';
+export 'ui/const_optimization.dart';

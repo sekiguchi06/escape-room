@@ -1,9 +1,13 @@
 {
   "mcpServers": {
-    "atlassian": {
-      "url": "https://mcp.atlassian.com/v1/sse",
-      "type": "sse",
-      "description": "Atlassian Remote MCP Server for Jira and Confluence access"
+    "global-image-generation": {
+      "command": "node",
+      "args": ["/Users/sekiguchi/git/proto/ai-services/server/server.js"],
+      "type": "stdio",
+      "env": {
+        "NODE_ENV": "production"
+      },
+      "description": "Global Image Generation MCP Server for Stable Diffusion and ComfyUI"
     }
   }
 }

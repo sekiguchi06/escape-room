@@ -1,7 +1,7 @@
 import 'dart:ui' as ui;
 import 'package:flame/components.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 /// 縦画面固定レイアウトシステム
 /// Strategy Pattern不使用、シンプル設計

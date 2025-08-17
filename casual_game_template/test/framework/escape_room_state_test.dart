@@ -10,11 +10,11 @@ void main() {
     group('EscapeRoomState列挙型テスト', () {
       test('状態値・名前・説明確認', () {
         final states = EscapeRoomState.values;
-        expect(states.length, equals(5));
+        expect(states.length, equals(10));
         
         // exploring状態
         expect(EscapeRoomState.exploring.name, equals('exploring'));
-        expect(EscapeRoomState.exploring.description, equals('部屋を探索中'));
+        expect(EscapeRoomState.exploring.description, equals('探索中'));
         
         // escaped状態
         expect(EscapeRoomState.escaped.name, equals('escaped'));
@@ -34,7 +34,7 @@ void main() {
       });
       
       test('初期状態確認', () {
-        expect(stateProvider.currentState, equals(EscapeRoomState.exploring));
+        expect(stateProvider.currentState, equals(EscapeRoomState.initial));
         expect(stateProvider.currentPuzzleId, isNull);
       });
       
@@ -110,7 +110,7 @@ void main() {
         final stateProvider = EscapeRoomStateProvider();
         
         // 1. exploring ↔ inventory ↔ puzzle の切り替え確認
-        expect(stateProvider.currentState, equals(EscapeRoomState.exploring));
+        expect(stateProvider.currentState, equals(EscapeRoomState.initial));
         
         stateProvider.showInventory();
         expect(stateProvider.currentState, equals(EscapeRoomState.inventory));

@@ -1,8 +1,6 @@
 import 'package:flame/components.dart';
-import 'package:flutter/material.dart';
 import '../components/inventory_manager.dart';
 import 'responsive_layout_calculator.dart';
-import 'ui_system.dart';
 import 'inventory_item_component.dart';
 import 'clickable_inventory_item.dart';
 import 'inventory_state_notifier.dart';
@@ -62,17 +60,12 @@ class InventoryUIComponent extends PositionComponent with HasVisibility {
   
   /// レイアウト計算機を取得（初期化チェック付き）
   ResponsiveLayoutCalculator get layoutCalculator {
-    _layoutCalculator ??= ResponsiveLayoutCalculator(
-      screenSize: screenSize,
-      maxItems: manager.maxItems,
-    );
-    return _layoutCalculator!;
+    return _layoutCalculator;
   }
   
   /// 状態通知機を取得（初期化チェック付き）
   InventoryStateNotifier get stateNotifier {
-    _stateNotifier ??= InventoryStateNotifier(manager: manager);
-    return _stateNotifier!;
+    return _stateNotifier;
   }
   
   @override 
@@ -125,7 +118,7 @@ class InventoryUIComponent extends PositionComponent with HasVisibility {
       id: 'book',
       name: JapaneseMessageSystem.getMessage('item_book'),
       description: JapaneseMessageSystem.getMessage('book_description'),
-      imagePath: 'images/hotspots/bookshelf_full.png',
+      imagePath: 'images/hotspots/prison_bucket.png',
     );
     _gameItems['box'] = GameItem(
       id: 'box',
@@ -174,44 +167,6 @@ class InventoryUIComponent extends PositionComponent with HasVisibility {
     }
   }
   
-  /// スマートフォン縦型レイアウト対応のインベントリUI設定
-  /// 移植ガイド準拠実装
-  void _setupInventoryUI() {
-    _setupInventoryLayout();
-    _setupItemComponents();
-  }
-  
-  /// 個別アイテム追加
-  /// 移植ガイド準拠実装
-  void _addInventoryItem(String itemId, Vector2 position, Vector2 size) {
-    final gameItem = _gameItems[itemId];
-    if (gameItem == null) return;
-    
-    final itemComponent = ClickableInventoryItem(
-      itemId: itemId,
-      item: gameItem,
-      onItemTapped: _onItemTapped,
-      position: position,
-      size: size,
-    );
-    
-    _itemComponents.add(itemComponent);
-    add(itemComponent);
-  }
-  
-  /// アイテム選択状態更新
-  /// 移植ガイド準拠実装
-  void _updateItemSelection(String itemId) {
-    for (final component in _itemComponents) {
-      if (component is InventoryItemComponent) {
-        final isSelected = component.itemId == itemId;
-        component.updateSelectionState(isSelected);
-      } else if (component is ClickableInventoryItem) {
-        final isSelected = component.itemId == itemId;
-        component.updateSelectionState(isSelected);
-      }
-    }
-  }
   
   /// アイテムコンポーネントをクリア
   void _clearItemComponents() {

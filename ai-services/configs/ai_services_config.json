@@ -1,0 +1,47 @@
+{
+  "services": {
+    "webui": {
+      "url": "http://127.0.0.1:7860",
+      "startup_script": "./start_webui.sh",
+      "mps_compatible": true,
+      "args": [
+        "--api",
+        "--listen",
+        "--port", "7860",
+        "--skip-torch-cuda-test",
+        "--upcast-sampling", 
+        "--no-half-vae",
+        "--use-cpu", "interrogate"
+      ]
+    },
+    "comfyui": {
+      "url": "http://127.0.0.1:8188",
+      "startup_script": "./start_comfyui.sh",
+      "mps_compatible": true,
+      "args": [
+        "--listen", "0.0.0.0",
+        "--port", "8188",
+        "--enable-cors-header"
+      ]
+    }
+  },
+  "paths": {
+    "models": "/Users/sekiguchi/ai-services/Models",
+    "checkpoints": "/Users/sekiguchi/ai-services/Models/checkpoints",
+    "loras": "/Users/sekiguchi/ai-services/Models/loras",
+    "vae": "/Users/sekiguchi/ai-services/Models/vae",
+    "embeddings": "/Users/sekiguchi/ai-services/Models/embeddings",
+    "output": "/Users/sekiguchi/.ai-services/output",
+    "comfyui_output": "/Users/sekiguchi/ai-services/ComfyUI/ComfyUI/output"
+  },
+  "mcp": {
+    "global_image_generation": {
+      "server_path": "/Users/sekiguchi/ai-services/MCPServers/global-image-generation/server.js",
+      "env": {
+        "COMFYUI_API_URL": "http://127.0.0.1:8188",
+        "WEBUI_API_URL": "http://127.0.0.1:7860",
+        "OUTPUT_DIR": "/Users/sekiguchi/.ai-services/output"
+      }
+    }
+  }
+}

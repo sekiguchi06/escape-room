@@ -151,6 +151,13 @@ class RoomNavigationSystem extends ChangeNotifier {
     }
   }
 
+  /// ゲームリスタート時：最初の部屋（中央）に戻す
+  void resetToInitialRoom() {
+    _currentRoom = RoomType.center;
+    notifyListeners();
+    debugPrint('🔄 ゲームリスタート: ${_getRoomName()}に戻りました');
+  }
+
   /// 部屋名を取得（デバッグ用）
   String _getRoomName() {
     switch (_currentRoom) {

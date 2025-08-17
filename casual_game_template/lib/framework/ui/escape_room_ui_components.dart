@@ -63,7 +63,7 @@ class ClickableInventoryItem extends RectangleComponent with TapCallbacks {
 class ModalComponent extends PositionComponent with TapCallbacks {
   final ModalConfig config;
   final Vector2 containerSize;
-  final Paint backgroundPaint = Paint()..color = Colors.black.withOpacity(0.8);
+  final Paint backgroundPaint = Paint()..color = Colors.black.withValues(alpha: 0.8);
   final Paint modalPaint = Paint()..color = Colors.white;
   
   ModalComponent({

@@ -43,7 +43,6 @@ class GameBackground extends StatelessWidget {
         }
         
         // 余白の計算（横幅は常に100%なので横余白なし）
-        final horizontalMargin = 0.0; // 横幅は100%
         final verticalMargin = (availableHeight - mainImageHeight) / 2;
         
         // 余白があるかどうか判定（縦方向のみ）
@@ -97,7 +96,7 @@ class GameBackground extends StatelessWidget {
                 sigmaY: 15.0,
               ),
               child: Container(
-                color: Colors.black.withOpacity(0.3), // 軽い暗化
+                color: Colors.black.withValues(alpha: 0.3), // 軽い暗化
               ),
             ),
           ),
@@ -212,7 +211,7 @@ class ResponsiveGameBackground extends StatelessWidget {
                 sigmaY: config.blurSigma,
               ),
               child: Container(
-                color: Colors.black.withOpacity(config.blurOpacity),
+                color: Colors.black.withValues(alpha: config.blurOpacity),
               ),
             ),
           ),
@@ -238,7 +237,7 @@ class ResponsiveGameBackground extends StatelessWidget {
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.3),
+              color: Colors.black.withValues(alpha: 0.3),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),

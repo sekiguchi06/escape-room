@@ -1,7 +1,9 @@
 import 'package:flame/components.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'escape_room_modal_system.dart';
 import 'modal_config.dart';
+import 'concentration_lines_component.dart';
+import '../effects/particle_system.dart';
 
 /// モーダルマネージャー
 /// 複数モーダルの管理とスタック処理
@@ -9,16 +11,36 @@ import 'modal_config.dart';
 class ModalManager extends Component {
   final List<ModalComponent> _modalStack = [];
   
+  // エフェクトマネージャーの参照
+  ConcentrationLinesManager? _concentrationLinesManager;
+  ParticleEffectManager? _particleEffectManager;
+  
+  /// エフェクトマネージャーを設定
+  void setEffectManagers({
+    ConcentrationLinesManager? concentrationLinesManager,
+    ParticleEffectManager? particleEffectManager,
+  }) {
+    _concentrationLinesManager = concentrationLinesManager;
+    _particleEffectManager = particleEffectManager;
+    debugPrint('🎊 ModalManager: Effect managers set');
+  }
+  
   /// モーダル表示
   void showModal(ModalConfig config, Vector2 screenSize) {
+    debugPrint('🎊 ModalManager: Showing modal type: ${config.type}');
+    
     final modal = ModalComponent(
       config: config,
       size: screenSize,
+      concentrationLinesManager: _concentrationLinesManager,
+      particleEffectManager: _particleEffectManager,
     );
     
     _modalStack.add(modal);
     add(modal);
     modal.show();
+    
+    debugPrint('🎊 ModalManager: Modal added to stack, count: ${_modalStack.length}');
   }
   
   /// 最前面のモーダルを閉じる

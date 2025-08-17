@@ -7,13 +7,11 @@ import 'l10n/app_localizations.dart';
 import 'framework/ui/image_preloader.dart';
 import 'game/tap_fire_game.dart';
 import 'game/simple_game.dart';
-import 'game/example_games/simple_tap_shooter.dart';
 // import 'game/example_games/simple_escape_room.dart'; // 削除済み
 import 'game/escape_room_demo.dart';
 import 'game/widgets/custom_game_ui.dart';
 import 'game/widgets/custom_start_ui.dart';
 import 'game/widgets/custom_settings_ui.dart';
-import 'game/framework_integration/simple_game_states_riverpod.dart';
 import 'framework/device/device_feedback_manager.dart';
 import 'framework/audio/volume_manager.dart';
 import 'framework/transitions/fade_page_route.dart';
@@ -22,6 +20,8 @@ import 'game/components/lighting_system.dart';
 import 'game/components/inventory_system.dart';
 import 'game/components/flutter_particle_system.dart';
 import 'game/components/global_tap_detector.dart';
+import 'framework/state/game_progress_system.dart';
+import 'framework/state/game_autosave_system.dart';
 
 void main() {
   runApp(
@@ -92,11 +92,71 @@ class _CasualGameAppState extends State<CasualGameApp> {
   }
 }
 
-class GameSelectionScreen extends ConsumerWidget {
+class GameSelectionScreen extends ConsumerStatefulWidget {
   const GameSelectionScreen({super.key});
   
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<GameSelectionScreen> createState() => _GameSelectionScreenState();
+}
+
+class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen> with WidgetsBindingObserver {
+  ProgressAwareDataManager? _progressManager;
+  bool _hasProgress = false;
+  
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _initializeProgressManager();
+  }
+  
+  Future<void> _initializeProgressManager() async {
+    _progressManager = ProgressAwareDataManager.defaultInstance();
+    await _progressManager!.initialize();
+    
+    // デバッグ情報を表示
+    print('🔍 Progress Manager Debug:');
+    print('  Has Progress: ${_progressManager!.progressManager.hasProgress}');
+    print('  Current Progress: ${_progressManager!.progressManager.currentProgress}');
+    if (_progressManager!.progressManager.currentProgress != null) {
+      final progress = _progressManager!.progressManager.currentProgress!;
+      print('  Game ID: ${progress.gameId}');
+      print('  Level: ${progress.currentLevel}');
+      print('  Completion: ${progress.completionRate}');
+    }
+    
+    if (mounted) {
+      setState(() {
+        _hasProgress = _progressManager!.progressManager.hasProgress;
+        print('🎮 UI Updated - Has Progress: $_hasProgress');
+      });
+    }
+  }
+  
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // アプリが再開された時に進行度を再チェック
+      _refreshProgressState();
+    }
+  }
+  
+  Future<void> _refreshProgressState() async {
+    if (_progressManager != null) {
+      print('🔄 Refreshing progress state...');
+      await _progressManager!.progressManager.initialize();
+      
+      if (mounted) {
+        setState(() {
+          _hasProgress = _progressManager!.progressManager.hasProgress;
+          print('🔄 Progress state refreshed - Has Progress: $_hasProgress');
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context);
     return Scaffold(
         body: Container(
@@ -204,15 +264,15 @@ class GameSelectionScreen extends ConsumerWidget {
                                     context: context,
                                     icon: Icons.play_arrow,
                                     text: 'はじめる',
-                                    subtitle: '新しい冒険をスタート',
+                                    subtitle: '',
                                     color: Colors.green.shade600,
-                                    onPressed: () {
+                                    onPressed: () async {
                                       DeviceFeedbackManager().gameActionVibrate(GameAction.buttonTap);
-                                      // ゲーム開始時：すべての状態を初期化
-                                      RoomNavigationSystem().resetToInitialRoom();
-                                      LightingSystem().resetToInitialState();
-                                      InventorySystem().initializeEmpty(); // インベントリを空で初期化
-                                      Navigator.of(context).pushFade(const EscapeRoomDemo());
+                                      if (_hasProgress) {
+                                        _showOverwriteWarningDialog();
+                                      } else {
+                                        await _startNewGame();
+                                      }
                                     },
                                   ),
                                   
@@ -223,15 +283,12 @@ class GameSelectionScreen extends ConsumerWidget {
                                     context: context,
                                     icon: Icons.save_alt,
                                     text: 'つづきから',
-                                    subtitle: '保存されたゲームを再開',
-                                    color: Colors.blue.shade600,
-                                    onPressed: () {
+                                    subtitle: '',
+                                    color: _hasProgress ? Colors.blue.shade600 : Colors.grey.shade600,
+                                    onPressed: _hasProgress ? () async {
                                       DeviceFeedbackManager().gameActionVibrate(GameAction.buttonTap);
-                                      // TODO: セーブデータ読み込み機能
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(content: Text('セーブデータ機能（実装予定）')),
-                                      );
-                                    },
+                                      await _loadSavedGame();
+                                    } : null,
                                   ),
                                   
                                   SizedBox(height: MediaQuery.of(context).size.height > 700 ? 16 : 12),
@@ -241,7 +298,7 @@ class GameSelectionScreen extends ConsumerWidget {
                                     context: context,
                                     icon: Icons.help_outline,
                                     text: 'あそびかた',
-                                    subtitle: 'ゲームの操作方法を学ぶ',
+                                    subtitle: '',
                                     color: Colors.orange.shade600,
                                     onPressed: () {
                                       DeviceFeedbackManager().gameActionVibrate(GameAction.buttonTap);
@@ -332,7 +389,7 @@ class GameSelectionScreen extends ConsumerWidget {
     required String text,
     required String subtitle,
     required Color color,
-    required VoidCallback onPressed,
+    required VoidCallback? onPressed,
   }) {
     final isSmallScreen = MediaQuery.of(context).size.height < 700;
     return SizedBox(
@@ -366,13 +423,14 @@ class GameSelectionScreen extends ConsumerWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      fontSize: isSmallScreen ? 10 : 12,
-                      color: Colors.white.withValues(alpha: 0.8),
+                  if (subtitle.isNotEmpty)
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: isSmallScreen ? 10 : 12,
+                        color: Colors.white.withValues(alpha: 0.8),
+                      ),
                     ),
-                  ),
                 ],
               ),
             ),
@@ -692,6 +750,222 @@ class GameSelectionScreen extends ConsumerWidget {
       },
     );
   }
+  
+  void _showOverwriteWarningDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Row(
+            children: [
+              Icon(
+                Icons.warning,
+                color: Colors.orange.shade600,
+                size: 28,
+              ),
+              const SizedBox(width: 12),
+              const Text(
+                '確認',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                '新しいゲームを開始すると、現在の進行状況が削除されます。',
+                style: TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.orange.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.orange.shade200),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      color: Colors.orange.shade600,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    const Expanded(
+                      child: Text(
+                        '「つづきから」で現在の進行状況を再開できます',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                '本当に新しいゲームを開始しますか？',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                'キャンセル',
+                style: TextStyle(
+                  color: Colors.grey.shade600,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await _startNewGame();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red.shade600,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              ),
+              child: const Text(
+                'データを削除して開始',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+  
+  Future<void> _startNewGame() async {
+    if (_progressManager == null) return;
+    
+    print('🆕 Starting new game...');
+    
+    // 既存の進行度があれば削除
+    if (_hasProgress) {
+      await _progressManager!.resetProgress();
+      print('🗑️ Previous progress data deleted');
+    }
+    
+    // ゲーム開始時：すべての状態を初期化
+    RoomNavigationSystem().resetToInitialRoom();
+    LightingSystem().resetToInitialState();
+    InventorySystem().initializeEmpty();
+    
+    // 新しいゲームを開始
+    await _progressManager!.startNewGame('escape_room_demo');
+    
+    print('🆕 New game started successfully');
+    print('  Has Progress: ${_progressManager!.progressManager.hasProgress}');
+    print('  Current Progress: ${_progressManager!.progressManager.currentProgress}');
+    
+    if (mounted) {
+      Navigator.of(context).pushFade(const EscapeRoomDemo()).then((_) {
+        // ゲームから戻った時に進行度を再チェック
+        _refreshProgressState();
+      });
+    }
+  }
+  
+  Future<void> _loadSavedGame() async {
+    print('🔄 Loading saved game...');
+    print('  Progress Manager: ${_progressManager != null}');
+    print('  Has Progress: $_hasProgress');
+    
+    if (_progressManager == null || !_hasProgress) {
+      print('❌ Cannot load: Manager is null or no progress');
+      return;
+    }
+    
+    try {
+      // 保存されたゲームを読み込み
+      final progress = await _progressManager!.continueGame();
+      
+      print('🔄 Continue game result: $progress');
+      
+      if (progress != null) {
+        print('✅ Progress loaded successfully:');
+        print('  Game ID: ${progress.gameId}');
+        print('  Level: ${progress.currentLevel}');
+        print('  Completion: ${progress.completionRate}');
+        
+        // 進行度に基づいてゲーム状態を復元
+        _restoreGameState(progress);
+        
+        if (mounted) {
+          Navigator.of(context).pushFade(const EscapeRoomDemo()).then((_) {
+            // ゲームから戻った時に進行度を再チェック
+            _refreshProgressState();
+          });
+        }
+      } else {
+        print('❌ Progress is null');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('セーブデータの読み込みに失敗しました')),
+          );
+        }
+      }
+    } catch (e) {
+      print('❌ Error loading saved game: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('エラーが発生しました: $e')),
+        );
+      }
+    }
+  }
+  
+  void _restoreGameState(GameProgress progress) {
+    // ゲーム状態を進行度から復元
+    final gameData = progress.gameData;
+    
+    // レベル/ルーム状態の復元
+    if (gameData.containsKey('current_room')) {
+      final currentRoom = gameData['current_room'] as String?;
+      if (currentRoom != null) {
+        // TODO: RoomNavigationSystem に進行度復元機能を追加後に実装
+      }
+    }
+    
+    // インベントリ状態の復元
+    if (gameData.containsKey('inventory')) {
+      final inventoryData = gameData['inventory'] as Map<String, dynamic>?;
+      if (inventoryData != null) {
+        // TODO: InventorySystem に進行度復元機能を追加後に実装
+      }
+    }
+    
+    // ライティング状態の復元
+    if (gameData.containsKey('lighting')) {
+      final lightingData = gameData['lighting'] as Map<String, dynamic>?;
+      if (lightingData != null) {
+        // TODO: LightingSystem に進行度復元機能を追加後に実装
+      }
+    }
+  }
+  
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _progressManager?.dispose();
+    super.dispose();
+  }
 }
 
 class GameScreen<T extends Game> extends StatelessWidget {
@@ -742,16 +1016,6 @@ class GameScreen<T extends Game> extends StatelessWidget {
             },
             onSettingsPressed: () {
               game.showSettingsUI();
-            },
-          );
-        } else if (game is SimpleTapShooter) {
-          return CustomStartUI(
-            title: 'Simple Tap Shooter',
-            onStartPressed: () {
-              game.startGame();
-            },
-            onSettingsPressed: () {
-              // 設定は後で実装
             },
           );
         }
@@ -818,22 +1082,6 @@ class GameScreen<T extends Game> extends StatelessWidget {
               game.restartFromGameOver();
             },
           );
-        } else if (game is SimpleTapShooter) {
-          return CustomGameUI(
-            score: game.score,
-            timeRemaining: game.formatTime(game.gameTimeRemaining),
-            isGameActive: game.gameActive,
-            onPausePressed: () {
-              if (game.gameActive) {
-                game.pauseGame();
-              } else {
-                game.resumeGame();
-              }
-            },
-            onRestartPressed: () {
-              game.resetGame();
-            },
-          );
         }
         // SimpleEscapeRoom削除済み
         return const SizedBox.shrink();
@@ -854,16 +1102,6 @@ class GameScreen<T extends Game> extends StatelessWidget {
             finalScore: game.score,
             onRestartPressed: () {
               game.restartFromGameOver();
-            },
-            onMenuPressed: () {
-              Navigator.of(context).pop();
-            },
-          );
-        } else if (game is SimpleTapShooter) {
-          return CustomGameOverUI(
-            finalScore: game.score,
-            onRestartPressed: () {
-              game.resetGame();
             },
             onMenuPressed: () {
               Navigator.of(context).pop();

@@ -1,13 +1,12 @@
 import 'package:flame/components.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'stateful_interactive_element.dart';
+import 'simple_interactive_element.dart';
 
 /// AI生成画像対応のインベントリアイテムコンポーネント
 /// 
 /// インベントリ内で表示される、選択可能なゲームアイテム
 /// 状態に応じた画像表示（通常/選択中/使用済み等）をサポート
-class InteractiveInventoryItem extends StatefulInteractiveElement {
+class InteractiveInventoryItem extends SimpleInteractiveElement {
   
   final String itemName;
   final String itemDescription;
@@ -28,11 +27,16 @@ class InteractiveInventoryItem extends StatefulInteractiveElement {
     required this.itemDescription,
     required this.itemType,
     required Map<String, String> imagePaths,
-    required super.onInteract,
+    required Function(String) onInteract,
     required super.position,
     required super.size,
     this.onSelectionChanged,
-  }) : _imagePaths = Map.from(imagePaths);
+  }) : _imagePaths = Map.from(imagePaths),
+       super(
+         onTap: onInteract,
+         inactiveImagePath: imagePaths['normal'] ?? '',
+         activeImagePath: imagePaths['selected'] ?? '',
+       );
   
   /// Factory constructors for common item types
   
@@ -135,7 +139,6 @@ class InteractiveInventoryItem extends StatefulInteractiveElement {
     );
   }
   
-  @override
   String getImagePath(bool isActivated) {
     // 使用済みアイテムの場合
     if (_isUsed && _imagePaths.containsKey('used')) {
@@ -168,8 +171,30 @@ class InteractiveInventoryItem extends StatefulInteractiveElement {
       return;
     }
     
-    // 通常の画像読み込み処理は基底クラスに委譲
-    await updateVisuals();
+    // 通常の画像読み込み処理
+    try {
+      final cleanPath = imagePath.replaceFirst('assets/', '');
+      final sprite = await Sprite.load(cleanPath);
+      
+      // 既存のスプライトコンポーネントを削除
+      children.whereType<SpriteComponent>().forEach((sprite) => sprite.removeFromParent());
+      
+      final spriteComponent = SpriteComponent(
+        sprite: sprite,
+        size: size,
+        position: Vector2.zero(),
+      );
+      add(spriteComponent);
+    } catch (e) {
+      debugPrint('❌ Failed to load image: $imagePath -> $e');
+      // フォールバック表示
+      children.whereType<RectangleComponent>().forEach((rect) => rect.removeFromParent());
+      add(RectangleComponent(
+        size: size,
+        paint: Paint()..color = Colors.grey.withValues(alpha: 0.3),
+        position: Vector2.zero(),
+      ));
+    }
   }
   
   /// アイコンテキスト（絵文字）のレンダリング
@@ -212,7 +237,6 @@ class InteractiveInventoryItem extends StatefulInteractiveElement {
     }
   }
   
-  @override
   void onInteractionCompleted() {
     // 選択状態の切り替え
     _isSelected = !_isSelected;
@@ -220,7 +244,7 @@ class InteractiveInventoryItem extends StatefulInteractiveElement {
     debugPrint('🎒 Item $id ($itemName) ${_isSelected ? "selected" : "deselected"}');
     
     // ビジュアル更新
-    updateVisuals();
+    _updateCurrentImage();
     
     // 外部コールバック実行
     onSelectionChanged?.call(id);
@@ -259,6 +283,12 @@ class InteractiveInventoryItem extends StatefulInteractiveElement {
     }
   }
   
+  /// ビジュアル更新（内部実装）
+  Future<void> _updateCurrentImage() async {
+    final imagePath = getImagePath(isActivated);
+    await _loadSpriteOverride(imagePath);
+  }
+  
   /// アイテム使用（外部から呼び出し）
   void useItem() {
     if (_isUsed) {
@@ -268,9 +298,8 @@ class InteractiveInventoryItem extends StatefulInteractiveElement {
     
     _isUsed = true;
     _isSelected = false; // 使用時は選択解除
-    setInteractable(false); // 使用済みアイテムは非インタラクティブ
-    
-    updateVisuals();
+    // 使用済みアイテムは非インタラクティブ（SimpleInteractiveElementでは手動管理）
+    _updateCurrentImage();
     
     debugPrint('✅ Item $id used');
   }
@@ -281,7 +310,7 @@ class InteractiveInventoryItem extends StatefulInteractiveElement {
     
     if (_isSelected != selected) {
       _isSelected = selected;
-      updateVisuals();
+      _updateCurrentImage();
       onSelectionChanged?.call(id);
     }
   }
@@ -289,12 +318,13 @@ class InteractiveInventoryItem extends StatefulInteractiveElement {
   /// アイテム情報の取得
   Map<String, dynamic> getItemInfo() {
     return {
-      ...getDebugInfo(),
+      'id': id,
       'itemName': itemName,
       'itemDescription': itemDescription,
       'itemType': itemType,
       'isSelected': _isSelected,
       'isUsed': _isUsed,
+      'isActivated': isActivated,
       'imagePaths': _imagePaths,
     };
   }

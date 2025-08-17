@@ -187,9 +187,19 @@ class SimpleGameStateFactory {
 
 /// SimpleGame用の状態プロバイダー（フレームワーク統合）
 class SimpleGameStateProvider extends GameStateProvider<GameState> {
+  int _sessionCount = 0;
+  
   SimpleGameStateProvider() : super(SimpleGameStateFactory.createStartState()) {
     // 状態遷移を定義
     stateMachine.defineTransitions(SimpleGameTransitions.getTransitions());
+  }
+  
+  /// 現在のセッション数
+  int get sessionCount => _sessionCount;
+  
+  /// 新しいセッションを開始
+  void startNewSession() {
+    _sessionCount++;
   }
   
   /// 現在の状態が特定の型かチェック

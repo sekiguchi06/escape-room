@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'item_detail_modal.dart';
 import 'room_navigation_system.dart';
+import 'inventory_system.dart';
 
 /// インベントリ管理ウィジェット
 class InventoryWidget extends StatefulWidget {
@@ -33,133 +34,152 @@ class InventoryWidget extends StatefulWidget {
 }
 
 class _InventoryWidgetState extends State<InventoryWidget> {
-  // インベントリ状態管理
-  final List<String?> _inventory = List.filled(5, null); // 5個のスロット、null = 空
-  int? _selectedSlotIndex; // 選択中のスロット（null = 未選択）
-  
   @override
   void initState() {
     super.initState();
-    // デモ用アイテムを追加
-    Future.delayed(const Duration(seconds: 1), () {
-      _addItemToInventory('key');
-      _addItemToInventory('lightbulb');
-    });
+    // シングルトンインベントリシステムを使用（デモアイテム削除済み）
   }
   
-  /// アイテムをインベントリに追加（左詰めで配置）
-  void _addItemToInventory(String itemId) {
-    final emptyIndex = _inventory.indexWhere((item) => item == null);
-    if (emptyIndex != -1) {
-      setState(() {
-        _inventory[emptyIndex] = itemId;
-      });
-      debugPrint('🎒 Added item: $itemId to slot $emptyIndex');
-    } else {
-      debugPrint('🎒 Inventory full, cannot add: $itemId');
-    }
-  }
-  
-  /// アイテムを追加（外部から呼び出し用）
-  void addItem(String itemId) {
-    _addItemToInventory(itemId);
-  }
-  
-  /// スロットを選択/詳細表示
+  /// スロットを選択/詳細表示/組み合わせ
   void _selectSlot(int index) {
-    final itemId = _inventory[index];
+    final inventorySystem = InventorySystem();
+    final itemId = inventorySystem.getItem(index);
     
     // アイテムがない場合は何もしない
     if (itemId == null) return;
     
+    // 既に他のアイテムが選択されている場合は組み合わせを試行
+    final selectedItem = inventorySystem.selectedItemId;
+    if (selectedItem != null && inventorySystem.selectedSlotIndex != index) {
+      if (inventorySystem.combineItemWithSelected(itemId)) {
+        // 組み合わせ成功
+        _showCombinationSuccess(selectedItem, itemId, 'master_key');
+        return;
+      } else {
+        // 組み合わせ不可 - 普通の選択に変更
+        inventorySystem.selectSlot(index);
+        return;
+      }
+    }
+    
     // 既に選択されているスロットを再タップした場合は詳細表示
-    if (_selectedSlotIndex == index) {
+    if (inventorySystem.selectedSlotIndex == index) {
       ItemDetailModal.show(context, itemId);
       return;
     }
     
     // 新しいスロットを選択
-    setState(() {
-      _selectedSlotIndex = index;
-    });
-    debugPrint('🎯 Selected slot: $_selectedSlotIndex (item: $itemId)');
+    inventorySystem.selectSlot(index);
+  }
+
+  /// 組み合わせ成功メッセージを表示
+  void _showCombinationSuccess(String item1, String item2, String result) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.brown[800],
+        title: Text(
+          '🔧 アイテム組み合わせ成功！',
+          style: TextStyle(color: Colors.amber[200], fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          '$item1 + $item2 = $result\n\n新しいアイテムが作成されました！',
+          style: TextStyle(color: Colors.brown[100]),
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.amber[700],
+              foregroundColor: Colors.brown[800],
+            ),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        // 利用可能な画面幅を取得
-        final screenWidth = constraints.maxWidth;
-        
-        // 全体のパディングを画面幅の比率で計算（より詰めたレイアウト）
-        final horizontalPadding = screenWidth * 0.02; // 横幅の2%
-        final verticalPadding = screenWidth * 0.015;   // 横幅の1.5%
-        
-        // 7個のボタン/アイテム（矢印2個 + アイテム5個）のための計算
-        const totalItems = 7;
-        const itemSpacing = 2.0; // アイテム間のスペーシングを最小に
-        
-        // 利用可能な幅から全アイテムの幅を計算
-        final availableWidth = screenWidth - (horizontalPadding * 2);
-        final totalSpacing = itemSpacing * (totalItems - 1);
-        final itemSize = (availableWidth - totalSpacing) / totalItems;
-        
-        // エリア全体の高さを計算（正方形サイズ + 上下パディング）
-        final areaHeight = itemSize + (verticalPadding * 2);
-        
-        return Container(
-          height: areaHeight,
-          color: Colors.brown[100],
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: horizontalPadding,
-              vertical: verticalPadding,
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // 左移動ボタン（正方形）
-                ListenableBuilder(
-                  listenable: RoomNavigationSystem(),
-                  builder: (context, _) {
-                    final canMoveLeft = RoomNavigationSystem().canMoveLeft;
-                    return _buildSquareButton(
-                      icon: Icons.arrow_back,
-                      size: itemSize,
-                      onPressed: canMoveLeft 
-                          ? () => RoomNavigationSystem().moveLeft()
-                          : null,
-                      isEnabled: canMoveLeft,
-                    );
-                  },
+    return ListenableBuilder(
+      listenable: InventorySystem(),
+      builder: (context, _) {
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            // 利用可能な画面幅を取得
+            final screenWidth = constraints.maxWidth;
+            
+            // 全体のパディングを画面幅の比率で計算（より詰めたレイアウト）
+            final horizontalPadding = screenWidth * 0.02; // 横幅の2%
+            final verticalPadding = screenWidth * 0.015;   // 横幅の1.5%
+            
+            // 7個のボタン/アイテム（矢印2個 + アイテム5個）のための計算
+            const totalItems = 7;
+            const itemSpacing = 2.0; // アイテム間のスペーシングを最小に
+            
+            // 利用可能な幅から全アイテムの幅を計算
+            final availableWidth = screenWidth - (horizontalPadding * 2);
+            final totalSpacing = itemSpacing * (totalItems - 1);
+            final itemSize = (availableWidth - totalSpacing) / totalItems;
+            
+            // エリア全体の高さを計算（正方形サイズ + 上下パディング）
+            final areaHeight = itemSize + (verticalPadding * 2);
+            
+            return Container(
+              height: areaHeight,
+              color: Colors.brown[100],
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: horizontalPadding,
+                  vertical: verticalPadding,
                 ),
-                
-                SizedBox(width: itemSpacing),
-                
-                // インベントリアイテム（5個の正方形）
-                ..._buildInventoryItems(itemSize, itemSpacing),
-                
-                SizedBox(width: itemSpacing),
-                
-                // 右移動ボタン（正方形）
-                ListenableBuilder(
-                  listenable: RoomNavigationSystem(),
-                  builder: (context, _) {
-                    final canMoveRight = RoomNavigationSystem().canMoveRight;
-                    return _buildSquareButton(
-                      icon: Icons.arrow_forward,
-                      size: itemSize,
-                      onPressed: canMoveRight 
-                          ? () => RoomNavigationSystem().moveRight()
-                          : null,
-                      isEnabled: canMoveRight,
-                    );
-                  },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // 左移動ボタン（正方形）
+                    ListenableBuilder(
+                      listenable: RoomNavigationSystem(),
+                      builder: (context, _) {
+                        final canMoveLeft = RoomNavigationSystem().canMoveLeft;
+                        return _buildSquareButton(
+                          icon: Icons.arrow_back,
+                          size: itemSize,
+                          onPressed: canMoveLeft 
+                              ? () => RoomNavigationSystem().moveLeft()
+                              : null,
+                          isEnabled: canMoveLeft,
+                        );
+                      },
+                    ),
+                    
+                    SizedBox(width: itemSpacing),
+                    
+                    // インベントリアイテム（5個の正方形）
+                    ..._buildInventoryItems(itemSize, itemSpacing),
+                    
+                    SizedBox(width: itemSpacing),
+                    
+                    // 右移動ボタン（正方形）
+                    ListenableBuilder(
+                      listenable: RoomNavigationSystem(),
+                      builder: (context, _) {
+                        final canMoveRight = RoomNavigationSystem().canMoveRight;
+                        return _buildSquareButton(
+                          icon: Icons.arrow_forward,
+                          size: itemSize,
+                          onPressed: canMoveRight 
+                              ? () => RoomNavigationSystem().moveRight()
+                              : null,
+                          isEnabled: canMoveRight,
+                        );
+                      },
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );
@@ -206,36 +226,70 @@ class _InventoryWidgetState extends State<InventoryWidget> {
 
   /// インベントリスロットを構築（正方形）
   Widget _buildInventorySlot(int index, double size) {
-    final itemId = _inventory[index];
-    final isSelected = _selectedSlotIndex == index;
+    final inventorySystem = InventorySystem();
+    final itemId = inventorySystem.getItem(index);
+    final isSelected = inventorySystem.selectedSlotIndex == index;
+    final canCombine = itemId != null && inventorySystem.canCombineWithSelected(itemId);
     
     return GestureDetector(
       onTap: () => _selectSlot(index),
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          color: isSelected 
-            ? Colors.orange[200] // 選択時の背景色
-            : (itemId != null ? Colors.brown[50] : Colors.grey[100]), // アイテム有無で背景色変更
-          borderRadius: BorderRadius.circular(6),
-          border: Border.all(
-            color: isSelected 
-              ? Colors.orange[600]! // 選択時の枠線色
-              : (itemId != null ? Colors.brown[300]! : Colors.grey[300]!),
-            width: isSelected ? 3 : 1, // 選択時の枠線太さ
+      child: Stack(
+        children: [
+          Container(
+            width: size,
+            height: size,
+            decoration: BoxDecoration(
+              color: isSelected 
+                ? Colors.orange[200] // 選択時の背景色
+                : (itemId != null ? Colors.brown[50] : Colors.grey[100]), // アイテム有無で背景色変更
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(
+                color: isSelected 
+                  ? Colors.orange[600]! // 選択時の枠線色
+                  : (itemId != null ? Colors.brown[300]! : Colors.grey[300]!),
+                width: isSelected ? 3 : 1, // 選択時の枠線太さ
+              ),
+              boxShadow: isSelected ? [
+                BoxShadow(
+                  color: Colors.orange[300]!.withOpacity(0.5),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                )
+              ] : null,
+            ),
+            child: Center(
+              child: _buildSlotContent(itemId, size),
+            ),
           ),
-          boxShadow: isSelected ? [
-            BoxShadow(
-              color: Colors.orange[300]!.withOpacity(0.5),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            )
-          ] : null,
-        ),
-        child: Center(
-          child: _buildSlotContent(itemId, size),
-        ),
+          
+          // 組み合わせ可能アイテムのキラキラエフェクト
+          if (canCombine)
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(
+                    color: Colors.yellow[400]!,
+                    width: 2,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.yellow[300]!.withOpacity(0.6),
+                      blurRadius: 8,
+                      offset: const Offset(0, 0),
+                    ),
+                  ],
+                ),
+                child: Center(
+                  child: Icon(
+                    Icons.auto_awesome,
+                    color: Colors.yellow[300]!,
+                    size: size * 0.3,
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -275,6 +329,18 @@ class _InventoryWidgetState extends State<InventoryWidget> {
       case 'gem':
         icon = Icons.diamond;
         color = Colors.blue[600]!;
+        break;
+      case 'master_key':
+        icon = Icons.vpn_key;
+        color = Colors.purple[600]!;
+        break;
+      case 'escape_key':
+        icon = Icons.key;
+        color = Colors.green[600]!;
+        break;
+      case 'escape_cipher':
+        icon = Icons.article;
+        color = Colors.indigo[600]!;
         break;
       default:
         icon = Icons.help_outline;

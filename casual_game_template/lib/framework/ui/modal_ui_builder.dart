@@ -1,7 +1,7 @@
 import 'package:flame/components.dart';
+import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
 import 'ui_system.dart';
-import 'escape_room_modal_system.dart';
 import 'number_puzzle_input_component.dart';
 import 'modal_config.dart';
 

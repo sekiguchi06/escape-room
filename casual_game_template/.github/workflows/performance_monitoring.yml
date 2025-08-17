@@ -1,0 +1,176 @@
+name: Performance Monitoring
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  schedule:
+    # 毎日午前2時（JST 11時）に実行
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  performance-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.24.5'
+        channel: 'stable'
+        
+    - name: Setup dependencies
+      run: |
+        # bcコマンドの安装（計算用）
+        sudo apt-get update
+        sudo apt-get install -y bc jq
+        
+    - name: Get dependencies
+      working-directory: ./casual_game_template
+      run: flutter pub get
+      
+    - name: Run static analysis
+      working-directory: ./casual_game_template
+      run: flutter analyze
+      
+    - name: Run performance tests
+      working-directory: ./casual_game_template
+      run: |
+        # パフォーマンステストディレクトリの作成
+        mkdir -p test/performance
+        # CI用パフォーマンステスト実行
+        ./scripts/ci_performance_test.sh
+        
+    - name: Archive performance results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: performance-results-${{ github.run_number }}
+        path: |
+          casual_game_template/performance_results/
+          casual_game_template/performance_test_results.json
+        retention-days: 30
+        
+    - name: Performance regression check
+      working-directory: ./casual_game_template
+      run: |
+        # 性能基準値チェック
+        if [ -f "performance_results/performance_$(date '+%Y%m%d')*.json" ]; then
+          LATEST_RESULT=$(ls -t performance_results/performance_*.json | head -1)
+          echo "最新の結果: $LATEST_RESULT"
+          
+          # ビルド時間チェック（60秒以下）
+          BUILD_TIME=$(jq -r '.measurements.build_time_seconds' "$LATEST_RESULT")
+          if (( $(echo "$BUILD_TIME > 60" | bc -l) )); then
+            echo "❌ ビルド時間が基準値を超過: ${BUILD_TIME}秒 > 60秒"
+            exit 1
+          else
+            echo "✅ ビルド時間OK: ${BUILD_TIME}秒"
+          fi
+          
+          # 結果をサマリーに出力
+          echo "## パフォーマンス測定結果" >> $GITHUB_STEP_SUMMARY
+          echo "- ビルド時間: ${BUILD_TIME}秒" >> $GITHUB_STEP_SUMMARY
+          echo "- 基準値チェック: ✅ 合格" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ パフォーマンス結果ファイルが見つかりません"
+          exit 1
+        fi
+        
+    - name: Comment PR with results
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const path = require('path');
+          
+          try {
+            // 最新の結果ファイルを読み込み
+            const resultsDir = 'casual_game_template/performance_results';
+            const files = fs.readdirSync(resultsDir)
+              .filter(f => f.startsWith('performance_'))
+              .sort()
+              .reverse();
+            
+            if (files.length > 0) {
+              const latestResult = JSON.parse(
+                fs.readFileSync(path.join(resultsDir, files[0]), 'utf8')
+              );
+              
+              const buildTime = latestResult.measurements.build_time_seconds;
+              const webSize = latestResult.measurements.web_app_size;
+              const status = buildTime <= 60 ? '✅ 合格' : '❌ 基準値超過';
+              
+              const comment = `## 🚀 パフォーマンス測定結果
+              
+**ビルド時間**: ${buildTime}秒 (基準値: 60秒以下)
+**Webアプリサイズ**: ${webSize}
+**総合判定**: ${status}
+
+<details>
+<summary>詳細情報</summary>
+
+\`\`\`json
+${JSON.stringify(latestResult, null, 2)}
+\`\`\`
+
+</details>`;
+              
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            }
+          } catch (error) {
+            console.log('パフォーマンス結果の投稿でエラー:', error);
+          }
+
+  performance-benchmark:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.24.5'
+        channel: 'stable'
+        
+    - name: Install dependencies
+      run: sudo apt-get install -y bc jq
+        
+    - name: Daily performance benchmark
+      working-directory: ./casual_game_template
+      run: |
+        flutter pub get
+        ./scripts/performance_measure.sh
+        
+        # 週次トレンド分析（簡易版）
+        echo "## 📊 週次パフォーマンストレンド" > performance_summary.md
+        echo "測定日時: $(date)" >> performance_summary.md
+        
+        if [ -f "performance_results/performance_$(date '+%Y%m%d')*.json" ]; then
+          LATEST_RESULT=$(ls -t performance_results/performance_*.json | head -1)
+          BUILD_TIME=$(jq -r '.measurements.build_time_seconds' "$LATEST_RESULT")
+          echo "- 今日のビルド時間: ${BUILD_TIME}秒" >> performance_summary.md
+        fi
+        
+    - name: Archive benchmark results
+      uses: actions/upload-artifact@v4
+      with:
+        name: daily-benchmark-${{ github.run_number }}
+        path: |
+          casual_game_template/performance_results/
+          casual_game_template/performance_summary.md
+        retention-days: 90

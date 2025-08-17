@@ -118,7 +118,7 @@ class GameTemplateConfiguration extends GameConfiguration<GameState, GameTemplat
 }
 
 /// メインゲームクラス - エラー修正済み実装
-class GameTemplate extends ConfigurableGame<GameState, GameTemplateConfig> {
+class GameTemplate extends ConfigurableGameBase<GameState, GameTemplateConfig> {
   // ゲーム状態
   late ParticleEffectManager _particleManager;
   bool _gameActive = false;
@@ -210,7 +210,7 @@ class GameTemplate extends ConfigurableGame<GameState, GameTemplateConfig> {
     _particleManager.playEffect('explosion', position); // ✅ 正しいメソッド
     
     // 効果音
-    audioManager.playSfx('tap');
+    managers.audioManager.playSfx('tap');
     
     debugPrint('🎮 Tap at $position, Score: $_score');
   }
@@ -219,7 +219,7 @@ class GameTemplate extends ConfigurableGame<GameState, GameTemplateConfig> {
     _gameActive = false;
     
     // 分析イベント
-    analyticsManager.trackEvent('game_template_completed', parameters: {
+    managers.analyticsManager.trackEvent('game_template_completed', parameters: {
       'score': _score,
       'duration': config.gameDuration,
       'difficulty': config.difficulty,

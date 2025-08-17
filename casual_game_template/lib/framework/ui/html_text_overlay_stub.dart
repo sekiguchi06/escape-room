@@ -23,11 +23,6 @@ class HtmlTextOverlay extends Component {
     // iOS/Androidでは何もしない
   }
   
-  @override
-  void onRemove() {
-    super.onRemove();
-    // iOS/Androidでは何もしない
-  }
   
   /// テキスト内容を更新（スタブ）
   void updateText(String newText) {

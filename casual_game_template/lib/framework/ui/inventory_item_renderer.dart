@@ -86,8 +86,11 @@ class InventoryItemRenderer {
       position: iconPosition,
       paint: Paint()..color = _getItemColor(),
     );
-    _iconComponent!.priority = InventoryUILayerPriority.inventoryItems + 1;
-    parent.add(_iconComponent!);
+    _iconComponent?.priority = InventoryUILayerPriority.inventoryItems + 1;
+    final iconComponent = _iconComponent;
+    if (iconComponent != null) {
+      parent.add(iconComponent);
+    }
   }
   
   /// テキストを描画
@@ -125,8 +128,9 @@ class InventoryItemRenderer {
     _nameComponent.text = newItem.name;
     
     // アイコン色更新
-    if (_iconComponent != null) {
-      _iconComponent!.paint.color = _getItemColor();
+    final iconComponent = _iconComponent;
+    if (iconComponent != null) {
+      iconComponent.paint.color = _getItemColor();
     }
   }
   

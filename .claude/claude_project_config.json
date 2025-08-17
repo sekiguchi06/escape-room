@@ -8,6 +8,13 @@
     "atlassian": {
       "url": "https://mcp.atlassian.com/v1/sse",
       "type": "sse"
+    },
+    "global-image-generation": {
+      "command": "node",
+      "args": ["/Users/sekiguchi/ai-services/MCPServers/global-image-generation/server.js"],
+      "env": {
+        "NODE_ENV": "production"
+      }
     }
   }
 }

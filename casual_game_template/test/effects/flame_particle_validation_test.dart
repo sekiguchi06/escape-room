@@ -14,18 +14,15 @@ void main() {
     });
 
     test('Flame公式API使用確認', () {
-      debugPrint('=== Flame公式パーティクルAPI確認 ===');
       
       // ParticleSystemComponentが正しく使用されているか
       expect(ParticleSystemComponent, isNotNull);
-      debugPrint('✅ ParticleSystemComponent使用確認');
       
       // 各種パーティクルタイプが使用可能か確認
       expect(AcceleratedParticle, isNotNull);
       expect(MovingParticle, isNotNull);
       expect(ComputedParticle, isNotNull);
       expect(CircleParticle, isNotNull);
-      debugPrint('✅ Flame公式パーティクルタイプ確認');
       
       // Particle.generateメソッドが使用可能か確認
       final testParticle = Particle.generate(
@@ -37,13 +34,10 @@ void main() {
         ),
       );
       expect(testParticle, isNotNull);
-      debugPrint('✅ Particle.generate使用確認');
       
-      debugPrint('🎉 Flame公式API使用確認完了！');
     });
     
     test('パーティクル設定正常性確認', () {
-      debugPrint('=== パーティクル設定確認 ===');
       
       final config = ParticleConfiguration(
         particleCount: 10,
@@ -56,13 +50,10 @@ void main() {
       expect(config.lifespan, equals(2.0));
       expect(config.minRadius, equals(1.0));
       expect(config.maxRadius, equals(5.0));
-      debugPrint('✅ パーティクル設定値確認');
       
-      debugPrint('🎉 パーティクル設定確認完了！');
     });
     
     test('エフェクト登録確認', () {
-      debugPrint('=== エフェクト登録確認 ===');
       
       final config = ParticleConfiguration(
         particleCount: 15,
@@ -73,13 +64,10 @@ void main() {
       
       // プライベートフィールドのため直接確認はできないが、エラーなく登録完了
       expect(() => particleManager.registerEffect('test_effect2', config), returnsNormally);
-      debugPrint('✅ エフェクト登録確認');
       
-      debugPrint('🎉 エフェクト登録確認完了！');
     });
     
     test('Flame公式パーティクル直接作成確認', () {
-      debugPrint('=== Flame公式パーティクル直接作成確認 ===');
       
       // AcceleratedParticle作成テスト
       final acceleratedParticle = AcceleratedParticle(
@@ -90,7 +78,6 @@ void main() {
         ),
       );
       expect(acceleratedParticle, isNotNull);
-      debugPrint('✅ AcceleratedParticle作成確認');
       
       // MovingParticle作成テスト
       final movingParticle = MovingParticle(
@@ -102,7 +89,6 @@ void main() {
         ),
       );
       expect(movingParticle, isNotNull);
-      debugPrint('✅ MovingParticle作成確認');
       
       // ComputedParticle作成テスト
       final computedParticle = ComputedParticle(
@@ -111,13 +97,10 @@ void main() {
         },
       );
       expect(computedParticle, isNotNull);
-      debugPrint('✅ ComputedParticle作成確認');
       
-      debugPrint('🎉 Flame公式パーティクル作成確認完了！');
     });
     
     test('パーティクルシステム統合確認', () {
-      debugPrint('=== パーティクルシステム統合確認 ===');
       
       // Flame公式推奨パターンでのParticleSystemComponent作成
       final particle = Particle.generate(
@@ -134,9 +117,7 @@ void main() {
       
       final particleSystem = ParticleSystemComponent(particle: particle);
       expect(particleSystem, isNotNull);
-      debugPrint('✅ ParticleSystemComponent統合確認');
       
-      debugPrint('🎉 パーティクルシステム統合確認完了！');
     });
   });
 }

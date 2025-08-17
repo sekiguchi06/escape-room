@@ -1,0 +1,6 @@
+{
+  "ckpt_dir": "/Users/sekiguchi/ai-services/Models/checkpoints",
+  "vae_dir": "/Users/sekiguchi/ai-services/Models/vae", 
+  "lora_dir": "/Users/sekiguchi/ai-services/Models/loras",
+  "embeddings_dir": "/Users/sekiguchi/ai-services/Models/embeddings"
+}

@@ -77,7 +77,7 @@ class PlayingScreenComponent extends PositionComponent {
     if (distance <= _testCircle.size.x / 2) {
       AnimationPresets.buttonTap(_testCircle);
       final game = findGame()! as SimpleGame;
-      game.audioManager.playSfx('tap', volumeMultiplier: 0.7);
+      game.managers.audioManager.playSfx('tap', volumeMultiplier: 0.7);
       return true;
     }
     return false;

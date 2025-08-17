@@ -1,6 +1,5 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'interactable_game_object.dart';
 import '../strategies/puzzle_strategy.dart';
 import '../components/dual_sprite_component.dart';

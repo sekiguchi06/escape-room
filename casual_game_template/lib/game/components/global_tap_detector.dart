@@ -25,7 +25,6 @@ class _GlobalTapDetectorState extends State<GlobalTapDetector> {
     _lastTapPosition = tapPosition;
     _tapCount++;
     
-    debugPrint('🖱️ Global pointer down detected at: $tapPosition (tap #$_tapCount)');
     
     // メインパーティクルエフェクト
     _triggerMainParticleEffect(tapPosition);
@@ -34,7 +33,6 @@ class _GlobalTapDetectorState extends State<GlobalTapDetector> {
   void _handlePointerUp(PointerUpEvent event) {
     final tapPosition = event.position;
     
-    debugPrint('🖱️ Global pointer up detected at: $tapPosition');
     
     // 追加のパーティクルエフェクト
     _triggerSecondaryParticleEffect(tapPosition);
@@ -43,7 +41,6 @@ class _GlobalTapDetectorState extends State<GlobalTapDetector> {
   void _triggerMainParticleEffect(Offset position) {
     // シンプルなオレンジ円形パーティクルのみ
     FlutterParticleSystem.triggerParticleEffect(position);
-    debugPrint('✨ Simple particle effect at $position');
   }
 
   void _triggerSecondaryParticleEffect(Offset position) {

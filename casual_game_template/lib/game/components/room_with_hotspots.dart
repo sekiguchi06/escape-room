@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'smooth_game_background.dart';
 import 'hotspot_display.dart';
 import 'game_background.dart';
+import 'room_hotspot_system.dart';
+import '../../framework/ui/item_acquisition_notification.dart';
 
 /// 背景とホットスポットを統合したルームコンポーネント
 /// フェード効果時にホットスポットが浮いてしまう問題を解決
@@ -83,7 +85,21 @@ class _RoomWithHotspotsState extends State<RoomWithHotspots> {
           bottomReservedHeight: widget.bottomReservedHeight,
         ),
         
-        // ホットスポット（背景と一緒にフェード）
+        // 背景タップ用の透明オーバーレイ（背景の上）
+        Positioned.fill(
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              splashColor: Colors.white.withOpacity(0.4), // 白い丸い光
+              highlightColor: Colors.white.withOpacity(0.2), // 白い丸い光
+              onTap: () {
+              },
+              child: Container(),
+            ),
+          ),
+        ),
+        
+        // ホットスポット（最上層 - タップイベントを先に受け取る）
         Positioned(
           top: 0,
           left: 0,
@@ -104,6 +120,7 @@ class OptimizedRoomWithHotspots extends StatelessWidget {
   final double topReservedHeight;
   final double bottomReservedHeight;
   final Size gameSize;
+  final dynamic game; // EscapeRoomGameインスタンス
 
   const OptimizedRoomWithHotspots({
     super.key,
@@ -111,6 +128,7 @@ class OptimizedRoomWithHotspots extends StatelessWidget {
     required this.topReservedHeight,
     required this.bottomReservedHeight,
     required this.gameSize,
+    this.game,
   });
 
   @override
@@ -133,6 +151,7 @@ class OptimizedRoomWithHotspots extends StatelessWidget {
           bottom: 0,
           child: HotspotDisplay(
             gameSize: gameSize,
+            game: game,
           ),
         ),
       ],

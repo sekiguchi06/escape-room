@@ -1,6 +1,5 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'interactable_game_object.dart';
 import '../strategies/item_provider_strategy.dart';
 import '../components/dual_sprite_component.dart';
@@ -28,7 +27,7 @@ class BookshelfObject extends InteractableGameObject {
   Future<void> loadAssets() async {
     // DualSpriteComponentで画像管理
     dualSpriteComponent = DualSpriteComponent(
-      inactiveAssetPath: 'hotspots/bookshelf_full.png',
+      inactiveAssetPath: 'hotspots/prison_bucket.png',
       activeAssetPath: 'hotspots/bookshelf_empty.png',
       fallbackColor: Colors.brown,
       componentSize: size,

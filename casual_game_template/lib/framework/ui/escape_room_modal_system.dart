@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'ui_system.dart';
 import 'modal_config.dart';
 import 'modal_display_strategy.dart';
+import 'concentration_lines_component.dart';
+import '../effects/particle_system.dart';
 
 
 /// モーダルコンポーネント（Strategy Pattern適用）
@@ -16,13 +18,20 @@ class ModalComponent extends PositionComponent with TapCallbacks {
   late ButtonUIComponent? _cancelButton;
   ModalDisplayStrategy? _strategy;
   
+  // エフェクトマネージャーの参照
+  ConcentrationLinesManager? _concentrationLinesManager;
+  ParticleEffectManager? _particleEffectManager;
+  
   bool _isVisible = false;
   
   ModalComponent({
     required this.config,
     super.position,
     super.size,
-  });
+    ConcentrationLinesManager? concentrationLinesManager,
+    ParticleEffectManager? particleEffectManager,
+  }) : _concentrationLinesManager = concentrationLinesManager,
+       _particleEffectManager = particleEffectManager;
   
   @override
   Future<void> onLoad() async {
@@ -31,6 +40,17 @@ class ModalComponent extends PositionComponent with TapCallbacks {
     // Strategy Pattern初期化
     _displayContext.initializeDefaultStrategies();
     _strategy = _displayContext.selectStrategy(config.type);
+    
+    // ItemDiscoveryDisplayStrategyにエフェクトマネージャーを設定
+    if (_strategy is ItemDiscoveryDisplayStrategy && 
+        _concentrationLinesManager != null && 
+        _particleEffectManager != null) {
+      (_strategy as ItemDiscoveryDisplayStrategy).setEffectManagers(
+        concentrationLinesManager: _concentrationLinesManager,
+        particleEffectManager: _particleEffectManager,
+      );
+      debugPrint('🎊 Effect managers set for ItemDiscoveryDisplayStrategy');
+    }
     
     if (_strategy != null) {
       _setupModalUI();

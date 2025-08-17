@@ -11,7 +11,7 @@ import 'simple_game_configuration.dart';
 
 /// SimpleGame のフレームワーク統合版
 /// 汎用フレームワークを使用して従来のSimpleGameを再実装
-class SimpleGameFramework extends ConfigurableGame<GameState, SimpleGameConfig> with TapCallbacks {
+class SimpleGameFramework extends ConfigurableGameBase<GameState, SimpleGameConfig> with TapCallbacks {
   
   // UI コンポーネント
   late TextUIComponent _statusText;
@@ -48,7 +48,7 @@ class SimpleGameFramework extends ConfigurableGame<GameState, SimpleGameConfig> 
     
     // 保留中のテーマを適用
     if (_pendingTheme != null) {
-      themeManager.setTheme(_pendingTheme!);
+      managers.themeManager.setTheme(_pendingTheme!);
       _pendingTheme = null;
     }
     
@@ -102,12 +102,12 @@ class SimpleGameFramework extends ConfigurableGame<GameState, SimpleGameConfig> 
   
   /// 状態変更リスナーのセットアップ  
   void _setupStateListeners() {
-    stateProvider.addListener(_onStateChanged);
+    managers.stateProvider.addListener(_onStateChanged);
   }
   
   /// 状態変更時のハンドラ
   void _onStateChanged() {
-    final state = stateProvider.currentState;
+    final state = managers.stateProvider.currentState;
     debugPrint('State changed to: ${state.name}');
     
     // UI更新
@@ -148,16 +148,16 @@ class SimpleGameFramework extends ConfigurableGame<GameState, SimpleGameConfig> 
   
   /// タイマー更新ハンドラ
   void _onTimerUpdate(Duration remaining) {
-    if (stateProvider.currentState is SimpleGamePlayingState) {
-      final simpleStateProvider = stateProvider as SimpleGameStateProvider;
+    if (managers.stateProvider.currentState is SimpleGamePlayingState) {
+      final simpleStateProvider = managers.stateProvider as SimpleGameStateProvider;
       simpleStateProvider.updateTimer(remaining.inMilliseconds / 1000.0);
     }
   }
   
   /// タイマー完了ハンドラ
   void _onTimerComplete() {
-    if (stateProvider.currentState is SimpleGamePlayingState) {
-      final simpleStateProvider = stateProvider as SimpleGameStateProvider;
+    if (managers.stateProvider.currentState is SimpleGamePlayingState) {
+      final simpleStateProvider = managers.stateProvider as SimpleGameStateProvider;
       final currentState = simpleStateProvider.currentState as SimpleGamePlayingState;
       
       final gameOverState = SimpleGameStateFactory.createGameOverState(
@@ -173,8 +173,8 @@ class SimpleGameFramework extends ConfigurableGame<GameState, SimpleGameConfig> 
   void onTapDown(TapDownEvent event) {
     if (!isInitialized) return;
     
-    final state = stateProvider.currentState;
-    // final simpleStateProvider = this.stateProvider as SimpleGameStateProvider;
+    final state = managers.stateProvider.currentState;
+    // final simpleStateProvider = this.managers.stateProvider as SimpleGameStateProvider;
     
     switch (state) {
       case SimpleGameStartState _:
@@ -191,7 +191,7 @@ class SimpleGameFramework extends ConfigurableGame<GameState, SimpleGameConfig> 
   
   /// ゲーム開始
   void _startGame() {
-    final simpleStateProvider = stateProvider as SimpleGameStateProvider;
+    final simpleStateProvider = managers.stateProvider as SimpleGameStateProvider;
     final initialTime = config.gameDuration.inMilliseconds / 1000.0;
     
     if (simpleStateProvider.startGame(initialTime)) {
@@ -205,7 +205,7 @@ class SimpleGameFramework extends ConfigurableGame<GameState, SimpleGameConfig> 
   
   /// ゲーム再開
   void _restartGame() {
-    final simpleStateProvider = stateProvider as SimpleGameStateProvider;
+    final simpleStateProvider = managers.stateProvider as SimpleGameStateProvider;
     final initialTime = config.gameDuration.inMilliseconds / 1000.0;
     
     if (simpleStateProvider.restart(initialTime)) {
@@ -231,7 +231,7 @@ class SimpleGameFramework extends ConfigurableGame<GameState, SimpleGameConfig> 
     ));
     
     // UI設定の更新
-    _updateUI(stateProvider.currentState);
+    _updateUI(managers.stateProvider.currentState);
     
     debugPrint('Configuration updated: ${oldConfig.gameDuration} -> ${newConfig.gameDuration}');
   }
@@ -250,7 +250,7 @@ class SimpleGameFramework extends ConfigurableGame<GameState, SimpleGameConfig> 
     super.onGamePause();
     trackEvent('game_pause', {
       'session_number': _currentSessionNumber,
-      'current_state': stateProvider.currentState.name,
+      'current_state': managers.stateProvider.currentState.name,
     });
   }
   
@@ -259,7 +259,7 @@ class SimpleGameFramework extends ConfigurableGame<GameState, SimpleGameConfig> 
     super.onGameResume();
     trackEvent('game_resume', {
       'session_number': _currentSessionNumber,
-      'current_state': stateProvider.currentState.name,
+      'current_state': managers.stateProvider.currentState.name,
     });
   }
   
@@ -268,7 +268,7 @@ class SimpleGameFramework extends ConfigurableGame<GameState, SimpleGameConfig> 
     super.onGameStop();
     trackEvent('game_stop', {
       'session_number': _currentSessionNumber,
-      'final_state': stateProvider.currentState.name,
+      'final_state': managers.stateProvider.currentState.name,
     });
   }
   
@@ -283,7 +283,7 @@ class SimpleGameFramework extends ConfigurableGame<GameState, SimpleGameConfig> 
   
   /// ゲーム統計情報を取得
   Map<String, dynamic> getGameStatistics() {
-    final simpleStateProvider = stateProvider as SimpleGameStateProvider;
+    final simpleStateProvider = managers.stateProvider as SimpleGameStateProvider;
     final gameInfo = simpleStateProvider.getCurrentGameInfo();
     
     return {

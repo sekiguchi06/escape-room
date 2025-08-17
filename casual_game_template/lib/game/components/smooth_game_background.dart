@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
 import '../../framework/ui/image_preloader.dart';
-import '../../gen/assets.gen.dart';
 import 'game_background.dart';
 
 /// スムーズなトランジション効果付きゲーム背景

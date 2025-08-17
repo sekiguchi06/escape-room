@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 enum ModalType {
   item,         // アイテム詳細表示
   puzzle,       // パズル解答
-  inspection    // オブジェクト詳細調査
+  inspection,   // オブジェクト詳細調査
+  itemDiscovery // アイテム発見演出（下からスライド＋集中線＋パーティクル）
 }
 
 /// モーダル設定（画像表示優先・文字表示なし）
@@ -18,6 +19,7 @@ class ModalConfig {
   final VoidCallback? onConfirm;
   final VoidCallback? onCancel;
   final VoidCallback? onTap;           // 画像タップ処理
+  final VoidCallback? onPuzzleSuccess; // パズル成功時コールバック
   
   const ModalConfig({
     required this.type,
@@ -28,6 +30,7 @@ class ModalConfig {
     this.onConfirm,
     this.onCancel,
     this.onTap,
+    this.onPuzzleSuccess,
   });
   
   /// パズル用設定のファクトリーメソッド
@@ -37,6 +40,7 @@ class ModalConfig {
     required String correctAnswer,
     VoidCallback? onConfirm,
     VoidCallback? onCancel,
+    VoidCallback? onPuzzleSuccess,
   }) {
     return ModalConfig(
       type: ModalType.puzzle,
@@ -45,6 +49,7 @@ class ModalConfig {
       data: {'correctAnswer': correctAnswer},
       onConfirm: onConfirm,
       onCancel: onCancel,
+      onPuzzleSuccess: onPuzzleSuccess,
     );
   }
   
@@ -83,6 +88,26 @@ class ModalConfig {
       title: title,
       content: content,
       data: {'objectId': objectId},
+      onConfirm: onConfirm,
+      onCancel: onCancel,
+    );
+  }
+  
+  /// アイテム発見演出用設定のファクトリーメソッド
+  factory ModalConfig.itemDiscovery({
+    required String title,
+    required String content,
+    String imagePath = '',
+    String? itemId,
+    VoidCallback? onConfirm,
+    VoidCallback? onCancel,
+  }) {
+    return ModalConfig(
+      type: ModalType.itemDiscovery,
+      title: title,
+      content: content,
+      imagePath: imagePath,
+      data: {'itemId': itemId},
       onConfirm: onConfirm,
       onCancel: onCancel,
     );

@@ -1,7 +1,6 @@
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 
 /// ホットスポットコンポーネント
 /// 脱出ゲームでクリック可能なオブジェクトを表現

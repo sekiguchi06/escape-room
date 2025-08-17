@@ -18,7 +18,7 @@ import 'config/tap_fire_config.dart';
 /// - 300行以下の実装
 /// - 設定駆動による難易度調整
 /// - 複雑なフレームワークは使用せず
-class TapFireGame extends ConfigurableGame<GameState, TapFireConfig> {
+class TapFireGame extends ConfigurableGameBase<GameState, TapFireConfig> {
   // ゲーム状態
   final List<FireballComponent> _fireballs = [];
   late ParticleEffectManager _particleManager;
@@ -133,7 +133,7 @@ class TapFireGame extends ConfigurableGame<GameState, TapFireConfig> {
   @override
   Future<void> initializeGame() async {
     debugPrint('🔥 TapFire Game initializing...');
-    debugPrint('🔥 TapFire: audioManager available');
+    debugPrint('🔥 TapFire: managers.audioManager available');
     
     // 音声システムの初期化を追加
     try {
@@ -186,11 +186,11 @@ class TapFireGame extends ConfigurableGame<GameState, TapFireConfig> {
         debugMode: true,
       );
       
-      await audioManager.updateConfiguration(audioConfig);
+      await managers.audioManager.updateConfiguration(audioConfig);
       
       debugPrint('🎵 TapFire: Audio system initialized');
       debugPrint('🎵 TapFire: SFX assets configured: tap.wav, success.wav, error.wav');
-      debugPrint('🎵 TapFire: Audio provider type: ${audioManager.provider.runtimeType}');
+      debugPrint('🎵 TapFire: Audio provider type: ${managers.audioManager.provider.runtimeType}');
     } catch (e) {
       debugPrint('❌ TapFire: Audio initialization failed: $e');
       debugPrint('❌ TapFire: Stack trace: ${StackTrace.current}');
@@ -291,7 +291,7 @@ class TapFireGame extends ConfigurableGame<GameState, TapFireConfig> {
     _particleManager.playEffect('explosion', position);
     
     // 効果音
-    audioManager.playSfx('tap');
+    managers.audioManager.playSfx('tap');
     
     // ファイヤーボール削除
     fireball.removeFromParent();
@@ -304,7 +304,7 @@ class TapFireGame extends ConfigurableGame<GameState, TapFireConfig> {
     _gameActive = false;
     
     // 分析イベント
-    analyticsManager.trackEvent('tapfire_game_completed', parameters: {
+    managers.analyticsManager.trackEvent('tapfire_game_completed', parameters: {
       'score': _score,
       'fireballs_destroyed': _fireballsDestroyed,
       'duration': config.gameDuration,

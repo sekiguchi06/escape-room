@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
-import 'package:flutter/material.dart';
 import '../components/inventory_manager.dart';
 import 'inventory_item_renderer.dart';
 import 'inventory_item_interaction.dart';

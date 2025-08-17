@@ -1,5 +1,4 @@
 import 'package:flame/events.dart';
-import 'package:flame/components.dart';
 import 'package:flutter/foundation.dart';
 import '../core/base_game_object.dart';
 import '../core/interactable_interface.dart';
@@ -98,9 +97,14 @@ class InteractableGameObject extends BaseGameObject with TapCallbacks implements
       
       // インタラクション結果を処理
       if (result.success) {
+        // オブジェクト操作をコントローラーに記録
+        final game = findGame();
+        if (game is EscapeRoomGame) {
+          game.controller.recordObjectInteraction(objectId);
+        }
+        
         // アイテムをインベントリに追加
         for (final itemId in result.itemsToAdd) {
-          final game = findGame();
           if (game is EscapeRoomGame) {
             game.addItemToInventory(itemId);
             // UIManagerでインベントリ表示を更新
@@ -112,7 +116,6 @@ class InteractableGameObject extends BaseGameObject with TapCallbacks implements
         
         // モーダル表示
         if (result.message.isNotEmpty) {
-          final game = findGame();
           if (game is EscapeRoomGame) {
             game.showInteractionModal(objectId, result.message);
           }

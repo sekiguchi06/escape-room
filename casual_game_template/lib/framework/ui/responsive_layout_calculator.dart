@@ -28,7 +28,6 @@ class ResponsiveLayoutCalculator {
   
   /// インベントリエリアの位置を計算（画面下部）
   Vector2 calculateInventoryPosition() {
-    final inventoryArea = calculateInventoryArea();
     final topMenuHeight = screenSize.y * 0.1;
     final gameAreaHeight = screenSize.y * 0.6;
     
@@ -78,7 +77,6 @@ class ResponsiveLayoutCalculator {
   Vector2 calculateLeftArrowPosition() {
     final inventoryPos = calculateInventoryPosition();
     final inventoryArea = calculateInventoryArea();
-    final buttonWidth = inventoryArea.x * 0.15;
     
     return Vector2(
       inventoryPos.x + inventoryArea.x * 0.02,

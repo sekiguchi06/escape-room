@@ -23,14 +23,14 @@ void main() {
       expect(game.isInitialized, isTrue);
       
       // 状態プロバイダーが正しく初期化されているか確認
-      expect(game.stateProvider, isNotNull);
-      expect(game.stateProvider.currentState, isA<SimpleGameStartState>());
+      expect(game.managers.stateProvider, isNotNull);
+      expect(game.managers.stateProvider.currentState, isA<SimpleGameStartState>());
       
       // タイマーマネージャーが初期化されているか確認
       expect(game.timerManager, isNotNull);
       
       // テーママネージャーが初期化されているか確認
-      expect(game.themeManager, isNotNull);
+      expect(game.managers.themeManager, isNotNull);
       
       // 設定が正しく読み込まれているか確認
       expect(game.configuration, isNotNull);
@@ -59,13 +59,13 @@ void main() {
       await game.onLoad();
       
       // 初期状態を確認
-      expect(game.stateProvider.currentState, isA<SimpleGameStartState>());
+      expect(game.managers.stateProvider.currentState, isA<SimpleGameStartState>());
       
       // startGameメソッドを直接呼び出し（SimpleGameではタップによる自動ゲーム開始は無効化されている）
       game.startGame();
       
       // 状態がプレイング状態に変わったことを確認
-      expect(game.stateProvider.currentState, isA<SimpleGamePlayingState>());
+      expect(game.managers.stateProvider.currentState, isA<SimpleGamePlayingState>());
       
       // タイマーが開始されたことを確認
       final timer = game.timerManager.getTimer('main');
@@ -80,22 +80,22 @@ void main() {
       
       // ゲーム開始
       game.startGame();
-      expect(game.stateProvider.currentState, isA<SimpleGamePlayingState>());
+      expect(game.managers.stateProvider.currentState, isA<SimpleGamePlayingState>());
       
       // 時間を進める
       game.update(1.0); // 1秒経過
       
       // 状態がまだプレイング状態であることを確認
-      if (game.stateProvider.currentState is SimpleGamePlayingState) {
-        final playingState = game.stateProvider.currentState as SimpleGamePlayingState;
+      if (game.managers.stateProvider.currentState is SimpleGamePlayingState) {
+        final playingState = game.managers.stateProvider.currentState as SimpleGamePlayingState;
         expect(playingState.timeRemaining, lessThan(10.0));
         expect(playingState.timeRemaining, greaterThan(8.0));
         
         // さらに時間を進める
         game.update(2.0); // さらに2秒経過
         
-        if (game.stateProvider.currentState is SimpleGamePlayingState) {
-          final updatedState = game.stateProvider.currentState as SimpleGamePlayingState;
+        if (game.managers.stateProvider.currentState is SimpleGamePlayingState) {
+          final updatedState = game.managers.stateProvider.currentState as SimpleGamePlayingState;
           expect(updatedState.timeRemaining, lessThan(8.0));
         }
       }
@@ -104,7 +104,7 @@ void main() {
       game.update(8.0); // 残り時間を超過
       
       // ゲームオーバー状態になることを確認
-      expect(game.stateProvider.currentState, isA<SimpleGameOverState>());
+      expect(game.managers.stateProvider.currentState, isA<SimpleGameOverState>());
     });
 
     test('ゲームオーバー後のリスタート', () async {
@@ -114,17 +114,17 @@ void main() {
       
       // 完全なゲームサイクルを実行
       game.startGame();
-      expect(game.stateProvider.currentState, isA<SimpleGamePlayingState>());
+      expect(game.managers.stateProvider.currentState, isA<SimpleGamePlayingState>());
       
       // ゲームオーバーまで時間を進める
       game.update(11.0); // ゲーム時間を超過
-      expect(game.stateProvider.currentState, isA<SimpleGameOverState>());
+      expect(game.managers.stateProvider.currentState, isA<SimpleGameOverState>());
       
       // リスタート
       game.restartGame();
       
       // 再びプレイング状態になることを確認
-      expect(game.stateProvider.currentState, isA<SimpleGamePlayingState>());
+      expect(game.managers.stateProvider.currentState, isA<SimpleGamePlayingState>());
       
       // タイマーがリセットされて開始されていることを確認
       final restartTimer = game.timerManager.getTimer('main');
@@ -139,14 +139,14 @@ void main() {
       await game.onLoad();
       
       // フレームワークの各システムが統合されていることを確認
-      expect(game.stateProvider, isNotNull);
+      expect(game.managers.stateProvider, isNotNull);
       expect(game.timerManager, isNotNull);
-      expect(game.themeManager, isNotNull);
+      expect(game.managers.themeManager, isNotNull);
       expect(game.configuration, isNotNull);
-      expect(game.audioManager, isNotNull);
-      expect(game.dataManager, isNotNull);
-      expect(game.monetizationManager, isNotNull);
-      expect(game.analyticsManager, isNotNull);
+      expect(game.managers.audioManager, isNotNull);
+      expect(game.managers.dataManager, isNotNull);
+      expect(game.managers.monetizationManager, isNotNull);
+      expect(game.managers.analyticsManager, isNotNull);
       
       // デバッグ情報が取得できることを確認
       final debugInfo = game.getDebugInfo();
@@ -172,7 +172,7 @@ void main() {
       game.update(100.0); // 異常に大きなdt
       
       // ゲームが正常に動作し続けることを確認
-      expect(game.stateProvider.currentState, isA<GameState>());
+      expect(game.managers.stateProvider.currentState, isA<GameState>());
       expect(game.children.length, greaterThan(0));
       
       // 連続的なupdate呼び出し（フレームスキップシミュレーション）
@@ -181,7 +181,7 @@ void main() {
       }
       
       // ゲームが安定していることを確認
-      expect(game.stateProvider.currentState, isA<GameState>());
+      expect(game.managers.stateProvider.currentState, isA<GameState>());
     });
   });
 }

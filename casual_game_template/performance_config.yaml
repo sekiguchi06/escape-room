@@ -1,0 +1,150 @@
+# パフォーマンス基準値設定
+# Flutter Guide第10章に基づく性能目標値
+
+performance_targets:
+  # フレームレート関連
+  fps:
+    target: 60  # 目標FPS
+    minimum: 55  # 最低許容FPS
+    measurement_duration_seconds: 30
+  
+  # フレーム時間
+  frame_time:
+    target_ms: 16.67  # 60fps時の理想フレーム時間
+    maximum_ms: 18    # 許容最大フレーム時間
+    drop_threshold_ms: 33  # フレームドロップとみなす閾値
+  
+  # メモリ使用量
+  memory:
+    target_mb: 80     # 目標メモリ使用量
+    maximum_mb: 120   # 最大許容メモリ使用量
+    warning_mb: 100   # 警告レベル
+  
+  # ビルド時間
+  build_time:
+    web_profile_seconds: 60      # Webプロファイルビルドの目標時間
+    web_release_seconds: 120     # Webリリースビルドの目標時間
+    android_apk_seconds: 180     # Android APKビルドの目標時間
+    ios_ipa_seconds: 300         # iOS IPAビルドの目標時間
+  
+  # アプリサイズ
+  app_size:
+    web_target_mb: 8      # Web版目標サイズ
+    web_maximum_mb: 12    # Web版最大サイズ
+    android_target_mb: 15 # Android版目標サイズ
+    android_maximum_mb: 25 # Android版最大サイズ
+    ios_target_mb: 20     # iOS版目標サイズ
+    ios_maximum_mb: 35    # iOS版最大サイズ
+  
+  # 起動時間
+  startup:
+    cold_start_ms: 3000   # コールドスタート目標時間
+    warm_start_ms: 1000   # ウォームスタート目標時間
+  
+  # ネットワーク
+  network:
+    asset_load_timeout_seconds: 10
+    api_response_timeout_seconds: 5
+
+# 測定設定
+measurement_settings:
+  # 自動測定間隔
+  monitoring_interval_seconds: 1
+  
+  # データ保持期間
+  data_retention:
+    frame_samples: 100      # フレームデータ保持数
+    memory_samples: 300     # メモリデータ保持数(5分)
+    session_duration_minutes: 30  # セッション継続時間
+  
+  # 警告設定
+  alerts:
+    consecutive_frame_drops: 5    # 連続フレームドロップ警告閾値
+    memory_spike_threshold: 1.5   # メモリ使用量急増倍率
+    performance_degradation_percent: 20  # 性能劣化警告率
+  
+  # プラットフォーム別調整
+  platform_adjustments:
+    web:
+      fps_tolerance: 5      # Web版FPS許容差
+      memory_multiplier: 1.2  # Web版メモリ使用量補正
+    mobile:
+      fps_tolerance: 3      # モバイル版FPS許容差
+      memory_multiplier: 1.0  # モバイル版メモリ使用量補正
+
+# テスト設定
+test_configuration:
+  # 自動テスト項目
+  automated_tests:
+    - build_time_check
+    - memory_leak_detection
+    - frame_rate_stability
+    - app_size_validation
+    - startup_time_measurement
+  
+  # 手動テスト項目
+  manual_tests:
+    - user_interaction_responsiveness
+    - complex_animation_performance
+    - background_processing_impact
+    - device_specific_optimization
+  
+  # 測定環境
+  test_environments:
+    - platform: web
+      browser: chrome
+      viewport: "1920x1080"
+    - platform: android
+      device_class: mid_range
+      api_level: 28
+    - platform: ios
+      device_class: modern
+      ios_version: "15.0"
+
+# レポート設定
+reporting:
+  # 出力形式
+  formats:
+    - json
+    - csv
+    - html_dashboard
+  
+  # 含める情報
+  metrics:
+    - timestamp
+    - platform_info
+    - flutter_version
+    - dart_version
+    - performance_scores
+    - recommendations
+  
+  # 履歴管理
+  history:
+    retention_days: 90
+    comparison_periods:
+      - daily
+      - weekly
+      - monthly
+
+# 最適化推奨事項
+optimization_recommendations:
+  # ウィジェット最適化
+  widget_optimization:
+    - use_const_constructors
+    - avoid_expensive_operations_in_build
+    - implement_efficient_list_views
+    - optimize_image_loading
+  
+  # メモリ最適化
+  memory_optimization:
+    - dispose_controllers_properly
+    - use_object_pooling
+    - optimize_asset_caching
+    - monitor_memory_leaks
+  
+  # レンダリング最適化
+  rendering_optimization:
+    - minimize_widget_rebuilds
+    - use_repaint_boundaries
+    - optimize_custom_painters
+    - efficient_animation_implementation

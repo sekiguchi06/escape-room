@@ -49,6 +49,13 @@ class LightingSystem extends ChangeNotifier {
     return RoomNavigationSystem().currentRoom == RoomType.center;
   }
 
+  /// ゲームリスタート時：照明を初期状態（オン）に戻す
+  void resetToInitialState() {
+    _isLightOn = true;
+    notifyListeners();
+    debugPrint('🔄 ゲームリスタート: 照明システムをリセット（オン）');
+  }
+
   /// 現在の照明状態に応じた背景設定を取得
   GameBackgroundConfig getCurrentBackgroundConfig() {
     return _isLightOn 

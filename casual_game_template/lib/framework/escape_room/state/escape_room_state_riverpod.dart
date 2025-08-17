@@ -213,6 +213,16 @@ class EscapeRoomStateNotifier extends StateNotifier<EscapeRoomStateData> {
       _transitionTo(EscapeRoomState.timeUp);
     }
   }
+
+  /// ゲームをリセットして探索状態に戻す
+  void resetToExploring() {
+    state = EscapeRoomStateData(
+      currentState: EscapeRoomState.exploring,
+      sessionStartTime: DateTime.now(),
+      sessionCount: state.sessionCount + 1,
+    );
+    debugPrint('🔄 Game reset to exploring state (session ${state.sessionCount})');
+  }
   
   /// 状態遷移可能性チェック
   bool _canTransitionTo(EscapeRoomState newState) {

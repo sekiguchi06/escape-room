@@ -7,6 +7,7 @@ import '../../components/inventory_manager.dart';
 class EscapeRoomGameController {
   final List<InteractableGameObject> gameObjects = [];
   final InventoryManager inventoryManager;
+  final Set<String> _interactedObjects = <String>{};
 
   EscapeRoomGameController({
     required this.inventoryManager,
@@ -64,5 +65,27 @@ class EscapeRoomGameController {
   /// GameObjectリストから削除
   void removeGameObject(InteractableGameObject gameObject) {
     gameObjects.remove(gameObject);
+  }
+
+  /// オブジェクト操作を記録
+  void recordObjectInteraction(String objectId) {
+    _interactedObjects.add(objectId);
+    debugPrint('🔧 Object interaction recorded: $objectId');
+  }
+
+  /// 操作されたオブジェクトのリストを取得
+  List<String> getInteractedObjects() {
+    return _interactedObjects.toList();
+  }
+
+  /// 特定のオブジェクトが操作されたかチェック
+  bool hasInteractedWith(String objectId) {
+    return _interactedObjects.contains(objectId);
+  }
+
+  /// 操作履歴をリセット
+  void resetInteractionHistory() {
+    _interactedObjects.clear();
+    debugPrint('🔄 Interaction history reset');
   }
 }

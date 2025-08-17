@@ -123,7 +123,7 @@ class SampleGameStateProvider extends GameStateProvider<SampleGameState> {
 }
 
 /// STEP 5: メインゲームクラス実装（CasualGameTemplateを継承）
-class SampleCasualGame extends ConfigurableGame<SampleGameState, SampleGameConfig> {
+class SampleCasualGame extends ConfigurableGameBase<SampleGameState, SampleGameConfig> {
   int currentScore = 0;
   int timeRemaining = 0;
   
@@ -148,7 +148,7 @@ class SampleCasualGame extends ConfigurableGame<SampleGameState, SampleGameConfi
     super.update(dt);
     
     // ゲーム状態が「playing」の時のみタイマー更新
-    if (stateProvider.currentState == SampleGameState.playing && timeRemaining > 0) {
+    if (managers.stateProvider.currentState == SampleGameState.playing && timeRemaining > 0) {
       // 実際のタイマーロジックはPlayingScreen側で実行
       // ここは表示用の更新のみ
     }
@@ -232,7 +232,7 @@ class MenuScreen extends PositionComponent with HasGameReference, TapCallbacks {
       debugPrint('Start button tapped - ゲーム開始!');
       // Start game - transition to playing state
       if (game is SampleCasualGame) {
-        (game as SampleCasualGame).stateProvider.transitionTo(SampleGameState.playing);
+        (game as SampleCasualGame).managers.stateProvider.transitionTo(SampleGameState.playing);
       }
     } else {
       debugPrint('Tap outside start button area');
@@ -302,7 +302,7 @@ class PlayingScreen extends PositionComponent with HasGameReference {
         // 1秒後にゲームオーバー画面へ遷移
         Future.delayed(const Duration(seconds: 1), () {
           if (game is SampleCasualGame) {
-            (game as SampleCasualGame).stateProvider.transitionTo(SampleGameState.gameOver);
+            (game as SampleCasualGame).managers.stateProvider.transitionTo(SampleGameState.gameOver);
           }
         });
       }

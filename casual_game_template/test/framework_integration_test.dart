@@ -65,7 +65,7 @@ void main() {
       final game = SimpleGameFrameworkFactory.createDefault();
       await game.onLoad();
       
-      final stateProvider = game.stateProvider as SimpleGameStateProvider;
+      final stateProvider = game.managers.stateProvider as SimpleGameStateProvider;
       
       // 初期状態の確認
       expect(stateProvider.isInState<SimpleGameStartState>(), isTrue, reason: '初期状態の検出が不正');
@@ -127,7 +127,7 @@ void main() {
       await game.onLoad();
       
       // テーママネージャーのテスト
-      final themeManager = game.themeManager;
+      final themeManager = game.managers.themeManager;
       expect(themeManager.getAvailableThemes().isNotEmpty, isTrue, reason: 'テーマが読み込まれていない');
       
       // テーマ変更テスト
@@ -211,7 +211,7 @@ void main() {
       
       expect(game.config.gameDuration.inSeconds, equals(15), reason: 'プリセット設定が適用されていない');
       expect(game.debugMode, isTrue, reason: 'デバッグモードが有効になっていない');
-      expect(game.themeManager.currentThemeId, equals('game'), reason: 'テーマが設定されていない');
+      expect(game.managers.themeManager.currentThemeId, equals('game'), reason: 'テーマが設定されていない');
       
       debugPrint('✅ ビルダーパターンテスト完了');
     });
@@ -221,7 +221,7 @@ void main() {
       final game = SimpleGameFrameworkFactory.createDefault();
       await game.onLoad();
       
-      final stateProvider = game.stateProvider as SimpleGameStateProvider;
+      final stateProvider = game.managers.stateProvider as SimpleGameStateProvider;
       
       // 完全なゲームサイクルをテスト
       // 1. 初期状態確認

@@ -10,13 +10,10 @@ class FlutterParticleSystem extends StatefulWidget {
 
   /// パーティクルエフェクトを発生させる
   static void triggerParticleEffect(Offset position) {
-    debugPrint('🎆 FlutterParticleSystem.triggerParticleEffect called at $position');
     final state = _globalKey.currentState;
     if (state != null) {
       state.addParticleEffect(position);
-      debugPrint('✅ Particle effect added successfully');
     } else {
-      debugPrint('❌ FlutterParticleSystem state is null');
     }
   }
 

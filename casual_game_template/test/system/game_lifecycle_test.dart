@@ -167,22 +167,22 @@ void main() {
         await game.onLoad();
         
         // === 分析システム: セッション開始 ===
-        await game.analyticsManager.trackGameStart(gameConfig: {
+        await game.managers.analyticsManager.trackGameStart(gameConfig: {
           'test_scenario': 'system_integration',
           'version': '1.0.0',
         });
         debugPrint('  📊 分析: ゲーム開始イベント送信');
         
         // === データ永続化: 初期データ設定 ===
-        await game.dataManager.saveHighScore(500);
-        final initialHighScore = await game.dataManager.loadHighScore();
+        await game.managers.dataManager.saveHighScore(500);
+        final initialHighScore = await game.managers.dataManager.loadHighScore();
         expect(initialHighScore, equals(500));
         debugPrint('  💾 データ: 初期ハイスコア設定 - $initialHighScore点');
         
         // === 音響システム: BGM開始 ===
-        await game.audioManager.playBgm('test_bgm');
+        await game.managers.audioManager.playBgm('test_bgm');
         // SilentAudioProviderは未実装のため、テストではスキップ
-        // expect(game.audioManager.provider, isA<SilentAudioProvider>());
+        // expect(game.managers.audioManager.provider, isA<SilentAudioProvider>());
         debugPrint('  🎵 音響: BGM再生開始');
         
         // === ゲーム開始 ===
@@ -193,13 +193,13 @@ void main() {
         
         // === 入力システム: タップイベント確認 ===
         final inputEvents = <InputEventData>[];
-        game.inputManager.addInputListener((event) {
+        game.managers.inputManager.addInputListener((event) {
           inputEvents.add(event);
         });
         
         // 実際のタップイベントを発生
-        game.inputManager.handleTapDown(Vector2(100, 100));
-        game.inputManager.handleTapUp(Vector2(100, 100));
+        game.managers.inputManager.handleTapDown(Vector2(100, 100));
+        game.managers.inputManager.handleTapUp(Vector2(100, 100));
         
         await Future.delayed(const Duration(milliseconds: 10));
         expect(inputEvents, isNotEmpty);
@@ -209,7 +209,7 @@ void main() {
         game.stateProvider.changeState(const SimpleGameOverState());
         
         // === 収益化システム: 広告イベント ===
-        final adResult = await game.monetizationManager.showInterstitial();
+        final adResult = await game.managers.monetizationManager.showInterstitial();
         // AdResultは未実装のため、テストではスキップ
         // expect(adResult, equals(AdResult.shown));
         debugPrint('  💰 収益化: インタースティシャル広告表示（結果: $adResult）');
@@ -230,13 +230,13 @@ void main() {
         final finalScore = 750;
         
         // === データ永続化: ハイスコア更新 ===
-        await game.dataManager.saveHighScore(finalScore);
-        final newHighScore = await game.dataManager.loadHighScore();
+        await game.managers.dataManager.saveHighScore(finalScore);
+        final newHighScore = await game.managers.dataManager.loadHighScore();
         expect(newHighScore, equals(finalScore));
         debugPrint('  💾 データ: ハイスコア更新 - $newHighScore点');
         
         // === 分析システム: ゲーム終了 ===
-        await game.analyticsManager.trackGameEnd(
+        await game.managers.analyticsManager.trackGameEnd(
           score: finalScore,
           duration: const Duration(seconds: 30),
           additionalData: {'systems_tested': 6},
@@ -244,16 +244,16 @@ void main() {
         debugPrint('  📊 分析: ゲーム終了イベント送信');
         
         // === 音響システム: BGM停止 ===
-        await game.audioManager.stopBgm();
+        await game.managers.audioManager.stopBgm();
         debugPrint('  🎵 音響: BGM停止');
         
         // === 最終状態確認 ===
         expect(game.isInitialized, isTrue);
-        expect(game.audioManager, isNotNull);
-        expect(game.inputManager, isNotNull);
-        expect(game.dataManager, isNotNull);
-        expect(game.monetizationManager, isNotNull);
-        expect(game.analyticsManager, isNotNull);
+        expect(game.managers.audioManager, isNotNull);
+        expect(game.managers.inputManager, isNotNull);
+        expect(game.managers.dataManager, isNotNull);
+        expect(game.managers.monetizationManager, isNotNull);
+        expect(game.managers.analyticsManager, isNotNull);
         
         debugPrint('🎉 全システム連携ワークフローテスト成功！');
       });

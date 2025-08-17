@@ -26,11 +26,11 @@ void main() {
       debugPrint('  ✅ フレームワーク初期化完了');
       
       // === 2. システム統合確認 ===
-      expect(game.audioManager, isNotNull);
-      expect(game.inputManager, isNotNull);
-      expect(game.dataManager, isNotNull);
-      expect(game.monetizationManager, isNotNull);
-      expect(game.analyticsManager, isNotNull);
+      expect(game.managers.audioManager, isNotNull);
+      expect(game.managers.inputManager, isNotNull);
+      expect(game.managers.dataManager, isNotNull);
+      expect(game.managers.monetizationManager, isNotNull);
+      expect(game.managers.analyticsManager, isNotNull);
       debugPrint('  ✅ 全システム初期化確認');
       
       // === 3. 基本ゲームループ ===
@@ -41,7 +41,7 @@ void main() {
       debugPrint('  ✅ ゲームループ安定動作');
       
       // === 4. 入力システム処理 ===
-      game.inputManager.handleTapDown(Vector2(100, 100));
+      game.managers.inputManager.handleTapDown(Vector2(100, 100));
       debugPrint('  ✅ 入力システム処理成功');
       
       debugPrint('🎉 基本フレームワーク動作テスト成功！');
@@ -53,35 +53,35 @@ void main() {
       await game.onLoad();
       
       // === 音響システム連携 ===
-      await game.audioManager.playBgm('test_bgm');
-      expect(game.audioManager, isNotNull);
+      await game.managers.audioManager.playBgm('test_bgm');
+      expect(game.managers.audioManager, isNotNull);
       debugPrint('  🎵 音響システム連携確認');
       
       // === データ永続化システム ===
-      await game.dataManager.saveHighScore(500);
+      await game.managers.dataManager.saveHighScore(500);
       // 保存後に少し待機（フラッシュ対応）
       await Future.delayed(const Duration(milliseconds: 100));
-      final highScore = await game.dataManager.loadHighScore();
+      final highScore = await game.managers.dataManager.loadHighScore();
       expect(highScore, equals(500));
       debugPrint('  💾 データ永続化システム確認');
       
       // === 収益化システム ===
-      final adResult = await game.monetizationManager.showInterstitial();
+      final adResult = await game.managers.monetizationManager.showInterstitial();
       expect(adResult, isNotNull);
       debugPrint('  💰 収益化システム確認');
       
       // === 分析システム ===
-      await game.analyticsManager.trackEvent('test_event', parameters: {
+      await game.managers.analyticsManager.trackEvent('test_event', parameters: {
         'test': true,
       });
       debugPrint('  📊 分析システム確認');
       
       // === 最終状態確認 ===
       expect(game.isInitialized, isTrue);
-      expect(game.audioManager, isNotNull);
-      expect(game.dataManager, isNotNull);
-      expect(game.monetizationManager, isNotNull);
-      expect(game.analyticsManager, isNotNull);
+      expect(game.managers.audioManager, isNotNull);
+      expect(game.managers.dataManager, isNotNull);
+      expect(game.managers.monetizationManager, isNotNull);
+      expect(game.managers.analyticsManager, isNotNull);
       
       debugPrint('🎉 統合ワークフローテスト成功！');
     });
@@ -105,7 +105,7 @@ void main() {
         
         // ランダムなタイミングで入力処理
         if (frame % 50 == 0) {
-          game.inputManager.handleTapDown(Vector2(frame % 300.0, frame % 200.0));
+          game.managers.inputManager.handleTapDown(Vector2(frame % 300.0, frame % 200.0));
         }
         
         // 進捗表示

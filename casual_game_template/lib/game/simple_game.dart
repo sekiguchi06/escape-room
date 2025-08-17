@@ -21,7 +21,7 @@ import '../framework/effects/particle_system.dart';
 import 'framework_integration/simple_game_states.dart';
 import 'framework_integration/simple_game_configuration.dart';
 
-class SimpleGame extends ConfigurableGame<GameState, SimpleGameConfig> {
+class SimpleGame extends ConfigurableGameBase<GameState, SimpleGameConfig> {
   // 既存フィールド（必要最小限）
   late GameComponent _testCircle;
   late ParticleEffectManager _particleEffectManager;
@@ -189,8 +189,8 @@ class SimpleGame extends ConfigurableGame<GameState, SimpleGameConfig> {
     debugPrint('🔥 _initializeAudio() completed');
     
     // UIテーマ初期化
-    themeManager.initializeDefaultThemes();
-    themeManager.setTheme('game');
+    managers.themeManager.initializeDefaultThemes();
+    managers.themeManager.setTheme('game');
     
     debugPrint('🔥 SimpleGame.initializeGame() completed');
     
@@ -234,17 +234,39 @@ class SimpleGame extends ConfigurableGame<GameState, SimpleGameConfig> {
 
   @override
   void onTapDown(TapDownEvent event) {
-    // ゲーム中のみタップ処理を有効化
-    if (_gameActive && stateProvider.currentState is SimpleGamePlayingState) {
-      final tapPosition = event.canvasPosition;
-      
+    final tapPosition = event.canvasPosition;
+    
+    debugPrint('🖱️ onTapDown called at position: $tapPosition');
+    debugPrint('🖱️ ParticleEffectManager isMounted: ${_particleEffectManager.isMounted}');
+    debugPrint('🖱️ ParticleEffectManager parent: ${_particleEffectManager.parent}');
+    
+    // どこをタップしてもパーティクルエフェクトを表示
+    try {
+      _particleEffectManager.playEffect('sparkle', tapPosition);
+      debugPrint('✨ Sparkle effect triggered at $tapPosition');
+    } catch (e) {
+      debugPrint('❌ Failed to play sparkle effect: $e');
+    }
+    
+    // ゲーム中のみゲーム固有のタップ処理を有効化
+    if (_gameActive && managers.stateProvider.currentState is SimpleGamePlayingState) {
+      debugPrint('🎮 Game is active, checking circle tap');
       // 青いサークル（_testCircle）のタップ判定
       if (_testCircle.containsPoint(tapPosition)) {
         _score += 10;
-        audioManager.playSfx('tap', volumeMultiplier: 0.8);
+        managers.audioManager.playSfx('tap', volumeMultiplier: 0.8);
+        // ターゲットヒット時は爆発エフェクトも追加
+        try {
+          _particleEffectManager.playEffect('explosion', tapPosition);
+          debugPrint('💥 Explosion effect triggered at $tapPosition');
+        } catch (e) {
+          debugPrint('❌ Failed to play explosion effect: $e');
+        }
         debugPrint('🎮 Circle tapped! Score: $_score');
         _updateUI();
       }
+    } else {
+      debugPrint('🎮 Game not active or not in playing state. Active: $_gameActive, State: ${managers.stateProvider.currentState}');
     }
   }
 
@@ -254,9 +276,9 @@ class SimpleGame extends ConfigurableGame<GameState, SimpleGameConfig> {
     if (mainTimer != null && mainTimer.isRunning) {
       mainTimer.update(dt);
       
-      if (stateProvider.currentState is SimpleGamePlayingState) {
+      if (managers.stateProvider.currentState is SimpleGamePlayingState) {
         final remaining = mainTimer.current.inMilliseconds / 1000.0;
-        (stateProvider as SimpleGameStateProvider).updateTimer(remaining);
+        (managers.stateProvider as SimpleGameStateProvider).updateTimer(remaining);
         
         // カスタムUI用の時間更新
         _gameTime = remaining;
@@ -280,7 +302,7 @@ class SimpleGame extends ConfigurableGame<GameState, SimpleGameConfig> {
     final newConfig = SimpleGameConfigPresets.getPreset(configKey);
     if (newConfig != null) {
       configuration.updateConfig(newConfig);
-      audioManager.playSfx('tap', volumeMultiplier: 0.5);
+      managers.audioManager.playSfx('tap', volumeMultiplier: 0.5);
       debugPrint('🎮 Manual configuration applied: $configKey');
       hideSettingsUI(); // 設定画面を閉じる
     }
@@ -301,7 +323,7 @@ class SimpleGame extends ConfigurableGame<GameState, SimpleGameConfig> {
     // _applySessionBasedConfiguration(); // 無効化 - 手動設定を優先
     
     // ゲーム開始音を再生
-    audioManager.playSfx('success', volumeMultiplier: 1.0);
+    managers.audioManager.playSfx('success', volumeMultiplier: 1.0);
     
     // カスタムUI用のゲーム状態設定
     _gameActive = true;
@@ -311,7 +333,7 @@ class SimpleGame extends ConfigurableGame<GameState, SimpleGameConfig> {
     final config = configuration.config;
     _gameTime = config.gameDuration.inMilliseconds / 1000.0;
     
-    (stateProvider as SimpleGameStateProvider).startGame(config.gameDuration.inMilliseconds / 1000.0);
+    (managers.stateProvider as SimpleGameStateProvider).startGame(config.gameDuration.inMilliseconds / 1000.0);
     
     timerManager.addTimer('main', TimerConfiguration(
       duration: config.gameDuration,
@@ -337,7 +359,7 @@ class SimpleGame extends ConfigurableGame<GameState, SimpleGameConfig> {
     // _applySessionBasedConfiguration(); // 無効化 - 手動設定を優先
     
     // リスタート音を再生
-    audioManager.playSfx('success', volumeMultiplier: 0.8);
+    managers.audioManager.playSfx('success', volumeMultiplier: 0.8);
     
     // カスタムUI用のゲーム状態リセット
     _gameActive = true;
@@ -347,7 +369,7 @@ class SimpleGame extends ConfigurableGame<GameState, SimpleGameConfig> {
     final config = configuration.config;
     _gameTime = config.gameDuration.inMilliseconds / 1000.0;
     
-    (stateProvider as SimpleGameStateProvider).restart(config.gameDuration.inMilliseconds / 1000.0);
+    (managers.stateProvider as SimpleGameStateProvider).restart(config.gameDuration.inMilliseconds / 1000.0);
     
     // タイマーを再作成
     timerManager.addTimer('main', TimerConfiguration(
@@ -366,14 +388,14 @@ class SimpleGame extends ConfigurableGame<GameState, SimpleGameConfig> {
     timerManager.getTimer('main')?.current.inMilliseconds ?? 0;
     
     // ゲームオーバー音を再生
-    audioManager.playSfx('error', volumeMultiplier: 0.9);
+    managers.audioManager.playSfx('error', volumeMultiplier: 0.9);
     
     // カスタムUI用のゲーム状態更新
     _gameActive = false;
     _gameTime = 0.0;
     
     // タイマー終了時は残り時間を0にしてゲームオーバー状態にする
-    (stateProvider as SimpleGameStateProvider).updateTimer(0.0);
+    (managers.stateProvider as SimpleGameStateProvider).updateTimer(0.0);
     
     // ゲームオーバーUIを表示
     _showGameOverUI();
@@ -391,7 +413,7 @@ class SimpleGame extends ConfigurableGame<GameState, SimpleGameConfig> {
       debugPrint('🎵 AudioManager available');
       
       await GameAudioIntegration.setupAudio(
-        audioManager: audioManager,
+        audioManager: managers.audioManager,
         bgmFiles: {
           'menu_bgm': 'menu.mp3',
         },
@@ -408,7 +430,7 @@ class SimpleGame extends ConfigurableGame<GameState, SimpleGameConfig> {
       
       debugPrint('🎵 Audio system initialized with GameAudioHelper');
       debugPrint('🎵 SFX assets configured: tap.wav, success.wav, error.wav');
-      debugPrint('🎵 Audio provider type: ${audioManager.provider.runtimeType}');
+      debugPrint('🎵 Audio provider type: ${managers.audioManager.provider.runtimeType}');
       debugPrint('🎵 BGM will start on first user interaction');
     } catch (e) {
       debugPrint('❌ Audio initialization failed: $e');
