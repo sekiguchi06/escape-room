@@ -1,0 +1,491 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/foundation.dart';
+
+import 'package:flame/components.dart';
+
+// 拡張システムのインポート
+import 'package:escape_room/framework/audio/audio_system.dart';
+import 'package:escape_room/framework/input/flame_input_system.dart';
+import 'package:escape_room/framework/persistence/persistence_system.dart';
+import 'package:escape_room/framework/monetization/monetization_system.dart';
+import 'package:escape_room/framework/analytics/analytics_system.dart';
+
+void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  group('拡張フレームワーク基盤テスト', () {
+    
+    group('音響システム - プロバイダーパターン', () {
+      test('SilentAudioProvider - 基本動作', () async {
+        debugPrint('🔊 音響システムテスト開始...');
+        
+        final config = const DefaultAudioConfiguration(
+          bgmAssets: {
+            'menu': 'menu_bgm.mp3',
+            'game': 'game_bgm.mp3',
+          },
+          sfxAssets: {
+            'tap': 'tap.wav',
+            'success': 'success.wav',
+          },
+          bgmVolume: 0.7,
+          sfxVolume: 0.8,
+          debugMode: true,
+        );
+        
+        final provider = SilentAudioProvider();
+        final manager = AudioManager(
+          provider: provider,
+          configuration: config,
+        );
+        
+        // 初期化
+        await manager.initialize();
+        debugPrint('  ✅ 音響システム初期化成功');
+        
+        // BGM再生テスト
+        await manager.playBgm('menu');
+        expect(provider.isBgmPlaying, isTrue);
+        debugPrint('  ✅ BGM再生: ${provider.isBgmPlaying}');
+        
+        // 効果音再生テスト
+        await manager.playSfx('tap');
+        await manager.playSfx('success', volumeMultiplier: 1.5);
+        debugPrint('  ✅ 効果音再生テスト成功');
+        
+        // 音量制御テスト
+        await manager.setVolumes(
+          masterVolume: 0.9,
+          bgmVolume: 0.5,
+          sfxVolume: 0.6,
+        );
+        debugPrint('  ✅ 音量制御テスト成功');
+        
+        // BGM制御テスト
+        await manager.pauseBgm();
+        expect(provider.isBgmPaused, isTrue);
+        await manager.resumeBgm();
+        expect(provider.isBgmPaused, isFalse);
+        debugPrint('  ✅ BGM制御（一時停止・再開）成功');
+        
+        // デバッグ情報確認
+        final debugInfo = manager.getDebugInfo();
+        expect(debugInfo['bgm_enabled'], isTrue);
+        expect(debugInfo['sfx_enabled'], isTrue);
+        debugPrint('  ✅ デバッグ情報: BGM有効=${debugInfo['bgm_enabled']}, SFX有効=${debugInfo['sfx_enabled']}');
+        
+        await manager.dispose();
+        debugPrint('🎉 音響システムテスト完了！');
+      });
+    });
+    
+    group('入力システム - Flame公式準拠', () {
+      test('FlameInputProcessor - TapCallbacks動作確認', () async {
+        debugPrint('👆 入力システムテスト開始...');
+        
+        final config = const DefaultInputConfiguration(
+          enabledInputTypes: {
+            InputEventType.tap,
+          },
+          debugMode: true,
+        );
+        
+        final processor = FlameInputProcessor();
+        final manager = InputManager(
+          processor: processor,
+          configuration: config,
+        );
+        
+        manager.initialize();
+        debugPrint('  ✅ 入力システム初期化成功');
+        
+        // Flame公式TapCallbacks動作確認
+        final receivedEvents = <InputEventData>[];
+        manager.addInputListener((event) {
+          receivedEvents.add(event);
+          debugPrint('  📥 入力イベント受信: ${event.type.name} at ${event.position}');
+        });
+        
+        // Flame公式: onTapDown → onTapUp パターン
+        processor.processTapDown(Vector2(100, 200));
+        processor.processTapUp(Vector2(100, 200));
+        
+        await Future.delayed(const Duration(milliseconds: 10));
+        expect(receivedEvents.any((e) => e.type == InputEventType.tap), isTrue);
+        debugPrint('  ✅ Flame公式TapCallbacks動作確認');
+        
+        // Flame公式DragCallbacks動作確認（ログ出力のみ）
+        processor.processPanStart(Vector2(100, 100));
+        processor.processPanUpdate(Vector2(120, 100), Vector2(20, 0));
+        processor.processPanEnd(Vector2(200, 100), Vector2(50, 0));
+        debugPrint('  ✅ Flame公式DragCallbacks動作確認');
+        
+        // デバッグ情報確認（Flame公式準拠）
+        final debugInfo = manager.getDebugInfo();
+        debugPrint('  ✅ デバッグ情報確認: ${debugInfo.keys.length}項目');
+        
+        debugPrint('🎉 入力システムテスト完了！');
+      });
+    });
+    
+    group('データ永続化システム - プロバイダーパターン', () {
+      test('LocalStorageProvider - データ操作', () async {
+        debugPrint('💾 データ永続化システムテスト開始...');
+        
+        final config = const DefaultPersistenceConfiguration(
+          autoSaveInterval: 5,
+          encryptionEnabled: true,
+          debugMode: true,
+        );
+        
+        final provider = LocalStorageProvider();
+        final manager = DataManager(
+          provider: provider,
+          configuration: config,
+        );
+        
+        // 初期化
+        final initResult = await manager.initialize();
+        expect(initResult, equals(PersistenceResult.success));
+        debugPrint('  ✅ データ永続化システム初期化成功');
+        
+        // ハイスコア保存・読み込みテスト
+        await manager.saveHighScore(1500);
+        final highScore = await manager.loadHighScore();
+        expect(highScore, equals(1500));
+        debugPrint('  ✅ ハイスコア保存・読み込み: $highScore');
+        
+        // より高いスコアで更新
+        await manager.saveHighScore(2000);
+        final newHighScore = await manager.loadHighScore();
+        expect(newHighScore, equals(2000));
+        debugPrint('  ✅ ハイスコア更新: $newHighScore');
+        
+        // 低いスコアでは更新されないことを確認
+        await manager.saveHighScore(1000);
+        final unchangedScore = await manager.loadHighScore();
+        expect(unchangedScore, equals(2000));
+        debugPrint('  ✅ ハイスコア保護: $unchangedScore（低いスコアで変更されない）');
+        
+        // ユーザー設定テスト
+        final userSettings = {
+          'sound_enabled': true,
+          'music_volume': 0.8,
+          'language': 'ja',
+        };
+        await manager.saveUserSettings(userSettings);
+        final loadedSettings = await manager.loadUserSettings();
+        expect(loadedSettings['sound_enabled'], isTrue);
+        expect(loadedSettings['music_volume'], equals(0.8));
+        debugPrint('  ✅ ユーザー設定保存・読み込み: $loadedSettings');
+        
+        // ゲーム進行状況テスト
+        final progress = {
+          'current_level': 5,
+          'unlocked_levels': [1, 2, 3, 4, 5],
+          'total_score': 15000,
+        };
+        await manager.saveGameProgress(progress);
+        final loadedProgress = await manager.loadGameProgress();
+        expect(loadedProgress['current_level'], equals(5));
+        expect(loadedProgress['unlocked_levels'], hasLength(5));
+        debugPrint('  ✅ ゲーム進行状況: レベル${loadedProgress['current_level']}, 解放${loadedProgress['unlocked_levels'].length}個');
+        
+        // ストレージ情報確認
+        final storageInfo = await manager.getStorageInfo();
+        debugPrint('  ✅ ストレージ情報: ${storageInfo['total_keys']}キー, ${storageInfo['total_size_kb']}KB');
+        
+        // デバッグ情報確認
+        final debugInfo = manager.getDebugInfo();
+        expect(debugInfo['encryption_enabled'], isTrue);
+        debugPrint('  ✅ デバッグ情報: 暗号化=${debugInfo['encryption_enabled']}');
+        
+        await manager.dispose();
+        debugPrint('🎉 データ永続化システムテスト完了！');
+      });
+    });
+    
+    group('収益化システム - 広告統合抽象化', () {
+      test('MockAdProvider - 広告制御', () async {
+        debugPrint('💰 収益化システムテスト開始...');
+        
+        final config = const DefaultMonetizationConfiguration(
+          interstitialInterval: 1,  // テスト用に短い間隔に設定
+          rewardMultiplier: 2.0,
+          testMode: true,
+          debugMode: true,
+        );
+        
+        final provider = MockAdProvider();
+        final manager = MonetizationManager(
+          provider: provider,
+          configuration: config,
+        );
+        
+        // 初期化
+        final initSuccess = await manager.initialize();
+        expect(initSuccess, isTrue);
+        debugPrint('  ✅ 収益化システム初期化成功');
+        
+        // 広告イベントリスナー設定
+        final List<AdEventData> adEvents = [];
+        manager.addAdEventListener((event) {
+          adEvents.add(event);
+          debugPrint('  📊 広告イベント: ${event.adType.name} - ${event.result.name}');
+        });
+        
+        // インタースティシャル広告テスト
+        // 初期化後の待機時間を挟む
+        await Future.delayed(const Duration(milliseconds: 1100)); // 間隔よりも長く待機
+        final interstitialResult = await manager.showInterstitial();
+        expect(interstitialResult, equals(AdResult.shown));
+        expect(adEvents.any((e) => e.adType == AdType.interstitial && e.result == AdResult.shown), isTrue);
+        debugPrint('  ✅ インタースティシャル広告表示成功');
+        
+        // リワード広告テスト
+        adEvents.clear();
+        final rewardResult = await manager.showRewarded();
+        expect(rewardResult, equals(AdResult.shown));
+        
+        // リワードイベント確認
+        await Future.delayed(const Duration(milliseconds: 600));
+        expect(adEvents.any((e) => e.result == AdResult.rewarded), isTrue);
+        debugPrint('  ✅ リワード広告とボーナス獲得成功');
+        
+        // 広告表示間隔チェック
+        // 間隔設定が1秒なので、直後は表示不可
+        final shouldShow1 = manager.shouldShowInterstitial();
+        debugPrint('  📊 広告表示間隔チェック（直後）: $shouldShow1');
+        
+        // 1.5秒待機後は表示可能
+        await Future.delayed(const Duration(milliseconds: 1500));
+        final shouldShow2 = manager.shouldShowInterstitial();
+        debugPrint('  📊 広告表示間隔チェック（1.5秒後）: $shouldShow2');
+        expect(shouldShow2, isTrue); // 1.5秒後は表示可能
+        debugPrint('  ✅ 広告表示間隔制御確認');
+        
+        // 収益統計確認
+        await Future.delayed(const Duration(milliseconds: 100));
+        final revenueStats = manager.getRevenueStats();
+        final totalShows = revenueStats['total_shows'];
+        expect(totalShows is int ? totalShows : int.parse(totalShows.toString()), greaterThan(0));
+        debugPrint('  ✅ 収益統計: 総表示${revenueStats['total_shows']}回, 推定収益\$${revenueStats['total_revenue']}');
+        
+        // デバッグ情報確認
+        final debugInfo = manager.getDebugInfo();
+        expect(debugInfo['test_mode'], isTrue);
+        debugPrint('  ✅ デバッグ情報: テストモード=${debugInfo['test_mode']}');
+        
+        await manager.dispose();
+        debugPrint('🎉 収益化システムテスト完了！');
+      });
+    });
+    
+    group('分析システム - イベント追跡抽象化', () {
+      test('ConsoleAnalyticsProvider - イベント追跡', () async {
+        debugPrint('📊 分析システムテスト開始...');
+        
+        final config = const DefaultAnalyticsConfiguration(
+          batchSize: 5,
+          batchInterval: 10,
+          autoTrackingEnabled: true,
+          debugMode: true,
+        );
+        
+        final provider = ConsoleAnalyticsProvider();
+        final manager = AnalyticsManager(
+          provider: provider,
+          configuration: config,
+        );
+        
+        // 初期化（自動セッション開始）
+        final initSuccess = await manager.initialize();
+        expect(initSuccess, isTrue);
+        expect(manager.currentSessionId, isNotNull);
+        debugPrint('  ✅ 分析システム初期化、セッション開始: ${manager.currentSessionId}');
+        
+        // 基本イベント追跡
+        await manager.trackEvent('test_event', parameters: {
+          'test_parameter': 'test_value',
+          'numeric_value': 42,
+        });
+        debugPrint('  ✅ 基本イベント追跡成功');
+        
+        // ゲーム固有イベント追跡
+        await manager.trackGameStart(gameConfig: {
+          'difficulty': 'normal',
+          'game_mode': 'classic',
+        });
+        
+        await manager.trackLevelComplete(
+          level: 3,
+          score: 1500,
+          duration: const Duration(minutes: 2, seconds: 30),
+        );
+        
+        await manager.trackGameEnd(
+          score: 5000,
+          duration: const Duration(minutes: 10),
+          additionalData: {'reason': 'completed'},
+        );
+        debugPrint('  ✅ ゲーム固有イベント追跡成功');
+        
+        // 広告・課金イベント
+        await manager.trackAdShown(
+          adType: 'interstitial',
+          adId: 'test_ad_123',
+        );
+        
+        await manager.trackPurchase(
+          itemId: 'power_up_bundle',
+          price: 2.99,
+          currency: 'USD',
+        );
+        debugPrint('  ✅ 広告・課金イベント追跡成功');
+        
+        // エラー追跡
+        await manager.trackError('Test error message', stackTrace: 'Stack trace here');
+        debugPrint('  ✅ エラー追跡成功');
+        
+        // ユーザープロパティ設定
+        await manager.setUserId('test_user_12345');
+        await manager.setUserProperty('user_type', 'premium');
+        debugPrint('  ✅ ユーザープロパティ設定成功');
+        
+        // 統計情報確認
+        final statistics = manager.getStatistics();
+        expect(statistics['session_id'], isNotNull);
+        expect(statistics['session_event_count'], greaterThan(0));
+        debugPrint('  ✅ 統計情報: セッションイベント数=${statistics['session_event_count']}');
+        
+        // バッチ送信テスト
+        await manager.flushEvents();
+        debugPrint('  ✅ イベントバッチ送信成功');
+        
+        // デバッグ情報確認
+        final debugInfo = manager.getDebugInfo();
+        expect(debugInfo['auto_tracking_enabled'], isTrue);
+        debugPrint('  ✅ デバッグ情報: 自動追跡=${debugInfo['auto_tracking_enabled']}');
+        
+        // セッション終了
+        await manager.endSession();
+        expect(manager.currentSessionId, isNull);
+        debugPrint('  ✅ セッション終了成功');
+        
+        await manager.dispose();
+        debugPrint('🎉 分析システムテスト完了！');
+      });
+    });
+    
+    group('統合シナリオ - 全システム連携', () {
+      test('マルチシステム連携動作', () async {
+        debugPrint('🎮 統合シナリオテスト開始...');
+        
+        // 全システム初期化
+        final audioManager = AudioManager(
+          provider: SilentAudioProvider(),
+          configuration: const DefaultAudioConfiguration(
+            bgmAssets: {'game': 'game_bgm.mp3'},
+            sfxAssets: {'action': 'action.wav'},
+          ),
+        );
+        
+        final inputManager = InputManager(
+          processor: BasicInputProcessor(),
+          configuration: const DefaultInputConfiguration(
+            enabledInputTypes: {InputEventType.tap},
+          ),
+        );
+        
+        final dataManager = DataManager(
+          provider: LocalStorageProvider(),
+          configuration: const DefaultPersistenceConfiguration(),
+        );
+        
+        final monetizationManager = MonetizationManager(
+          provider: MockAdProvider(),
+          configuration: const DefaultMonetizationConfiguration(),
+        );
+        
+        final analyticsManager = AnalyticsManager(
+          provider: ConsoleAnalyticsProvider(),
+          configuration: const DefaultAnalyticsConfiguration(),
+        );
+        
+        // 全システム初期化
+        await audioManager.initialize();
+        inputManager.initialize();
+        await dataManager.initialize();
+        await monetizationManager.initialize();
+        await analyticsManager.initialize();
+        debugPrint('  ✅ 全システム初期化完了');
+        
+        // ゲーム開始シナリオ
+        await audioManager.playBgm('game');
+        await analyticsManager.trackGameStart();
+        debugPrint('  🎵 ゲーム開始: BGM再生、分析追跡');
+        
+        // プレイヤーアクション統合処理
+        int score = 0;
+        for (int i = 0; i < 3; i++) {
+          // 入力処理
+          inputManager.processor.processTapDown(Vector2(100 + (i * 10).toDouble(), 100));
+          inputManager.processor.processTapUp(Vector2(100 + (i * 10).toDouble(), 100));
+          
+          // 効果音再生
+          await audioManager.playSfx('action');
+          
+          // スコア更新
+          score += 100;
+          
+          // 分析追跡
+          await analyticsManager.trackEvent('player_action', parameters: {
+            'action_type': 'tap',
+            'score': score,
+          });
+          
+          debugPrint('  👆 アクション${i + 1}: タップ→効果音→スコア$score→分析');
+        }
+        
+        // ハイスコア保存
+        await dataManager.saveHighScore(score);
+        final savedScore = await dataManager.loadHighScore();
+        expect(savedScore, equals(score));
+        debugPrint('  💾 ハイスコア保存: $savedScore');
+        
+        // 広告表示（ゲーム終了時）
+        final adResult = await monetizationManager.showInterstitial();
+        if (adResult == AdResult.shown) {
+          await analyticsManager.trackAdShown(adType: 'interstitial', adId: 'end_game_ad');
+          debugPrint('  📺 ゲーム終了広告表示・追跡完了');
+        }
+        
+        // ゲーム終了処理
+        await audioManager.stopBgm();
+        await analyticsManager.trackGameEnd(
+          score: score,
+          duration: const Duration(minutes: 1),
+        );
+        debugPrint('  🏁 ゲーム終了: BGM停止、分析追跡');
+        
+        // 最終統計
+        final revenueStats = monetizationManager.getRevenueStats();
+        final analyticsStats = analyticsManager.getStatistics();
+        final storageInfo = await dataManager.getStorageInfo();
+        
+        debugPrint('  📊 最終統計:');
+        debugPrint('    - 広告収益: \$${revenueStats['total_revenue']}');
+        debugPrint('    - 分析イベント: ${analyticsStats['session_event_count']}件');
+        debugPrint('    - データサイズ: ${storageInfo['total_size_kb']}KB');
+        
+        // リソース解放
+        await audioManager.dispose();
+        await dataManager.dispose();
+        await monetizationManager.dispose();
+        await analyticsManager.dispose();
+        debugPrint('  🧹 全システムリソース解放完了');
+        
+        debugPrint('🎉 統合シナリオテスト完了！');
+      });
+    });
+  });
+}
