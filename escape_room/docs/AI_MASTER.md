@@ -1,31 +1,43 @@
-# AI開発マスターファイル
-最終更新: 2025-08-11
+# AI開発マスターファイル - 脱出ゲーム特化版
+最終更新: 2025-08-18
 
-## 読み込み順序
-1. **[CLAUDE.md](CLAUDE.md)** - AI開発ルール・品質基準・禁止事項（厳格に厳守）
-2. **このファイル** - プロジェクト情報・技術仕様・実装ガイド
+## 📚 ドキュメント読み込み順序
+1. **[ESCAPE_ROOM_UNIFIED_DESIGN_GUIDE.md](ESCAPE_ROOM_UNIFIED_DESIGN_GUIDE.md)** - 設計思想・アーキテクチャ指針（必読）
+2. **このファイル** - 実装状況・技術仕様・進捗管理（実装ガイド）
+3. **[CLAUDE.md](CLAUDE.md)** - AI開発ルール・品質基準・禁止事項（厳格に厳守）
+
+## 📋 このファイルの役割
+- **実装進捗の追跡**: システム実装状況・完成度管理
+- **技術仕様の詳細**: ファイル構成・API・コマンド等
+- **開発効率化**: 実装パターン・よくあるエラー対処
+- **品質管理**: 具体的KPI・テスト成功率・パフォーマンス指標
+
+> **設計原則・アーキテクチャ**: [DESIGN_GUIDE](ESCAPE_ROOM_UNIFIED_DESIGN_GUIDE.md)を参照  
+> **開発ルール・禁止事項**: [CLAUDE.md](CLAUDE.md)を参照
 
 ## 現在の実装状況（2025年8月時点）
-### ✅ 完了済み（高優先度）
-1. **ConfigurableGame基盤** - Flame統合完了・安定稼働中
-2. **全9システム統合** - Audio、Animation、UI、Timer、State等完成
-3. **ScoreSystem完成** - スコア管理・ランキング・コンボシステム実装完了
-4. **TapFireGame実装** - CasualGameTemplateの完全使用例・量産テンプレート完成
-5. **テスト環境完成** - 92.2%成功率（364/395）・ブラウザシミュレーション対応
-6. **🆕 QuickTemplateシステム** - 4種類のゲームテンプレート（5分で作成可能）
-7. **🆕 App Store公開システム** - 脱出ゲーム"Escape Master"設定完了・テンプレート量産対応
+### ✅ 脱出ゲーム専用システム完成
+1. **EscapeRoomFramework基盤** - パズル・インベントリ・ホットスポット統合済み
+2. **パズルシステム完成** - CodePad、Safe、Bookshelf、Box等のパズルオブジェクト実装
+3. **インベントリシステム完成** - アイテム管理・組み合わせ・UI統合完了
+4. **ルームナビゲーション完成** - 複数ルーム間遷移・ホットスポット相互作用
+5. **UI特化システム完成** - 脱出ゲーム専用モーダル・日本語対応・モバイル最適化
+6. **ストーリー統合システム** - ゲーム進行とパズル解決の連携システム
+7. **🆕 App Store公開準備完了** - 脱出ゲーム"Escape Master"リリース設定済み
 
 ## 次期優先タスク
 1. **App Storeリリース完了** - 脱出ゲーム "Escape Master" 公開完了
-2. **量産フロー実行** - テンプレートシステム活用による2本目ゲーム開発
-3. **LevelSystem実装** - 難易度進行・ステージ管理システム
+2. **パズルシステム拡張** - 新しい謎解きメカニズムの追加
+3. **ストーリーシステム強化** - ルーム間の物語連結・キャラクター開発
+4. **ヒントシステム改善** - アダプティブヒント・難易度調整
 
 ## プロジェクト概要
-- **目的**: AI支援カジュアルゲーム開発フレームワーク
-- **目標**: 月4本リリース、月収30-65万円
+- **目的**: AI支援高品質脱出ゲーム開発フレームワーク
+- **目標**: ストーリー性とパズル要素を重視した没入型体験
 - **技術**: Flutter + Flame 1.30.1 + MCP
-- **完成度**: 90%（主要フレームワーク完成・量産体制構築済み）
-- **テスト**: 364/395成功（92.2%）
+- **特化要素**: 謎解きシステム、インベントリ管理、ルーム遷移、ホットスポット相互作用
+- **ゲームタイプ**: 脱出ゲーム・パズルアドベンチャー特化
+- **プレイ時間**: 15-45分（じっくりと謎解きを楽しむ）
 
 ## テスト定義・品質基準
 
@@ -55,38 +67,48 @@
 
 ## システム実装状況
 
-### ✅ 完了（100%統合済み）
+### ✅ 脱出ゲームコアシステム（完成）
 | システム | ファイル | テスト | 備考 |
 |---------|---------|--------|------|
-| ConfigurableGame | lib/framework/core/configurable_game.dart | test/framework_core_test.dart | Flame統合基盤 |
-| AnimationSystem | lib/framework/animation/animation_system.dart | test/animation_disabled/* | Flame Effects統合 |
-| AudioSystem | lib/framework/audio/audio_system.dart | test/providers/flame_audio_provider_test.dart | BGM/SFX対応 |
-| TimerSystem | lib/framework/timer/flame_timer_system.dart | test/timer/* | カウントダウン/アップ |
-| InputSystem | lib/framework/input/flame_input_system.dart | test/input/* | Flame公式events準拠 |
+| EscapeRoomGame | lib/framework/escape_room/core/escape_room_game.dart | test/framework/escape_room_* | ゲームメインクラス |
+| EscapeRoomController | lib/framework/escape_room/core/escape_room_game_controller.dart | test/framework/escape_room_* | ゲームロジック制御 |
+| EscapeRoomUIManager | lib/framework/escape_room/core/escape_room_ui_manager.dart | test/framework/escape_room_* | UI管理系 |
+| InventoryManager | lib/framework/components/inventory_manager.dart | test/framework/inventory_* | アイテム管理システム |
+| HotspotComponent | lib/framework/components/hotspot_component.dart | test/framework/* | ホットスポット相互作用 |
+| InteractionManager | lib/framework/components/interaction_manager.dart | test/framework/* | オブジェクト間相互作用 |
+
+### ✅ パズルシステム（完成）
+| システム | ファイル | テスト | 備考 |
+|---------|---------|--------|------|
+| CodePadObject | lib/framework/escape_room/gameobjects/code_pad_object.dart | test/framework/code_pad_* | 数字パズル |
+| SafeObject | lib/framework/escape_room/gameobjects/safe_object.dart | test/framework/* | 金庫パズル |
+| BookshelfObject | lib/framework/escape_room/gameobjects/bookshelf_object.dart | test/framework/* | 本棚相互作用 |
+| BoxObject | lib/framework/escape_room/gameobjects/box_object.dart | test/framework/* | 箱パズル |
+| ItemCombinationManager | lib/framework/escape_room/core/item_combination_manager.dart | test/framework/item_* | アイテム組み合わせ |
+
+### ✅ 基盤システム（共通）
+| システム | ファイル | テスト | 備考 |
+|---------|---------|--------|------|
+| AudioSystem | lib/framework/audio/audio_system.dart | test/framework/audio/* | BGM/SFX管理 |
 | StateSystem | lib/framework/state/game_state_system.dart | test/state/* | 状態遷移管理 |
-| PersistenceSystem | lib/framework/persistence/persistence_system.dart | test/persistence/* | ハイスコア保存 |
-| UISystem | lib/framework/ui/ui_system.dart | test/framework/ui/* | ButtonUIComponent等 |
-| AdProvider | lib/framework/monetization/providers/google_ad_provider.dart | test/providers/google_ad_provider_test.dart | Google Mobile Ads |
-| AnalyticsProvider | lib/framework/analytics/providers/firebase_analytics_provider.dart | test/providers/firebase_analytics_provider_test.dart | Firebase Analytics |
+| PersistenceSystem | lib/framework/persistence/persistence_system.dart | test/persistence/* | セーブデータ管理 |
+| AnalyticsSystem | lib/framework/analytics/analytics_system.dart | test/framework/analytics/* | プレイデータ分析 |
 
-### ✅ 完了（100%統合済み）
+### ✅ UI専用システム（脱出ゲーム特化）
 | システム | ファイル | テスト | 備考 |
 |---------|---------|--------|------|
-| ScoreSystem | lib/framework/score/score_system.dart | 実装完了 | スコア計算・ランキング・コンボ対応 |
+| InventoryUIComponent | lib/framework/ui/inventory_ui_component.dart | test/framework/ui/* | インベントリ表示 |
+| EscapeRoomModalSystem | lib/framework/ui/escape_room_modal_system.dart | test/framework/ui/* | モーダルダイアログ |
+| JapaneseMessageSystem | lib/framework/ui/japanese_message_system.dart | test/framework/ui/* | 日本語メッセージ |
+| MobilePortraitLayout | lib/framework/ui/mobile_portrait_layout.dart | test/framework/ui/* | モバイル縦向きUI |
 
-### 🆕 QuickTemplateシステム（5分でゲーム作成可能）
-| テンプレート | ファイル | 実装例 | 主な機能 |
-|-------------|---------|--------|----------|
-| TapShooterTemplate | lib/framework/game_types/quick_templates/tap_shooter_template.dart | simple_tap_shooter.dart | 敵生成・タップ処理・スコア管理 |
-| Match3Template | lib/framework/game_types/quick_templates/match3_template.dart | simple_match3.dart | グリッド管理・マッチ判定・連鎖処理 |
-| EndlessRunnerTemplate | lib/framework/game_types/quick_templates/endless_runner_template.dart | simple_runner.dart | 自動スクロール・障害物・ジャンプ |
-| EscapeRoomTemplate | lib/framework/game_types/quick_templates/escape_room_template.dart | simple_escape_room.dart | インベントリ・パズル・ホットスポット |
-
-### ❌ 未実装
+### ❌ 今後の拡張予定
 | システム | 説明 | 優先度 |
 |---------|------|--------|
-| LevelSystem | 難易度進行・ステージ管理 | 中 |
-| PowerUpSystem | アイテム・パワーアップ | 低 |
+| MultiRoomSystem | 複数部屋間の遷移システム | 中 |
+| AdvancedPuzzleSystem | より複雑なパズルメカニズム | 中 |
+| StorySystemIntegration | ストーリー進行とパズル連携 | 低 |
+| HintSystemEnhancement | アダプティブヒントシステム | 低 |
 
 ## 公式ドキュメント参照（AIは必要時参照）
 ```
@@ -144,31 +166,53 @@ abstract class StorageProvider {
 
 ## 実装パターン
 
-### 🆕 QuickTemplateを使った5分ゲーム作成
+### ✅ 脱出ゲーム新規パズル作成
 ```dart
-// 1. テンプレートを継承
-class MyShooterGame extends QuickTapShooterTemplate {
-  // 2. 設定のみ実装（これだけで動作！）
+// 1. 基底クラスを継承
+class MyCustomPuzzle extends InteractableGameObject {
+  String? _solution;
+  bool _isUnlocked = false;
+
   @override
-  TapShooterConfig get gameConfig => const TapShooterConfig(
-    gameDuration: Duration(seconds: 60),
-    enemySpeed: 150.0,
-    maxEnemies: 6,
-    targetScore: 1500,
-  );
-  
-  // 3. オプション：イベントカスタマイズ
-  @override
-  void onScoreUpdated(int newScore) {
-    // カスタム処理
+  Future<InteractionResult> onTapped(Vector2 tapPosition) async {
+    if (_isUnlocked) {
+      return InteractionResult.alreadyCompleted();
+    }
+    
+    // パズル UI を表示
+    final userInput = await _showPuzzleDialog();
+    
+    if (userInput == _solution) {
+      _isUnlocked = true;
+      // アイテムやヒント提供
+      return InteractionResult.success(
+        message: 'パズルを解きました！',
+        providedItems: ['key', 'hint_note'],
+      );
+    }
+    
+    return InteractionResult.failure(message: 'まだ解けていません...');
   }
 }
+```
 
-// 利用可能なテンプレート:
-// - QuickTapShooterTemplate: タップシューティング
-// - QuickMatch3Template: マッチ3パズル  
-// - QuickEndlessRunnerTemplate: エンドレスランナー
-// - QuickEscapeRoomTemplate: 脱出ゲーム
+### ✅ ホットスポット相互作用の追加
+```dart
+// ホットスポット定義
+final hotspot = HotspotComponent(
+  position: Vector2(100, 200),
+  size: Vector2(50, 50),
+  interactableObject: BookshelfObject(),
+  onInteraction: (result) {
+    if (result.isSuccess) {
+      // UI更新・アニメーション等
+      _showResultAnimation(result);
+    }
+  },
+);
+
+// ゲームに追加
+add(hotspot);
 ```
 
 ### 新規画面コンポーネント（Flame公式準拠）
@@ -223,6 +267,53 @@ void onFireballTapped(Vector2 position) {
 }
 ```
 
+## 🖼️ 利用可能な画像資産
+
+### 脱出ゲーム専用アセット
+```
+assets/images/
+├── escape_room_bg*.png          # 背景画像（通常・ダーク・ナイト）
+├── room_*.png                   # 各ルーム画像
+├── hotspots/                    # ホットスポット画像
+│   ├── bookshelf_*.png          # 本棚（満/空）
+│   ├── safe_*.png               # 金庫（閉/開）
+│   ├── box_*.png                # 箱（閉/開）
+│   ├── alchemy_*.png            # 錬金術関連
+│   ├── entrance_*.png           # 入口関連
+│   ├── library_*.png            # 図書館関連
+│   ├── prison_*.png             # 監獄関連
+│   └── treasure_*.png           # 宝物関連
+├── items/                       # アイテム画像
+│   ├── book.png, coin.png       # 基本アイテム
+│   ├── gem.png, key.png         # 重要アイテム
+│   └── lightbulb.png           # ヒントアイテム
+└── sounds/                      # 音響ファイル
+    ├── puzzle_solved.wav        # パズル解決音
+    ├── item_found.wav          # アイテム発見音
+    ├── door_open.wav           # ドア開放音
+    └── escape.wav              # 脱出成功音
+```
+
+## ⚠️ 実装時の必須ルール
+
+### 1. 画像パス使用規則
+- **必須**: `assets/images/hotspots/`内の画像を使用
+- **命名規則**: 状態を示すサフィックス（`_closed`, `_opened`, `_full`, `_empty`）
+- **エラーハンドリング**: 画像読み込み失敗時の代替画像指定
+
+### 2. デバッグログ必須出力
+```dart
+// 全インタラクションでログ出力
+debugPrint('[EscapeRoom] ${object.runtimeType}: ${interaction.type}');
+debugPrint('[Inventory] Added item: $itemId, Total: ${items.length}');
+debugPrint('[Puzzle] Solution attempt: $userInput vs $correctAnswer');
+```
+
+### 3. クラスサイズ制限
+- **1クラス**: 200行以内を原則とする
+- **1メソッド**: 50行以内を原則とする
+- **違反時**: 責任分割・コンポーネント分離を実施
+
 ## よくあるエラーと対処
 | エラー | 原因 | 対処 |
 |--------|------|------|
@@ -231,23 +322,37 @@ void onFireballTapped(Vector2 position) {
 | event.handled使用 | Flame非推奨API | continuePropagation使用に変更 |
 | RenderFlex overflow | UI要素のサイズ超過 | ScrollView追加、サイズ調整 |
 | タップイベント重複 | 背景とボタンの競合 | TapCallbacks適切配置 |
+| 画像読み込み失敗 | パス間違い・ファイル不存在 | assets/images/内パス確認、代替画像設定 |
+| 日本語フォント未表示 | フォント設定不備 | NotoSansJP-Regular.ttf設定確認 |
 
-## 設定値仕様
-### 難易度設定（SimpleGameConfig）
-| 項目 | Easy | Default | Hard |
-|------|------|---------|------|
-| gameDuration | 10秒 | 5秒 | 3秒 |
-| speed | 1.0 | 1.5 | 2.0 |
-| targetScore | 100 | 500 | 1000 |
-| particleCount | 20 | 30 | 50 |
+## 脱出ゲーム設定値仕様
 
-### タイマー種別
-- `TimerType.countdown`: 残り時間表示（ゲーム終了用）
-- `TimerType.countup`: 経過時間表示（プレイ時間計測）
+### 品質基準とKPI（脱出ゲーム特化）
+| 項目 | 目標値 | 測定方法 | 備考 |
+|------|--------|----------|------|
+| クリア率 | 60%以上 | 最後まで到達したユーザー比率 | ヒントなしでの達成 |
+| プレイ時間 | 15-45分 | 平均プレイセッション時間 | 適度なボリューム |
+| パズル解決率 | 80%以上 | 各パズルの解決成功率 | ヒント3段階で達成 |
+| ユーザー満足度 | 4.0以上 | アプリストア評価平均 | ストーリー・パズル品質 |
 
-### 音声設定
-- BGM音量: 0.6（デフォルト）
-- SFX音量: 0.8（デフォルト）
+### パズル難易度設定
+| レベル | 解決時間目安 | ヒント段階 | 複雑度 |
+|--------|-------------|-----------|--------|
+| チュートリアル | 30秒-1分 | 1段階 | 直感的操作 |
+| 初級 | 1-3分 | 2段階 | 基本的推理 |
+| 中級 | 3-7分 | 3段階 | 論理的思考 |
+| 上級 | 5-10分 | 3段階 | 複合的推理 |
+
+### インベントリ設定
+- 最大保持アイテム数: 8個
+- アイテム組み合わせ: 最大2個同時
+- 自動整理: 重要度順
+- 使用済みアイテム: 自動削除または履歴保持
+
+### 音響設定（脱出ゲーム特化）
+- 環境音（BGM）: 0.4（没入感重視で低め）
+- 効果音（SFX）: 0.7（パズル解決時等の重要音）
+- 音声（ナレーション）: 0.8（ストーリー重要）
 - マスター音量: 1.0
 
 ## コマンド一覧
@@ -276,44 +381,79 @@ git push origin master                         # プッシュ
 ## ファイル構成
 ```
 lib/
-├── framework/                 # フレームワーク本体
-│   ├── core/                 # ✅ ConfigurableGame基盤
-│   │   ├── configurable_game.dart      # 設定駆動ゲーム基底クラス
-│   │   └── casual_game_extensions.dart # 拡張機能
-│   ├── game_types/           # 🆕 ゲームタイプ別テンプレート
-│   │   └── quick_templates/  # 5分で作成可能なクイックテンプレート
-│   │       ├── tap_shooter_template.dart   # タップシューティング
-│   │       ├── match3_template.dart        # マッチ3パズル
-│   │       ├── endless_runner_template.dart # エンドレスランナー
-│   │       └── escape_room_template.dart   # 脱出ゲーム
-│   ├── animation/            # ✅ AnimationSystem（Flame Effects統合）
-│   ├── audio/                # ✅ AudioSystem（BGM/SFX）
-│   │   └── providers/        # FlameAudioProvider実装
-│   ├── effects/              # ✅ ParticleSystem（統合完了）
-│   ├── input/                # ✅ InputSystem（Flame events）
-│   ├── state/                # ✅ StateSystem（状態管理）
-│   ├── timer/                # ✅ TimerSystem（タイマー）
-│   ├── ui/                   # ✅ UISystem（ボタン等）
-│   ├── score/                # ✅ ScoreSystem（スコア・ランキング）
-│   ├── persistence/          # ✅ PersistenceSystem（データ保存）
-│   ├── monetization/         # ✅ AdProvider（広告）
-│   │   └── providers/        # GoogleAdProvider、MockAdProvider
-│   ├── analytics/            # ✅ AnalyticsProvider（分析）
-│   │   └── providers/        # FirebaseAnalyticsProvider
-│   ├── game_services/        # ✅ GameServices（統合サービス）
-│   ├── templates/            # テンプレート例
-│   │   └── platform_configs/ # 🆕 App Store公開設定テンプレート
-│   ├── test_utils/           # テストユーティリティ
+├── framework/                 # 脱出ゲーム特化フレームワーク
+│   ├── escape_room/          # ✅ 脱出ゲーム専用システム
+│   │   ├── core/             # ゲームコア機能
+│   │   │   ├── escape_room_game.dart           # メインゲームクラス
+│   │   │   ├── escape_room_game_controller.dart # ゲームロジック制御
+│   │   │   ├── escape_room_ui_manager.dart     # UI管理
+│   │   │   ├── item_combination_manager.dart   # アイテム組み合わせ
+│   │   │   └── clear_condition_manager.dart    # クリア条件管理
+│   │   ├── gameobjects/      # パズルオブジェクト
+│   │   │   ├── code_pad_object.dart            # 数字パズル
+│   │   │   ├── safe_object.dart                # 金庫パズル
+│   │   │   ├── bookshelf_object.dart           # 本棚相互作用
+│   │   │   └── box_object.dart                 # 箱パズル
+│   │   ├── components/       # 脱出ゲーム専用コンポーネント
+│   │   │   ├── audio_component.dart            # 音響効果
+│   │   │   ├── dual_sprite_component.dart      # 状態切替スプライト
+│   │   │   └── sprite_component.dart           # 基本スプライト
+│   │   ├── state/            # 状態管理（Riverpod）
+│   │   │   └── escape_room_state_riverpod.dart # ゲーム状態管理
+│   │   ├── strategies/       # 戦略パターン
+│   │   │   ├── interaction_strategy.dart       # 相互作用戦略
+│   │   │   ├── item_provider_strategy.dart     # アイテム提供戦略
+│   │   │   └── puzzle_strategy.dart            # パズル解決戦略
+│   │   └── ui/               # 脱出ゲーム専用UI
+│   │       └── portrait_ui_builder.dart       # 縦向きUI構築
+│   ├── components/           # ✅ 汎用コンポーネント
+│   │   ├── inventory_manager.dart              # インベントリ管理
+│   │   ├── hotspot_component.dart              # ホットスポット
+│   │   ├── interaction_manager.dart            # 相互作用管理
+│   │   └── interactive_inventory_item.dart     # インタラクティブアイテム
+│   ├── ui/                   # ✅ 脱出ゲーム特化UI
+│   │   ├── inventory_ui_component.dart         # インベントリ表示
+│   │   ├── escape_room_modal_system.dart       # モーダルダイアログ
+│   │   ├── japanese_message_system.dart        # 日本語メッセージ
+│   │   ├── mobile_portrait_layout.dart         # モバイル縦向きUI
+│   │   ├── item_acquisition_notification.dart  # アイテム取得通知
+│   │   └── modal_manager.dart                  # モーダル管理
+│   ├── audio/                # ✅ 音響システム（脱出ゲーム対応）
+│   │   ├── audio_system.dart                   # 音響制御
+│   │   ├── volume_manager.dart                 # 音量管理
+│   │   └── providers/        # 音響プロバイダー
+│   ├── state/                # ✅ 状態管理システム
+│   │   ├── game_state_system.dart              # ゲーム状態
+│   │   ├── game_progress_system.dart           # 進行状況
+│   │   └── game_autosave_system.dart           # オートセーブ
+│   ├── persistence/          # ✅ データ永続化
+│   │   ├── persistence_system.dart             # データ保存
+│   │   └── data_manager.dart                   # データ管理
+│   ├── analytics/            # ✅ 分析システム
+│   │   ├── analytics_system.dart               # 分析機能
+│   │   └── providers/        # 分析プロバイダー
+│   ├── core/                 # ✅ 基盤システム
+│   │   ├── configurable_game.dart              # 設定駆動ゲーム
+│   │   ├── game_lifecycle.dart                 # ゲームライフサイクル
+│   │   └── framework_initializer.dart          # フレームワーク初期化
 │   └── framework.dart        # フレームワークエクスポート
 │
-├── game/                      # ゲーム実装
-│   ├── simple_game.dart      # メインゲームクラス（統合ポイント）
-│   ├── tap_fire_game.dart    # TapFireゲーム実装例
-│   ├── example_games/        # 🆕 QuickTemplate使用例
-│   │   ├── simple_tap_shooter.dart  # タップシューター実装例
-│   │   ├── simple_runner.dart       # ランナー実装例
-│   │   ├── simple_match3.dart       # マッチ3実装例
-│   │   └── simple_escape_room.dart  # 脱出ゲーム実装例
+├── game/                      # 脱出ゲーム実装
+│   ├── escape_room.dart      # メイン脱出ゲームクラス
+│   ├── inventory_demo.dart   # インベントリデモ
+│   ├── example_games/        # パズルゲーム実装例
+│   │   └── code_pad_example.dart    # 数字パズル実装例
+│   ├── components/           # ゲーム専用コンポーネント
+│   │   ├── room_navigation_system.dart     # ルーム遷移システム
+│   │   ├── room_hotspot_system.dart        # ホットスポットシステム
+│   │   ├── inventory_system.dart           # インベントリシステム
+│   │   ├── hint_dialog.dart                # ヒントダイアログ
+│   │   └── item_detail_modal.dart          # アイテム詳細モーダル
+│   ├── widgets/              # ゲーム専用ウィジェット
+│   │   ├── custom_game_ui.dart             # ゲームUI
+│   │   ├── custom_start_ui.dart            # スタート画面
+│   │   ├── custom_settings_ui.dart         # 設定画面
+│   │   └── custom_game_clear_ui.dart       # クリア画面
 │   ├── config/               # 設定
 │   │   └── game_config.dart  # 難易度設定等
 │   ├── screens/              # 画面コンポーネント
@@ -348,15 +488,31 @@ templates/                    # 🆕 App Store公開設定テンプレート
 │   └── docs/                         # 設定ドキュメント
 ```
 
-## AI開発時の更新ルール
+## 📝 AI開発時の更新ルール
+
+### このファイル（AI_MASTER.md）の更新対象
 - **実装完了時**: 「システム実装状況」の表を更新
 - **タスク完了時**: 「現在の最優先タスク」を更新
 - **エラー発生時**: 「よくあるエラーと対処」に追記
 - **新規API追加時**: 「主要インターフェース」に追記
 - **設定値変更時**: 「設定値仕様」を更新
-- **品質基準変更時**: 「テスト定義・品質基準」を更新
+- **具体的KPI変更時**: 「品質基準とKPI」を更新
+- **ファイル構成変更時**: 「ファイル構成」セクションを更新
+
+### 他ドキュメントとの連携ルール
+- **設計原則変更時**: [DESIGN_GUIDE](ESCAPE_ROOM_UNIFIED_DESIGN_GUIDE.md)を更新
+- **アーキテクチャ変更時**: [DESIGN_GUIDE](ESCAPE_ROOM_UNIFIED_DESIGN_GUIDE.md)を更新
+- **開発ルール変更時**: [CLAUDE.md](CLAUDE.md)を更新
+- **禁止事項追加時**: [CLAUDE.md](CLAUDE.md)を更新
+
+### 役割分担の原則
+- **このファイル**: 実装詳細・進捗・具体的数値（可変・頻繁更新）
+- **DESIGN_GUIDE**: 設計思想・品質原則（不変・長期保持）
+- **CLAUDE.md**: 開発ルール・AI行動規則（厳格・変更稀）
 
 ## 最近の主な変更
+- 2025-08-18: **ドキュメント体系整理完了** - 役割分担明確化（DESIGN_GUIDE: 設計原則、AI_MASTER: 実装詳細、CLAUDE: 開発ルール）
+- 2025-08-18: **脱出ゲーム特化プロジェクト適合** - カジュアルゲーム→脱出ゲーム特化、実装構造更新、乖離解消
 - 2025-08-11: **ドキュメント修正完了** - 実装状況を実測値に更新（テスト成功率92.2%、364/395成功）・escape_room_responsive_test.dart修正完了
 - 2025-08-11: **App Store公開システム完成** - 脱出ゲーム"Escape Master"設定完了・Bundle ID更新・メタデータ作成
 - 2025-08-11: **量産テンプレートシステム構築** - app_release_template.json・脱出ゲーム専用設定完成

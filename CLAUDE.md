@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-This repository contains a complete Flutter + Flame casual game development framework with 90% implementation completion and 96.2% test success rate. The main project is located in the `casual_game_template/` directory.
+This repository contains a complete Flutter + Flame escape room game development framework with specialized components for puzzle-solving, inventory management, and room navigation. The main project is located in the `escape_room/` directory, with additional game templates in `endless_runner_game/`.
 
 ## MCP Configuration
 
@@ -262,15 +262,16 @@ JQL: status = 10003 AND labels NOT IN ("human-intervention-required")
 2. 残作業をAIが継続実行
 3. または新規サブタスクとして分割
 
-## カジュアルゲーム開発プロジェクト設定
+## 脱出ゲーム開発プロジェクト設定
 
 ### プロジェクト概要
-- 目的: AI支援による効率的なカジュアルゲーム開発ビジネス
-- 目標: 月4本リリース、月収30-65万円
+- 目的: AI支援による高品質脱出ゲーム開発
+- 目標: ストーリー性とパズル要素を重視した没入型体験
 - 技術スタック: Flutter + Flame + Claude Code + MCP
+- 特化要素: 謎解きシステム、インベントリ管理、ルーム遷移、ホットスポット相互作用
 
 ### 📌 AI開発指示の統一エントリーポイント
-**必ず `casual_game_template/AI_MASTER.md` から開始してください。**
+**必ず `escape_room/docs/AI_MASTER.md` から開始してください。**
 AI_MASTER.mdが唯一の統合ガイドです。
 
 ### 20分サイクル開発フロー
@@ -288,14 +289,15 @@ AI_MASTER.mdが唯一の統合ガイドです。
 - jql-validator: JQLクエリの事前検証とタイムアウト防止
 
 ### 品質基準とKPI
-- D1リテンション: 40%以上
-- D7リテンション: 15%以上  
-- 目標ARPU: $0.13以上
-- 開発サイクル: 7日/ゲーム以下
+- クリア率: 60%以上（ユーザーが最後までプレイ）
+- プレイ時間: 15-45分（適度なボリューム）
+- パズル解決率: 80%以上（ヒントなし）
+- ストーリー没入度: ユーザーフィードバック基準
 - Claude Code活用率: 80%以上
 
-### ゲーム設計指針
-- セッション時間: 30-90秒
-- 操作: シンプルなタップ/スワイプ
-- 難易度: 3秒で成功体験、60秒で挫折
-- 広告頻度: 1分あたり2-3個
+### 脱出ゲーム設計指針
+- プレイ時間: 15-45分（じっくりと謎解きを楽しむ）
+- 操作: ホットスポットタップ、アイテム組み合わせ、ルーム遷移
+- 難易度: 最初のパズルは1分3分、最終パズルは5-10分
+- ヒントシステム: 3段階ヒント（きっかけ・方向性・解答）
+- ストーリー: ルーム関の進行で物語が展開

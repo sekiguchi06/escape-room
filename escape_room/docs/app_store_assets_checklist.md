@@ -2,11 +2,11 @@
 
 ## Phase 2: App Store準備 - 進行状況
 
-### 📱 アプリアイコン作成
-- [ ] 1024x1024 マスターアイコン作成 (脱出ゲームテーマ: 鍵・ドア・謎解きモチーフ)
-- [ ] 全サイズアイコン自動生成 (20x20 〜 1024x1024)
-- [ ] iOS Assets.xcassets/AppIcon.appiconset/ へ配置
-- [ ] アイコン表示確認 (シミュレータ)
+### 📱 アプリアイコン作成 ✅ 完了済み
+- [x] 1024x1024 マスターアイコン作成 (脱出ゲームテーマ: 鍵・ドア・謎解きモチーフ)
+- [x] 全サイズアイコン自動生成 (15サイズ完全実装: 20x20 〜 1024x1024)
+- [x] iOS Assets.xcassets/AppIcon.appiconset/ へ配置完了
+- [x] アイコン表示確認 完了 (Contents.json適切設定済み)
 
 ### 📸 スクリーンショット撮影
 - [ ] iPhone 6.5" (1284×2778) - 3枚
@@ -21,19 +21,19 @@
 - [ ] Escape Master ロゴ配置
 - [ ] iOS LaunchScreen.storyboard 更新
 
-### 📝 App Store メタデータ
+### 📝 App Store メタデータ ✅ 完了済み
 #### 日本語版
-- [ ] アプリ名: "脱出マスター"
-- [ ] サブタイトル: "5分間で脱出せよ！究極のパズル体験"
-- [ ] 説明文: 長文(最大4000文字)での魅力的な説明
-- [ ] キーワード: "脱出ゲーム,パズル,謎解き,カジュアルゲーム,アドベンチャー"
-- [ ] プロモーションテキスト: "制限時間内に部屋から脱出せよ！"
+- [x] アプリ名: "脱出マスター"
+- [x] サブタイトル: "5分間で脱出せよ！究極のパズル体験"
+- [x] 説明文: 完全作成済み (docs/app_store_metadata.md)
+- [x] キーワード: "脱出ゲーム,パズル,謎解き,カジュアルゲーム,アドベンチャー"
+- [x] プロモーションテキスト: "制限時間内に部屋から脱出せよ！"
 
-#### 英語版  
-- [ ] アプリ名: "Escape Master"
-- [ ] サブタイトル: "Ultimate 5-Minute Escape Challenge"
-- [ ] 説明文: 英語版長文説明
-- [ ] キーワード: "escape game,puzzle,mystery,casual game,adventure"
+#### 英語版 ✅ 完了済み
+- [x] アプリ名: "Escape Master"
+- [x] サブタイトル: "Ultimate 5-Minute Escape Challenge"
+- [x] 説明文: 英語版完全作成済み (docs/app_store_metadata.md)
+- [x] キーワード: "escape game,puzzle,mystery,casual game,adventure"
 
 ### 🏪 App Store Connect設定
 - [ ] 新規アプリ作成 ("Escape Master")
@@ -43,11 +43,11 @@
 - [ ] 価格設定: 無料 (広告収益モデル)
 - [ ] 配信地域: 全世界
 
-### 📋 コンプライアンス
-- [ ] プライバシーポリシー作成・公開
-- [ ] 利用規約作成・公開
-- [ ] データ収集に関する開示
-  - [ ] Google Mobile Ads データ収集
+### 📋 コンプライアンス ✅ 完了済み
+- [x] プライバシーポリシー作成・公開準備完了 (docs/privacy_policy.md)
+- [x] データ収集に関する開示完了 (docs/privacy_labels_data.md)
+- [x] プライバシーマニフェスト実装済み (ios/Runner/PrivacyInfo.xcprivacy)
+- [x] Google Mobile Ads データ収集設定完了
   - [ ] Firebase Analytics データ収集
 - [ ] COPPA対応 (13歳未満対応)
 

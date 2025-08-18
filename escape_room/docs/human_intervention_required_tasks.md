@@ -1,5 +1,8 @@
 # 人間介入必須作業 - App Store公開準備
 
+**更新日**: 2025年8月18日
+**現在の進捗**: テスト設定完了、本番設定への切り替え待ち
+
 ## 🎯 概要
 AI実行不可能な、アカウント・支払い・認証が必要な作業の詳細ガイド
 
@@ -55,6 +58,7 @@ graph TD
 1. Apple Developer Portal へログイン
 2. Certificates, Identifiers & Profiles 確認
 3. App ID 作成: com.casualgames.escapemaster
+   ⚠️ **現在の状況**: Xcodeでは設定済み、Firebaseはcom.example.casual_game_templateで不一致
 4. iOS Distribution Certificate 作成
 ```
 
@@ -63,7 +67,7 @@ graph TD
 - **支払い**: 自動更新、キャンセル可能
 - **審査**: 1-7日、稀に追加書類要求
 
-## 💾 Phase 2: Firebase本番プロジェクト設定
+## 💾 Phase 2: Firebase本番プロジェクト設定（🔄 テストから本番へ切り替え）
 
 ### 📋 作業内容
 **目的**: テスト用から本番用Analytics設定への切り替え
@@ -85,6 +89,12 @@ graph TD
 - iOS Bundle ID: com.casualgames.escapemaster
 - アプリ名: Escape Master
 - App Store ID: （後で設定）
+
+⚠️ 現在の状況:
+- テストプロジェクト: casual-game-template-dev
+- Bundle ID: com.example.casual_game_template  
+- GoogleService-Info.plist: ✅ 設定済み（テスト用）
+→ 本番Bundle IDへの変更が必要
 ```
 
 #### Step 2.3: 設定ファイル更新
@@ -100,7 +110,7 @@ flutter clean
 flutter build ios --debug --no-codesign
 ```
 
-## 💰 Phase 3: Google AdMob本番設定
+## 💰 Phase 3: Google AdMob本番設定（🔄 テストから本番へ切り替え）
 
 ### 📋 作業内容
 **目的**: テスト用広告IDから本番用への切り替え
@@ -123,6 +133,10 @@ flutter build ios --debug --no-codesign
 - アプリ名: Escape Master
 - Bundle ID: com.casualgames.escapemaster
 - カテゴリ: ゲーム
+
+⚠️ 現在の状況:
+- テストAdMob ID: ca-app-pub-3940256099942544~1458002511 ✅ Info.plist設定済み
+→ 本番アカウント作成後、新IDへの切り替えが必要
 ```
 
 #### Step 3.3: 広告ユニット作成
@@ -147,7 +161,7 @@ flutter build ios --debug --no-codesign
 <string>ca-app-pub-XXXXXXXXXXXXXXXX~XXXXXXXXXX</string>
 ```
 
-## 🌐 Phase 4: プライバシーポリシーWeb公開
+## 🌐 Phase 4: プライバシーポリシーWeb公開（⚠️ 未実施・必須）
 
 ### 📋 作業内容
 **目的**: App Store審査必須要件
@@ -164,6 +178,9 @@ flutter build ios --debug --no-codesign
 3. docs/privacy_policy.md を index.md にコピー
 4. GitHub Pages 有効化
 5. URL取得: https://[username].github.io/escape-master-privacy/
+
+✅ 準備済みリソース:
+- docs/privacy_policy.md: 完成済み（Web公開のみ必要）
 ```
 
 #### Option B: 無料ホスティング
@@ -189,7 +206,7 @@ flutter build ios --debug --no-codesign
 利用規約（オプション）: https://[domain]/terms-of-service
 ```
 
-## 📱 Phase 5: App Store Connect設定
+## 📱 Phase 5: App Store Connect設定（⚠️ 未実施）
 
 ### 📋 作業内容
 **目的**: App Store公開申請
@@ -216,7 +233,7 @@ flutter build ios --debug --no-codesign
 #### Step 5.3: メタデータ設定
 **準備済みリソース活用**:
 ```
-データソース: docs/app_store_metadata.md
+✅ データソース: docs/app_store_metadata.md 完成済み
 - 説明文（日本語・英語）
 - キーワード
 - サブタイトル
@@ -228,21 +245,22 @@ flutter build ios --debug --no-codesign
 #### Step 5.4: プライバシー設定
 **準備済みリソース活用**:
 ```
-データソース: docs/app_store_connect_privacy_setup.md
+✅ データソース: docs/app_store_connect_privacy_setup.md 完成済み
 - データ収集設定
-- プライバシーラベル
+- プライバシーラベル 
 - トラッキング設定
-- プライバシーポリシーURL
+- プライバシーポリシーURL（Web公開待ち）
+✅ PrivacyInfo.xcprivacy: 実装済み
 ```
 
 #### Step 5.5: アセット設定
 **必要なアセット**:
 ```
-- アプリアイコン: 1024x1024 （準備済み）
-- スクリーンショット: iPhone/iPad用（要作成）
+- ✅ アプリアイコン: 1024x1024 完成済み（全15サイズ実装済み）
+- ⏳ スクリーンショット: iPhone/iPad用（状況確認中）
 ```
 
-## 🏗️ Phase 6: iOSビルド・署名・アップロード
+## 🏗️ Phase 6: iOSビルド・署名・アップロード（⚠️ 未実施）
 
 ### 📋 作業内容
 **目的**: App Store審査用ビルド作成・提出
@@ -291,6 +309,8 @@ Xcode操作:
 ## ⏰ スケジュール・工数見積もり
 
 ### 📅 推奨実行順序（個人作業）
+
+**現在の進捗**: テスト設定完了、Phase 1から開始
 
 #### 週1: アカウント準備週
 ```
@@ -390,15 +410,23 @@ AdMob Support: https://support.google.com/admob/
 □ iOSビルド・Archive作成完了
 □ App Store Connect アップロード完了
 □ 審査申請完了
+
+### ✅ 既に完了済みの項目
+- アプリアイコン（全15サイズ）
+- プライバシーマニフェスト（PrivacyInfo.xcprivacy）
+- App Storeメタデータ文書
+- プライバシーポリシー文書
+- Firebase/AdMobテスト設定
+- Bundle ID設定（Xcode）
 ```
 
 ### 最終確認項目
 ```
 □ 全設定ファイル本番用に更新済み
-□ テスト動作確認完了
-□ スクリーンショット準備完了
-□ 審査申請時の注意事項確認済み
-□ リリース後の運用計画確認済み
+✅ テスト動作確認完了（ゲームプレイ確認済み）
+⏳ スクリーンショット準備（状況確認中）
+✅ 審査申請時の注意事項確認済み
+✅ リリース後の運用計画確認済み
 ```
 
 ## 🎯 成功の鍵

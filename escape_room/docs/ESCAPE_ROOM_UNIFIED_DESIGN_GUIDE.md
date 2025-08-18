@@ -1,8 +1,9 @@
-# Escape Room Framework 統一設計ガイド
+# 脱出ゲームフレームワーク 設計アーキテクチャガイド
 
-**作成日**: 2025-08-14  
-**目的**: Flutter・Flame・Dart公式ガイドライン準拠のEscape Roomフレームワーク設計  
-**対象**: 後続AI開発者向け統一ガイド
+**最終更新**: 2025-08-18  
+**目的**: Flutter + Flameベースの脱出ゲーム特化フレームワークの設計原則定義  
+**対象**: 設計思想統一・長期保守性確保  
+**関連ドキュメント**: [AI_MASTER.md](AI_MASTER.md) (実装詳細・進捗管理), [CLAUDE.md](CLAUDE.md) (開発ルール)
 
 ## 📚 参照公式ドキュメント
 
@@ -126,44 +127,53 @@
 - **拡張性**: 新戦略追加時に既存コード変更不要
 - **パラメータ化**: 設定値による動作カスタマイズ対応
 
-## 🔧 実装順序
+## 🗺️ 現在の実装アーキテクチャ
 
-### Phase 1: 基盤レイヤー
-1. インターフェース・抽象クラス定義
-2. 基底コンポーネントクラス実装
-3. 基本戦略インターフェース定義
+### 実装済みレイヤー構造
+```
+lib/framework/escape_room/
+├── core/             # Core Layer - 基底クラス・コントローラー
+├── gameobjects/      # GameObject Layer - パズルオブジェクト
+├── components/       # Component Layer - 音響・スプライト等
+├── strategies/       # Strategy Layer - 相互作用パターン
+├── state/            # State Layer - Riverpod状態管理
+└── ui/               # UI Layer - 縦向きUI構築
 
-### Phase 2: コンポーネントレイヤー
-1. 画像管理コンポーネント実装
-2. 音声管理コンポーネント実装
-3. アニメーション管理コンポーネント実装
+その他のフレームワークコンポーネント:
+lib/framework/
+├── components/       # 汎用コンポーネント(インベントリ等)
+├── ui/               # 脱出ゲーム特化UI
+├── audio/            # 音響システム
+├── state/            # 状態管理
+└── core/             # 基盤システム
+```
 
-### Phase 3: 戦略レイヤー
-1. アイテム提供戦略実装
-2. パズル要求戦略実装
-3. 条件付き相互作用戦略実装
+### アーキテクチャ遵守状況
+- ✅ **Component-based Design**: Flame FCSに準拠した設計
+- ✅ **Composition over Inheritance**: 継承より組み合わせを優先
+- ✅ **Strategy Pattern**: 相互作用パターンの分離
+- ✅ **Separation of Concerns**: 各レイヤーの明確な役割分担
 
-### Phase 4: GameObjectレイヤー
-1. 基底GameObjectクラス実装
-2. 具象GameObject実装(本棚、金庫、箱等)
-3. システム統合テスト
+## ✅ 設計品質基準
 
-## ✅ 品質基準
+### 1. アーキテクチャ品質
+- **単一責任原則**: 1クラスは1つの明確な責任を持つ
+- **継承深度制限**: 3層を超える深い継承禁止
+- **コンポーネント間疎結合**: 強い依存関係の排除
+- **インターフェース分離**: 必要最小限のpublicメンバー
 
-### 1. コード品質
-- `flutter analyze`: 0 errors, 0 warnings
-- `dart format`: 自動フォーマット適用済み
-- 循環複雑度: 1メソッドあたり10未満
+### 2. コード品質ルール
+- **クラスサイズ**: 200行以内を原則とする
+- **メソッドサイズ**: 50行以内を原則とする
+- **命名統一**: 目的・責任が明確になる命名
+- **final使用**: 変更不要なフィールドはFinal宣言
 
-### 2. テスト基準
-- 単体テスト: 各クラス・メソッドの個別テスト
-- 統合テスト: コンポーネント間連携テスト
-- テストカバレッジ: 80%以上
+### 3. 設計パターン遵守
+- **Strategy Pattern**: 行動パターンの交換可能性確保
+- **Template Method**: ライフサイクル統一管理
+- **Composition Pattern**: 機能組み合わせによる拡張
 
-### 3. パフォーマンス基準
-- 起動時間: 3秒未満
-- フレームレート: 60fps維持
-- メモリ使用量: 100MB未満
+> **注意**: 実装詳細なコード品質・KPIは[AI_MASTER.md](AI_MASTER.md)を参照
 
 ## 📖 参考資料
 
@@ -179,50 +189,60 @@
 - **I**nterface Segregation: インターフェース分離
 - **D**ependency Inversion: 抽象への依存
 
-## ⚠️ 後続AI開発者への注意事項
+## ⚠️ 設計原則遵守指針
 
-### 1. このドキュメント必読
-実装開始前にこのドキュメントを完全に理解してください。不明点がある場合は作業を停止し、質問してください。
+### 1. アーキテクチャ優先順位
+1. **Flutter/Flame/Dart公式ガイドライン**: 最優先遵守
+2. **このドキュメントの設計原則**: 第2優先
+3. **実装者の裁量**: 上記2つに矛盾しない範囲で許可
 
-### 2. 公式ガイドライン優先
-Flutter・Flame・Dart公式ガイドラインと矛盾する場合は、必ず公式を優先してください。
+### 2. 設計思想の継承
+- **基本設計は変更禁止**: レイヤー構造・責任分担の大幅変更禁止
+- **拡張性確保**: 新機能追加時に既存コード変更最小化
+- **下位互換性維持**: 既存APIの互換性破壊禁止
 
-### 3. 段階的実装
-一度に全体を実装せず、Phase単位での段階的実装を行ってください。
+### 3. 品質確保手法
+- **設計レビュー**: 実装前の設計パターン確認
+- **コードレビュー**: 設計原則遵守状況の確認
+- **アーキテクチャテスト**: レイヤー間依存関係の検証
 
-### 4. テスト駆動開発
-各実装完了時に対応するテストを作成・実行し、品質を確保してください。
+### 4. ドキュメント連携
+- **設計変更時**: このドキュメントを更新
+- **実装変更時**: [AI_MASTER.md](AI_MASTER.md)を更新
+- **ルール変更時**: [CLAUDE.md](CLAUDE.md)を更新
 
-## 🎯 実装時の具体的指示
+## 📄 ドキュメント体系と役割分担
 
-### 最初にやること
-1. **このドキュメント熟読** - 理解できるまで実装開始禁止
-2. **既存escape_room_template.dartを完全無視** - 参考にしない
-3. **新規ディレクトリ確認**: `lib/framework/escape_room/`
-4. **基底クラスから実装開始** - 具象クラスは後
+### このドキュメントの役割
+- **設計原則・アーキテクチャ指針の定義** (不変・長期保持)
+- **品質基準・禁止事項の明文化** (変更稀)
+- **公式ガイドライン準拠の確保** (Flutter/Flame/Dart準拠)
 
-### AI生成画像資産
-```
-assets/images/hotspots/
-├── bookshelf_full.png    ✅ 存在
-├── bookshelf_empty.png   ✅ 存在  
-├── safe_closed.png       ✅ 存在
-├── safe_opened.png       ✅ 存在
-├── box_closed.png        ✅ 存在
-└── box_opened.png        ✅ 存在
-```
+### 実装詳細は別ドキュメント参照
+- **実装状況・進捗**: [AI_MASTER.md](AI_MASTER.md)
+- **ファイル構成・API仕様**: [AI_MASTER.md](AI_MASTER.md)
+- **コマンド・実装パターン**: [AI_MASTER.md](AI_MASTER.md)
+- **開発ルール・禁止事項**: [CLAUDE.md](CLAUDE.md)
 
-### 各実装での必須確認
-- **コンパイルエラー0**: 次の実装に進む前に解決
-- **AI画像パス正確性**: assets/images/hotspots/の画像使用
-- **ログ出力確認**: debugPrint()で動作ログ
-- **行数制限遵守**: 各クラス200行以内
-
-### 実装時の必須ルール
-1. **AI生成画像の必須使用** - assets/images/hotspots/内の画像
-2. **エラーハンドリング必須** - 画像読み込み失敗時の対応
-3. **デバッグログ必須** - 全てのインタラクションをログ出力
+### 読み込み順序
+1. **このドキュメント**: 設計思想理解
+2. **[AI_MASTER.md](AI_MASTER.md)**: 実装ガイド
+3. **[CLAUDE.md](CLAUDE.md)**: 開発ルール
 
 ---
 
-**このドキュメントは後続AI開発者が一貫した品質でEscape Roomフレームワークを実装するための統一ガイドです。疑問点がある場合は実装を停止し、明確化を求めてください。**
+## 📚 参考文献・推奨学習リソース
+
+### 公式ドキュメント
+- [Flutter Architecture](https://docs.flutter.dev/development/data-and-backend/state-mgmt/options)
+- [Flame Engine Components](https://docs.flame-engine.org/latest/flame/components.html)
+- [Dart Effective Design](https://dart.dev/guides/language/effective-dart/design)
+
+### 設計パターン
+- Strategy Pattern, Template Method Pattern, Composition Pattern
+- SOLID原則の実践的適用
+- Component-based Architecture vs Object-oriented Architecture
+
+---
+
+**このドキュメントは脱出ゲームフレームワークの設計思想と品質基準を定義し、長期的な保守性と拡張性を確保するためのアーキテクチャガイドです。実装詳細については[AI_MASTER.md](AI_MASTER.md)を参照してください。**
