@@ -52,7 +52,7 @@ class GlobalImageGenerationMCP {
               cfg_scale: { type: 'number', default: 8.0 },
               sampler: { type: 'string', default: 'dpmpp_2m_karras' },
               scheduler: { type: 'string', default: 'karras' },
-              model: { type: 'string', description: 'Model filename', default: 'sd_xl_base_1.0.safetensors' },
+              model: { type: 'string', description: 'Model filename', default: 'Counterfeit-V3.0_fp16.safetensors' },
               output_name: { type: 'string', description: 'Custom output filename (optional)' },
               quality_preset: { type: 'string', enum: ['draft', 'standard', 'high', 'ultra'], default: 'high', description: 'Quality preset for generation' }
             },
@@ -71,7 +71,7 @@ class GlobalImageGenerationMCP {
               upscale_factor: { type: 'number', enum: [2, 4], default: 2 },
               steps: { type: 'number', default: 40 },
               cfg_scale: { type: 'number', default: 8.0 },
-              model: { type: 'string', description: 'Model filename', default: 'sd_xl_base_1.0.safetensors' },
+              model: { type: 'string', description: 'Model filename', default: 'Counterfeit-V3.0_fp16.safetensors' },
               output_name: { type: 'string', description: 'Custom output filename (optional)' }
             },
             required: ['prompt'],
@@ -179,7 +179,7 @@ class GlobalImageGenerationMCP {
       cfg_scale = 8.0,
       sampler = 'dpmpp_2m_karras',
       scheduler = 'karras',
-      model = 'sd_xl_base_1.0.safetensors',
+      model = 'Counterfeit-V3.0_fp16.safetensors',
       output_name,
       quality_preset = 'high'
     } = args;
@@ -341,7 +341,7 @@ class GlobalImageGenerationMCP {
       upscale_factor = 2,
       steps = 40,
       cfg_scale = 8.0,
-      model = 'sd_xl_base_1.0.safetensors',
+      model = 'Counterfeit-V3.0_fp16.safetensors',
       output_name
     } = args;
 
