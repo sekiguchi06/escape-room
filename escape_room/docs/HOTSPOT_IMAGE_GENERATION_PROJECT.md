@@ -48,6 +48,49 @@
 
 ## ⚠️ 発見された技術課題
 
+### 🔥 緊急: MCP接続エラー & ComfyUI BrokenPipeError（2025-08-18解決済み）
+
+#### **根本原因**
+1. **MCP接続失敗**: `node`パス解決の問題
+   - 症状: `No such tool available: mcp__global-image-generation__xxx`
+   - 原因: `.mcp.json`でnodeコマンドのパスが相対指定
+   - 解決: 絶対パス指定 → `/opt/homebrew/bin/node`
+
+2. **ComfyUI BrokenPipeError**: モデルファイルアクセス不可
+   - 症状: `[Errno 32] Broken pipe` 画像生成中にプロセス強制終了
+   - 原因: ComfyUIがカスタムモデルパスを認識せず、存在しないモデルにアクセス
+   - 解決: ComfyUI再起動で`extra_model_paths.yaml`を再読み込み
+
+#### **修正内容**
+```json
+// .mcp.json（修正前）
+"command": "node"
+// .mcp.json（修正後）  
+"command": "/opt/homebrew/bin/node"
+```
+
+```javascript
+// server.js（追加）
+import { config } from 'dotenv';
+config({ path: path.join(process.cwd(), '../../.env') });
+const OUTPUT_DIR = process.env.OUTPUT_DIR || path.join(os.homedir(), '.ai-services', 'output');
+```
+
+#### **確認手順（後続AI用）**
+1. **MCP接続確認**: `mcp__global-image-generation__check_services` 実行
+2. **モデルファイル確認**: `find ~/ai-services/ -name "*.safetensors"` でモデル存在確認
+3. **ComfyUI設定確認**: `extra_model_paths.yaml`でカスタムパス設定確認
+4. **ComfyUI再起動**: `bash ~/git/escape-room/ai-services/scripts/start_comfyui.sh`
+5. **テスト生成**: 最小パラメータで画像生成テスト実行
+
+#### **予防策**
+- MCP設定変更後は必ずClaude Code再起動
+- ComfyUI設定変更後は必ずComfyUI再起動
+- モデルファイルの物理的存在確認を最初に実行
+- 環境変数は.envファイルで統一管理
+
+## ⚠️ その他の技術課題
+
 ### MCPサーバー統合問題
 - **問題**: Claude CodeがMCPサーバーを認識しない
 - **原因**: `.claude/claude_project_config.json`に`type: "stdio"`が欠けていた

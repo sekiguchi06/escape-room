@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { config } from 'dotenv';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { 
@@ -11,9 +12,12 @@ import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
 
-const COMFYUI_API_URL = 'http://127.0.0.1:8188';
-const WEBUI_API_URL = 'http://127.0.0.1:7860';
-const OUTPUT_DIR = path.join(os.homedir(), '.ai-services', 'output');
+// .envファイルを読み込み（プロジェクトルートから）
+config({ path: path.join(process.cwd(), '../../.env') });
+
+const COMFYUI_API_URL = process.env.COMFYUI_API_URL || 'http://127.0.0.1:8188';
+const WEBUI_API_URL = process.env.WEBUI_API_URL || 'http://127.0.0.1:7860';
+const OUTPUT_DIR = process.env.OUTPUT_DIR || path.join(os.homedir(), '.ai-services', 'output');
 
 class GlobalImageGenerationMCP {
   constructor() {
@@ -50,7 +54,7 @@ class GlobalImageGenerationMCP {
               height: { type: 'number', default: 1024 },
               steps: { type: 'number', default: 30 },
               cfg_scale: { type: 'number', default: 8.0 },
-              sampler: { type: 'string', default: 'dpmpp_2m_karras' },
+              sampler: { type: 'string', default: 'dpmpp_2m' },
               scheduler: { type: 'string', default: 'karras' },
               model: { type: 'string', description: 'Model filename', default: 'Counterfeit-V3.0_fp16.safetensors' },
               lora: { type: 'string', description: 'LoRA filename (optional)', default: '' },
@@ -167,8 +171,8 @@ class GlobalImageGenerationMCP {
     const settings = {
       'draft': { steps: 15, cfg: 6.0, sampler: 'euler', scheduler: 'normal' },
       'standard': { steps: 25, cfg: 7.5, sampler: 'dpmpp_2m', scheduler: 'karras' },
-      'high': { steps: 35, cfg: 8.0, sampler: 'dpmpp_2m_karras', scheduler: 'karras' },
-      'ultra': { steps: 50, cfg: 9.0, sampler: 'dpmpp_2m_karras', scheduler: 'karras' }
+      'high': { steps: 35, cfg: 8.0, sampler: 'dpmpp_2m', scheduler: 'karras' },
+      'ultra': { steps: 50, cfg: 9.0, sampler: 'dpmpp_2m', scheduler: 'karras' }
     };
     return settings[preset] || settings['high'];
   }
@@ -181,7 +185,7 @@ class GlobalImageGenerationMCP {
       height = 1024,
       steps = 30,
       cfg_scale = 8.0,
-      sampler = 'dpmpp_2m_karras',
+      sampler = 'dpmpp_2m',
       scheduler = 'karras',
       model = 'Counterfeit-V3.0_fp16.safetensors',
       lora = '',
@@ -328,31 +332,55 @@ class GlobalImageGenerationMCP {
       }
     };
 
-    const response = await axios.post(`${COMFYUI_API_URL}/prompt`, {
+    const payload = {
       prompt: workflow,
       client_id: 'global-mcp-client'
-    });
-
-    const promptId = response.data.prompt_id;
-    const result = await this.waitForCompletion(promptId, COMFYUI_API_URL);
-    
-    // 生成された画像をユーザー出力ディレクトリにコピー
-    await this.copyComfyUIOutput(result, output_name || 'comfyui_generated');
-
-    return {
-      content: [
-        {
-          type: 'text',
-          text: `✅ ComfyUI image generated successfully!\n` +
-                `📝 Prompt: "${prompt}"\n` +
-                `🎯 Model: ${model}\n` +
-                `📐 Size: ${width}x${height}\n` +
-                `🔄 Steps: ${steps}\n` +
-                `💾 Output directory: ${OUTPUT_DIR}\n` +
-                `🆔 Prompt ID: ${promptId}`,
-        },
-      ],
     };
+
+    console.log('Sending workflow to ComfyUI:');
+    console.log('Payload keys:', Object.keys(payload));
+    console.log('Workflow nodes:', Object.keys(workflow));
+    
+    try {
+      const response = await axios.post(`${COMFYUI_API_URL}/prompt`, payload, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      console.log('ComfyUI response status:', response.status);
+      console.log('ComfyUI response data:', JSON.stringify(response.data, null, 2));
+      
+      const promptId = response.data.prompt_id;
+      const result = await this.waitForCompletion(promptId, COMFYUI_API_URL, 120000);
+      
+      // 生成された画像をユーザー出力ディレクトリにコピー
+      await this.copyComfyUIOutput(result, output_name || 'comfyui_generated');
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `✅ ComfyUI image generated successfully!\\n` +
+                  `📝 Prompt: "${prompt}"\\n` +
+                  `🎯 Model: ${model}\\n` +
+                  `📐 Size: ${width}x${height}\\n` +
+                  `🔄 Steps: ${steps}\\n` +
+                  `💾 Output directory: ${OUTPUT_DIR}\\n` +
+                  `🆔 Prompt ID: ${promptId}`,
+          },
+        ],
+      };
+    } catch (error) {
+      console.error('ComfyUI API Error Details:', {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        headers: error.response?.headers,
+        message: error.message
+      });
+      
+      throw new Error(`ComfyUI API error: ${error.response?.status} - ${JSON.stringify(error.response?.data || error.message)}`);
+    }
   }
 
   async webuiGenerate(args) {
@@ -664,8 +692,21 @@ class GlobalImageGenerationMCP {
         const response = await axios.get(`${apiUrl}/history/${promptId}`);
         const history = response.data;
         
-        if (history[promptId] && history[promptId].status && history[promptId].status.completed) {
-          return history[promptId];
+        if (history[promptId]) {
+          const status = history[promptId].status;
+          
+          if (status && status.completed) {
+            return history[promptId];
+          }
+          
+          // エラーをチェック
+          if (status && status.status_str === 'error') {
+            const errorMessage = status.messages.find(msg => msg[0] === 'execution_error');
+            if (errorMessage) {
+              throw new Error(`ComfyUI execution error: ${errorMessage[1].exception_message}`);
+            }
+            throw new Error('ComfyUI execution failed with unknown error');
+          }
         }
         
         await new Promise(resolve => setTimeout(resolve, 2000));

@@ -12,7 +12,7 @@
       "description": "Atlassian Jira and Confluence integration"
     },
     "global-image-generation": {
-      "command": "node",
+      "command": "/opt/homebrew/bin/node",
       "args": ["/Users/sekiguchi/git/escape-room/ai-services/server/server.js"],
       "env": {
         "NODE_ENV": "production"
