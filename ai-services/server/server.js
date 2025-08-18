@@ -53,7 +53,7 @@ class GlobalImageGenerationMCP {
               sampler: { type: 'string', default: 'dpmpp_2m_karras' },
               scheduler: { type: 'string', default: 'karras' },
               model: { type: 'string', description: 'Model filename', default: 'Counterfeit-V3.0_fp16.safetensors' },
-              lora: { type: 'string', description: 'LoRA filename (optional)', default: 'isometric_dreams.safetensors' },
+              lora: { type: 'string', description: 'LoRA filename (optional)', default: '' },
               lora_strength: { type: 'number', description: 'LoRA strength', default: 0.7 },
               output_name: { type: 'string', description: 'Custom output filename (optional)' },
               quality_preset: { type: 'string', enum: ['draft', 'standard', 'high', 'ultra'], default: 'high', description: 'Quality preset for generation' }
@@ -74,7 +74,7 @@ class GlobalImageGenerationMCP {
               steps: { type: 'number', default: 40 },
               cfg_scale: { type: 'number', default: 8.0 },
               model: { type: 'string', description: 'Model filename', default: 'Counterfeit-V3.0_fp16.safetensors' },
-              lora: { type: 'string', description: 'LoRA filename (optional)', default: 'isometric_dreams.safetensors' },
+              lora: { type: 'string', description: 'LoRA filename (optional)', default: '' },
               lora_strength: { type: 'number', description: 'LoRA strength', default: 0.7 },
               output_name: { type: 'string', description: 'Custom output filename (optional)' }
             },
@@ -184,7 +184,7 @@ class GlobalImageGenerationMCP {
       sampler = 'dpmpp_2m_karras',
       scheduler = 'karras',
       model = 'Counterfeit-V3.0_fp16.safetensors',
-      lora = 'isometric_dreams.safetensors',
+      lora = '',
       lora_strength = 0.7,
       output_name,
       quality_preset = 'high'
