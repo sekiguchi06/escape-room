@@ -13,8 +13,7 @@
     },
     "global-image-generation": {
       "command": "node",
-      "args": ["/Users/sekiguchi/ai-services/MCPServers/global-image-generation/server.js"],
-      "type": "stdio",
+      "args": ["/Users/sekiguchi/git/escape-room/ai-services/server/server.js"],
       "env": {
         "NODE_ENV": "production"
       },
