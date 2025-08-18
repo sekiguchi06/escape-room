@@ -53,6 +53,8 @@ class GlobalImageGenerationMCP {
               sampler: { type: 'string', default: 'dpmpp_2m_karras' },
               scheduler: { type: 'string', default: 'karras' },
               model: { type: 'string', description: 'Model filename', default: 'Counterfeit-V3.0_fp16.safetensors' },
+              lora: { type: 'string', description: 'LoRA filename (optional)', default: 'isometric_dreams.safetensors' },
+              lora_strength: { type: 'number', description: 'LoRA strength', default: 0.7 },
               output_name: { type: 'string', description: 'Custom output filename (optional)' },
               quality_preset: { type: 'string', enum: ['draft', 'standard', 'high', 'ultra'], default: 'high', description: 'Quality preset for generation' }
             },
@@ -72,6 +74,8 @@ class GlobalImageGenerationMCP {
               steps: { type: 'number', default: 40 },
               cfg_scale: { type: 'number', default: 8.0 },
               model: { type: 'string', description: 'Model filename', default: 'Counterfeit-V3.0_fp16.safetensors' },
+              lora: { type: 'string', description: 'LoRA filename (optional)', default: 'isometric_dreams.safetensors' },
+              lora_strength: { type: 'number', description: 'LoRA strength', default: 0.7 },
               output_name: { type: 'string', description: 'Custom output filename (optional)' }
             },
             required: ['prompt'],
@@ -180,6 +184,8 @@ class GlobalImageGenerationMCP {
       sampler = 'dpmpp_2m_karras',
       scheduler = 'karras',
       model = 'Counterfeit-V3.0_fp16.safetensors',
+      lora = 'isometric_dreams.safetensors',
+      lora_strength = 0.7,
       output_name,
       quality_preset = 'high'
     } = args;
@@ -191,7 +197,78 @@ class GlobalImageGenerationMCP {
     const finalSampler = sampler || qualitySettings.sampler;
     const finalScheduler = scheduler || qualitySettings.scheduler;
 
-    const workflow = {
+    // LoRA使用判定
+    const useLoRA = lora && lora.trim() !== '';
+    
+    const workflow = useLoRA ? {
+      "3": {
+        "class_type": "KSampler",
+        "inputs": {
+          "seed": Math.floor(Math.random() * 1000000),
+          "steps": finalSteps,
+          "cfg": finalCfg,
+          "sampler_name": finalSampler,
+          "scheduler": finalScheduler,
+          "denoise": 1.0,
+          "model": ["10", 0],
+          "positive": ["6", 0],
+          "negative": ["7", 0],
+          "latent_image": ["5", 0]
+        }
+      },
+      "4": {
+        "class_type": "CheckpointLoaderSimple",
+        "inputs": {
+          "ckpt_name": model
+        }
+      },
+      "5": {
+        "class_type": "EmptyLatentImage",
+        "inputs": {
+          "width": width,
+          "height": height,
+          "batch_size": 1
+        }
+      },
+      "6": {
+        "class_type": "CLIPTextEncode",
+        "inputs": {
+          "text": prompt,
+          "clip": ["10", 1]
+        }
+      },
+      "7": {
+        "class_type": "CLIPTextEncode",
+        "inputs": {
+          "text": negative_prompt,
+          "clip": ["10", 1]
+        }
+      },
+      "8": {
+        "class_type": "VAEDecode",
+        "inputs": {
+          "samples": ["3", 0],
+          "vae": ["4", 2]
+        }
+      },
+      "9": {
+        "class_type": "SaveImage",
+        "inputs": {
+          "filename_prefix": output_name || "ComfyUI",
+          "images": ["8", 0]
+        }
+      },
+      "10": {
+        "class_type": "LoraLoader",
+        "inputs": {
+          "model": ["4", 0],
+          "clip": ["4", 1],
+          "lora_name": lora,
+          "strength_model": lora_strength,
+          "strength_clip": lora_strength
+        }
+      }
+    } : {
       "3": {
         "class_type": "KSampler",
         "inputs": {
