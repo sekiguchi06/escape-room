@@ -76,3 +76,42 @@ performance_results/
 **/*.pdf
 docs/pdf_split/
 docs/markdown_converted/
+
+# Environment and configuration files (Security)
+.env
+.env.*
+!.env.example
+!.env.template
+
+# API Keys and secrets
+**/google-services.json
+**/GoogleService-Info.plist
+!**/GoogleService-Info.plist.template
+!**/google-services.json.template
+
+# Private keys and certificates
+*.p12
+*.p8
+*.pem
+*.key
+*.keystore
+*.jks
+
+# Firebase and other service configurations
+firebase.json
+.firebase/
+.firebaserc
+
+# IDE and system files
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
+
+# Cache and logs
+.serena/cache/
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

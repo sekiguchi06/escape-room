@@ -1,13 +1,21 @@
-# カジュアルゲーム開発フレームワーク
+# 脱出ゲーム開発フレームワーク
 
-Flutter + Flameベースの汎用カジュアルゲーム開発フレームワーク
+Flutter + Flameベースの脱出ゲーム特化開発フレームワーク
+
+**アプリケーション**: Escape Master - 謎解き脱出ゲーム  
+**技術スタック**: Flutter + Flame 1.30.1 + MCP  
+**特化要素**: パズルシステム、インベントリ管理、ルーム遷移、ホットスポット相互作用
 
 ## 📚 ドキュメント
 
+### 主要ガイド
 - **[AI_MASTER.md](docs/AI_MASTER.md)** - プロジェクト情報・技術仕様・実装ガイド
 - **[CLAUDE.md](docs/CLAUDE.md)** - AI開発ルール・品質基準・禁止事項
-- **[GAME_DEVELOPMENT_GUIDE.md](docs/GAME_DEVELOPMENT_GUIDE.md)** - ゲーム開発ガイド
-- **[GAME_TEMPLATE_GUIDE.md](docs/GAME_TEMPLATE_GUIDE.md)** - テンプレートガイド
+- **[ESCAPE_ROOM_UNIFIED_DESIGN_GUIDE.md](docs/ESCAPE_ROOM_UNIFIED_DESIGN_GUIDE.md)** - 設計アーキテクチャガイド
+
+### 特化ドキュメント
+- **[HOTSPOT_IMAGE_GENERATION_PROJECT.md](docs/HOTSPOT_IMAGE_GENERATION_PROJECT.md)** - ホットスポット画像生成ガイド
+- **[MCP_TROUBLESHOOTING_GUIDE.md](docs/MCP_TROUBLESHOOTING_GUIDE.md)** - MCP接続問題解決ガイド
 
 ## テスト実行
 

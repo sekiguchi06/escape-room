@@ -1,5 +1,5 @@
 name: escape_room
-description: "Escape Room puzzle game powered by Flutter + Flame"
+description: "Escape Master - 謎解き脱出ゲーム powered by Flutter + Flame"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -56,6 +56,7 @@ dependencies:
   # firebase_messaging: ^14.7.10
   # ローカル通知機能 - 無効化
   # flutter_local_notifications: ^18.0.1
+  
 
 dev_dependencies:
   flutter_test:
@@ -94,6 +95,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/sounds/
+    - assets/audio/
     - assets/fonts/
     - assets/images/
     - assets/images/hotspots/
