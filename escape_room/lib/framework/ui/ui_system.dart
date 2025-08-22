@@ -17,8 +17,8 @@ import 'ui_layer_priority.dart';
 
 /// インベントリUI階層の優先度定義
 class InventoryUILayerPriority extends UILayerPriority {
-  static const int inventoryBackground = UILayerPriority.ui + 10;     // 210
-  static const int inventoryItems = UILayerPriority.ui + 20;          // 220  
-  static const int selectedItem = UILayerPriority.ui + 30;            // 230
-  static const int itemTooltip = UILayerPriority.tooltip;             // 500
+  static const int inventoryBackground = UILayerPriority.ui + 10; // 210
+  static const int inventoryItems = UILayerPriority.ui + 20; // 220
+  static const int selectedItem = UILayerPriority.ui + 30; // 230
+  static const int itemTooltip = UILayerPriority.tooltip; // 500
 }

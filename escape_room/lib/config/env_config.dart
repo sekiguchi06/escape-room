@@ -3,10 +3,10 @@ import 'package:envied/envied.dart';
 part 'env_config.g.dart';
 
 /// 環境変数設定クラス
-/// 
+///
 /// ENViedパッケージを使用してコンパイル時に環境変数を注入し、
 /// セキュアな設定管理を実現します。
-/// 
+///
 /// 使用方法:
 /// - 開発環境: .env または .env.dev
 /// - 本番環境: .env.prod
@@ -41,17 +41,19 @@ abstract class EnvConfig {
   static const String bannerAdUnitIdIos = _EnvConfig.bannerAdUnitIdIos;
 
   @EnviedField(varName: 'INTERSTITIAL_AD_UNIT_ID_ANDROID')
-  static const String interstitialAdUnitIdAndroid = _EnvConfig.interstitialAdUnitIdAndroid;
+  static const String interstitialAdUnitIdAndroid =
+      _EnvConfig.interstitialAdUnitIdAndroid;
 
   @EnviedField(varName: 'INTERSTITIAL_AD_UNIT_ID_IOS')
-  static const String interstitialAdUnitIdIos = _EnvConfig.interstitialAdUnitIdIos;
+  static const String interstitialAdUnitIdIos =
+      _EnvConfig.interstitialAdUnitIdIos;
 
   /// プラットフォーム別Google Mobile Ads アプリIDを取得
   static String getGoogleAdAppId() {
     // プラットフォーム判定はdart:ioを使用してコンパイル時に解決
     const bool isAndroid = bool.fromEnvironment('dart.library.android');
     const bool isIos = bool.fromEnvironment('dart.library.ios');
-    
+
     if (isAndroid) {
       return googleAdAppIdAndroid;
     } else if (isIos) {
@@ -66,7 +68,7 @@ abstract class EnvConfig {
   static String getBannerAdUnitId() {
     const bool isAndroid = bool.fromEnvironment('dart.library.android');
     const bool isIos = bool.fromEnvironment('dart.library.ios');
-    
+
     if (isAndroid) {
       return bannerAdUnitIdAndroid;
     } else if (isIos) {
@@ -80,7 +82,7 @@ abstract class EnvConfig {
   static String getInterstitialAdUnitId() {
     const bool isAndroid = bool.fromEnvironment('dart.library.android');
     const bool isIos = bool.fromEnvironment('dart.library.ios');
-    
+
     if (isAndroid) {
       return interstitialAdUnitIdAndroid;
     } else if (isIos) {

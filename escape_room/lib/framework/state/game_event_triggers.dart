@@ -5,19 +5,19 @@ import 'game_autosave_system.dart';
 class GameEventTriggers {
   final ProgressAwareDataManager _dataManager;
   bool _isEnabled = true;
-  
+
   GameEventTriggers(this._dataManager);
 
   /// システムの有効・無効切り替え
   bool get isEnabled => _isEnabled;
-  
+
   void enable() {
     _isEnabled = true;
     if (kDebugMode) {
       debugPrint('Game event triggers enabled');
     }
   }
-  
+
   void disable() {
     _isEnabled = false;
     if (kDebugMode) {
@@ -56,11 +56,13 @@ class GameEventTriggers {
       );
 
       final saveResult = await _dataManager.saveSystem.saveOnItemFound(itemId);
-      
+
       if (kDebugMode) {
-        debugPrint('🎒 Item discovered: $itemName ($itemId) - Saved: $saveResult');
+        debugPrint(
+          '🎒 Item discovered: $itemName ($itemId) - Saved: $saveResult',
+        );
       }
-      
+
       return saveResult;
     } catch (e) {
       if (kDebugMode) {
@@ -106,12 +108,16 @@ class GameEventTriggers {
         },
       );
 
-      final saveResult = await _dataManager.saveSystem.saveOnPuzzleSolved(puzzleId);
-      
+      final saveResult = await _dataManager.saveSystem.saveOnPuzzleSolved(
+        puzzleId,
+      );
+
       if (kDebugMode) {
-        debugPrint('🧩 Puzzle solved: $puzzleName ($puzzleId) - Saved: $saveResult');
+        debugPrint(
+          '🧩 Puzzle solved: $puzzleName ($puzzleId) - Saved: $saveResult',
+        );
       }
-      
+
       return saveResult;
     } catch (e) {
       if (kDebugMode) {
@@ -158,12 +164,14 @@ class GameEventTriggers {
         },
       );
 
-      final saveResult = await _dataManager.saveSystem.saveOnLevelComplete(level);
-      
+      final saveResult = await _dataManager.saveSystem.saveOnLevelComplete(
+        level,
+      );
+
       if (kDebugMode) {
         debugPrint('🎯 Level completed: $level - Saved: $saveResult');
       }
-      
+
       return saveResult;
     } catch (e) {
       if (kDebugMode) {
@@ -198,17 +206,19 @@ class GameEventTriggers {
           'checkpoints': {checkpointId: checkpointData},
           'last_checkpoint': checkpointId,
         },
-        statisticsUpdate: {
-          'total_checkpoints_reached': 1,
-        },
+        statisticsUpdate: {'total_checkpoints_reached': 1},
       );
 
-      final saveResult = await _dataManager.saveSystem.saveOnCheckpoint(checkpointId);
-      
+      final saveResult = await _dataManager.saveSystem.saveOnCheckpoint(
+        checkpointId,
+      );
+
       if (kDebugMode) {
-        debugPrint('📍 Checkpoint reached: $checkpointName ($checkpointId) - Saved: $saveResult');
+        debugPrint(
+          '📍 Checkpoint reached: $checkpointName ($checkpointId) - Saved: $saveResult',
+        );
       }
-      
+
       return saveResult;
     } catch (e) {
       if (kDebugMode) {
@@ -252,11 +262,13 @@ class GameEventTriggers {
       );
 
       final saveResult = await _dataManager.saveSystem.manualSave();
-      
+
       if (kDebugMode) {
-        debugPrint('🔥 Boss defeated: $bossName ($bossId) - Saved: $saveResult');
+        debugPrint(
+          '🔥 Boss defeated: $bossName ($bossId) - Saved: $saveResult',
+        );
       }
-      
+
       return saveResult;
     } catch (e) {
       if (kDebugMode) {
@@ -298,11 +310,13 @@ class GameEventTriggers {
       );
 
       final saveResult = await _dataManager.saveSystem.manualSave();
-      
+
       if (kDebugMode) {
-        debugPrint('🏆 Achievement unlocked: $achievementName ($achievementId) - Saved: $saveResult');
+        debugPrint(
+          '🏆 Achievement unlocked: $achievementName ($achievementId) - Saved: $saveResult',
+        );
       }
-      
+
       return saveResult;
     } catch (e) {
       if (kDebugMode) {
@@ -344,11 +358,11 @@ class GameEventTriggers {
       );
 
       final saveResult = await _dataManager.saveSystem.manualSave();
-      
+
       if (kDebugMode) {
         debugPrint('🎉 Game escape success - Saved: $saveResult');
       }
-      
+
       return saveResult;
     } catch (e) {
       if (kDebugMode) {
@@ -385,11 +399,13 @@ class GameEventTriggers {
       );
 
       final saveResult = await _dataManager.saveSystem.manualSave();
-      
+
       if (kDebugMode) {
-        debugPrint('🎮 Custom event: $eventType ($eventId) - Saved: $saveResult');
+        debugPrint(
+          '🎮 Custom event: $eventType ($eventId) - Saved: $saveResult',
+        );
       }
-      
+
       return saveResult;
     } catch (e) {
       if (kDebugMode) {

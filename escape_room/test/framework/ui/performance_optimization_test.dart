@@ -7,9 +7,11 @@ import 'package:escape_room/framework/ui/const_optimization.dart';
 
 void main() {
   group('BuildContext Optimization Tests', () {
-    testWidgets('NavigationUtils createNavigatorCallback should work', (WidgetTester tester) async {
+    testWidgets('NavigationUtils createNavigatorCallback should work', (
+      WidgetTester tester,
+    ) async {
       bool callbackExecuted = false;
-      
+
       await tester.pumpWidget(
         MaterialApp(
           home: Builder(
@@ -20,7 +22,7 @@ void main() {
                   callbackExecuted = true;
                 },
               );
-              
+
               return Scaffold(
                 body: ElevatedButton(
                   onPressed: callback,
@@ -31,14 +33,16 @@ void main() {
           ),
         ),
       );
-      
+
       await tester.tap(find.byType(ElevatedButton));
       await tester.pumpAndSettle();
-      
+
       expect(callbackExecuted, isTrue);
     });
 
-    testWidgets('NavigationUtils pushRoute should create proper callback', (WidgetTester tester) async {
+    testWidgets('NavigationUtils pushRoute should create proper callback', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Builder(
@@ -47,7 +51,7 @@ void main() {
                 context,
                 () => const Scaffold(body: Text('Second Page')),
               );
-              
+
               return Scaffold(
                 body: ElevatedButton(
                   onPressed: pushCallback,
@@ -58,10 +62,10 @@ void main() {
           ),
         ),
       );
-      
+
       await tester.tap(find.byType(ElevatedButton));
       await tester.pumpAndSettle();
-      
+
       expect(find.text('Second Page'), findsOneWidget);
     });
   });
@@ -85,7 +89,9 @@ void main() {
       expect((key as ValueKey<String>).value, equals('items_3'));
     });
 
-    testWidgets('OptimizedHotspotDisplay should use proper keys', (WidgetTester tester) async {
+    testWidgets('OptimizedHotspotDisplay should use proper keys', (
+      WidgetTester tester,
+    ) async {
       final hotspots = [
         {'id': 'hotspot1', 'x': 100, 'y': 100},
         {'id': 'hotspot2', 'x': 200, 'y': 200},
@@ -114,14 +120,16 @@ void main() {
   });
 
   group('State Optimization Tests', () {
-    testWidgets('LocalStateBuilder should manage local state', (WidgetTester tester) async {
+    testWidgets('LocalStateBuilder should manage local state', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: LocalStateBuilder(
               builder: (context, setState) {
                 int counter = 0;
-                
+
                 return Column(
                   children: [
                     Text('Count: $counter'),
@@ -142,18 +150,20 @@ void main() {
       );
 
       expect(find.text('Count: 0'), findsOneWidget);
-      
+
       await tester.tap(find.byType(ElevatedButton));
       await tester.pumpAndSettle();
-      
+
       // Note: LocalStateBuilder resets state on rebuild
       // This test verifies the widget builds correctly
       expect(find.byType(ElevatedButton), findsOneWidget);
     });
 
-    testWidgets('OptimizedPressButton should handle press animations', (WidgetTester tester) async {
+    testWidgets('OptimizedPressButton should handle press animations', (
+      WidgetTester tester,
+    ) async {
       bool pressed = false;
-      
+
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -169,7 +179,7 @@ void main() {
 
       await tester.tap(find.byType(OptimizedPressButton));
       await tester.pumpAndSettle();
-      
+
       expect(pressed, isTrue);
     });
   });
@@ -185,12 +195,14 @@ void main() {
     test('ConstOptimizationChecker should identify const candidates', () {
       final statelessWidget = const SizedBox();
       final textWidget = const Text('test');
-      
+
       expect(ConstOptimizationChecker.canBeConst(statelessWidget), isTrue);
       expect(ConstOptimizationChecker.shouldUseConst(textWidget), isTrue);
     });
 
-    testWidgets('OptimizedSpacer should provide const spacing', (WidgetTester tester) async {
+    testWidgets('OptimizedSpacer should provide const spacing', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -212,7 +224,9 @@ void main() {
       expect(find.text('Third'), findsOneWidget);
     });
 
-    testWidgets('GameConstWidgets should provide game-specific constants', (WidgetTester tester) async {
+    testWidgets('GameConstWidgets should provide game-specific constants', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -234,7 +248,9 @@ void main() {
   });
 
   group('Integration Tests', () {
-    testWidgets('All optimization utilities should work together', (WidgetTester tester) async {
+    testWidgets('All optimization utilities should work together', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Builder(
@@ -255,7 +271,10 @@ void main() {
                           items: const ['item1', 'item2'],
                           itemBuilder: (item, index) {
                             return Container(
-                              key: KeyOptimization.listItemKey('inventory', index),
+                              key: KeyOptimization.listItemKey(
+                                'inventory',
+                                index,
+                              ),
                               child: Text(item?.toString() ?? 'Empty'),
                             );
                           },

@@ -1,5 +1,5 @@
 // Web専用ファイル
-import 'dart:html' as html;
+import 'package:web/web.dart' as web;
 import 'package:flutter/foundation.dart';
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
@@ -11,15 +11,15 @@ class HtmlTextOverlay extends Component {
   final Vector2 position;
   final double fontSize;
   final Color color;
-  late html.DivElement _textElement;
-  
+  late web.HTMLDivElement _textElement;
+
   HtmlTextOverlay({
     required this.text,
     required this.position,
     required this.fontSize,
     required this.color,
   });
-  
+
   @override
   Future<void> onLoad() async {
     super.onLoad();
@@ -27,7 +27,7 @@ class HtmlTextOverlay extends Component {
       _createHtmlElement();
     }
   }
-  
+
   @override
   void onRemove() {
     if (kIsWeb) {
@@ -35,38 +35,42 @@ class HtmlTextOverlay extends Component {
     }
     super.onRemove();
   }
-  
+
   /// HTML要素を作成してDOMに追加
   void _createHtmlElement() {
-    _textElement = html.DivElement()
-      ..text = text
-      ..style.position = 'absolute'
-      ..style.left = '${position.x}px'
-      ..style.top = '${position.y}px'
-      ..style.fontSize = '${fontSize}px'
-      ..style.color = '#${color.value.toRadixString(16).substring(2)}'
-      ..style.fontFamily = 'system-ui, -apple-system, "Hiragino Sans", "Yu Gothic Medium", "Meiryo", sans-serif'
-      ..style.pointerEvents = 'none'
-      ..style.zIndex = '1000'
-      ..style.whiteSpace = 'nowrap'
-      ..style.userSelect = 'none';
-    
+    _textElement = web.HTMLDivElement()..text = text;
+
+    final style = _textElement.style;
+    style.position = 'absolute';
+    style.left = '${position.x}px';
+    style.top = '${position.y}px';
+    style.fontSize = '${fontSize}px';
+    style.color =
+        '#${color.value.toRadixString(16).padLeft(8, '0').substring(2)}';
+    style.fontFamily =
+        'system-ui, -apple-system, "Hiragino Sans", "Yu Gothic Medium", "Meiryo", sans-serif';
+    style.pointerEvents = 'none';
+    style.zIndex = '1000';
+    style.whiteSpace = 'nowrap';
+    style.userSelect = 'none';
+
     // Flutter Web のゲームcanvasに重ねて表示
-    html.document.body?.append(_textElement);
+    web.document.body?.appendChild(_textElement);
   }
-  
+
   /// テキスト内容を更新
   void updateText(String newText) {
     if (kIsWeb) {
       _textElement.text = newText;
     }
   }
-  
+
   /// 位置を更新
   void updatePosition(Vector2 newPosition) {
     if (kIsWeb) {
-      _textElement.style.left = '${newPosition.x}px';
-      _textElement.style.top = '${newPosition.y}px';
+      final style = _textElement.style;
+      style.left = '${newPosition.x}px';
+      style.top = '${newPosition.y}px';
     }
   }
 }
@@ -74,7 +78,7 @@ class HtmlTextOverlay extends Component {
 /// HtmlTextOverlay管理ヘルパー
 class HtmlTextManager {
   static final Map<String, HtmlTextOverlay> _overlays = {};
-  
+
   /// HTMLテキストオーバーレイを作成
   static HtmlTextOverlay createText({
     required String id,
@@ -85,18 +89,18 @@ class HtmlTextManager {
   }) {
     // 既存のオーバーレイを削除
     removeText(id);
-    
+
     final overlay = HtmlTextOverlay(
       text: text,
       position: position,
       fontSize: fontSize,
       color: color,
     );
-    
+
     _overlays[id] = overlay;
     return overlay;
   }
-  
+
   /// HTMLテキストオーバーレイを削除
   static void removeText(String id) {
     final existing = _overlays[id];
@@ -105,7 +109,7 @@ class HtmlTextManager {
       _overlays.remove(id);
     }
   }
-  
+
   /// 全てのオーバーレイをクリア
   static void clearAll() {
     for (final overlay in _overlays.values) {

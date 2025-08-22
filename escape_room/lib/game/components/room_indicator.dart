@@ -11,11 +11,11 @@ class RoomIndicator extends StatelessWidget {
       listenable: RoomNavigationSystem(),
       builder: (context, _) {
         final currentIndex = RoomNavigationSystem().currentRoomIndex;
-        
+
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.6),
+            color: Colors.black.withValues(alpha: 0.6),
             borderRadius: BorderRadius.circular(20),
           ),
           child: Row(
@@ -23,16 +23,16 @@ class RoomIndicator extends StatelessWidget {
             children: List.generate(5, (index) {
               final roomIndex = index - 2; // -2, -1, 0, 1, 2
               final isActive = roomIndex == currentIndex;
-              
+
               return Container(
                 margin: const EdgeInsets.symmetric(horizontal: 3),
                 width: 8,
                 height: 8,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: isActive 
-                      ? Colors.amber[400] 
-                      : Colors.white.withOpacity(0.4),
+                  color: isActive
+                      ? Colors.amber[400]
+                      : Colors.white.withValues(alpha: 0.4),
                 ),
               );
             }),

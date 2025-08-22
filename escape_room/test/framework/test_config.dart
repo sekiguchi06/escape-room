@@ -10,7 +10,7 @@ class TestGameConfig {
   final Map<String, Color> colors;
   final bool enablePowerUps;
   final double difficultyMultiplier;
-  
+
   const TestGameConfig({
     required this.maxTime,
     required this.maxLevel,
@@ -19,7 +19,7 @@ class TestGameConfig {
     this.enablePowerUps = false,
     this.difficultyMultiplier = 1.0,
   });
-  
+
   TestGameConfig copyWith({
     Duration? maxTime,
     int? maxLevel,
@@ -37,7 +37,7 @@ class TestGameConfig {
       difficultyMultiplier: difficultyMultiplier ?? this.difficultyMultiplier,
     );
   }
-  
+
   Map<String, dynamic> toJson() {
     return {
       'maxTimeMs': maxTime.inMilliseconds,
@@ -48,14 +48,15 @@ class TestGameConfig {
       'difficultyMultiplier': difficultyMultiplier,
     };
   }
-  
+
   factory TestGameConfig.fromJson(Map<String, dynamic> json) {
     return TestGameConfig(
       maxTime: Duration(milliseconds: json['maxTimeMs'] ?? 60000),
       maxLevel: json['maxLevel'] ?? 5,
       messages: Map<String, String>.from(json['messages'] ?? {}),
-      colors: (json['colors'] as Map<String, dynamic>? ?? {})
-          .map((k, v) => MapEntry(k, Color(v as int))),
+      colors: (json['colors'] as Map<String, dynamic>? ?? {}).map(
+        (k, v) => MapEntry(k, Color(v as int)),
+      ),
       enablePowerUps: json['enablePowerUps'] ?? false,
       difficultyMultiplier: (json['difficultyMultiplier'] ?? 1.0).toDouble(),
     );
@@ -63,25 +64,24 @@ class TestGameConfig {
 }
 
 /// テスト用の汎用ゲーム設定クラス
-class TestGameConfiguration extends GameConfiguration<GameState, TestGameConfig> 
+class TestGameConfiguration extends GameConfiguration<GameState, TestGameConfig>
     with ChangeNotifier, ConfigurationNotifier<GameState, TestGameConfig> {
-  
   TestGameConfiguration({required super.config});
-  
+
   @override
   bool isValid() {
     return config.maxTime.inMilliseconds > 0 &&
-           config.maxLevel > 0 &&
-           config.messages.isNotEmpty;
+        config.maxLevel > 0 &&
+        config.messages.isNotEmpty;
   }
-  
+
   @override
   bool isValidConfig(TestGameConfig config) {
     return config.maxTime.inMilliseconds > 0 &&
-           config.maxLevel > 0 &&
-           config.messages.isNotEmpty;
+        config.maxLevel > 0 &&
+        config.messages.isNotEmpty;
   }
-  
+
   @override
   TestGameConfig copyWith(Map<String, dynamic> overrides) {
     return config.copyWith(
@@ -93,18 +93,16 @@ class TestGameConfiguration extends GameConfiguration<GameState, TestGameConfig>
       difficultyMultiplier: overrides['difficultyMultiplier'] as double?,
     );
   }
-  
+
   @override
   Map<String, dynamic> toJson() {
     return config.toJson();
   }
-  
+
   static TestGameConfiguration fromJson(Map<String, dynamic> json) {
-    return TestGameConfiguration(
-      config: TestGameConfig.fromJson(json),
-    );
+    return TestGameConfiguration(config: TestGameConfig.fromJson(json));
   }
-  
+
   @override
   TestGameConfig getConfigForVariant(String variantId) {
     switch (variantId) {

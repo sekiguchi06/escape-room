@@ -12,7 +12,7 @@ class ClickableInventoryItem extends RectangleComponent with TapCallbacks {
   final GameItem item;
   final Function(String) onItemTapped;
   bool _isSelected = false;
-  
+
   ClickableInventoryItem({
     required this.itemId,
     required this.item,
@@ -20,23 +20,23 @@ class ClickableInventoryItem extends RectangleComponent with TapCallbacks {
     required Vector2 position,
     required Vector2 size,
   }) : super(
-    position: position,
-    size: size,
-    paint: Paint()..color = Colors.grey.shade700,
-  );
-  
+         position: position,
+         size: size,
+         paint: Paint()..color = Colors.grey.shade700,
+       );
+
   @override
   Future<void> onLoad() async {
     await super.onLoad();
     priority = InventoryUILayerPriority.inventoryItems;
     _setupItemUI();
   }
-  
+
   /// アイテムUI設定
   void _setupItemUI() {
     // アイテム背景
     paint = Paint()..color = Colors.grey.shade700;
-    
+
     // アイテム名表示
     final nameComponent = JapaneseMessageSystem.createMessageComponent(
       itemId,
@@ -46,7 +46,7 @@ class ClickableInventoryItem extends RectangleComponent with TapCallbacks {
       anchor: Anchor.center,
     );
     add(nameComponent);
-    
+
     // 選択状態の枠線
     final borderComponent = RectangleComponent(
       size: size,
@@ -59,23 +59,22 @@ class ClickableInventoryItem extends RectangleComponent with TapCallbacks {
     borderComponent.priority = InventoryUILayerPriority.inventoryItems + 1;
     add(borderComponent);
   }
-  
+
   /// タップ処理
   @override
   bool onTapUp(TapUpEvent event) {
     onItemTapped(itemId);
     return true;
   }
-  
+
   /// 選択状態更新
   void updateSelectionState(bool isSelected) {
     _isSelected = isSelected;
-    
+
     // 背景色変更
-    paint = Paint()..color = _isSelected 
-        ? Colors.yellow.shade700 
-        : Colors.grey.shade700;
-    
+    paint = Paint()
+      ..color = _isSelected ? Colors.yellow.shade700 : Colors.grey.shade700;
+
     // 枠線色変更
     final childList = children.toList();
     if (childList.length > 1 && childList[1] is RectangleComponent) {

@@ -11,17 +11,17 @@ class AnimationConfig {
   final bool infinite;
   final Duration startDelay;
   final VoidCallback? onComplete;
-  
+
   const AnimationConfig({
     this.duration = const Duration(milliseconds: 300),
     this.curve = Curves.easeInOut,
     this.autoReverse = false,
     this.repeatCount = 1,
-    this.infinite = false, 
+    this.infinite = false,
     this.startDelay = Duration.zero,
     this.onComplete,
   });
-  
+
   /// EffectController生成
   EffectController toEffectController() {
     return EffectController(
@@ -45,79 +45,49 @@ extension PositionComponentAnimations on PositionComponent {
     AnimationConfig config = const AnimationConfig(),
   }) {
     // onCompleteはEffectControllerで管理されるため、Effect自体には渡さない
-    add(
-      MoveEffect.to(
-        destination,
-        config.toEffectController(),
-      ),
-    );
+    add(MoveEffect.to(destination, config.toEffectController()));
   }
-  
+
   /// 相対移動アニメーション
   void animateMoveBy(
     Vector2 offset, {
     AnimationConfig config = const AnimationConfig(),
   }) {
-    add(
-      MoveEffect.by(
-        offset,
-        config.toEffectController(),
-      ),
-    );
+    add(MoveEffect.by(offset, config.toEffectController()));
   }
-  
+
   /// スケールアニメーション
   void animateScaleTo(
     Vector2 scale, {
     AnimationConfig config = const AnimationConfig(),
   }) {
-    add(
-      ScaleEffect.to(
-        scale,
-        config.toEffectController(),
-      ),
-    );
+    add(ScaleEffect.to(scale, config.toEffectController()));
   }
-  
+
   /// 相対スケールアニメーション
   void animateScaleBy(
     Vector2 scaleFactor, {
     AnimationConfig config = const AnimationConfig(),
   }) {
-    add(
-      ScaleEffect.by(
-        scaleFactor,
-        config.toEffectController(),
-      ),
-    );
+    add(ScaleEffect.by(scaleFactor, config.toEffectController()));
   }
-  
+
   /// 回転アニメーション
   void animateRotateTo(
     double angle, {
     AnimationConfig config = const AnimationConfig(),
   }) {
-    add(
-      RotateEffect.to(
-        angle,
-        config.toEffectController(),
-      ),
-    );
+    add(RotateEffect.to(angle, config.toEffectController()));
   }
-  
+
   /// 相対回転アニメーション
   void animateRotateBy(
     double angle, {
     AnimationConfig config = const AnimationConfig(),
   }) {
-    add(
-      RotateEffect.by(
-        angle,
-        config.toEffectController(),
-      ),
-    );
+    add(RotateEffect.by(angle, config.toEffectController()));
   }
-  
+
   /// 振動アニメーション
   void animateShake({
     double intensity = 5.0,
@@ -157,58 +127,36 @@ extension PositionComponentAnimations on PositionComponent {
 /// HasPaint実装Component用Extension（透明度）
 extension HasPaintAnimations<T extends Component> on T {
   /// フェードイン
-  void animateFadeIn({
-    AnimationConfig config = const AnimationConfig(),
-  }) {
+  void animateFadeIn({AnimationConfig config = const AnimationConfig()}) {
     if (this is OpacityProvider) {
-      add(
-        OpacityEffect.fadeIn(
-          config.toEffectController(),
-        ),
-      );
+      add(OpacityEffect.fadeIn(config.toEffectController()));
     }
   }
-  
+
   /// フェードアウト
-  void animateFadeOut({
-    AnimationConfig config = const AnimationConfig(),
-  }) {
+  void animateFadeOut({AnimationConfig config = const AnimationConfig()}) {
     if (this is OpacityProvider) {
-      add(
-        OpacityEffect.fadeOut(
-          config.toEffectController(),
-        ),
-      );
+      add(OpacityEffect.fadeOut(config.toEffectController()));
     }
   }
-  
+
   /// 透明度アニメーション
   void animateOpacityTo(
     double opacity, {
     AnimationConfig config = const AnimationConfig(),
   }) {
     if (this is OpacityProvider) {
-      add(
-        OpacityEffect.to(
-          opacity,
-          config.toEffectController(),
-        ),
-      );
+      add(OpacityEffect.to(opacity, config.toEffectController()));
     }
   }
-  
+
   /// 相対透明度アニメーション
   void animateOpacityBy(
     double offset, {
     AnimationConfig config = const AnimationConfig(),
   }) {
     if (this is OpacityProvider) {
-      add(
-        OpacityEffect.by(
-          offset,
-          config.toEffectController(),
-        ),
-      );
+      add(OpacityEffect.by(offset, config.toEffectController()));
     }
   }
 }
@@ -222,7 +170,7 @@ extension SpriteComponentAnimations on SpriteComponent {
     VoidCallback? onComplete,
   }) {
     final effects = <Effect>[];
-    
+
     for (int i = 0; i < blinkCount; i++) {
       effects.add(
         OpacityEffect.to(
@@ -240,7 +188,7 @@ extension SpriteComponentAnimations on SpriteComponent {
         ),
       );
     }
-    
+
     add(SequenceEffect(effects));
   }
 }
@@ -254,7 +202,9 @@ extension TextComponentAnimations on TextComponent {
   }) {
     // TextComponentはデフォルトでHasPaint未実装のため
     // カスタム実装が必要（公式Issue #1013参照）
-    debugPrint('TextComponent opacity animations require custom implementation with HasPaint');
+    debugPrint(
+      'TextComponent opacity animations require custom implementation with HasPaint',
+    );
   }
 }
 
@@ -264,14 +214,14 @@ extension ComponentEffectChain on Component {
   void animateSequence(List<Effect> effects) {
     add(SequenceEffect(effects));
   }
-  
+
   /// 並列アニメーション実行
   void animateParallel(List<Effect> effects) {
     for (final effect in effects) {
       add(effect);
     }
   }
-  
+
   /// 全Effect削除
   void clearAllEffects() {
     final effects = children.whereType<Effect>().toList();
@@ -294,7 +244,7 @@ class AnimationPresets {
       ),
     );
   }
-  
+
   /// ポップアップ表示
   static void popIn(PositionComponent component) {
     component.scale = Vector2.zero();
@@ -306,7 +256,7 @@ class AnimationPresets {
       ),
     );
   }
-  
+
   /// スライドイン（左から）
   static void slideInFromLeft(PositionComponent component, double screenWidth) {
     final originalX = component.position.x;
@@ -334,15 +284,12 @@ class GameComponent extends PositionComponent with HasPaint {
     super.children,
     super.priority,
   });
-  
+
   @override
   void render(Canvas canvas) {
     // 基本的な矩形描画（デバッグ用）
     if (size.x > 0 && size.y > 0) {
-      canvas.drawRect(
-        Rect.fromLTWH(0, 0, size.x, size.y),
-        paint,
-      );
+      canvas.drawRect(Rect.fromLTWH(0, 0, size.x, size.y), paint);
     }
     super.render(canvas);
   }

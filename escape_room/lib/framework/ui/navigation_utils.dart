@@ -1,14 +1,14 @@
 /// Navigator操作の最適化ユーティリティ
-/// 
+///
 /// BuildContextの効率的な使用パターンとNavigator.ofの最適化を提供
-library navigation_utils;
+library;
 
 import 'package:flutter/material.dart';
 
 /// Navigator操作の最適化クラス
 class NavigationUtils {
   /// buildメソッド内でのNavigator.of呼び出しを最適化
-  /// 
+  ///
   /// buildメソッド内でNavigator.ofを呼び出すのは計算コストが高いため、
   /// 実際の操作時まで遅延させる最適化パターン
   static VoidCallback createNavigatorCallback(
@@ -27,9 +27,7 @@ class NavigationUtils {
     Widget Function() routeBuilder,
   ) {
     return createNavigatorCallback(context, (navigator) {
-      navigator.push(
-        MaterialPageRoute(builder: (_) => routeBuilder()),
-      );
+      navigator.push(MaterialPageRoute(builder: (_) => routeBuilder()));
     });
   }
 
@@ -57,7 +55,7 @@ class NavigationUtils {
 typedef NavigatorAction = void Function(NavigatorState navigator);
 
 /// 最適化されたNavigatorコールバックのMixin
-/// 
+///
 /// StatefulWidgetで使用してNavigator操作を最適化
 mixin NavigatorOptimization<T extends StatefulWidget> on State<T> {
   /// キャッシュされたNavigatorState

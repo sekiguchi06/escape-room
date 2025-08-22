@@ -31,7 +31,6 @@ class ImagePreloader {
   Future<void> preloadAllRoomImages(BuildContext context) async {
     if (_isPreloaded) return;
 
-    
     // プリロード対象の画像リスト
     final images = [
       // 基本ルーム画像
@@ -40,7 +39,7 @@ class ImagePreloader {
       Assets.images.roomLeftmost,
       Assets.images.roomRight,
       Assets.images.roomRightmost,
-      
+
       // 夜モード画像
       Assets.images.escapeRoomBgNight,
       Assets.images.roomLeftNight,
@@ -57,14 +56,13 @@ class ImagePreloader {
       try {
         // Flutter Image Provider にプリキャッシュ
         await precacheImage(asset.provider(), context);
-        
+
         // AssetBundle にもプリロード
         await _preloadAssetBundle(asset.path);
-        
+
         loaded++;
         _progress = loaded / total;
         _progressNotifier.value = _progress;
-        
       } catch (e) {
         debugPrint('❌ Failed to preload ${asset.path}: $e');
       }
@@ -75,7 +73,6 @@ class ImagePreloader {
 
     _isPreloaded = true;
     _preloadComplete.value = true;
-    
   }
 
   /// AssetBundle レベルでのプリロード
@@ -98,7 +95,7 @@ class ImagePreloader {
   /// プリロード完了を待機
   Future<void> waitForPreload() async {
     if (_isPreloaded) return;
-    
+
     // プリロード完了まで待機
     while (!_preloadComplete.value) {
       await Future.delayed(const Duration(milliseconds: 50));
@@ -138,11 +135,7 @@ class PreloadedApp extends StatefulWidget {
   final Widget child;
   final Widget? loadingWidget;
 
-  const PreloadedApp({
-    super.key,
-    required this.child,
-    this.loadingWidget,
-  });
+  const PreloadedApp({super.key, required this.child, this.loadingWidget});
 
   @override
   State<PreloadedApp> createState() => _PreloadedAppState();
@@ -164,7 +157,7 @@ class _PreloadedAppState extends State<PreloadedApp> {
     try {
       // フレーム構築完了を待機
       await WidgetsBinding.instance.endOfFrame;
-      
+
       if (!mounted) return;
 
       setState(() {
@@ -173,7 +166,6 @@ class _PreloadedAppState extends State<PreloadedApp> {
 
       // プリロード実行（エラーハンドリング付き）
       await _preloader.preloadAllRoomImages(context);
-      
     } catch (e) {
       if (mounted) {
         setState(() {
@@ -241,11 +233,7 @@ class _PreloadedAppState extends State<PreloadedApp> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.error_outline,
-                color: Colors.red,
-                size: 48,
-              ),
+              const Icon(Icons.error_outline, color: Colors.red, size: 48),
               const SizedBox(height: 16),
               const Text(
                 'Loading failed',
@@ -258,10 +246,7 @@ class _PreloadedAppState extends State<PreloadedApp> {
               const SizedBox(height: 8),
               const Text(
                 'Some images could not be loaded',
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 14,
-                ),
+                style: TextStyle(color: Colors.white70, fontSize: 14),
               ),
               const SizedBox(height: 24),
               ElevatedButton(

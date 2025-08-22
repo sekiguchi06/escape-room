@@ -38,10 +38,7 @@ class FadePageRoute<T> extends PageRoute<T> {
   ) {
     // フェードイン・アウト効果
     return FadeTransition(
-      opacity: CurvedAnimation(
-        parent: animation,
-        curve: curve,
-      ),
+      opacity: CurvedAnimation(parent: animation, curve: curve),
       child: child,
     );
   }
@@ -58,13 +55,11 @@ class FadePageRoute<T> extends PageRoute<T> {
 
 /// ゲーム専用の長いフェードトランジション
 class GameFadePageRoute<T> extends FadePageRoute<T> {
-  GameFadePageRoute({
-    required super.child,
-    super.settings,
-  }) : super(
-          fadeDuration: const Duration(milliseconds: 800), // 部屋移動(300ms)より長め
-          curve: Curves.easeInOut,
-        );
+  GameFadePageRoute({required super.child, super.settings})
+    : super(
+        fadeDuration: const Duration(milliseconds: 800), // 部屋移動(300ms)より長め
+        curve: Curves.easeInOut,
+      );
 }
 
 /// 便利な拡張メソッド
@@ -94,13 +89,11 @@ extension FadeNavigationExtension on NavigatorState {
         fadeDuration: const Duration(milliseconds: 400),
       ),
     );
-    
+
     // 瞬時に戻る
     pop();
-    
+
     // そして新しいページをフェードインで表示
-    return pushReplacement<T, void>(
-      GameFadePageRoute<T>(child: page),
-    );
+    return pushReplacement<T, void>(GameFadePageRoute<T>(child: page));
   }
 }

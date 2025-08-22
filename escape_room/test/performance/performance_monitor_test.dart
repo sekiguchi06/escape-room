@@ -29,7 +29,7 @@ void main() {
 
     test('パフォーマンスレポートが取得できる', () {
       final report = monitor.getReport();
-      
+
       expect(report, isA<PerformanceReport>());
       expect(report.averageFrameTimeMs, isA<double>());
       expect(report.currentFps, isA<double>());
@@ -43,7 +43,7 @@ void main() {
     test('データクリアが正常に動作する', () {
       monitor.clearData();
       final report = monitor.getReport();
-      
+
       expect(report.totalFrames, equals(0));
       expect(report.frameDropCount, equals(0));
     });
@@ -51,7 +51,7 @@ void main() {
     test('レポートのJSON変換が正常に動作する', () {
       final report = monitor.getReport();
       final json = report.toJson();
-      
+
       expect(json, isA<Map<String, dynamic>>());
       expect(json['averageFrameTimeMs'], isA<double>());
       expect(json['currentFps'], isA<double>());
@@ -66,7 +66,7 @@ void main() {
     test('レポートの文字列表現が適切にフォーマットされる', () {
       final report = monitor.getReport();
       final reportString = report.toString();
-      
+
       expect(reportString, contains('パフォーマンスレポート'));
       expect(reportString, contains('平均フレーム時間'));
       expect(reportString, contains('現在のFPS'));
@@ -77,7 +77,7 @@ void main() {
     test('シングルトンパターンが正しく実装されている', () {
       final monitor1 = PerformanceMonitor();
       final monitor2 = PerformanceMonitor();
-      
+
       expect(identical(monitor1, monitor2), isTrue);
     });
   });

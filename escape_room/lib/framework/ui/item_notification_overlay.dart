@@ -8,46 +8,50 @@ class ItemNotificationOverlay extends StatefulWidget {
   const ItemNotificationOverlay({super.key});
 
   @override
-  State<ItemNotificationOverlay> createState() => _ItemNotificationOverlayState();
+  State<ItemNotificationOverlay> createState() =>
+      _ItemNotificationOverlayState();
 }
 
 class _ItemNotificationOverlayState extends State<ItemNotificationOverlay>
     with TickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<Offset> _slideAnimation;
-  
+
   bool _isVisible = false;
   String _itemName = '';
   String _description = '';
   AssetGenImage? _itemAsset;
-  
+
   @override
   void initState() {
     super.initState();
-    
+
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 500),
       vsync: this,
     );
-    
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0.0, 1.0), // 画面下から
-      end: const Offset(0.0, 0.0),   // 表示位置
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOutBack,
-    ));
-    
+
+    _slideAnimation =
+        Tween<Offset>(
+          begin: const Offset(0.0, 1.0), // 画面下から
+          end: const Offset(0.0, 0.0), // 表示位置
+        ).animate(
+          CurvedAnimation(
+            parent: _animationController,
+            curve: Curves.easeOutBack,
+          ),
+        );
+
     // アイテム発見コールバックを設定
     _setupItemDiscoveryCallback();
   }
-  
+
   /// ホットスポットシステムにアイテム発見コールバックを設定
   void _setupItemDiscoveryCallback() {
     final hotspotSystem = RoomHotspotSystem();
     hotspotSystem.setItemDiscoveryCallback(_showNotification);
   }
-  
+
   /// 通知を表示
   void _showNotification({
     required String itemId,
@@ -56,28 +60,28 @@ class _ItemNotificationOverlayState extends State<ItemNotificationOverlay>
     required AssetGenImage itemAsset,
   }) {
     if (_isVisible) return;
-    
+
     setState(() {
       _itemName = itemName;
       _description = description;
       _itemAsset = itemAsset;
       _isVisible = true;
     });
-    
+
     _animationController.forward();
-    
+
     debugPrint('🎊 Notification overlay: Showing $itemName');
-    
+
     // 3秒後に自動的に非表示
     Future.delayed(const Duration(seconds: 3), () {
       _hideNotification();
     });
   }
-  
+
   /// 通知を非表示
   void _hideNotification() {
     if (!_isVisible) return;
-    
+
     _animationController.reverse().then((_) {
       if (mounted) {
         setState(() {
@@ -88,22 +92,22 @@ class _ItemNotificationOverlayState extends State<ItemNotificationOverlay>
         });
       }
     });
-    
+
     debugPrint('🎊 Notification overlay: Hidden');
   }
-  
+
   @override
   void dispose() {
     _animationController.dispose();
     super.dispose();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     if (!_isVisible || _itemAsset == null) {
       return const SizedBox.shrink();
     }
-    
+
     return Material(
       elevation: 100, // モーダルより高いelevation
       borderRadius: BorderRadius.circular(12),
@@ -117,17 +121,14 @@ class _ItemNotificationOverlayState extends State<ItemNotificationOverlay>
       ),
     );
   }
-  
+
   /// 通知カードを構築
   Widget _buildNotificationCard() {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         color: Colors.black.withValues(alpha: 0.9),
-        border: Border.all(
-          color: Colors.yellow,
-          width: 2.0,
-        ),
+        border: Border.all(color: Colors.yellow, width: 2.0),
       ),
       padding: const EdgeInsets.all(12.0),
       child: Row(
@@ -160,9 +161,9 @@ class _ItemNotificationOverlayState extends State<ItemNotificationOverlay>
               ),
             ),
           ),
-          
+
           const SizedBox(width: 12),
-          
+
           // テキスト部分
           Expanded(
             child: Column(
@@ -181,9 +182,9 @@ class _ItemNotificationOverlayState extends State<ItemNotificationOverlay>
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                
+
                 const SizedBox(height: 4),
-                
+
                 // 説明
                 Text(
                   _description,

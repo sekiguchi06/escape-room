@@ -7,16 +7,51 @@ import 'package:flutter/material.dart';
 class HotspotComponent extends SpriteComponent with TapCallbacks {
   final String id;
   late final Function(String) onTap;
-  
+  bool _invisible = false;
+  bool _debugMode = false;
+
   HotspotComponent({
     required this.id,
     required this.onTap,
     required Vector2 position,
     required Vector2 size,
-  }) : super(
-          position: position,
-          size: size,
-        );
+    bool invisible = false,
+    bool debugMode = false,
+  }) : _invisible = invisible,
+       _debugMode = debugMode,
+       super(position: position, size: size);
+
+  /// 透明状態の取得
+  bool get isInvisible => _invisible;
+
+  /// デバッグモード状態の取得
+  bool get debugMode => _debugMode;
+
+  /// 透明状態の設定
+  void setInvisible(bool invisible) {
+    _invisible = invisible;
+    _updateVisibility();
+  }
+
+  /// デバッグモードの設定
+  void setDebugMode(bool debugMode) {
+    _debugMode = debugMode;
+    _updateVisibility();
+  }
+
+  /// 表示状態の更新
+  void _updateVisibility() {
+    if (_debugMode) {
+      // デバッグモード時は赤い半透明で表示
+      opacity = 1.0;
+    } else if (_invisible) {
+      // 透明時は完全に非表示
+      opacity = 0.0;
+    } else {
+      // 通常時は表示
+      opacity = 1.0;
+    }
+  }
 
   @override
   Future<void> onLoad() async {
@@ -53,15 +88,15 @@ class HotspotComponent extends SpriteComponent with TapCallbacks {
       final paint = Paint()
         ..color = Colors.grey.withValues(alpha: 0.3)
         ..style = PaintingStyle.fill;
-      
+
       final borderPaint = Paint()
         ..color = Colors.grey
         ..style = PaintingStyle.stroke
         ..strokeWidth = 2.0;
-      
+
       canvas.drawRect(size.toRect(), paint);
       canvas.drawRect(size.toRect(), borderPaint);
-      
+
       // IDテキストを表示
       final textPainter = TextPainter(
         text: TextSpan(
@@ -74,7 +109,7 @@ class HotspotComponent extends SpriteComponent with TapCallbacks {
         ),
         textDirection: TextDirection.ltr,
       );
-      
+
       textPainter.layout();
       textPainter.paint(
         canvas,

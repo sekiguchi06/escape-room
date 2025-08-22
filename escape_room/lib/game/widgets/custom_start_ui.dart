@@ -29,10 +29,7 @@ class CustomStartUI extends StatelessWidget {
       height: double.infinity,
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            Colors.indigo.shade900,
-            Colors.purple.shade900,
-          ],
+          colors: [Colors.indigo.shade900, Colors.purple.shade900],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
         ),
@@ -61,7 +58,7 @@ class CustomStartUI extends StatelessWidget {
               ),
             ),
           ),
-          
+
           // 進行度情報
           if (hasProgress && progressInfo != null)
             Positioned(
@@ -73,7 +70,9 @@ class CustomStartUI extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Colors.black.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.2),
+                  ),
                 ),
                 child: Text(
                   progressInfo!,
@@ -86,10 +85,10 @@ class CustomStartUI extends StatelessWidget {
                 ),
               ),
             ),
-          
+
           // ゲームボタン群
           _buildGameButtons(context),
-          
+
           // 設定ボタン
           Positioned(
             top: 60,
@@ -138,7 +137,7 @@ class CustomStartUI extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            
+
             // 下段のボタン行
             Row(
               children: [
@@ -146,7 +145,11 @@ class CustomStartUI extends StatelessWidget {
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed: onRetryPressed,
-                    icon: const Icon(Icons.refresh, color: Colors.white, size: 20),
+                    icon: const Icon(
+                      Icons.refresh,
+                      color: Colors.white,
+                      size: 20,
+                    ),
                     label: const Text(
                       'リトライ',
                       style: TextStyle(
@@ -165,12 +168,16 @@ class CustomStartUI extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 12),
-                
+
                 // 初めからボタン
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed: () => _showResetConfirmDialog(context),
-                    icon: const Icon(Icons.restart_alt, color: Colors.white, size: 20),
+                    icon: const Icon(
+                      Icons.restart_alt,
+                      color: Colors.white,
+                      size: 20,
+                    ),
                     label: const Text(
                       '初めから',
                       style: TextStyle(
@@ -238,9 +245,7 @@ class CustomStartUI extends StatelessWidget {
             '進行度をリセット',
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
-          content: const Text(
-            '現在の進行度を削除して、最初からゲームを開始しますか？\n\nこの操作は取り消せません。',
-          ),
+          content: const Text('現在の進行度を削除して、最初からゲームを開始しますか？\n\nこの操作は取り消せません。'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),

@@ -10,28 +10,30 @@ import '../components/dual_sprite_component.dart';
 class CodePadObject extends InteractableGameObject {
   final String correctCode;
   final String rewardItemId;
-  
+
   CodePadObject({
-    required Vector2 position, 
+    required Vector2 position,
     required Vector2 size,
-    this.correctCode = '2859',  // デフォルトの正解コード
-    this.rewardItemId = 'puzzle_key',  // 報酬アイテム
+    this.correctCode = '2859', // デフォルトの正解コード
+    this.rewardItemId = 'puzzle_key', // 報酬アイテム
   }) : super(objectId: 'code_pad') {
     this.position = position;
     this.size = size;
   }
-  
+
   @override
   Future<void> initialize() async {
     // コードパッド専用戦略を設定
-    setInteractionStrategy(CodePadPuzzleStrategy(
-      correctCode: correctCode,
-      successMessage: 'コードが正解です！隠し扉が開きました',
-      failureMessage: 'コードが間違っています。正しい4桁の数字を入力してください',
-      rewardItemId: rewardItemId,
-    ));
+    setInteractionStrategy(
+      CodePadPuzzleStrategy(
+        correctCode: correctCode,
+        successMessage: 'コードが正解です！隠し扉が開きました',
+        failureMessage: 'コードが間違っています。正しい4桁の数字を入力してください',
+        rewardItemId: rewardItemId,
+      ),
+    );
   }
-  
+
   @override
   Future<void> loadAssets() async {
     // DualSpriteComponentで画像管理
@@ -42,7 +44,7 @@ class CodePadObject extends InteractableGameObject {
       componentSize: size,
     );
   }
-  
+
   @override
   void onActivated() {
     debugPrint('CodePad activated: puzzle solved successfully');
@@ -57,48 +59,48 @@ class CodePadPuzzleStrategy implements InteractionStrategy {
   final String failureMessage;
   final String? rewardItemId;
   bool _isSolved = false;
-  
+
   CodePadPuzzleStrategy({
     required this.correctCode,
     required this.successMessage,
     required this.failureMessage,
     this.rewardItemId,
   });
-  
+
   @override
   bool canInteract() {
     return !_isSolved;
   }
-  
+
   @override
   InteractionResult execute() {
     if (!canInteract()) {
       return InteractionResult.failure('既に解決済みです');
     }
-    
+
     // パズルモーダルを表示する必要があることを示す
     // 実際のモーダル表示とコード検証は上位レイヤーで処理
     return InteractionResult.success(
       message: 'コードパッドにアクセスしています...',
-      shouldActivate: false,  // まだ解決していない
+      shouldActivate: false, // まだ解決していない
     );
   }
-  
+
   /// コード検証処理（モーダルからの入力用）
   InteractionResult validateCode(String inputCode) {
     if (!canInteract()) {
       return InteractionResult.failure('既に解決済みです');
     }
-    
+
     if (inputCode == correctCode) {
       _isSolved = true;
-      
+
       // 報酬アイテムを決定
       final itemsToAdd = <String>[];
       if (rewardItemId != null) {
         itemsToAdd.add(rewardItemId!);
       }
-      
+
       return InteractionResult.success(
         message: successMessage,
         itemsToAdd: itemsToAdd,
@@ -108,13 +110,13 @@ class CodePadPuzzleStrategy implements InteractionStrategy {
       return InteractionResult.failure(failureMessage);
     }
   }
-  
+
   @override
   String get strategyName => 'CodePadPuzzle';
-  
+
   /// 正解コードを取得（モーダル表示用）
   String get expectedCode => correctCode;
-  
+
   /// 状態リセット（テスト用）
   void reset() {
     _isSolved = false;
@@ -127,7 +129,7 @@ extension CodePadObjectExtensions on CodePadObject {
   CodePadPuzzleStrategy? getCodePadStrategy() {
     // performInteractionを使って間接的に戦略の状態を確認
     if (!canInteract()) return null;
-    
+
     // 実際のStrategyインスタンスにアクセスする必要がある場合は
     // この実装では制限があるため、代替アプローチを使用
     return CodePadPuzzleStrategy(

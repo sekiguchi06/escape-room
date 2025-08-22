@@ -1,67 +1,243 @@
 {
   "@@locale": "en",
-  "appTitle": "Casual Game Template",
+  "@@author": "Escape Room Development Team",
+  "@@last_modified": "2024-08-19",
+  
+  "appTitle": "Escape Master",
   "@appTitle": {
-    "description": "Application title"
+    "description": "Main app title displayed in UI"
   },
-  "escapeGameTitle": "🔓 Play Escape Room",
-  "@escapeGameTitle": {
-    "description": "Escape game button title"
+  
+  "appSubtitle": "Ultimate Escape Puzzle Game", 
+  "@appSubtitle": {
+    "description": "App tagline/subtitle"
   },
-  "playTapFireGame": "Play Tap Fire Game",
-  "@playTapFireGame": {
-    "description": "Tap fire game button"
+  
+  "buttonStart": "Start",
+  "@buttonStart": {
+    "description": "Start new game button"
   },
-  "playSimpleGame": "Play Simple Game",
-  "@playSimpleGame": {
-    "description": "Simple game button"
+  
+  "buttonContinue": "Continue",
+  "@buttonContinue": {
+    "description": "Continue saved game button"
   },
-  "playTapShooter": "Play Simple Tap Shooter",
-  "@playTapShooter": {
-    "description": "Tap shooter button"
+  
+  "buttonHowToPlay": "How to Play",
+  "@buttonHowToPlay": {
+    "description": "How to play instructions button"
   },
-  "gameOver": "Game Over",
-  "@gameOver": {
-    "description": "Game over message"
-  },
-  "clear": "Clear!",
-  "@clear": {
-    "description": "Game clear message"
-  },
-  "play": "Play",
-  "@play": {
-    "description": "Play button"
-  },
+  
   "settings": "Settings",
   "@settings": {
     "description": "Settings button"
   },
+  
+  "buttonClose": "Close",
+  "@buttonClose": {
+    "description": "Close dialog button"
+  },
+  
+  "buttonCancel": "Cancel",
+  "@buttonCancel": {
+    "description": "Cancel action button"
+  },
+  
+  "buttonConfirm": "Confirm", 
+  "@buttonConfirm": {
+    "description": "Confirm action button"
+  },
+  
   "back": "Back",
   "@back": {
     "description": "Back button"
   },
+  
+  "gameStartNewGame": "Start New Game",
+  "@gameStartNewGame": {
+    "description": "New game confirmation option"
+  },
+  
+  "gameOverwriteWarning": "Starting a new game will delete current progress. Do you want to continue?",
+  "@gameOverwriteWarning": {
+    "description": "Warning when overwriting saved progress"
+  },
+  
+  "gameDeleteProgressConfirm": "Delete Progress and Start", 
+  "@gameDeleteProgressConfirm": {
+    "description": "Confirm button to delete progress and start new game"
+  },
+  
+  "gameOver": "Game Over",
+  "@gameOver": {
+    "description": "Game over message"
+  },
+  
+  "clear": "Clear!",
+  "@clear": {
+    "description": "Game clear message"
+  },
+  
+  "play": "Play",
+  "@play": {
+    "description": "Play button"
+  },
+  
   "restart": "Restart",
   "@restart": {
     "description": "Restart button"
   },
+  
   "pause": "Pause",
   "@pause": {
     "description": "Pause button"
   },
+  
   "resume": "Resume",
   "@resume": {
     "description": "Resume button"
   },
+  
   "menu": "Menu",
   "@menu": {
     "description": "Menu button"
   },
+  
   "score": "Score",
   "@score": {
     "description": "Score display"
   },
+  
   "timeRemaining": "Time Remaining",
   "@timeRemaining": {
     "description": "Time remaining display"
+  },
+  
+  "itemsCount": "{count, plural, =0{No items} =1{1 item} other{{count} items}}",
+  "@itemsCount": {
+    "description": "Count of items with proper plural support",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  
+  "tooltipVolumeSettings": "Volume settings",
+  "@tooltipVolumeSettings": {
+    "description": "Volume settings button tooltip"
+  },
+  
+  "tooltipRanking": "Ranking",
+  "@tooltipRanking": {
+    "description": "Ranking button tooltip"
+  },
+  
+  "tooltipAchievements": "Achievements", 
+  "@tooltipAchievements": {
+    "description": "Achievements button tooltip"
+  },
+  
+  "tooltipSettings": "Settings",
+  "@tooltipSettings": {
+    "description": "Settings button tooltip"
+  },
+  
+  "tooltipAppInfo": "App info",
+  "@tooltipAppInfo": {
+    "description": "App info button tooltip"
+  },
+  
+  "settingsTitle": "Settings",
+  "@settingsTitle": {
+    "description": "Settings dialog title"
+  },
+  
+  "settingsVibration": "Vibration", 
+  "@settingsVibration": {
+    "description": "Vibration setting label"
+  },
+  
+  "settingsVibrationDesc": "Haptic feedback on tap",
+  "@settingsVibrationDesc": {
+    "description": "Vibration setting description"
+  },
+  
+  "settingsPushNotification": "Push Notifications",
+  "@settingsPushNotification": {
+    "description": "Push notification setting label"
+  },
+  
+  "settingsPushNotificationDesc": "Game updates and hint notifications", 
+  "@settingsPushNotificationDesc": {
+    "description": "Push notification setting description"
+  },
+  
+  "settingsAutoSave": "Auto Save",
+  "@settingsAutoSave": {
+    "description": "Auto save setting label"
+  },
+  
+  "settingsAutoSaveDesc": "Automatic progress saving",
+  "@settingsAutoSaveDesc": {
+    "description": "Auto save setting description"
+  },
+  
+  "volumeTitle": "Volume Settings",
+  "@volumeTitle": {
+    "description": "Volume settings dialog title"
+  },
+  
+  "volumeBgm": "BGM Volume",
+  "@volumeBgm": {
+    "description": "Background music volume label"
+  },
+  
+  "volumeSfx": "Sound Effects Volume", 
+  "@volumeSfx": {
+    "description": "Sound effects volume label"
+  },
+  
+  "volumeMuted": "Muted",
+  "@volumeMuted": {
+    "description": "Muted status label"
+  },
+  
+  "volumeReset": "Reset",
+  "@volumeReset": {
+    "description": "Reset volume settings button"
+  },
+  
+  "volumeTest": "Test",
+  "@volumeTest": {
+    "description": "Test sound button"
+  },
+  
+  "errorLoadSaveData": "Failed to load save data",
+  "@errorLoadSaveData": {
+    "description": "Error message when save data loading fails"
+  },
+  
+  "errorOccurred": "An error occurred: {error}",
+  "@errorOccurred": {
+    "description": "Generic error message with placeholder",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network connection failed"
+      }
+    }
+  },
+  
+  "messageNotImplemented": "{feature} feature (coming soon)",
+  "@messageNotImplemented": {
+    "description": "Not implemented feature message", 
+    "placeholders": {
+      "feature": {
+        "type": "String",
+        "example": "Ranking"
+      }
+    }
   }
 }

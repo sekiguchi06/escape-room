@@ -7,7 +7,7 @@ class TestGameStateProvider extends GameStateProvider<GameState> {
   TestGameStateProvider() : super(const TestGameIdleState()) {
     _setupTransitions();
   }
-  
+
   void _setupTransitions() {
     stateMachine.defineTransitions([
       // Idle -> Active
@@ -19,7 +19,7 @@ class TestGameStateProvider extends GameStateProvider<GameState> {
           debugPrint('ゲーム開始: レベル${activeState.level}');
         },
       ),
-      
+
       // Active -> Active (進捗更新)
       StateTransition<GameState>(
         fromState: TestGameActiveState,
@@ -32,7 +32,7 @@ class TestGameStateProvider extends GameStateProvider<GameState> {
           }
         },
       ),
-      
+
       // Active -> Completed
       StateTransition<GameState>(
         fromState: TestGameActiveState,
@@ -40,10 +40,12 @@ class TestGameStateProvider extends GameStateProvider<GameState> {
         onTransition: (from, to) {
           final activeState = from as TestGameActiveState;
           final completedState = to as TestGameCompletedState;
-          debugPrint('ゲーム完了: レベル${activeState.level} -> 最終レベル${completedState.finalLevel}');
+          debugPrint(
+            'ゲーム完了: レベル${activeState.level} -> 最終レベル${completedState.finalLevel}',
+          );
         },
       ),
-      
+
       // Completed -> Idle (リセット)
       StateTransition<GameState>(
         fromState: TestGameCompletedState,
@@ -54,7 +56,7 @@ class TestGameStateProvider extends GameStateProvider<GameState> {
       ),
     ]);
   }
-  
+
   /// ゲーム開始
   bool startGame(int initialLevel) {
     final newState = TestGameActiveState(level: initialLevel, progress: 0.0);
@@ -62,30 +64,30 @@ class TestGameStateProvider extends GameStateProvider<GameState> {
     // Note: startNewSession method is removed as it's not available in the current implementation
     return success;
   }
-  
+
   /// 進捗更新
   bool updateProgress(int level, double progress) {
     if (currentState is! TestGameActiveState) return false;
-    
+
     final newState = TestGameActiveState(level: level, progress: progress);
     return transitionTo(newState);
   }
-  
+
   /// ゲーム完了
   bool completeGame(int finalLevel, Duration completionTime) {
     if (currentState is! TestGameActiveState) return false;
-    
+
     final completedState = TestGameCompletedState(
       finalLevel: finalLevel,
       completionTime: completionTime,
     );
     return transitionTo(completedState);
   }
-  
+
   /// リセット
   bool resetGame() {
     if (currentState is! TestGameCompletedState) return false;
-    
+
     return transitionTo(const TestGameIdleState());
   }
 }

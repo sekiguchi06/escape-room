@@ -7,7 +7,7 @@ class SpriteRenderComponent extends Component {
   final Map<String, Sprite> _sprites = {};
   String _currentState = '';
   SpriteComponent? _spriteComponent;
-  
+
   /// スプライトセット読み込み
   Future<void> loadSpriteSet(Map<String, String> spritePaths) async {
     for (final entry in spritePaths.entries) {
@@ -15,11 +15,13 @@ class SpriteRenderComponent extends Component {
         _sprites[entry.key] = await Sprite.load(entry.value);
         debugPrint('Loaded sprite: ${entry.key} from ${entry.value}');
       } catch (e) {
-        debugPrint('Failed to load sprite: ${entry.key} from ${entry.value}, error: $e');
+        debugPrint(
+          'Failed to load sprite: ${entry.key} from ${entry.value}, error: $e',
+        );
       }
     }
   }
-  
+
   /// 初期状態設定
   void setInitialState(String state) {
     if (_sprites.containsKey(state)) {
@@ -27,7 +29,7 @@ class SpriteRenderComponent extends Component {
       _updateSprite();
     }
   }
-  
+
   /// 状態切り替え
   void switchToState(String state) {
     if (_sprites.containsKey(state)) {
@@ -35,21 +37,21 @@ class SpriteRenderComponent extends Component {
       _updateSprite();
     }
   }
-  
+
   /// アクティブ状態切り替え
   void switchToActivatedState() {
     switchToState('active');
   }
-  
+
   /// 現在の状態取得
   String get currentState => _currentState;
-  
+
   void _updateSprite() {
     if (_spriteComponent != null) {
       remove(_spriteComponent!);
       _spriteComponent = null;
     }
-    
+
     if (_sprites.containsKey(_currentState)) {
       _spriteComponent = SpriteComponent(sprite: _sprites[_currentState]!);
       if (parent != null) {
@@ -59,7 +61,7 @@ class SpriteRenderComponent extends Component {
       debugPrint('Updated sprite to state: $_currentState');
     }
   }
-  
+
   /// リソース解放
   void dispose() {
     _sprites.clear();

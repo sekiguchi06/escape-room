@@ -24,10 +24,7 @@ class CustomSettingsUI extends StatelessWidget {
           padding: const EdgeInsets.all(30),
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [
-                Colors.indigo.shade800,
-                Colors.indigo.shade900,
-              ],
+              colors: [Colors.indigo.shade800, Colors.indigo.shade900],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -64,17 +61,14 @@ class CustomSettingsUI extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 30),
-              
+
               // 難易度設定
               const Text(
                 'Difficulty',
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 16,
-                ),
+                style: TextStyle(color: Colors.white70, fontSize: 16),
               ),
               const SizedBox(height: 10),
-              
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -83,9 +77,9 @@ class CustomSettingsUI extends StatelessWidget {
                   _buildDifficultyButton('Hard', Colors.red),
                 ],
               ),
-              
+
               const SizedBox(height: 40),
-              
+
               // 閉じるボタン
               CustomActionButton(
                 icon: Icons.close,
@@ -109,10 +103,7 @@ class CustomSettingsUI extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [
-              color.withValues(alpha: 0.8),
-              color,
-            ],
+            colors: [color.withValues(alpha: 0.8), color],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),

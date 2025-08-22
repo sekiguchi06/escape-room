@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Flutter Guideに基づくテーママネージャー
 /// システム設定と連動するダークモード対応を提供
 class FlutterThemeManager extends ChangeNotifier {
   static const String _themeModeKey = 'theme_mode';
-  
+
   ThemeMode _themeMode = ThemeMode.system;
   bool _isSystemDarkMode = false;
 
@@ -28,7 +27,7 @@ class FlutterThemeManager extends ChangeNotifier {
   Future<void> initialize() async {
     await _loadThemeMode();
     await _detectSystemTheme();
-    
+
     // システムテーマ変更の監視
     _listenToSystemThemeChanges();
   }
@@ -36,7 +35,8 @@ class FlutterThemeManager extends ChangeNotifier {
   /// システムのダークモード設定を検出
   Future<void> _detectSystemTheme() async {
     try {
-      final brightness = WidgetsBinding.instance.platformDispatcher.platformBrightness;
+      final brightness =
+          WidgetsBinding.instance.platformDispatcher.platformBrightness;
       _isSystemDarkMode = brightness == Brightness.dark;
       notifyListeners();
     } catch (e) {
@@ -47,16 +47,18 @@ class FlutterThemeManager extends ChangeNotifier {
 
   /// システムテーマ変更の監視
   void _listenToSystemThemeChanges() {
-    WidgetsBinding.instance.platformDispatcher.onPlatformBrightnessChanged = () {
-      _detectSystemTheme();
-    };
+    WidgetsBinding.instance.platformDispatcher.onPlatformBrightnessChanged =
+        () {
+          _detectSystemTheme();
+        };
   }
 
   /// 保存されたテーマモードを読み込み
   Future<void> _loadThemeMode() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final themeModeIndex = prefs.getInt(_themeModeKey) ?? ThemeMode.system.index;
+      final themeModeIndex =
+          prefs.getInt(_themeModeKey) ?? ThemeMode.system.index;
       _themeMode = ThemeMode.values[themeModeIndex];
     } catch (e) {
       debugPrint('Failed to load theme mode: $e');
@@ -67,10 +69,10 @@ class FlutterThemeManager extends ChangeNotifier {
   /// テーマモードを設定して保存
   Future<void> setThemeMode(ThemeMode mode) async {
     if (_themeMode == mode) return;
-    
+
     _themeMode = mode;
     notifyListeners();
-    
+
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setInt(_themeModeKey, mode.index);

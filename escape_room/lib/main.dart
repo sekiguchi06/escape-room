@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flame/game.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 import 'l10n/app_localizations.dart';
 
 import 'framework/ui/image_preloader.dart';
 // import 'game/example_games/simple_escape_room.dart'; // 削除済み
 import 'game/escape_room.dart';
-import 'game/widgets/custom_game_ui.dart';
-import 'game/widgets/custom_start_ui.dart';
-import 'game/widgets/custom_settings_ui.dart';
 import 'framework/device/device_feedback_manager.dart';
 import 'framework/audio/volume_manager.dart';
 import 'framework/transitions/fade_page_route.dart';
@@ -21,14 +20,13 @@ import 'game/components/global_tap_detector.dart';
 import 'framework/state/game_progress_system.dart';
 import 'framework/state/game_autosave_system.dart';
 
-void main() {
-  runApp(
-    const ProviderScope(
-      child: PreloadedApp(
-        child: EscapeRoomApp(),
-      ),
-    ),
-  );
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Firebase初期化
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  runApp(const ProviderScope(child: PreloadedApp(child: EscapeRoomApp())));
 }
 
 class EscapeRoomApp extends StatefulWidget {
@@ -46,7 +44,7 @@ class _EscapeRoomAppState extends State<EscapeRoomApp> {
     DeviceFeedbackManager().initialize();
     VolumeManager().initialize();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return GlobalTapDetector(
@@ -92,37 +90,41 @@ class _EscapeRoomAppState extends State<EscapeRoomApp> {
 
 class GameSelectionScreen extends ConsumerStatefulWidget {
   const GameSelectionScreen({super.key});
-  
+
   @override
-  ConsumerState<GameSelectionScreen> createState() => _GameSelectionScreenState();
+  ConsumerState<GameSelectionScreen> createState() =>
+      _GameSelectionScreenState();
 }
 
-class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen> with WidgetsBindingObserver {
+class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen>
+    with WidgetsBindingObserver {
   ProgressAwareDataManager? _progressManager;
   bool _hasProgress = false;
-  
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _initializeProgressManager();
   }
-  
+
   Future<void> _initializeProgressManager() async {
     _progressManager = ProgressAwareDataManager.defaultInstance();
     await _progressManager!.initialize();
-    
+
     // デバッグ情報を表示
     print('🔍 Progress Manager Debug:');
     print('  Has Progress: ${_progressManager!.progressManager.hasProgress}');
-    print('  Current Progress: ${_progressManager!.progressManager.currentProgress}');
+    print(
+      '  Current Progress: ${_progressManager!.progressManager.currentProgress}',
+    );
     if (_progressManager!.progressManager.currentProgress != null) {
       final progress = _progressManager!.progressManager.currentProgress!;
       print('  Game ID: ${progress.gameId}');
       print('  Level: ${progress.currentLevel}');
       print('  Completion: ${progress.completionRate}');
     }
-    
+
     if (mounted) {
       setState(() {
         _hasProgress = _progressManager!.progressManager.hasProgress;
@@ -130,7 +132,7 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen> with 
       });
     }
   }
-  
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
@@ -138,12 +140,12 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen> with 
       _refreshProgressState();
     }
   }
-  
+
   Future<void> _refreshProgressState() async {
     if (_progressManager != null) {
       print('🔄 Refreshing progress state...');
       await _progressManager!.progressManager.initialize();
-      
+
       if (mounted) {
         setState(() {
           _hasProgress = _progressManager!.progressManager.hasProgress;
@@ -157,22 +159,22 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen> with 
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context);
     return Scaffold(
-        body: Container(
-          width: double.infinity,
-          height: double.infinity,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Colors.deepPurple.shade900,
-                Colors.indigo.shade900,
-                Colors.blue.shade800,
-              ],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Colors.deepPurple.shade900,
+              Colors.indigo.shade900,
+              Colors.blue.shade800,
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
-          child: SafeArea(
-            child: Stack(
+        ),
+        child: SafeArea(
+          child: Stack(
             children: [
               // 背景装飾
               Positioned(
@@ -199,11 +201,10 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen> with 
                   ),
                 ),
               ),
-              
+
               // メインコンテンツ
               Column(
                 children: [
-                  
                   // メインコンテンツエリア（修正版レスポンシブ対応）
                   Expanded(
                     child: SingleChildScrollView(
@@ -219,7 +220,13 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen> with 
                                 children: [
                                   Text(
                                     '🔓',
-                                    style: TextStyle(fontSize: MediaQuery.of(context).size.height > 700 ? 64 : 48),
+                                    style: TextStyle(
+                                      fontSize:
+                                          MediaQuery.of(context).size.height >
+                                              700
+                                          ? 64
+                                          : 48,
+                                    ),
                                   ),
                                   const SizedBox(height: 16),
                                   Text(
@@ -227,7 +234,11 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen> with 
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                       color: Colors.white,
-                                      fontSize: MediaQuery.of(context).size.height > 700 ? 48 : 36,
+                                      fontSize:
+                                          MediaQuery.of(context).size.height >
+                                              700
+                                          ? 48
+                                          : 36,
                                       fontWeight: FontWeight.bold,
                                       shadows: const [
                                         Shadow(
@@ -240,32 +251,43 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen> with 
                                   ),
                                   const SizedBox(height: 8),
                                   Text(
-                                    '究極の脱出パズルゲーム',
+                                    localizations?.appSubtitle ?? '究極の脱出パズルゲーム',
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
-                                      color: Colors.white.withValues(alpha: 0.8),
-                                      fontSize: MediaQuery.of(context).size.height > 700 ? 18 : 14,
+                                      color: Colors.white.withValues(
+                                        alpha: 0.8,
+                                      ),
+                                      fontSize:
+                                          MediaQuery.of(context).size.height >
+                                              700
+                                          ? 18
+                                          : 14,
                                       fontWeight: FontWeight.w300,
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                            
+
                             // メインボタンエリア
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 20),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 32.0,
+                                vertical: 20,
+                              ),
                               child: Column(
                                 children: [
                                   // 始めるボタン
                                   _buildMainButton(
                                     context: context,
                                     icon: Icons.play_arrow,
-                                    text: 'はじめる',
+                                    text: localizations?.buttonStart ?? 'はじめる',
                                     subtitle: '',
                                     color: Colors.green.shade600,
                                     onPressed: () async {
-                                      DeviceFeedbackManager().gameActionVibrate(GameAction.buttonTap);
+                                      DeviceFeedbackManager().gameActionVibrate(
+                                        GameAction.buttonTap,
+                                      );
                                       if (_hasProgress) {
                                         _showOverwriteWarningDialog();
                                       } else {
@@ -273,33 +295,56 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen> with 
                                       }
                                     },
                                   ),
-                                  
-                                  SizedBox(height: MediaQuery.of(context).size.height > 700 ? 16 : 12),
-                                  
+
+                                  SizedBox(
+                                    height:
+                                        MediaQuery.of(context).size.height > 700
+                                        ? 16
+                                        : 12,
+                                  ),
+
                                   // 続きからボタン
                                   _buildMainButton(
                                     context: context,
                                     icon: Icons.save_alt,
-                                    text: 'つづきから',
+                                    text:
+                                        localizations?.buttonContinue ??
+                                        'つづきから',
                                     subtitle: '',
-                                    color: _hasProgress ? Colors.blue.shade600 : Colors.grey.shade600,
-                                    onPressed: _hasProgress ? () async {
-                                      DeviceFeedbackManager().gameActionVibrate(GameAction.buttonTap);
-                                      await _loadSavedGame();
-                                    } : null,
+                                    color: _hasProgress
+                                        ? Colors.blue.shade600
+                                        : Colors.grey.shade600,
+                                    onPressed: _hasProgress
+                                        ? () async {
+                                            DeviceFeedbackManager()
+                                                .gameActionVibrate(
+                                                  GameAction.buttonTap,
+                                                );
+                                            await _loadSavedGame();
+                                          }
+                                        : null,
                                   ),
-                                  
-                                  SizedBox(height: MediaQuery.of(context).size.height > 700 ? 16 : 12),
-                                  
+
+                                  SizedBox(
+                                    height:
+                                        MediaQuery.of(context).size.height > 700
+                                        ? 16
+                                        : 12,
+                                  ),
+
                                   // 遊び方ボタン
                                   _buildMainButton(
                                     context: context,
                                     icon: Icons.help_outline,
-                                    text: 'あそびかた',
+                                    text:
+                                        localizations?.buttonHowToPlay ??
+                                        'あそびかた',
                                     subtitle: '',
                                     color: Colors.orange.shade600,
                                     onPressed: () {
-                                      DeviceFeedbackManager().gameActionVibrate(GameAction.buttonTap);
+                                      DeviceFeedbackManager().gameActionVibrate(
+                                        GameAction.buttonTap,
+                                      );
                                       _showHowToPlayDialog(context);
                                     },
                                   ),
@@ -311,7 +356,7 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen> with 
                       ),
                     ),
                   ),
-                  
+
                   // 下部ボタンエリア
                   Padding(
                     padding: const EdgeInsets.all(16.0),
@@ -324,9 +369,10 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen> with 
                           onPressed: () {
                             _showVolumeDialog(context);
                           },
-                          tooltip: '音量設定',
+                          tooltip:
+                              localizations?.tooltipVolumeSettings ?? '音量設定',
                         ),
-                        
+
                         // ランキングボタン
                         _buildIconButton(
                           icon: Icons.leaderboard,
@@ -336,9 +382,9 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen> with 
                               const SnackBar(content: Text('ランキング機能（実装予定）')),
                             );
                           },
-                          tooltip: 'ランキング',
+                          tooltip: localizations?.tooltipRanking ?? 'ランキング',
                         ),
-                        
+
                         // 実績ボタン
                         _buildIconButton(
                           icon: Icons.emoji_events,
@@ -348,32 +394,31 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen> with 
                               const SnackBar(content: Text('実績機能（実装予定）')),
                             );
                           },
-                          tooltip: '実績',
+                          tooltip: localizations?.tooltipAchievements ?? '実績',
                         ),
-                        
+
                         // 設定ボタン
                         _buildIconButton(
                           icon: Icons.settings,
                           onPressed: () {
                             _showSettingsDialog(context);
                           },
-                          tooltip: '設定',
+                          tooltip: localizations?.tooltipSettings ?? '設定',
                         ),
-                        
+
                         // 情報ボタン
                         _buildIconButton(
                           icon: Icons.info_outline,
                           onPressed: () {
                             _showAboutDialog(context);
                           },
-                          tooltip: 'アプリ情報',
+                          tooltip: localizations?.tooltipAppInfo ?? 'アプリ情報',
                         ),
                       ],
                     ),
                   ),
                 ],
               ),
-              
             ],
           ),
         ),
@@ -477,7 +522,10 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen> with 
                 Text('• アイテムをタップして詳細を確認'),
                 Text('• インベントリのアイテムを組み合わせて使用'),
                 SizedBox(height: 16),
-                Text('🔍 ゲームの進め方', style: TextStyle(fontWeight: FontWeight.bold)),
+                Text(
+                  '🔍 ゲームの進め方',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 SizedBox(height: 8),
                 Text('• 部屋に隠されたアイテムを見つけよう'),
                 Text('• パズルを解いて新しいアイテムを入手'),
@@ -504,7 +552,7 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen> with 
 
   void _showVolumeDialog(BuildContext context) {
     final volumeManager = VolumeManager();
-    
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -520,13 +568,17 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen> with 
                       const Spacer(),
                       IconButton(
                         icon: Icon(
-                          volumeManager.isMuted ? Icons.volume_off : Icons.volume_up,
+                          volumeManager.isMuted
+                              ? Icons.volume_off
+                              : Icons.volume_up,
                           color: volumeManager.isMuted ? Colors.red : null,
                         ),
                         onPressed: () {
                           volumeManager.toggleMute();
                           // ミュート切り替え時にフィードバック
-                          DeviceFeedbackManager().gameActionVibrate(GameAction.buttonTap);
+                          DeviceFeedbackManager().gameActionVibrate(
+                            GameAction.buttonTap,
+                          );
                         },
                         tooltip: volumeManager.isMuted ? 'ミュート解除' : 'ミュート',
                       ),
@@ -543,7 +595,9 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen> with 
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               const Text('🎵 BGM音量'),
-                              Text('${(volumeManager.bgmVolume * 100).round()}%'),
+                              Text(
+                                '${(volumeManager.bgmVolume * 100).round()}%',
+                              ),
                             ],
                           ),
                           Slider(
@@ -551,17 +605,21 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen> with 
                             min: 0.0,
                             max: 1.0,
                             divisions: 20,
-                            onChanged: volumeManager.isMuted ? null : (value) {
-                              volumeManager.setBgmVolume(value);
-                              // 音量変更時に軽いフィードバック
-                              DeviceFeedbackManager().vibrate(pattern: VibrationPattern.light);
-                            },
+                            onChanged: volumeManager.isMuted
+                                ? null
+                                : (value) {
+                                    volumeManager.setBgmVolume(value);
+                                    // 音量変更時に軽いフィードバック
+                                    DeviceFeedbackManager().vibrate(
+                                      pattern: VibrationPattern.light,
+                                    );
+                                  },
                           ),
                         ],
                       ),
-                      
+
                       const SizedBox(height: 16),
-                      
+
                       // 効果音音量スライダー
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -570,7 +628,9 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen> with 
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               const Text('🔔 効果音音量'),
-                              Text('${(volumeManager.sfxVolume * 100).round()}%'),
+                              Text(
+                                '${(volumeManager.sfxVolume * 100).round()}%',
+                              ),
                             ],
                           ),
                           Slider(
@@ -578,17 +638,21 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen> with 
                             min: 0.0,
                             max: 1.0,
                             divisions: 20,
-                            onChanged: volumeManager.isMuted ? null : (value) {
-                              volumeManager.setSfxVolume(value);
-                              // 音量変更時にテスト効果音を再生
-                              volumeManager.playGameSfx(GameSfxType.buttonTap);
-                            },
+                            onChanged: volumeManager.isMuted
+                                ? null
+                                : (value) {
+                                    volumeManager.setSfxVolume(value);
+                                    // 音量変更時にテスト効果音を再生
+                                    volumeManager.playGameSfx(
+                                      GameSfxType.buttonTap,
+                                    );
+                                  },
                           ),
                         ],
                       ),
-                      
+
                       const SizedBox(height: 16),
-                      
+
                       // ミュート状態の表示
                       if (volumeManager.isMuted)
                         Container(
@@ -596,16 +660,25 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen> with 
                           decoration: BoxDecoration(
                             color: Colors.red.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+                            border: Border.all(
+                              color: Colors.red.withValues(alpha: 0.3),
+                            ),
                           ),
                           child: const Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.volume_off, color: Colors.red, size: 16),
+                              Icon(
+                                Icons.volume_off,
+                                color: Colors.red,
+                                size: 16,
+                              ),
                               SizedBox(width: 8),
                               Text(
                                 'ミュート中',
-                                style: TextStyle(color: Colors.red, fontSize: 12),
+                                style: TextStyle(
+                                  color: Colors.red,
+                                  fontSize: 12,
+                                ),
                               ),
                             ],
                           ),
@@ -617,7 +690,9 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen> with 
                     TextButton(
                       onPressed: () {
                         volumeManager.resetToDefaults();
-                        DeviceFeedbackManager().gameActionVibrate(GameAction.buttonTap);
+                        DeviceFeedbackManager().gameActionVibrate(
+                          GameAction.buttonTap,
+                        );
                       },
                       child: const Text('リセット'),
                     ),
@@ -625,7 +700,9 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen> with 
                     TextButton(
                       onPressed: () {
                         volumeManager.playGameSfx(GameSfxType.success);
-                        DeviceFeedbackManager().gameActionVibrate(GameAction.buttonTap);
+                        DeviceFeedbackManager().gameActionVibrate(
+                          GameAction.buttonTap,
+                        );
                       },
                       child: const Text('テスト'),
                     ),
@@ -633,7 +710,9 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen> with 
                     TextButton(
                       onPressed: () {
                         Navigator.of(context).pop();
-                        DeviceFeedbackManager().gameActionVibrate(GameAction.buttonTap);
+                        DeviceFeedbackManager().gameActionVibrate(
+                          GameAction.buttonTap,
+                        );
                       },
                       child: const Text('閉じる'),
                     ),
@@ -649,7 +728,7 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen> with 
 
   void _showSettingsDialog(BuildContext context) {
     final deviceManager = DeviceFeedbackManager();
-    
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -728,7 +807,10 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen> with 
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Escape Master', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+              Text(
+                'Escape Master',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
               SizedBox(height: 8),
               Text('バージョン: 1.0.0'),
               Text('開発者: Claude Code'),
@@ -748,7 +830,7 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen> with 
       },
     );
   }
-  
+
   void _showOverwriteWarningDialog() {
     showDialog(
       context: context,
@@ -756,16 +838,9 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen> with 
         return AlertDialog(
           title: Row(
             children: [
-              Icon(
-                Icons.warning,
-                color: Colors.orange.shade600,
-                size: 28,
-              ),
+              Icon(Icons.warning, color: Colors.orange.shade600, size: 28),
               const SizedBox(width: 12),
-              const Text(
-                '確認',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
+              const Text('確認', style: TextStyle(fontWeight: FontWeight.bold)),
             ],
           ),
           content: Column(
@@ -795,10 +870,7 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen> with 
                     const Expanded(
                       child: Text(
                         '「つづきから」で現在の進行状況を再開できます',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.black87,
-                        ),
+                        style: TextStyle(fontSize: 14, color: Colors.black87),
                       ),
                     ),
                   ],
@@ -807,10 +879,7 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen> with 
               const SizedBox(height: 16),
               const Text(
                 '本当に新しいゲームを開始しますか？',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
             ],
           ),
@@ -819,10 +888,7 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen> with 
               onPressed: () => Navigator.of(context).pop(),
               child: Text(
                 'キャンセル',
-                style: TextStyle(
-                  color: Colors.grey.shade600,
-                  fontSize: 16,
-                ),
+                style: TextStyle(color: Colors.grey.shade600, fontSize: 16),
               ),
             ),
             ElevatedButton(
@@ -833,14 +899,14 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen> with 
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red.shade600,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
               ),
               child: const Text(
                 'データを削除して開始',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
             ),
           ],
@@ -848,30 +914,32 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen> with 
       },
     );
   }
-  
+
   Future<void> _startNewGame() async {
     if (_progressManager == null) return;
-    
+
     print('🆕 Starting new game...');
-    
+
     // 既存の進行度があれば削除
     if (_hasProgress) {
       await _progressManager!.resetProgress();
       print('🗑️ Previous progress data deleted');
     }
-    
+
     // ゲーム開始時：すべての状態を初期化
     RoomNavigationSystem().resetToInitialRoom();
     LightingSystem().resetToInitialState();
     InventorySystem().initializeEmpty();
-    
+
     // 新しいゲームを開始
     await _progressManager!.startNewGame('escape_room');
-    
+
     print('🆕 New game started successfully');
     print('  Has Progress: ${_progressManager!.progressManager.hasProgress}');
-    print('  Current Progress: ${_progressManager!.progressManager.currentProgress}');
-    
+    print(
+      '  Current Progress: ${_progressManager!.progressManager.currentProgress}',
+    );
+
     if (mounted) {
       Navigator.of(context).pushFade(const EscapeRoom()).then((_) {
         // ゲームから戻った時に進行度を再チェック
@@ -879,32 +947,32 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen> with 
       });
     }
   }
-  
+
   Future<void> _loadSavedGame() async {
     print('🔄 Loading saved game...');
     print('  Progress Manager: ${_progressManager != null}');
     print('  Has Progress: $_hasProgress');
-    
+
     if (_progressManager == null || !_hasProgress) {
       print('❌ Cannot load: Manager is null or no progress');
       return;
     }
-    
+
     try {
       // 保存されたゲームを読み込み
       final progress = await _progressManager!.continueGame();
-      
+
       print('🔄 Continue game result: $progress');
-      
+
       if (progress != null) {
         print('✅ Progress loaded successfully:');
         print('  Game ID: ${progress.gameId}');
         print('  Level: ${progress.currentLevel}');
         print('  Completion: ${progress.completionRate}');
-        
+
         // 進行度に基づいてゲーム状態を復元
         _restoreGameState(progress);
-        
+
         if (mounted) {
           Navigator.of(context).pushFade(const EscapeRoom()).then((_) {
             // ゲームから戻った時に進行度を再チェック
@@ -914,25 +982,25 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen> with 
       } else {
         print('❌ Progress is null');
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('セーブデータの読み込みに失敗しました')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('セーブデータの読み込みに失敗しました')));
         }
       }
     } catch (e) {
       print('❌ Error loading saved game: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('エラーが発生しました: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('エラーが発生しました: $e')));
       }
     }
   }
-  
+
   void _restoreGameState(GameProgress progress) {
     // ゲーム状態を進行度から復元
     final gameData = progress.gameData;
-    
+
     // レベル/ルーム状態の復元
     if (gameData.containsKey('current_room')) {
       final currentRoom = gameData['current_room'] as String?;
@@ -940,7 +1008,7 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen> with 
         // TODO: RoomNavigationSystem に進行度復元機能を追加後に実装
       }
     }
-    
+
     // インベントリ状態の復元
     if (gameData.containsKey('inventory')) {
       final inventoryData = gameData['inventory'] as Map<String, dynamic>?;
@@ -948,7 +1016,7 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen> with 
         // TODO: InventorySystem に進行度復元機能を追加後に実装
       }
     }
-    
+
     // ライティング状態の復元
     if (gameData.containsKey('lighting')) {
       final lightingData = gameData['lighting'] as Map<String, dynamic>?;
@@ -957,7 +1025,7 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen> with 
       }
     }
   }
-  
+
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
@@ -969,13 +1037,13 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen> with 
 class GameScreen<T extends Game> extends StatelessWidget {
   final String gameTitle;
   final T Function() gameFactory;
-  
+
   const GameScreen({
     super.key,
     required this.gameTitle,
     required this.gameFactory,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -992,7 +1060,7 @@ class GameScreen<T extends Game> extends StatelessWidget {
       ),
     );
   }
-  
+
   Map<String, Widget Function(BuildContext, T)> _buildOverlayMap() {
     return {
       'startUI': (context, game) {

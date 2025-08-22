@@ -16,7 +16,7 @@ fi
 
 echo "ComfyUIが停止中です。起動します..."
 
-cd ~/ai-services/ComfyUI/ComfyUI
+cd ~/ai-services/ComfyUI
 source ../venv-system/bin/activate
 
 # ログファイルの設定
@@ -27,4 +27,5 @@ echo "$(date): Starting ComfyUI API..." >> "$LOG_FILE"
 python main.py \
   --listen 0.0.0.0 \
   --port 8188 \
-  --enable-cors-header
+  --enable-cors-header \
+  --disable-xformers

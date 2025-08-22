@@ -23,19 +23,15 @@ class CustomGameUI extends StatelessWidget {
     return Stack(
       children: [
         // スコア表示 - 左上
-        Positioned(
-          top: 60,
-          left: 20,
-          child: CustomScoreWidget(score: score),
-        ),
-        
+        Positioned(top: 60, left: 20, child: CustomScoreWidget(score: score)),
+
         // タイマー表示 - 右上
         Positioned(
           top: 60,
           right: 20,
           child: CustomTimerWidget(timeRemaining: timeRemaining),
         ),
-        
+
         // ゲームコントロール - 右下
         Positioned(
           bottom: 100,
@@ -74,10 +70,7 @@ class CustomScoreWidget extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            Colors.purple.shade600,
-            Colors.purple.shade800,
-          ],
+          colors: [Colors.purple.shade600, Colors.purple.shade800],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -97,11 +90,7 @@ class CustomScoreWidget extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.stars,
-            color: Colors.yellow.shade300,
-            size: 20,
-          ),
+          Icon(Icons.stars, color: Colors.yellow.shade300, size: 20),
           const SizedBox(width: 8),
           Text(
             '$score',
@@ -137,7 +126,7 @@ class CustomTimerWidget extends StatelessWidget {
       final minutes = int.tryParse(parts[0]) ?? 0;
       final seconds = int.tryParse(parts[1]) ?? 0;
       final totalSeconds = minutes * 60 + seconds;
-      
+
       // 30秒以下で赤、60秒以下でオレンジ、それ以上で緑
       if (totalSeconds <= 30) return Colors.red.shade600;
       if (totalSeconds <= 60) return Colors.orange.shade600;
@@ -151,10 +140,7 @@ class CustomTimerWidget extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            _timerColor.withValues(alpha: 0.9),
-            _timerColor,
-          ],
+          colors: [_timerColor.withValues(alpha: 0.9), _timerColor],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -174,11 +160,7 @@ class CustomTimerWidget extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.timer,
-            color: Colors.white,
-            size: 18,
-          ),
+          Icon(Icons.timer, color: Colors.white, size: 18),
           const SizedBox(width: 8),
           Text(
             timeRemaining,
@@ -231,13 +213,9 @@ class _CustomActionButtonState extends State<CustomActionButton>
       duration: const Duration(milliseconds: 100),
       vsync: this,
     );
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 0.95,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
   }
 
   @override
@@ -277,10 +255,7 @@ class _CustomActionButtonState extends State<CustomActionButton>
                           widget.color.withValues(alpha: 0.7),
                           widget.color.withValues(alpha: 0.7),
                         ]
-                      : [
-                          widget.color.withValues(alpha: 0.9),
-                          widget.color,
-                        ],
+                      : [widget.color.withValues(alpha: 0.9), widget.color],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -310,11 +285,7 @@ class _CustomActionButtonState extends State<CustomActionButton>
                   width: 1.5,
                 ),
               ),
-              child: Icon(
-                widget.icon,
-                color: Colors.white,
-                size: 24,
-              ),
+              child: Icon(widget.icon, color: Colors.white, size: 24),
             ),
           ),
         );
@@ -348,10 +319,7 @@ class CustomGameOverUI extends StatelessWidget {
           padding: const EdgeInsets.all(30),
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [
-                Colors.indigo.shade800,
-                Colors.indigo.shade900,
-              ],
+              colors: [Colors.indigo.shade800, Colors.indigo.shade900],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -388,7 +356,7 @@ class CustomGameOverUI extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-              
+
               // 最終スコア表示
               Container(
                 padding: const EdgeInsets.all(20),
@@ -400,10 +368,7 @@ class CustomGameOverUI extends StatelessWidget {
                   children: [
                     const Text(
                       'Final Score',
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 16,
-                      ),
+                      style: TextStyle(color: Colors.white70, fontSize: 16),
                     ),
                     const SizedBox(height: 8),
                     Text(
@@ -425,7 +390,7 @@ class CustomGameOverUI extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 30),
-              
+
               // アクションボタン
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,

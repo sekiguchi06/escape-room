@@ -29,9 +29,13 @@ class GameProgress {
       gameId: json['gameId'] ?? '',
       currentLevel: json['currentLevel'] ?? 1,
       gameData: Map<String, dynamic>.from(json['gameData'] ?? {}),
-      lastPlayed: DateTime.parse(json['lastPlayed'] ?? DateTime.now().toIso8601String()),
+      lastPlayed: DateTime.parse(
+        json['lastPlayed'] ?? DateTime.now().toIso8601String(),
+      ),
       completionRate: (json['completionRate'] ?? 0.0).toDouble(),
-      achievementsUnlocked: Map<String, bool>.from(json['achievementsUnlocked'] ?? {}),
+      achievementsUnlocked: Map<String, bool>.from(
+        json['achievementsUnlocked'] ?? {},
+      ),
       playTimeSeconds: json['playTimeSeconds'] ?? 0,
       statistics: Map<String, int>.from(json['statistics'] ?? {}),
     );
@@ -68,7 +72,8 @@ class GameProgress {
       gameData: gameData ?? Map.from(this.gameData),
       lastPlayed: lastPlayed ?? this.lastPlayed,
       completionRate: completionRate ?? this.completionRate,
-      achievementsUnlocked: achievementsUnlocked ?? Map.from(this.achievementsUnlocked),
+      achievementsUnlocked:
+          achievementsUnlocked ?? Map.from(this.achievementsUnlocked),
       playTimeSeconds: playTimeSeconds ?? this.playTimeSeconds,
       statistics: statistics ?? Map.from(this.statistics),
     );
@@ -123,7 +128,7 @@ class GameProgressManager extends ChangeNotifier {
   final DataManager _dataManager;
   GameProgress? _currentProgress;
   final String _storageKey = 'current_game_progress';
-  
+
   GameProgressManager(this._dataManager);
 
   /// 現在の進行度
@@ -145,10 +150,10 @@ class GameProgressManager extends ChangeNotifier {
       lastPlayed: DateTime.now(),
       gameData: {},
     );
-    
+
     await _saveProgress();
     notifyListeners();
-    
+
     if (kDebugMode) {
       debugPrint('Started new game: $gameId');
     }
@@ -165,21 +170,28 @@ class GameProgressManager extends ChangeNotifier {
     if (_currentProgress == null) return;
 
     // ゲームデータの更新
-    final updatedGameData = Map<String, dynamic>.from(_currentProgress!.gameData);
+    final updatedGameData = Map<String, dynamic>.from(
+      _currentProgress!.gameData,
+    );
     if (gameDataUpdate != null) {
       updatedGameData.addAll(gameDataUpdate);
     }
 
     // 統計データの更新
-    final updatedStatistics = Map<String, int>.from(_currentProgress!.statistics);
+    final updatedStatistics = Map<String, int>.from(
+      _currentProgress!.statistics,
+    );
     if (statisticsUpdate != null) {
       for (final entry in statisticsUpdate.entries) {
-        updatedStatistics[entry.key] = (updatedStatistics[entry.key] ?? 0) + entry.value;
+        updatedStatistics[entry.key] =
+            (updatedStatistics[entry.key] ?? 0) + entry.value;
       }
     }
 
     // アチーブメントの更新
-    final updatedAchievements = Map<String, bool>.from(_currentProgress!.achievementsUnlocked);
+    final updatedAchievements = Map<String, bool>.from(
+      _currentProgress!.achievementsUnlocked,
+    );
     if (newAchievements != null) {
       updatedAchievements.addAll(newAchievements);
     }
@@ -195,7 +207,7 @@ class GameProgressManager extends ChangeNotifier {
 
     await _saveProgress();
     notifyListeners();
-    
+
     if (kDebugMode) {
       debugPrint('Progress updated: ${_currentProgress.toString()}');
     }
@@ -204,7 +216,7 @@ class GameProgressManager extends ChangeNotifier {
   /// レベルを進める
   Future<void> advanceLevel() async {
     if (_currentProgress == null) return;
-    
+
     await updateProgress(
       currentLevel: _currentProgress!.currentLevel + 1,
       statisticsUpdate: {'levels_completed': 1},
@@ -214,12 +226,12 @@ class GameProgressManager extends ChangeNotifier {
   /// プレイ時間を記録
   Future<void> recordPlayTime(int seconds) async {
     if (_currentProgress == null) return;
-    
+
     _currentProgress = _currentProgress!.copyWith(
       playTimeSeconds: _currentProgress!.playTimeSeconds + seconds,
       lastPlayed: DateTime.now(),
     );
-    
+
     await _saveProgress();
     notifyListeners();
   }
@@ -227,18 +239,21 @@ class GameProgressManager extends ChangeNotifier {
   /// 特定のレベルに設定
   Future<void> setLevel(int level) async {
     if (_currentProgress == null || level < 1) return;
-    
+
     await updateProgress(currentLevel: level);
   }
 
   /// 現在のレベルをリトライ（データは保持）
   Future<void> retryCurrentLevel() async {
     if (_currentProgress == null) return;
-    
+
     // レベル固有のデータをクリア（必要に応じてカスタマイズ）
     final clearedData = Map<String, dynamic>.from(_currentProgress!.gameData);
-    clearedData.removeWhere((key, value) => key.startsWith('level_${_currentProgress!.currentLevel}_'));
-    
+    clearedData.removeWhere(
+      (key, value) =>
+          key.startsWith('level_${_currentProgress!.currentLevel}_'),
+    );
+
     await updateProgress(
       gameDataUpdate: clearedData,
       statisticsUpdate: {'level_retries': 1},
@@ -250,7 +265,7 @@ class GameProgressManager extends ChangeNotifier {
     await _dataManager.deleteData(_storageKey);
     _currentProgress = null;
     notifyListeners();
-    
+
     if (kDebugMode) {
       debugPrint('Progress reset');
     }
@@ -268,7 +283,7 @@ class GameProgressManager extends ChangeNotifier {
       if (progressData.isNotEmpty) {
         _currentProgress = GameProgress.fromJson(progressData);
         notifyListeners();
-        
+
         if (kDebugMode) {
           debugPrint('Progress loaded: ${_currentProgress.toString()}');
         }
@@ -283,10 +298,10 @@ class GameProgressManager extends ChangeNotifier {
   /// 進行度の保存
   Future<void> _saveProgress() async {
     if (_currentProgress == null) return;
-    
+
     try {
       await _dataManager.saveGameProgress(_currentProgress!.toJson());
-      
+
       if (kDebugMode) {
         debugPrint('Progress saved successfully');
       }
@@ -325,7 +340,7 @@ class GameProgressUtils {
     final hours = seconds ~/ 3600;
     final minutes = (seconds % 3600) ~/ 60;
     final remainingSeconds = seconds % 60;
-    
+
     if (hours > 0) {
       return '${hours}:${minutes.toString().padLeft(2, '0')}:${remainingSeconds.toString().padLeft(2, '0')}';
     } else {
@@ -341,9 +356,9 @@ class GameProgressUtils {
   /// 進行度の妥当性チェック
   static bool validateProgress(GameProgress progress) {
     return progress.isValid &&
-           progress.completionRate >= 0.0 &&
-           progress.completionRate <= 1.0 &&
-           progress.currentLevel > 0 &&
-           progress.playTimeSeconds >= 0;
+        progress.completionRate >= 0.0 &&
+        progress.completionRate <= 1.0 &&
+        progress.currentLevel > 0 &&
+        progress.playTimeSeconds >= 0;
   }
 }

@@ -25,52 +25,54 @@ class HotspotData {
 }
 
 /// アイテム発見時のコールバック関数型
-typedef ItemDiscoveryCallback = void Function({
-  required String itemId,
-  required String itemName,
-  required String description,
-  required AssetGenImage itemAsset,
-});
+typedef ItemDiscoveryCallback =
+    void Function({
+      required String itemId,
+      required String itemName,
+      required String description,
+      required AssetGenImage itemAsset,
+    });
 
 /// パズルモーダル表示要求のコールバック関数型
-typedef PuzzleModalCallback = void Function({
-  required String hotspotId,
-  required String title,
-  required String description,
-  required String correctAnswer,
-  required String rewardItemId,
-  required String rewardItemName,
-  required String rewardDescription,
-  required AssetGenImage rewardAsset,
-});
+typedef PuzzleModalCallback =
+    void Function({
+      required String hotspotId,
+      required String title,
+      required String description,
+      required String correctAnswer,
+      required String rewardItemId,
+      required String rewardItemName,
+      required String rewardDescription,
+      required AssetGenImage rewardAsset,
+    });
 
 /// 部屋別ホットスポットシステム
 class RoomHotspotSystem extends ChangeNotifier {
   static final RoomHotspotSystem _instance = RoomHotspotSystem._internal();
   factory RoomHotspotSystem() => _instance;
   RoomHotspotSystem._internal();
-  
+
   /// アイテム発見モーダル表示用コールバック
   ItemDiscoveryCallback? _onItemDiscovered;
-  
+
   /// パズルモーダル表示用コールバック
   PuzzleModalCallback? _onPuzzleModalRequested;
-  
+
   /// 操作されたホットスポットのID記録
   final Set<String> _interactedHotspots = <String>{};
-  
+
   /// アイテム発見コールバックを設定
   void setItemDiscoveryCallback(ItemDiscoveryCallback? callback) {
     _onItemDiscovered = callback;
     debugPrint('🎊 Item discovery callback set: ${callback != null}');
   }
-  
+
   /// パズルモーダルコールバックを設定
   void setPuzzleModalCallback(PuzzleModalCallback? callback) {
     _onPuzzleModalRequested = callback;
     debugPrint('🧩 Puzzle modal callback set: ${callback != null}');
   }
-  
+
   /// アイテム発見を通知
   void notifyItemDiscovered({
     required String itemId,
@@ -85,18 +87,18 @@ class RoomHotspotSystem extends ChangeNotifier {
       itemAsset: itemAsset,
     );
   }
-  
+
   /// ホットスポット操作を記録
   void recordHotspotInteraction(String hotspotId) {
     _interactedHotspots.add(hotspotId);
     debugPrint('🔧 Hotspot interaction recorded: $hotspotId');
   }
-  
+
   /// 操作されたホットスポットのリストを取得
   List<String> getInteractedHotspots() {
     return _interactedHotspots.toList();
   }
-  
+
   /// 特定のホットスポットが操作されたかチェック
   bool hasInteractedWith(String hotspotId) {
     return _interactedHotspots.contains(hotspotId);
@@ -105,7 +107,7 @@ class RoomHotspotSystem extends ChangeNotifier {
   /// 現在の部屋のホットスポットを取得
   List<HotspotData> getCurrentRoomHotspots() {
     final currentRoom = RoomNavigationSystem().currentRoom;
-    
+
     switch (currentRoom) {
       case RoomType.leftmost:
         return _getPrisonHotspots();
@@ -117,6 +119,8 @@ class RoomHotspotSystem extends ChangeNotifier {
         return _getAlchemyHotspots();
       case RoomType.rightmost:
         return _getTreasureHotspots();
+      case RoomType.testRoom:
+        return _getTestRoomHotspots();
     }
   }
 
@@ -146,9 +150,12 @@ class RoomHotspotSystem extends ChangeNotifier {
         onTap: (tapPosition) {
           debugPrint('🪣 桶を調べています...');
           recordHotspotInteraction('prison_bucket');
-          
+
           // アイテム取得機能（重複取得防止付き）
-          final success = InventorySystem().acquireItemFromHotspot('prison_bucket', 'coin');
+          final success = InventorySystem().acquireItemFromHotspot(
+            'prison_bucket',
+            'coin',
+          );
           if (success) {
             debugPrint('✨ アイテム発見！ コインを手に入れました！');
             // itemDiscovery モーダルを表示
@@ -158,7 +165,10 @@ class RoomHotspotSystem extends ChangeNotifier {
               description: '桶の底から見つかった古いコイン。何かの支払いに使えるかもしれない。',
               itemAsset: Assets.images.items.coin,
             );
-          } else if (InventorySystem().isItemAcquiredFromHotspot('prison_bucket', 'coin')) {
+          } else if (InventorySystem().isItemAcquiredFromHotspot(
+            'prison_bucket',
+            'coin',
+          )) {
             debugPrint('🔍 調査結果: 既に調べた桶です。もうコインはありません');
           } else {
             debugPrint('🔍 調査結果: コインを発見しましたが、インベントリがフルです');
@@ -205,7 +215,7 @@ class RoomHotspotSystem extends ChangeNotifier {
         onTap: (tapPosition) {
           debugPrint('🚪 扉を調べています...');
           recordHotspotInteraction('entrance_door');
-          
+
           // 扉は特別なギミックなので、詳細処理はHotspotDisplayで実行
           debugPrint('🔍 調査結果: 複雑な鍵穴がある、脱出の鍵が必要だ');
         },
@@ -220,9 +230,12 @@ class RoomHotspotSystem extends ChangeNotifier {
         onTap: (tapPosition) {
           debugPrint('🛡️ 紋章を調べています...');
           recordHotspotInteraction('entrance_emblem');
-          
+
           // パズル未解決の場合のみパズルモーダルを表示
-          if (!InventorySystem().isItemAcquiredFromHotspot('entrance_emblem', 'escape_cipher')) {
+          if (!InventorySystem().isItemAcquiredFromHotspot(
+            'entrance_emblem',
+            'escape_cipher',
+          )) {
             debugPrint('🔍 調査結果: 紋章に4桁の暗号が刻まれている。解読が必要だ');
             // パズルモーダル表示のトリガー（HotspotDisplayで処理）
             _showEmblemPuzzleModal();
@@ -270,9 +283,12 @@ class RoomHotspotSystem extends ChangeNotifier {
         size: const Size(0.15, 0.2),
         onTap: (tapPosition) {
           debugPrint('🪑 椅子を調べています...');
-          
+
           // アイテム取得機能（重複取得防止付き）
-          final success = InventorySystem().acquireItemFromHotspot('library_chair', 'key');
+          final success = InventorySystem().acquireItemFromHotspot(
+            'library_chair',
+            'key',
+          );
           if (success) {
             debugPrint('✨ アイテム発見！ 小さな鍵を手に入れました！');
             // itemDiscovery モーダルを表示
@@ -282,7 +298,10 @@ class RoomHotspotSystem extends ChangeNotifier {
               description: '椅子のクッションの下から見つかった小さな鍵。どこかの扉を開けられるかもしれない。',
               itemAsset: Assets.images.items.key,
             );
-          } else if (InventorySystem().isItemAcquiredFromHotspot('library_chair', 'key')) {
+          } else if (InventorySystem().isItemAcquiredFromHotspot(
+            'library_chair',
+            'key',
+          )) {
             debugPrint('🔍 調査結果: 既に調べた椅子です。もう鍵はありません');
           } else {
             debugPrint('🔍 調査結果: 小さな鍵を発見しましたが、インベントリがフルです');
@@ -347,7 +366,7 @@ class RoomHotspotSystem extends ChangeNotifier {
         onTap: (tapPosition) {
           debugPrint('💰 宝箱を調べています...');
           recordHotspotInteraction('treasure_chest');
-          
+
           // 宝箱は特別なギミックなので、詳細処理はHotspotDisplayで実行
           debugPrint('🔍 調査結果: 宝箱には特別な鍵が必要だ');
         },
@@ -378,21 +397,21 @@ class RoomHotspotSystem extends ChangeNotifier {
       ),
     ];
   }
-  
+
   /// 紋章パズルモーダルを表示要求
   void _showEmblemPuzzleModal() {
     _onPuzzleModalRequested?.call(
       hotspotId: 'entrance_emblem',
       title: '古代の暗号解読',
       description: '紋章に刻まれた4桁の数字を解読してください',
-      correctAnswer: '5297',  // 城の入口にふさわしい暗号
+      correctAnswer: '5297', // 城の入口にふさわしい暗号
       rewardItemId: 'escape_cipher',
       rewardItemName: '脱出の暗号',
       rewardDescription: '紋章から解読した古代の暗号。脱出の手がかりとなるかもしれない。',
-      rewardAsset: Assets.images.items.book,  // 古文書のアイテム画像
+      rewardAsset: Assets.images.items.book, // 古文書のアイテム画像
     );
   }
-  
+
   /// パズル解決成功時の処理
   void onPuzzleSolved({
     required String hotspotId,
@@ -402,7 +421,10 @@ class RoomHotspotSystem extends ChangeNotifier {
     required AssetGenImage rewardAsset,
   }) {
     // アイテム取得機能（重複取得防止付き）
-    final success = InventorySystem().acquireItemFromHotspot(hotspotId, rewardItemId);
+    final success = InventorySystem().acquireItemFromHotspot(
+      hotspotId,
+      rewardItemId,
+    );
     if (success) {
       debugPrint('✨ パズル解決！ $rewardItemNameを手に入れました！');
       // itemDiscovery モーダルを表示
@@ -413,5 +435,33 @@ class RoomHotspotSystem extends ChangeNotifier {
         itemAsset: rewardAsset,
       );
     }
+  }
+
+  /// テスト部屋のホットスポット
+  List<HotspotData> _getTestRoomHotspots() {
+    return [
+      HotspotData(
+        id: 'test_button',
+        asset: Assets.images.hotspots.entranceDoor, // テスト用にドアアセット使用
+        name: 'テストボタン',
+        description: 'テスト用のインタラクティブボタン',
+        position: const Offset(0.3, 0.5),
+        size: const Size(0.2, 0.15),
+        onTap: (tapPosition) {
+          debugPrint('🧪 テストボタンがタップされました');
+        },
+      ),
+      HotspotData(
+        id: 'test_object',
+        asset: Assets.images.hotspots.treasureChest, // テスト用に宝箱アセット使用
+        name: 'テストオブジェクト',
+        description: 'テスト用のオブジェクト',
+        position: const Offset(0.6, 0.4),
+        size: const Size(0.15, 0.2),
+        onTap: (tapPosition) {
+          debugPrint('🔍 テストオブジェクトを調査中...');
+        },
+      ),
+    ];
   }
 }

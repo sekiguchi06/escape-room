@@ -10,11 +10,11 @@ import '../effects/particle_system.dart';
 /// Component-based設計準拠、単一責任原則適用
 class ModalManager extends Component {
   final List<ModalComponent> _modalStack = [];
-  
+
   // エフェクトマネージャーの参照
   ConcentrationLinesManager? _concentrationLinesManager;
   ParticleEffectManager? _particleEffectManager;
-  
+
   /// エフェクトマネージャーを設定
   void setEffectManagers({
     ConcentrationLinesManager? concentrationLinesManager,
@@ -24,25 +24,27 @@ class ModalManager extends Component {
     _particleEffectManager = particleEffectManager;
     debugPrint('🎊 ModalManager: Effect managers set');
   }
-  
+
   /// モーダル表示
   void showModal(ModalConfig config, Vector2 screenSize) {
     debugPrint('🎊 ModalManager: Showing modal type: ${config.type}');
-    
+
     final modal = ModalComponent(
       config: config,
       size: screenSize,
       concentrationLinesManager: _concentrationLinesManager,
       particleEffectManager: _particleEffectManager,
     );
-    
+
     _modalStack.add(modal);
     add(modal);
     modal.show();
-    
-    debugPrint('🎊 ModalManager: Modal added to stack, count: ${_modalStack.length}');
+
+    debugPrint(
+      '🎊 ModalManager: Modal added to stack, count: ${_modalStack.length}',
+    );
   }
-  
+
   /// 最前面のモーダルを閉じる
   void hideTopModal() {
     if (_modalStack.isNotEmpty) {
@@ -51,7 +53,7 @@ class ModalManager extends Component {
       remove(modal);
     }
   }
-  
+
   /// 全モーダルを閉じる
   void hideAllModals() {
     for (final modal in _modalStack.reversed) {
@@ -60,13 +62,14 @@ class ModalManager extends Component {
     }
     _modalStack.clear();
   }
-  
+
   /// モーダルが表示中かチェック
   bool get hasActiveModal => _modalStack.isNotEmpty;
-  
+
   /// 表示中のモーダル数
   int get modalCount => _modalStack.length;
-  
+
   /// 最前面のモーダル取得
-  ModalComponent? get topModal => _modalStack.isNotEmpty ? _modalStack.last : null;
+  ModalComponent? get topModal =>
+      _modalStack.isNotEmpty ? _modalStack.last : null;
 }

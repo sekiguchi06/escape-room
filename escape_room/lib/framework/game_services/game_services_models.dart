@@ -7,6 +7,7 @@ enum GameServiceResult {
   notSignedIn,
   networkError,
   permissionDenied,
+  disabled,
 }
 
 /// リーダーボード操作結果
@@ -14,33 +15,33 @@ class LeaderboardResult {
   final GameServiceResult result;
   final String? message;
   final String? leaderboardId;
-  
+
   const LeaderboardResult({
     required this.result,
     this.message,
     this.leaderboardId,
   });
-  
+
   bool get isSuccess => result == GameServiceResult.success;
-  
+
   @override
   String toString() => 'LeaderboardResult(result: $result, message: $message)';
 }
 
-/// 実績操作結果  
+/// 実績操作結果
 class AchievementResult {
   final GameServiceResult result;
   final String? message;
   final String? achievementId;
-  
+
   const AchievementResult({
     required this.result,
     this.message,
     this.achievementId,
   });
-  
+
   bool get isSuccess => result == GameServiceResult.success;
-  
+
   @override
   String toString() => 'AchievementResult(result: $result, message: $message)';
 }
@@ -55,7 +56,7 @@ class GamePlayer {
   final bool isAuthenticated;
   final bool isSignedIn;
   final Map<String, dynamic> additionalInfo;
-  
+
   const GamePlayer({
     this.id,
     this.playerId,
@@ -66,10 +67,11 @@ class GamePlayer {
     this.isSignedIn = false,
     this.additionalInfo = const {},
   });
-  
+
   @override
-  String toString() => 'GamePlayer(id: ${id ?? playerId}, name: $displayName, authenticated: ${isAuthenticated || isSignedIn})';
-  
+  String toString() =>
+      'GamePlayer(id: ${id ?? playerId}, name: $displayName, authenticated: ${isAuthenticated || isSignedIn})';
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,

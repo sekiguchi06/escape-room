@@ -52,6 +52,8 @@ dependencies:
   riverpod_annotation: ^2.6.1
   # バイブレーション機能
   vibration: ^2.0.1
+  # Web support
+  web: ^1.1.0
   # プッシュ通知機能 - 無効化
   # firebase_messaging: ^14.7.10
   # ローカル通知機能 - 無効化

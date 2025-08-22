@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Audio Test</title>
+</head>
+<body>
+    <h1>🔊 Audio Test</h1>
+    
+    <button onclick="playBeep()">Play Beep (Web Audio API)</button><br><br>
+    
+    <button onclick="playTapWav()">Play tap.wav File</button><br><br>
+    
+    <button onclick="playVictoryMp3()">Play victory_fanfare.mp3</button><br><br>
+    
+    <div id="status"></div>
+
+    <script>
+        function updateStatus(message) {
+            document.getElementById('status').innerHTML = message;
+            console.log(message);
+        }
+
+        // Web Audio APIでビープ音生成
+        function playBeep() {
+            updateStatus('🔊 Generating beep sound...');
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = 800; // 800Hz
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.5);
+                
+                updateStatus('✅ Beep sound played');
+            } catch (e) {
+                updateStatus('❌ Beep failed: ' + e.message);
+            }
+        }
+
+        // tap.wavファイル再生
+        function playTapWav() {
+            updateStatus('🔊 Playing tap.wav...');
+            try {
+                const audio = new Audio('assets/sounds/tap.wav');
+                audio.volume = 1.0;
+                audio.oncanplaythrough = function() {
+                    updateStatus('✅ tap.wav loaded, playing...');
+                    audio.play();
+                };
+                audio.onerror = function(e) {
+                    updateStatus('❌ tap.wav error: ' + e.message);
+                };
+                audio.onended = function() {
+                    updateStatus('✅ tap.wav finished playing');
+                };
+                audio.load();
+            } catch (e) {
+                updateStatus('❌ tap.wav failed: ' + e.message);
+            }
+        }
+
+        // victory_fanfare.mp3再生
+        function playVictoryMp3() {
+            updateStatus('🔊 Playing victory_fanfare.mp3...');
+            try {
+                const audio = new Audio('assets/sounds/victory_fanfare.mp3');
+                audio.volume = 1.0;
+                audio.oncanplaythrough = function() {
+                    updateStatus('✅ victory_fanfare.mp3 loaded, playing...');
+                    audio.play();
+                };
+                audio.onerror = function(e) {
+                    updateStatus('❌ victory_fanfare.mp3 error: ' + e.message);
+                };
+                audio.onended = function() {
+                    updateStatus('✅ victory_fanfare.mp3 finished playing');
+                };
+                audio.load();
+            } catch (e) {
+                updateStatus('❌ victory_fanfare.mp3 failed: ' + e.message);
+            }
+        }
+
+        updateStatus('🎵 Audio test page loaded. Click buttons to test sound.');
+    </script>
+</body>
+</html>

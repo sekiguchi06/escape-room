@@ -8,21 +8,23 @@ import '../../ui/japanese_message_system.dart';
 /// 箱オブジェクト - AI生成画像使用
 /// 🎯 目的: 工具アイテムの提供
 class BoxObject extends InteractableGameObject {
-  BoxObject({required Vector2 position, required Vector2 size}) 
-      : super(objectId: 'box') {
+  BoxObject({required Vector2 position, required Vector2 size})
+    : super(objectId: 'box') {
     this.position = position;
     this.size = size;
   }
-  
+
   @override
   Future<void> initialize() async {
     // アイテム提供戦略を設定
-    setInteractionStrategy(ItemProviderStrategy(
-      itemId: 'tool',
-      message: JapaneseMessageSystem.getMessage('box_discovery_message'),
-    ));
+    setInteractionStrategy(
+      ItemProviderStrategy(
+        itemId: 'tool',
+        message: JapaneseMessageSystem.getMessage('box_discovery_message'),
+      ),
+    );
   }
-  
+
   @override
   Future<void> loadAssets() async {
     // DualSpriteComponentで画像管理
@@ -33,7 +35,7 @@ class BoxObject extends InteractableGameObject {
       componentSize: size,
     );
   }
-  
+
   @override
   void onActivated() {
     debugPrint('Box activated: tool item added');

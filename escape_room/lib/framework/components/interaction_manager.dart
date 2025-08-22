@@ -1,12 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 /// インタラクション結果
-enum InteractionResult {
-  success,
-  failure,
-  itemRequired,
-  alreadyCompleted,
-}
+enum InteractionResult { success, failure, itemRequired, alreadyCompleted }
 
 /// インタラクションイベント
 class InteractionEvent {
@@ -14,7 +9,7 @@ class InteractionEvent {
   final String? itemId;
   final InteractionResult result;
   final String? message;
-  
+
   const InteractionEvent({
     required this.hotspotId,
     this.itemId,
@@ -28,15 +23,15 @@ class InteractionEvent {
 class InteractionManager {
   final Function(String, String?) onInteraction;
   final List<InteractionEvent> _history = [];
-  
-  InteractionManager({
-    required this.onInteraction,
-  });
-  
+
+  InteractionManager({required this.onInteraction});
+
   /// インタラクション実行
   void interact(String hotspotId, String? itemId) {
-    debugPrint('🤝 Interaction: $hotspotId ${itemId != null ? 'with $itemId' : '(no item)'}');
-    
+    debugPrint(
+      '🤝 Interaction: $hotspotId ${itemId != null ? 'with $itemId' : '(no item)'}',
+    );
+
     // インタラクション履歴に記録
     final event = InteractionEvent(
       hotspotId: hotspotId,
@@ -44,14 +39,14 @@ class InteractionManager {
       result: InteractionResult.success, // 実際の結果は後で更新
     );
     _history.add(event);
-    
+
     // 実際のインタラクション処理を委譲
     onInteraction(hotspotId, itemId);
   }
-  
+
   /// インタラクション履歴
   List<InteractionEvent> get history => List.unmodifiable(_history);
-  
+
   /// 特定のホットスポットとの最後のインタラクション
   InteractionEvent? getLastInteraction(String hotspotId) {
     try {
@@ -60,25 +55,27 @@ class InteractionManager {
       return null;
     }
   }
-  
+
   /// インタラクション回数
   int getInteractionCount(String hotspotId) {
     return _history.where((event) => event.hotspotId == hotspotId).length;
   }
-  
+
   /// 履歴クリア
   void clearHistory() {
     _history.clear();
     debugPrint('🤝 Interaction history cleared');
   }
-  
+
   /// アイテムを使用したインタラクション回数
   int get itemInteractionCount {
     return _history.where((event) => event.itemId != null).length;
   }
-  
+
   /// 成功したインタラクション回数
   int get successfulInteractionCount {
-    return _history.where((event) => event.result == InteractionResult.success).length;
+    return _history
+        .where((event) => event.result == InteractionResult.success)
+        .length;
   }
 }

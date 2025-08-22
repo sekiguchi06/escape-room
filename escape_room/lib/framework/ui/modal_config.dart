@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 /// モーダル種別定義
 /// 移植ガイド準拠実装
 enum ModalType {
-  item,         // アイテム詳細表示
-  puzzle,       // パズル解答
-  inspection,   // オブジェクト詳細調査
-  itemDiscovery // アイテム発見演出（下からスライド＋集中線＋パーティクル）
+  item, // アイテム詳細表示
+  puzzle, // パズル解答
+  inspection, // オブジェクト詳細調査
+  itemDiscovery, // アイテム発見演出（下からスライド＋集中線＋パーティクル）
 }
 
 /// モーダル設定（画像表示優先・文字表示なし）
@@ -14,13 +14,13 @@ class ModalConfig {
   final ModalType type;
   final String title;
   final String content;
-  final String imagePath;              // 画像パス（95%表示）
-  final Map<String, dynamic> data;     // パズル答え・ID等
+  final String imagePath; // 画像パス（95%表示）
+  final Map<String, dynamic> data; // パズル答え・ID等
   final VoidCallback? onConfirm;
   final VoidCallback? onCancel;
-  final VoidCallback? onTap;           // 画像タップ処理
+  final VoidCallback? onTap; // 画像タップ処理
   final VoidCallback? onPuzzleSuccess; // パズル成功時コールバック
-  
+
   const ModalConfig({
     required this.type,
     required this.title,
@@ -32,7 +32,7 @@ class ModalConfig {
     this.onTap,
     this.onPuzzleSuccess,
   });
-  
+
   /// パズル用設定のファクトリーメソッド
   factory ModalConfig.puzzle({
     required String title,
@@ -52,7 +52,7 @@ class ModalConfig {
       onPuzzleSuccess: onPuzzleSuccess,
     );
   }
-  
+
   /// アイテム用設定のファクトリーメソッド（画像表示対応）
   factory ModalConfig.item({
     required String title,
@@ -74,7 +74,7 @@ class ModalConfig {
       onTap: onTap,
     );
   }
-  
+
   /// 調査用設定のファクトリーメソッド
   factory ModalConfig.inspection({
     required String title,
@@ -92,7 +92,7 @@ class ModalConfig {
       onCancel: onCancel,
     );
   }
-  
+
   /// アイテム発見演出用設定のファクトリーメソッド
   factory ModalConfig.itemDiscovery({
     required String title,

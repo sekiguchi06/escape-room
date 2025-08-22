@@ -9,7 +9,7 @@ import 'framework/integration_scenario_test.dart' as integration_tests;
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  
+
   group('フレームワークコア基盤テスト - 統合実行', () {
     // 各テストグループを実行
     state_tests.main();

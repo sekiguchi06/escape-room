@@ -6,9 +6,9 @@ import 'providers/flame_audio_provider.dart';
 /// 流用時に間違いやすいパス設定を簡素化
 class GameAudioHelper {
   /// 標準的なゲーム音声設定を作成（flame_audio公式準拠）
-  /// 
+  ///
   /// assets/audio/ フォルダ直下に音声ファイルを配置することを前提
-  /// 
+  ///
   /// 使用例:
   /// ```dart
   /// final audioConfig = GameAudioHelper.createStandardConfig(
@@ -40,13 +40,13 @@ class GameAudioHelper {
     for (final entry in bgmFiles.entries) {
       bgmAssets[entry.key] = entry.value;
     }
-    
+
     // SFXアセットマップを自動生成（flame_audio公式準拠：ファイル名のみ）
     final sfxAssets = <String, String>{};
     for (final entry in sfxFiles.entries) {
       sfxAssets[entry.key] = entry.value;
     }
-    
+
     // デフォルトループ設定（BGMは全てループ、SFXはループなし）
     final defaultLoopSettings = <String, bool>{};
     for (final bgmId in bgmFiles.keys) {
@@ -55,12 +55,12 @@ class GameAudioHelper {
     for (final sfxId in sfxFiles.keys) {
       defaultLoopSettings[sfxId] = false; // SFXは自動的にループなし
     }
-    
+
     // カスタムループ設定をマージ
     if (loopSettings != null) {
       defaultLoopSettings.addAll(loopSettings);
     }
-    
+
     return DefaultAudioConfiguration(
       bgmAssets: bgmAssets,
       sfxAssets: sfxAssets,
@@ -74,12 +74,10 @@ class GameAudioHelper {
       debugMode: debugMode,
     );
   }
-  
+
   /// 簡単なテスト用音声設定を作成
   /// 音声ファイルが存在しない場合でも動作する（SilentAudioProvider使用）
-  static DefaultAudioConfiguration createTestConfig({
-    bool debugMode = true,
-  }) {
+  static DefaultAudioConfiguration createTestConfig({bool debugMode = true}) {
     return const DefaultAudioConfiguration(
       bgmAssets: {},
       sfxAssets: {},
@@ -93,21 +91,21 @@ class GameAudioHelper {
       debugMode: true,
     );
   }
-  
+
   /// ゲーム開発用の実プロバイダーを作成（flame_audio公式準拠）
   /// 本番環境での音声再生用
   static AudioProvider createRealProvider() {
     return FlameAudioProvider();
   }
-  
+
   /// テスト・開発用のサイレントプロバイダーを作成
   /// 音声ファイルなしでの開発・テスト用
   static AudioProvider createSilentProvider() {
     return SilentAudioProvider();
   }
-  
+
   /// pubspec.yamlに追加すべきアセット設定を生成
-  /// 
+  ///
   /// 使用例:
   /// ```dart
   /// final assetConfig = GameAudioHelper.generateAssetConfig();
@@ -119,7 +117,7 @@ class GameAudioHelper {
     - assets/audio/bgm/
     - assets/audio/sfx/''';
   }
-  
+
   /// 必要なディレクトリ構造のガイド
   static String getDirectoryStructureGuide() {
     return '''
@@ -149,7 +147,7 @@ ${generateAssetConfig()}
 /// ConfigurableGameでの使用を簡素化
 class GameAudioIntegration {
   /// 簡単な音声統合の設定例
-  /// 
+  ///
   /// ConfigurableGameの継承クラスで使用:
   /// ```dart
   /// class MyGame extends ConfigurableGame<GameState, MyConfig> {
@@ -180,16 +178,16 @@ class GameAudioIntegration {
       sfxVolume: sfxVolume,
       debugMode: debugMode,
     );
-    
+
     await audioManager.updateConfiguration(config);
-    
+
     if (debugMode) {
       debugPrint('🎵 GameAudioIntegration: Audio setup completed');
       debugPrint('  BGM files: ${bgmFiles.keys.join(', ')}');
       debugPrint('  SFX files: ${sfxFiles.keys.join(', ')}');
     }
   }
-  
+
   /// よくあるゲーム音声パターンのプリセット
   static Map<String, String> getCommonBgmPreset() {
     return {
@@ -198,7 +196,7 @@ class GameAudioIntegration {
       'victory_bgm': 'victory.mp3',
     };
   }
-  
+
   static Map<String, String> getCommonSfxPreset() {
     return {
       'tap': 'tap.wav',

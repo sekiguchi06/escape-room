@@ -10,30 +10,27 @@ class SettingsMenuComponent extends PositionComponent {
   late RectangleComponent _background;
   late TextUIComponent _titleText;
   final List<ButtonUIComponent> _buttons = [];
-  
+
   final void Function(String difficulty)? onDifficultyChanged;
   final void Function()? onClosePressed;
-  
-  SettingsMenuComponent({
-    this.onDifficultyChanged,
-    this.onClosePressed,
-  }) {
+
+  SettingsMenuComponent({this.onDifficultyChanged, this.onClosePressed}) {
     size = Vector2(300, 400);
     // 設定メニューはモーダル内コンテンツとして高優先度
     priority = UILayerPriority.modal + 1;
   }
-  
+
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    
+
     // 背景（不透明な白）
     _background = RectangleComponent(
       size: size,
       paint: Paint()..color = Colors.white.withValues(alpha: 0.95),
     );
     add(_background);
-    
+
     // タイトル
     _titleText = TextUIComponent(
       text: 'Settings',
@@ -43,10 +40,10 @@ class SettingsMenuComponent extends PositionComponent {
     _titleText.anchor = Anchor.center;
     _titleText.setTextColor(Colors.black);
     add(_titleText);
-    
+
     // 難易度変更ボタン
     _createDifficultyButtons();
-    
+
     // 閉じるボタン
     final closeButton = ButtonUIComponent(
       text: 'Close',
@@ -58,24 +55,22 @@ class SettingsMenuComponent extends PositionComponent {
     _buttons.add(closeButton);
     add(closeButton);
   }
-  
+
   void _createDifficultyButtons() {
     final difficulties = ['Easy', 'Default', 'Hard'];
     final buttonWidth = 80.0;
     final buttonHeight = 40.0;
     final spacing = 10.0;
-    final totalWidth = difficulties.length * buttonWidth + (difficulties.length - 1) * spacing;
+    final totalWidth =
+        difficulties.length * buttonWidth + (difficulties.length - 1) * spacing;
     final startX = (size.x - totalWidth) / 2;
-    
+
     for (int i = 0; i < difficulties.length; i++) {
       final difficulty = difficulties[i];
       final button = ButtonUIComponent(
         text: difficulty,
         colorId: 'secondary',
-        position: Vector2(
-          startX + i * (buttonWidth + spacing),
-          150,
-        ),
+        position: Vector2(startX + i * (buttonWidth + spacing), 150),
         size: Vector2(buttonWidth, buttonHeight),
         onPressed: () => onDifficultyChanged?.call(difficulty.toLowerCase()),
       );
@@ -83,12 +78,16 @@ class SettingsMenuComponent extends PositionComponent {
       add(button);
     }
   }
-  
+
   /// 設定項目を追加
-  void addSettingItem(String label, List<String> options, void Function(String) onChanged) {
+  void addSettingItem(
+    String label,
+    List<String> options,
+    void Function(String) onChanged,
+  ) {
     // 新しい設定項目のボタンを作成
     final buttonY = 200.0 + _buttons.length * 50.0;
-    
+
     for (int i = 0; i < options.length; i++) {
       final option = options[i];
       final button = ButtonUIComponent(
@@ -102,7 +101,7 @@ class SettingsMenuComponent extends PositionComponent {
       add(button);
     }
   }
-  
+
   /// ボタンの状態を更新
   void updateButtonState(String text, bool isSelected) {
     for (final button in _buttons) {
@@ -112,7 +111,7 @@ class SettingsMenuComponent extends PositionComponent {
       }
     }
   }
-  
+
   @override
   void onRemove() {
     // ボタンのクリーンアップ

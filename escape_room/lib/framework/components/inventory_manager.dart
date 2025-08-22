@@ -9,7 +9,7 @@ class GameItem {
   final String imagePath;
   final bool canUse;
   final bool canCombine;
-  
+
   const GameItem({
     required this.id,
     required this.name,
@@ -18,13 +18,13 @@ class GameItem {
     this.canUse = true,
     this.canCombine = false,
   });
-  
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     return other is GameItem && other.id == id;
   }
-  
+
   @override
   int get hashCode => id.hashCode;
 }
@@ -35,26 +35,25 @@ class InventoryManager extends ChangeNotifier {
   final int maxItems;
   final Function(String) onItemSelected;
   final List<String> _items = [];
-  
-  InventoryManager({
-    required this.maxItems,
-    required this.onItemSelected,
-  });
-  
+
+  InventoryManager({required this.maxItems, required this.onItemSelected});
+
   /// 現在のアイテムリスト（読み取り専用）
   List<String> get items => List.unmodifiable(_items);
-  
+
   /// アイテム所持チェック
   bool hasItem(String itemId) => _items.contains(itemId);
-  
+
   /// アイテム追加（例外処理+ログ出力準拠）
   bool addItem(String itemId) {
     try {
       if (_items.length >= maxItems || _items.contains(itemId)) {
-        debugPrint('🎒 Cannot add item: $itemId (max: $maxItems, current: ${_items.length})');
+        debugPrint(
+          '🎒 Cannot add item: $itemId (max: $maxItems, current: ${_items.length})',
+        );
         return false;
       }
-      
+
       _items.add(itemId);
       debugPrint('🎒 Item added: $itemId');
       notifyListeners();
@@ -64,7 +63,7 @@ class InventoryManager extends ChangeNotifier {
       return false;
     }
   }
-  
+
   /// アイテム削除（例外処理+ログ出力準拠）
   bool removeItem(String itemId) {
     try {
@@ -79,7 +78,7 @@ class InventoryManager extends ChangeNotifier {
       return false;
     }
   }
-  
+
   /// インベントリクリア（例外処理+ログ出力準拠）
   void clear() {
     try {
@@ -90,7 +89,7 @@ class InventoryManager extends ChangeNotifier {
       debugPrint('🎒 Error clearing inventory: $e');
     }
   }
-  
+
   /// アイテム選択（例外処理+ログ出力準拠）
   void selectItem(String itemId) {
     try {
@@ -104,14 +103,13 @@ class InventoryManager extends ChangeNotifier {
       debugPrint('🎒 Error selecting item $itemId: $e');
     }
   }
-  
+
   /// インベントリ使用率
   double get usageRate => _items.length / maxItems;
-  
+
   /// インベントリが満杯かチェック
   bool get isFull => _items.length >= maxItems;
-  
+
   /// インベントリが空かチェック
   bool get isEmpty => _items.isEmpty;
 }
-

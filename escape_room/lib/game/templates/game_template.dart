@@ -1,8 +1,8 @@
 // 🎮 SimpleGameベース 量産ゲームテンプレート
-// 
+//
 // 使用方法:
 // 1. [GAME_NAME] を実際のゲーム名に置換（例: BubblePop）
-// 2. [SPECIFIC_PARAM] をゲーム固有パラメータに置換（例: bubbleSpeed）  
+// 2. [SPECIFIC_PARAM] をゲーム固有パラメータに置換（例: bubbleSpeed）
 // 3. _handleTap メソッドにゲーム固有ロジックを実装
 // 4. 必要に応じてコンポーネントを追加
 
@@ -16,7 +16,6 @@ import '../../framework/core/configurable_game.dart';
 import '../../framework/audio/audio_system.dart';
 import '../../framework/audio/providers/flame_audio_provider.dart';
 import '../../framework/effects/particle_system.dart';
-import '../framework_integration/simple_game_states.dart';
 
 /// ゲーム設定クラス - 型安全実装
 class GameTemplateConfig {
@@ -48,14 +47,16 @@ class GameTemplateConfig {
     'difficulty': difficulty,
   };
 
-  factory GameTemplateConfig.fromJson(Map<String, dynamic> json) => GameTemplateConfig(
-    gameDuration: json['gameDuration'] ?? 30,
-    specificParam: json['specificParam']?.toDouble() ?? 1.0,
-    difficulty: json['difficulty'] ?? 'normal',
-  );
+  factory GameTemplateConfig.fromJson(Map<String, dynamic> json) =>
+      GameTemplateConfig(
+        gameDuration: json['gameDuration'] ?? 30,
+        specificParam: json['specificParam']?.toDouble() ?? 1.0,
+        difficulty: json['difficulty'] ?? 'normal',
+      );
 
   @override
-  String toString() => 'GameTemplateConfig(duration: ${gameDuration}s, param: $specificParam)';
+  String toString() =>
+      'GameTemplateConfig(duration: ${gameDuration}s, param: $specificParam)';
 }
 
 /// 設定プリセット - 3難易度対応
@@ -80,29 +81,30 @@ class GameTemplateConfigPresets {
 
   static GameTemplateConfig getPreset(String difficulty) {
     switch (difficulty.toLowerCase()) {
-      case 'easy': return easy;
-      case 'hard': return hard;
-      default: return normal;
+      case 'easy':
+        return easy;
+      case 'hard':
+        return hard;
+      default:
+        return normal;
     }
   }
 }
 
 /// GameConfiguration実装 - 継承関係修正済み
-class GameTemplateConfiguration extends GameConfiguration<GameState, GameTemplateConfig> {
+class GameTemplateConfiguration
+    extends GameConfiguration<GameState, GameTemplateConfig> {
   GameTemplateConfiguration(GameTemplateConfig config) : super(config: config);
 
-  static final GameTemplateConfiguration defaultConfig = 
-    GameTemplateConfiguration(GameTemplateConfigPresets.normal);
+  static final GameTemplateConfiguration defaultConfig =
+      GameTemplateConfiguration(GameTemplateConfigPresets.normal);
 
   @override
-  bool isValid() => 
-    config.gameDuration > 0 && 
-    config.specificParam > 0;
+  bool isValid() => config.gameDuration > 0 && config.specificParam > 0;
 
   @override
-  bool isValidConfig(GameTemplateConfig config) => 
-    config.gameDuration > 0 && 
-    config.specificParam > 0;
+  bool isValidConfig(GameTemplateConfig config) =>
+      config.gameDuration > 0 && config.specificParam > 0;
 
   @override
   GameTemplateConfig copyWith(Map<String, dynamic> overrides) {
@@ -125,15 +127,17 @@ class GameTemplate extends ConfigurableGameBase<GameState, GameTemplateConfig> {
   int _score = 0;
   double _gameTimeRemaining = 0;
 
-  GameTemplate() : super(
-    configuration: GameTemplateConfiguration.defaultConfig,
-    debugMode: false,
-  );
+  GameTemplate()
+    : super(
+        configuration: GameTemplateConfiguration.defaultConfig,
+        debugMode: false,
+      );
 
-  /// 必須オーバーライド - 既存プロバイダー流用
+  /// 必須オーバーライド - 基本実装
   @override
   GameStateProvider<GameState> createStateProvider() {
-    return SimpleGameStateProvider(); // ✅ 既存を流用
+    // TODO: Implement proper GameStateProvider
+    throw UnimplementedError('GameStateProvider not implemented');
   }
 
   AudioProvider createAudioProvider() {
@@ -144,15 +148,17 @@ class GameTemplate extends ConfigurableGameBase<GameState, GameTemplateConfig> {
   @override
   Future<void> initializeGame() async {
     debugPrint('🎮 GameTemplate initializing...');
-    
+
     // パーティクルシステム初期化
     _particleManager = ParticleEffectManager();
     add(_particleManager);
-    
+
     // ゲーム状態リセット
     _resetGame();
-    
-    debugPrint('🎮 GameTemplate initialized - Duration: ${config.gameDuration}s');
+
+    debugPrint(
+      '🎮 GameTemplate initialized - Duration: ${config.gameDuration}s',
+    );
   }
 
   void _resetGame() {
@@ -165,7 +171,7 @@ class GameTemplate extends ConfigurableGameBase<GameState, GameTemplateConfig> {
   @override
   void update(double dt) {
     super.update(dt);
-    
+
     if (!_gameActive) return;
 
     // タイマー更新
@@ -187,7 +193,8 @@ class GameTemplate extends ConfigurableGameBase<GameState, GameTemplateConfig> {
 
   /// タップイベント処理 - 型安全実装
   @override
-  void onTapDown(TapDownEvent event) { // ✅ 正しい型
+  void onTapDown(TapDownEvent event) {
+    // ✅ 正しい型
     if (!_gameActive) {
       // ゲーム終了時はリスタート
       _resetGame();
@@ -195,7 +202,7 @@ class GameTemplate extends ConfigurableGameBase<GameState, GameTemplateConfig> {
     }
 
     final tapPosition = event.localPosition; // ✅ 正しいプロパティ
-    
+
     // ゲーム固有のタップ処理
     _handleTap(tapPosition);
   }
@@ -203,28 +210,31 @@ class GameTemplate extends ConfigurableGameBase<GameState, GameTemplateConfig> {
   void _handleTap(Vector2 position) {
     // ゲーム固有のタップ処理を実装
     // 例: アイテムクリック、敵撃退など
-    
+
     _score += 10;
-    
+
     // パーティクルエフェクト（正しいメソッド名）
     _particleManager.playEffect('explosion', position); // ✅ 正しいメソッド
-    
+
     // 効果音
     managers.audioManager.playSfx('tap');
-    
+
     debugPrint('🎮 Tap at $position, Score: $_score');
   }
 
   void _endGame() {
     _gameActive = false;
-    
+
     // 分析イベント
-    managers.analyticsManager.trackEvent('game_template_completed', parameters: {
-      'score': _score,
-      'duration': config.gameDuration,
-      'difficulty': config.difficulty,
-    });
-    
+    managers.analyticsManager.trackEvent(
+      'game_template_completed',
+      parameters: {
+        'score': _score,
+        'duration': config.gameDuration,
+        'difficulty': config.difficulty,
+      },
+    );
+
     debugPrint('🎮 Game Over! Final Score: $_score');
   }
 
@@ -232,13 +242,13 @@ class GameTemplate extends ConfigurableGameBase<GameState, GameTemplateConfig> {
   @override
   void render(Canvas canvas) {
     super.render(canvas);
-    
+
     // 背景
     canvas.drawRect(
       Rect.fromLTWH(0, 0, size.x, size.y),
       Paint()..color = Colors.black.withValues(alpha: 0.8),
     );
-    
+
     // UI描画
     _renderUI(canvas);
   }
@@ -262,8 +272,9 @@ class GameTemplate extends ConfigurableGameBase<GameState, GameTemplateConfig> {
     // タイマー表示
     final minutes = _gameTimeRemaining ~/ 60;
     final seconds = (_gameTimeRemaining % 60).round();
-    final timeString = '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-    
+    final timeString =
+        '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+
     final timeSpan = TextSpan(text: 'Time: $timeString', style: textStyle);
     final timePainter = TextPainter(
       text: timeSpan,
@@ -284,23 +295,26 @@ class GameTemplate extends ConfigurableGameBase<GameState, GameTemplateConfig> {
       fontSize: 32,
       fontWeight: FontWeight.bold,
     );
-    
+
     final gameOverSpan = TextSpan(
-      text: 'Game Over!\nFinal Score: $_score\nTap to Restart', 
-      style: gameOverStyle
+      text: 'Game Over!\nFinal Score: $_score\nTap to Restart',
+      style: gameOverStyle,
     );
-    
+
     final gameOverPainter = TextPainter(
       text: gameOverSpan,
       textDirection: TextDirection.ltr,
       textAlign: TextAlign.center,
     );
-    
+
     gameOverPainter.layout();
-    gameOverPainter.paint(canvas, Offset(
-      (size.x - gameOverPainter.width) / 2,
-      (size.y - gameOverPainter.height) / 2,
-    ));
+    gameOverPainter.paint(
+      canvas,
+      Offset(
+        (size.x - gameOverPainter.width) / 2,
+        (size.y - gameOverPainter.height) / 2,
+      ),
+    );
   }
 }
 
@@ -308,27 +322,27 @@ class GameTemplate extends ConfigurableGameBase<GameState, GameTemplateConfig> {
 /// 必要に応じて追加・修正してください
 class GameObjectComponent extends CircleComponent {
   final double speed;
-  
+
   GameObjectComponent({
     required Vector2 position,
     required this.speed,
     required double size,
     required Color color,
   }) : super(
-    position: position,
-    radius: size / 2,
-    paint: Paint()..color = color,
-    anchor: Anchor.center,
-  );
-  
+         position: position,
+         radius: size / 2,
+         paint: Paint()..color = color,
+         anchor: Anchor.center,
+       );
+
   @override
   void update(double dt) {
     super.update(dt);
-    
+
     // オブジェクト固有の動作
     position.y += speed * dt; // 例: 下方向移動
   }
-  
+
   @override
   bool containsPoint(Vector2 point) {
     final distance = position.distanceTo(point);

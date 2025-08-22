@@ -2,9 +2,9 @@
 
 /// タイマーの種類
 enum TimerType {
-  countdown,  // カウントダウン
-  countup,    // カウントアップ
-  interval,   // インターバル（繰り返し）
+  countdown, // カウントダウン
+  countup, // カウントアップ
+  interval, // インターバル（繰り返し）
 }
 
 /// タイマー設定（既存API互換）
@@ -18,7 +18,7 @@ class TimerConfiguration {
   final void Function()? onPause;
   final void Function()? onResume;
   final bool resetOnComplete;
-  
+
   const TimerConfiguration({
     required this.duration,
     this.type = TimerType.countdown,
@@ -30,7 +30,7 @@ class TimerConfiguration {
     this.onResume,
     this.resetOnComplete = false,
   });
-  
+
   TimerConfiguration copyWith({
     Duration? duration,
     TimerType? type,

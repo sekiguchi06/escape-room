@@ -9,7 +9,7 @@ class GameManualSaveSystem {
   final GameProgressManager _progressManager;
   bool _isEnabled = true;
   DateTime? _lastSaveTime;
-  
+
   GameManualSaveSystem({
     required DataManager dataManager,
     required GameProgressManager progressManager,
@@ -19,7 +19,7 @@ class GameManualSaveSystem {
   /// 手動保存システムを初期化
   void initialize() {
     if (!_isEnabled) return;
-    
+
     if (kDebugMode) {
       debugPrint('Manual save system initialized');
     }
@@ -28,7 +28,7 @@ class GameManualSaveSystem {
   /// 手動保存システムを無効化
   void disable() {
     _isEnabled = false;
-    
+
     if (kDebugMode) {
       debugPrint('Manual save system disabled');
     }
@@ -37,7 +37,7 @@ class GameManualSaveSystem {
   /// 手動保存システムを有効化
   void enable() {
     _isEnabled = true;
-    
+
     if (kDebugMode) {
       debugPrint('Manual save system enabled');
     }
@@ -46,11 +46,11 @@ class GameManualSaveSystem {
   /// 手動保存実行
   Future<bool> manualSave() async {
     if (!_isEnabled) return false;
-    
+
     try {
       await _performSave();
       _lastSaveTime = DateTime.now();
-      
+
       if (kDebugMode) {
         debugPrint('Manual save executed successfully');
       }
@@ -66,11 +66,11 @@ class GameManualSaveSystem {
   /// アイテム発見時の保存
   Future<bool> saveOnItemFound(String itemId) async {
     if (!_isEnabled) return false;
-    
+
     try {
       await _performSave();
       _lastSaveTime = DateTime.now();
-      
+
       if (kDebugMode) {
         debugPrint('Progress saved on item found: $itemId');
       }
@@ -86,11 +86,11 @@ class GameManualSaveSystem {
   /// ギミッククリア時の保存
   Future<bool> saveOnPuzzleSolved(String puzzleId) async {
     if (!_isEnabled) return false;
-    
+
     try {
       await _performSave();
       _lastSaveTime = DateTime.now();
-      
+
       if (kDebugMode) {
         debugPrint('Progress saved on puzzle solved: $puzzleId');
       }
@@ -106,11 +106,11 @@ class GameManualSaveSystem {
   /// レベルクリア時の保存
   Future<bool> saveOnLevelComplete(int level) async {
     if (!_isEnabled) return false;
-    
+
     try {
       await _performSave();
       _lastSaveTime = DateTime.now();
-      
+
       if (kDebugMode) {
         debugPrint('Progress saved on level complete: $level');
       }
@@ -126,11 +126,11 @@ class GameManualSaveSystem {
   /// チェックポイント到達時の保存
   Future<bool> saveOnCheckpoint(String checkpointId) async {
     if (!_isEnabled) return false;
-    
+
     try {
       await _performSave();
       _lastSaveTime = DateTime.now();
-      
+
       if (kDebugMode) {
         debugPrint('Progress saved on checkpoint: $checkpointId');
       }
@@ -148,7 +148,7 @@ class GameManualSaveSystem {
     try {
       await _performSave();
       _lastSaveTime = DateTime.now();
-      
+
       if (kDebugMode) {
         debugPrint('Exit save completed');
       }
@@ -167,7 +167,7 @@ class GameManualSaveSystem {
     if (_progressManager.currentProgress != null) {
       await _progressManager.saveProgress();
     }
-    
+
     // DataManagerの保留データを強制保存
     await _dataManager.performAutoSave();
   }
@@ -175,7 +175,7 @@ class GameManualSaveSystem {
   /// システム状態の取得
   bool get isEnabled => _isEnabled;
   DateTime? get lastSaveTime => _lastSaveTime;
-  
+
   /// デバッグ情報
   Map<String, dynamic> getDebugInfo() {
     return {
@@ -200,17 +200,16 @@ class ProgressAwareDataManager {
   final DataManager _dataManager;
   final GameProgressManager _progressManager;
   final GameManualSaveSystem _saveSystem;
-  
+
   static ProgressAwareDataManager? _defaultInstance;
-  
-  ProgressAwareDataManager({
-    required DataManager dataManager,
-  }) : _dataManager = dataManager,
-       _progressManager = GameProgressManager(dataManager),
-       _saveSystem = GameManualSaveSystem(
-         dataManager: dataManager,
-         progressManager: GameProgressManager(dataManager),
-       );
+
+  ProgressAwareDataManager({required DataManager dataManager})
+    : _dataManager = dataManager,
+      _progressManager = GameProgressManager(dataManager),
+      _saveSystem = GameManualSaveSystem(
+        dataManager: dataManager,
+        progressManager: GameProgressManager(dataManager),
+      );
 
   /// デフォルトインスタンスを取得（シングルトン）
   static ProgressAwareDataManager defaultInstance() {
@@ -224,7 +223,7 @@ class ProgressAwareDataManager {
   Future<void> initialize() async {
     await _progressManager.initialize();
     _saveSystem.initialize();
-    
+
     if (kDebugMode) {
       debugPrint('ProgressAwareDataManager initialized (manual save mode)');
     }
@@ -239,7 +238,7 @@ class ProgressAwareDataManager {
   Future<void> startNewGame(String gameId) async {
     await _progressManager.startNewGame(gameId);
     await _saveSystem.manualSave();
-    
+
     if (kDebugMode) {
       debugPrint('New game started with manual save: $gameId');
     }
@@ -254,7 +253,7 @@ class ProgressAwareDataManager {
   Future<void> retryLevel() async {
     await _progressManager.retryCurrentLevel();
     await _saveSystem.manualSave();
-    
+
     if (kDebugMode) {
       debugPrint('Level retry with manual save');
     }
@@ -264,7 +263,7 @@ class ProgressAwareDataManager {
   Future<void> resetProgress() async {
     await _progressManager.resetProgress();
     await _saveSystem.manualSave();
-    
+
     if (kDebugMode) {
       debugPrint('Progress reset with manual save');
     }
@@ -277,14 +276,14 @@ class ProgressAwareDataManager {
       gameDataUpdate: {'items_found': itemId},
       statisticsUpdate: {'items_collected': 1},
     );
-    
+
     // 保存実行
     final saveResult = await _saveSystem.saveOnItemFound(itemId);
-    
+
     if (kDebugMode) {
       debugPrint('Item found processed: $itemId, saved: $saveResult');
     }
-    
+
     return saveResult;
   }
 
@@ -295,14 +294,14 @@ class ProgressAwareDataManager {
       gameDataUpdate: {'puzzles_solved': puzzleId},
       statisticsUpdate: {'puzzles_completed': 1},
     );
-    
+
     // 保存実行
     final saveResult = await _saveSystem.saveOnPuzzleSolved(puzzleId);
-    
+
     if (kDebugMode) {
       debugPrint('Puzzle solved processed: $puzzleId, saved: $saveResult');
     }
-    
+
     return saveResult;
   }
 
@@ -310,14 +309,14 @@ class ProgressAwareDataManager {
   Future<bool> onLevelComplete(int level) async {
     // 進行度を更新してレベルアップ
     await _progressManager.advanceLevel();
-    
+
     // 保存実行
     final saveResult = await _saveSystem.saveOnLevelComplete(level);
-    
+
     if (kDebugMode) {
       debugPrint('Level complete processed: $level, saved: $saveResult');
     }
-    
+
     return saveResult;
   }
 
@@ -328,14 +327,16 @@ class ProgressAwareDataManager {
       gameDataUpdate: {'last_checkpoint': checkpointId},
       statisticsUpdate: {'checkpoints_reached': 1},
     );
-    
+
     // 保存実行
     final saveResult = await _saveSystem.saveOnCheckpoint(checkpointId);
-    
+
     if (kDebugMode) {
-      debugPrint('Checkpoint reached processed: $checkpointId, saved: $saveResult');
+      debugPrint(
+        'Checkpoint reached processed: $checkpointId, saved: $saveResult',
+      );
     }
-    
+
     return saveResult;
   }
 
@@ -347,11 +348,11 @@ class ProgressAwareDataManager {
   /// ゲーム終了時の処理
   Future<bool> onGameExit() async {
     final saveResult = await _saveSystem.saveOnExit();
-    
+
     if (kDebugMode) {
       debugPrint('Game exit save completed: $saveResult');
     }
-    
+
     return saveResult;
   }
 

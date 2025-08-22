@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 /// タップ時のパーティクルエフェクト種類
 enum TapParticleType {
-  normal,     // 通常のタップ（統一デザイン）
-  success,    // アイテム取得成功時（特別エフェクト）
-  failure,    // 取得失敗時（特別エフェクト）
+  normal, // 通常のタップ（統一デザイン）
+  success, // アイテム取得成功時（特別エフェクト）
+  failure, // 取得失敗時（特別エフェクト）
 }
 
 /// パーティクルエフェクトデータ
@@ -12,7 +12,7 @@ class TapParticleData {
   final Offset position;
   final TapParticleType type;
   final DateTime timestamp;
-  
+
   const TapParticleData({
     required this.position,
     required this.type,
@@ -28,7 +28,7 @@ class TapParticleSystem extends ChangeNotifier {
 
   // アクティブなパーティクル管理
   final List<TapParticleData> _activeParticles = [];
-  
+
   /// アクティブなパーティクル一覧
   List<TapParticleData> get activeParticles => List.from(_activeParticles);
 
@@ -39,11 +39,10 @@ class TapParticleSystem extends ChangeNotifier {
       type: type,
       timestamp: DateTime.now(),
     );
-    
+
     _activeParticles.add(particle);
     notifyListeners();
-    
-    
+
     // 一定時間後にパーティクルを削除
     Future.delayed(_getParticleDuration(type), () {
       _activeParticles.remove(particle);
@@ -73,11 +72,8 @@ class TapParticleSystem extends ChangeNotifier {
 /// パーティクルエフェクト表示ウィジェット
 class TapParticleWidget extends StatefulWidget {
   final TapParticleData particle;
-  
-  const TapParticleWidget({
-    super.key,
-    required this.particle,
-  });
+
+  const TapParticleWidget({super.key, required this.particle});
 
   @override
   State<TapParticleWidget> createState() => _TapParticleWidgetState();
@@ -93,16 +89,18 @@ class _TapParticleWidgetState extends State<TapParticleWidget>
   @override
   void initState() {
     super.initState();
-    
-    final duration = TapParticleSystem()._getParticleDuration(widget.particle.type);
-    
-    _controller = AnimationController(
-      duration: duration,
-      vsync: this,
+
+    final duration = TapParticleSystem()._getParticleDuration(
+      widget.particle.type,
     );
 
+    _controller = AnimationController(duration: duration, vsync: this);
+
     // デフォルトの回転アニメーション（回転なし）
-    _rotationAnimation = Tween<double>(begin: 0.0, end: 0.0).animate(_controller);
+    _rotationAnimation = Tween<double>(
+      begin: 0.0,
+      end: 0.0,
+    ).animate(_controller);
 
     // アニメーション設定（パーティクルタイプ別）
     switch (widget.particle.type) {
@@ -114,7 +112,7 @@ class _TapParticleWidgetState extends State<TapParticleWidget>
           CurvedAnimation(parent: _controller, curve: const Interval(0.3, 1.0)),
         );
         break;
-      
+
       case TapParticleType.success:
         _scaleAnimation = Tween<double>(begin: 0.0, end: 1.8).animate(
           CurvedAnimation(parent: _controller, curve: Curves.elasticOut),
@@ -123,13 +121,17 @@ class _TapParticleWidgetState extends State<TapParticleWidget>
           CurvedAnimation(parent: _controller, curve: const Interval(0.6, 1.0)),
         );
         // 成功時は回転アニメーション
-        _rotationAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(_controller);
+        _rotationAnimation = Tween<double>(
+          begin: 0.0,
+          end: 1.0,
+        ).animate(_controller);
         break;
-      
+
       case TapParticleType.failure:
-        _scaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-          CurvedAnimation(parent: _controller, curve: Curves.easeOut),
-        );
+        _scaleAnimation = Tween<double>(
+          begin: 0.0,
+          end: 1.0,
+        ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
         _opacityAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
           CurvedAnimation(parent: _controller, curve: const Interval(0.2, 1.0)),
         );
@@ -148,25 +150,24 @@ class _TapParticleWidgetState extends State<TapParticleWidget>
 
   @override
   Widget build(BuildContext context) {
-    
     return Positioned(
       left: widget.particle.position.dx - 25, // パーティクルサイズの半分
       top: widget.particle.position.dy - 25,
       child: AnimatedBuilder(
-          animation: _controller,
-          builder: (context, child) {
-            return Transform.scale(
-              scale: _scaleAnimation.value,
-              child: Transform.rotate(
-                angle: _rotationAnimation.value * 2 * 3.14159, // 1回転
-                child: Opacity(
-                  opacity: _opacityAnimation.value,
-                  child: _buildParticleContent(),
-                ),
+        animation: _controller,
+        builder: (context, child) {
+          return Transform.scale(
+            scale: _scaleAnimation.value,
+            child: Transform.rotate(
+              angle: _rotationAnimation.value * 2 * 3.14159, // 1回転
+              child: Opacity(
+                opacity: _opacityAnimation.value,
+                child: _buildParticleContent(),
               ),
-            );
-          },
-        ),
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -179,8 +180,11 @@ class _TapParticleWidgetState extends State<TapParticleWidget>
           height: 40,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: Colors.red.withOpacity(0.8), // より目立つ色に変更
-            border: Border.all(color: Colors.yellow.withOpacity(0.9), width: 3), // より太い境界線
+            color: Colors.red.withValues(alpha: 0.8), // より目立つ色に変更
+            border: Border.all(
+              color: Colors.yellow.withValues(alpha: 0.9),
+              width: 3,
+            ), // より太い境界線
           ),
           child: const Center(
             child: Text(
@@ -193,44 +197,36 @@ class _TapParticleWidgetState extends State<TapParticleWidget>
             ),
           ),
         );
-      
+
       case TapParticleType.success:
         return Container(
           width: 50,
           height: 50,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: Colors.green.withOpacity(0.8),
+            color: Colors.green.withValues(alpha: 0.8),
             border: Border.all(color: Colors.lightGreen, width: 2),
             boxShadow: [
               BoxShadow(
-                color: Colors.green.withOpacity(0.4),
+                color: Colors.green.withValues(alpha: 0.4),
                 blurRadius: 8,
                 spreadRadius: 1,
               ),
             ],
           ),
-          child: const Icon(
-            Icons.check,
-            color: Colors.white,
-            size: 24,
-          ),
+          child: const Icon(Icons.check, color: Colors.white, size: 24),
         );
-      
+
       case TapParticleType.failure:
         return Container(
           width: 40,
           height: 40,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: Colors.red.withOpacity(0.7),
+            color: Colors.red.withValues(alpha: 0.7),
             border: Border.all(color: Colors.redAccent, width: 2),
           ),
-          child: const Icon(
-            Icons.close,
-            color: Colors.white,
-            size: 20,
-          ),
+          child: const Icon(Icons.close, color: Colors.white, size: 20),
         );
     }
   }
@@ -247,11 +243,11 @@ class TapParticleOverlay extends StatelessWidget {
         listenable: TapParticleSystem(),
         builder: (context, _) {
           final particles = TapParticleSystem().activeParticles;
-          
+
           if (particles.isEmpty) {
             return const SizedBox.shrink();
           }
-          
+
           return Stack(
             children: particles.map((particle) {
               return TapParticleWidget(particle: particle);

@@ -7,23 +7,25 @@ import '../components/dual_sprite_component.dart';
 /// 金庫オブジェクト - AI生成画像使用
 /// 🎯 目的: 鍵を必要とするパズル
 class SafeObject extends InteractableGameObject {
-  SafeObject({required Vector2 position, required Vector2 size}) 
-      : super(objectId: 'safe') {
+  SafeObject({required Vector2 position, required Vector2 size})
+    : super(objectId: 'safe') {
     this.position = position;
     this.size = size;
   }
-  
+
   @override
   Future<void> initialize() async {
     // パズル戦略を設定
-    setInteractionStrategy(PuzzleStrategy(
-      requiredItemId: 'key',
-      successMessage: '金庫が開いた！重要な書類を発見した',
-      failureMessage: '金庫は鍵がかかっている。鍵が必要だ',
-      rewardItemId: 'code',  // 金庫から得られるアイテム
-    ));
+    setInteractionStrategy(
+      PuzzleStrategy(
+        requiredItemId: 'key',
+        successMessage: '金庫が開いた！重要な書類を発見した',
+        failureMessage: '金庫は鍵がかかっている。鍵が必要だ',
+        rewardItemId: 'code', // 金庫から得られるアイテム
+      ),
+    );
   }
-  
+
   @override
   Future<void> loadAssets() async {
     // DualSpriteComponentで画像管理
@@ -34,7 +36,7 @@ class SafeObject extends InteractableGameObject {
       componentSize: size,
     );
   }
-  
+
   @override
   void onActivated() {
     debugPrint('Safe activated: puzzle solved');

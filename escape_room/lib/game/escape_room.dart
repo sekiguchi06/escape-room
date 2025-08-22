@@ -28,7 +28,7 @@ class EscapeRoom extends ConsumerStatefulWidget {
 class _EscapeRoomState extends ConsumerState<EscapeRoom> {
   late EscapeRoomGame _game;
   ProgressAwareDataManager? _progressManager;
-  
+
   @override
   void initState() {
     super.initState();
@@ -37,65 +37,73 @@ class _EscapeRoomState extends ConsumerState<EscapeRoom> {
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
-    
+
     // ゲームインスタンスを初期化
     _game = EscapeRoomGame();
-    
+
     // 進行度管理システムを初期化
     _initializeProgressSystem();
-    
+
     // ゲーム開始時間を記録（クリア時間計算用）
     _gameStartTime = DateTime.now();
   }
-  
+
   Future<void> _initializeProgressSystem() async {
     _progressManager = ProgressAwareDataManager.defaultInstance();
     await _progressManager!.initialize();
-    
+
     // ゲーム内イベントのリスナーを設定
     _setupGameEventListeners();
-    
+
     print('🎮 EscapeRoom: Progress system initialized');
   }
-  
+
   void _setupGameEventListeners() {
     // インベントリシステムのリスナー設定
     InventorySystem().addListener(_onInventoryChanged);
-    
+
     print('🎮 EscapeRoom: Event listeners set up');
   }
-  
+
   void _onInventoryChanged() {
     print('📦 Inventory changed - updating progress...');
     final inventory = InventorySystem().inventory;
-    final nonNullItems = inventory.where((item) => item != null).cast<String>().toList();
+    final nonNullItems = inventory
+        .where((item) => item != null)
+        .cast<String>()
+        .toList();
     print('📦 Current inventory: ${nonNullItems.join(', ')}');
-    
+
     // アイテム取得時の進行度更新
     _updateProgressFromInventory();
   }
-  
+
   Future<void> _updateProgressFromInventory() async {
     if (_progressManager != null) {
       final inventory = InventorySystem().inventory;
-      final nonNullItems = inventory.where((item) => item != null).cast<String>().toList();
-      
+      final nonNullItems = inventory
+          .where((item) => item != null)
+          .cast<String>()
+          .toList();
+
       // インベントリデータを進行度に記録
       await _progressManager!.progressManager.updateProgress(
         gameDataUpdate: {
-          'inventory_items': nonNullItems.map((itemId) => {
-            'id': itemId,
-            'name': itemId, // 簡易的にIDを名前として使用
-            'category': 'general',
-          }).toList(),
+          'inventory_items': nonNullItems
+              .map(
+                (itemId) => {
+                  'id': itemId,
+                  'name': itemId, // 簡易的にIDを名前として使用
+                  'category': 'general',
+                },
+              )
+              .toList(),
           'total_items_collected': nonNullItems.length,
           'last_update': DateTime.now().toIso8601String(),
         },
-        statisticsUpdate: {
-          'items_collected': 1,
-        },
+        statisticsUpdate: {'items_collected': 1},
       );
-      
+
       await _progressManager!.manualSave();
       print('💾 Progress updated and saved from EscapeRoom');
       print('💾 Total items in progress: ${nonNullItems.length}');
@@ -108,7 +116,7 @@ class _EscapeRoomState extends ConsumerState<EscapeRoom> {
   void dispose() {
     // ゲームイベントリスナーを削除
     InventorySystem().removeListener(_onInventoryChanged);
-    
+
     // 画面向き設定をリセット
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -123,19 +131,19 @@ class _EscapeRoomState extends ConsumerState<EscapeRoom> {
   Widget build(BuildContext context) {
     // ProviderContainerをゲームに設定
     _game.setProviderContainer(ProviderScope.containerOf(context));
-    
+
     // ゲーム状態を監視してクリア画面を表示
     _watchGameState();
-    
+
     return Scaffold(
-        body: Column(
+      body: Column(
         children: [
           // 1. ゲーム表示領域（動的高さ）
           Expanded(
             child: Builder(
               builder: (context) {
                 final menuBarHeight = GameMenuBar.getHeight(context);
-                
+
                 return Stack(
                   children: [
                     // ゲーム本体（最下層・透明背景）
@@ -149,7 +157,7 @@ class _EscapeRoomState extends ConsumerState<EscapeRoom> {
                         overlayBuilderMap: _buildOverlayMap(),
                       ),
                     ),
-                    
+
                     // 背景とホットスポットを統合（中層・タップ可能）
                     Positioned(
                       top: menuBarHeight,
@@ -163,11 +171,12 @@ class _EscapeRoomState extends ConsumerState<EscapeRoom> {
                         ]),
                         builder: (context, _) {
                           final isLightOn = LightingSystem().isLightOn;
-                          final currentConfig = RoomNavigationSystem().getCurrentRoomBackground(isLightOn);
+                          final currentConfig = RoomNavigationSystem()
+                              .getCurrentRoomBackground(isLightOn);
                           return LayoutBuilder(
                             builder: (context, constraints) {
                               final gameSize = Size(
-                                constraints.maxWidth, 
+                                constraints.maxWidth,
                                 constraints.maxHeight,
                               );
                               return OptimizedRoomWithHotspots(
@@ -184,7 +193,7 @@ class _EscapeRoomState extends ConsumerState<EscapeRoom> {
                         },
                       ),
                     ),
-                    
+
                     // 上部メニューバー（最前面オーバーレイ）
                     GameMenuBar(
                       onAddItem: () {
@@ -192,17 +201,15 @@ class _EscapeRoomState extends ConsumerState<EscapeRoom> {
                         debugPrint('Adding item from hint dialog');
                       },
                     ),
-                    
+
                     // 部屋インジケーター（メニューバー下部）
                     Positioned(
                       top: menuBarHeight + 8,
                       left: 0,
                       right: 0,
-                      child: const Center(
-                        child: RoomIndicator(),
-                      ),
+                      child: const Center(child: RoomIndicator()),
                     ),
-                    
+
                     // アイテム取得通知オーバーレイ（最前面）
                     Positioned(
                       bottom: 15.0, // ゲーム領域下端から15px上
@@ -210,16 +217,15 @@ class _EscapeRoomState extends ConsumerState<EscapeRoom> {
                       right: MediaQuery.of(context).size.width * 0.025,
                       child: const ItemNotificationOverlay(),
                     ),
-                    
                   ],
                 );
               },
             ),
           ),
-          
+
           // 2. インベントリ＋移動ボタン領域（動的高さ）
           const InventoryWidget(),
-          
+
           // 3. 広告領域（固定50px）
           const AdArea(),
         ],
@@ -228,11 +234,14 @@ class _EscapeRoomState extends ConsumerState<EscapeRoom> {
   }
 
   /// overlayBuilderMapを構築
-  Map<String, Widget Function(BuildContext, EscapeRoomGame)> _buildOverlayMap() {
+  Map<String, Widget Function(BuildContext, EscapeRoomGame)>
+  _buildOverlayMap() {
     return {
       'gameClearUI': (context, game) {
         return CustomGameClearUI(
-          clearTime: _gameStartTime != null ? DateTime.now().difference(_gameStartTime!) : null,
+          clearTime: _gameStartTime != null
+              ? DateTime.now().difference(_gameStartTime!)
+              : null,
           onMenuPressed: () {
             // ゲームクリア画面を非表示にしてスタート画面に戻る
             game.overlays.remove('gameClearUI');
@@ -254,10 +263,10 @@ class _EscapeRoomState extends ConsumerState<EscapeRoom> {
     RoomNavigationSystem().resetToInitialRoom();
     LightingSystem().resetToInitialState();
     InventorySystem().initializeEmpty();
-    
+
     // ゲーム開始時間をリセット
     _gameStartTime = DateTime.now();
-    
+
     // ゲームの状態をリセット（EscapeRoomGameの初期状態に戻す）
     final stateNotifier = _game.stateNotifier;
     stateNotifier.resetToExploring();

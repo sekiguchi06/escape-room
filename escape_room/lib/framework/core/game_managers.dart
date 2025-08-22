@@ -14,43 +14,43 @@ import '../providers/provider_factory.dart';
 class GameManagers<TState extends GameState> {
   /// 状態管理
   late GameStateProvider<TState> stateProvider;
-  
+
   /// タイマー管理
   late FlameTimerManager timerManager;
-  
+
   /// テーマ管理（Flutter公式ThemeData準拠）
   late FlutterThemeManager themeManager;
-  
+
   /// 音響管理
   late AudioManager audioManager;
-  
+
   /// 入力管理
   late InputManager inputManager;
-  
+
   /// データ管理
   late DataManager dataManager;
-  
+
   /// 収益化管理
   late MonetizationManager monetizationManager;
-  
+
   /// 分析管理
   late AnalyticsManager analyticsManager;
-  
+
   /// ゲームサービス管理
   late FlutterGameServicesManager gameServicesManager;
-  
+
   /// プロバイダーファクトリー
   late ProviderFactory providerFactory;
-  
+
   /// プロバイダーバンドル
   late ProviderBundle providerBundle;
-  
+
   /// 初期化フラグ
   bool _isInitialized = false;
-  
+
   /// 初期化完了かどうか
   bool get isInitialized => _isInitialized;
-  
+
   /// 初期化処理
   Future<void> initialize({
     required TState initialState,
@@ -58,10 +58,10 @@ class GameManagers<TState extends GameState> {
     bool debugMode = false,
   }) async {
     if (_isInitialized) return;
-    
+
     providerFactory = factory;
     providerBundle = providerFactory.createProviderBundle();
-    
+
     // システムマネージャーの初期化
     stateProvider = GameStateProvider<TState>(initialState);
     timerManager = FlameTimerManager();
@@ -87,10 +87,10 @@ class GameManagers<TState extends GameState> {
       configuration: providerBundle.analyticsConfiguration,
     );
     gameServicesManager = providerBundle.gameServicesManager;
-    
+
     _isInitialized = true;
   }
-  
+
   /// リソース解放
   Future<void> dispose() async {
     await audioManager.dispose();
@@ -99,7 +99,7 @@ class GameManagers<TState extends GameState> {
     await monetizationManager.dispose();
     await gameServicesManager.dispose();
     await providerBundle.disposeAll();
-    
+
     _isInitialized = false;
   }
 }

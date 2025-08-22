@@ -9,7 +9,10 @@ void main() {
       final json = {
         'gameId': 'test_game',
         'currentLevel': 5,
-        'gameData': {'score': 1000, 'items': ['key', 'potion']},
+        'gameData': {
+          'score': 1000,
+          'items': ['key', 'potion'],
+        },
         'lastPlayed': '2024-01-01T12:00:00.000Z',
         'completionRate': 0.5,
         'achievementsUnlocked': {'first_level': true},
@@ -73,14 +76,14 @@ void main() {
       );
 
       final invalidProgress1 = GameProgress(
-        gameId: '',  // 空のゲームID
+        gameId: '', // 空のゲームID
         currentLevel: 1,
         lastPlayed: DateTime.now(),
       );
 
       final invalidProgress2 = GameProgress(
         gameId: 'test',
-        currentLevel: 0,  // 無効なレベル
+        currentLevel: 0, // 無効なレベル
         lastPlayed: DateTime.now(),
       );
 
@@ -97,19 +100,16 @@ void main() {
     setUp(() {
       final config = DefaultPersistenceConfiguration(
         debugMode: true,
-        autoSaveInterval: 1,  // テスト用に短い間隔
+        autoSaveInterval: 1, // テスト用に短い間隔
       );
       final provider = MemoryStorageProvider();
-      dataManager = DataManager(
-        provider: provider,
-        configuration: config,
-      );
+      dataManager = DataManager(provider: provider, configuration: config);
       progressManager = GameProgressManager(dataManager);
     });
 
     test('should initialize without existing progress', () async {
       await progressManager.initialize();
-      
+
       expect(progressManager.hasProgress, false);
       expect(progressManager.currentProgress, null);
     });
@@ -148,7 +148,10 @@ void main() {
       await progressManager.advanceLevel();
 
       expect(progressManager.currentProgress?.currentLevel, 2);
-      expect(progressManager.currentProgress?.getStatistic('levels_completed'), 1);
+      expect(
+        progressManager.currentProgress?.getStatistic('levels_completed'),
+        1,
+      );
     });
 
     test('should record play time', () async {
@@ -163,7 +166,7 @@ void main() {
     test('should retry current level', () async {
       await progressManager.initialize();
       await progressManager.startNewGame('test_game');
-      
+
       // レベル固有のデータを追加
       await progressManager.updateProgress(
         gameDataUpdate: {'level_1_attempts': 3, 'global_score': 1000},
@@ -212,7 +215,10 @@ void main() {
       expect(GameProgressUtils.calculateCompletionRate(10, 10), 1.0);
       expect(GameProgressUtils.calculateCompletionRate(0, 10), 0.0);
       expect(GameProgressUtils.calculateCompletionRate(15, 10), 1.0); // clamp
-      expect(GameProgressUtils.calculateCompletionRate(5, 0), 0.0); // division by zero
+      expect(
+        GameProgressUtils.calculateCompletionRate(5, 0),
+        0.0,
+      ); // division by zero
     });
 
     test('should format play time correctly', () {
@@ -260,10 +266,7 @@ void main() {
         autoSaveInterval: 1,
       );
       final provider = MemoryStorageProvider();
-      dataManager = DataManager(
-        provider: provider,
-        configuration: config,
-      );
+      dataManager = DataManager(provider: provider, configuration: config);
       progressManager = GameProgressManager(dataManager);
       manualSaveSystem = GameManualSaveSystem(
         dataManager: dataManager,
@@ -334,7 +337,9 @@ void main() {
       await progressManager.startNewGame('test_game');
 
       // チェックポイント到達時の保存
-      final saveResult = await manualSaveSystem.saveOnCheckpoint('checkpoint_01');
+      final saveResult = await manualSaveSystem.saveOnCheckpoint(
+        'checkpoint_01',
+      );
 
       expect(saveResult, true);
       expect(manualSaveSystem.lastSaveTime, isNotNull);
@@ -381,7 +386,10 @@ void main() {
       await manager.startNewGame('integration_test');
 
       expect(manager.progressManager.hasProgress, true);
-      expect(manager.progressManager.currentProgress?.gameId, 'integration_test');
+      expect(
+        manager.progressManager.currentProgress?.gameId,
+        'integration_test',
+      );
     });
 
     test('should continue existing game', () async {
@@ -397,7 +405,10 @@ void main() {
       await manager.startNewGame('retry_test');
 
       await manager.retryLevel();
-      expect(manager.progressManager.currentProgress?.getStatistic('level_retries'), 1);
+      expect(
+        manager.progressManager.currentProgress?.getStatistic('level_retries'),
+        1,
+      );
     });
 
     test('should reset progress with manual save', () async {
@@ -414,7 +425,12 @@ void main() {
 
       final result = await manager.onItemFound('test_item');
       expect(result, true);
-      expect(manager.progressManager.currentProgress?.getStatistic('items_collected'), 1);
+      expect(
+        manager.progressManager.currentProgress?.getStatistic(
+          'items_collected',
+        ),
+        1,
+      );
     });
 
     test('should handle puzzle solved event', () async {
@@ -423,7 +439,12 @@ void main() {
 
       final result = await manager.onPuzzleSolved('test_puzzle');
       expect(result, true);
-      expect(manager.progressManager.currentProgress?.getStatistic('puzzles_completed'), 1);
+      expect(
+        manager.progressManager.currentProgress?.getStatistic(
+          'puzzles_completed',
+        ),
+        1,
+      );
     });
 
     test('should handle level complete event', () async {
@@ -441,7 +462,12 @@ void main() {
 
       final result = await manager.onCheckpointReached('checkpoint_1');
       expect(result, true);
-      expect(manager.progressManager.currentProgress?.getStatistic('checkpoints_reached'), 1);
+      expect(
+        manager.progressManager.currentProgress?.getStatistic(
+          'checkpoints_reached',
+        ),
+        1,
+      );
     });
 
     test('should perform manual save', () async {

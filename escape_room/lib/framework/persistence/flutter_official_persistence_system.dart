@@ -3,12 +3,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
 /// Flutter公式準拠の永続化システム
-/// 
+///
 /// 参考ドキュメント:
 /// - https://pub.dev/packages/shared_preferences
 /// - https://flutter.dev/docs/cookbook/persistence/key-value
 /// - https://api.flutter.dev/flutter/foundation/debugPrint.html
-/// 
+///
 /// 設計原則:
 /// 1. shared_preferencesパッケージを直接使用
 /// 2. 複雑な暗号化・クラウド同期機能を排除
@@ -16,7 +16,7 @@ import 'dart:convert';
 /// 4. Flutter公式ドキュメントのベストプラクティスに準拠
 
 /// データ永続化マネージャー
-/// 
+///
 /// Flutter公式shared_preferencesパッケージを直接使用
 /// 複雑な抽象化レイヤーを排除し、シンプルな実装を重視
 class FlutterDataManager {
@@ -24,47 +24,51 @@ class FlutterDataManager {
   bool _initialized = false;
   final Map<String, dynamic> _cache = <String, dynamic>{};
   final bool _debugMode;
-  
+
   /// Flutter公式推奨: コンストラクタでデバッグモード設定
   FlutterDataManager({bool debugMode = false}) : _debugMode = debugMode;
-  
+
   /// 初期化
-  /// 
+  ///
   /// Flutter公式パターン: SharedPreferences.getInstance()を使用
   Future<void> initialize() async {
     if (_initialized) return;
-    
+
     try {
       _prefs = await SharedPreferences.getInstance();
       _initialized = true;
-      
+
       if (_debugMode) {
-        debugPrint('🗃️ FlutterDataManager initialized with shared_preferences');
+        debugPrint(
+          '🗃️ FlutterDataManager initialized with shared_preferences',
+        );
       }
     } catch (e) {
       debugPrint('❌ FlutterDataManager initialization failed: $e');
       rethrow;
     }
   }
-  
+
   /// 初期化状態確認
   bool get isInitialized => _initialized;
-  
+
   /// 文字列データ保存
-  /// 
+  ///
   /// Flutter公式パターン: SharedPreferences.setStringを直接使用
   Future<bool> saveString(String key, String value) async {
     if (!_initialized) {
       debugPrint('❌ FlutterDataManager not initialized');
       return false;
     }
-    
+
     try {
       final success = await _prefs!.setString(key, value);
       if (success) {
         _cache[key] = value;
         if (_debugMode) {
-          debugPrint('💾 Saved string: $key = ${value.length > 50 ? '${value.substring(0, 50)}...' : value}');
+          debugPrint(
+            '💾 Saved string: $key = ${value.length > 50 ? '${value.substring(0, 50)}...' : value}',
+          );
         }
       }
       return success;
@@ -73,20 +77,22 @@ class FlutterDataManager {
       return false;
     }
   }
-  
+
   /// 文字列データ読み込み
-  /// 
+  ///
   /// Flutter公式パターン: SharedPreferences.getStringを直接使用
   String? loadString(String key, {String? defaultValue}) {
     if (!_initialized) {
       debugPrint('❌ FlutterDataManager not initialized');
       return defaultValue;
     }
-    
+
     try {
       final value = _prefs!.getString(key) ?? defaultValue;
       if (_debugMode && value != null) {
-        debugPrint('📖 Loaded string: $key = ${value.length > 50 ? '${value.substring(0, 50)}...' : value}');
+        debugPrint(
+          '📖 Loaded string: $key = ${value.length > 50 ? '${value.substring(0, 50)}...' : value}',
+        );
       }
       return value;
     } catch (e) {
@@ -94,16 +100,16 @@ class FlutterDataManager {
       return defaultValue;
     }
   }
-  
+
   /// 整数データ保存
-  /// 
+  ///
   /// Flutter公式パターン: SharedPreferences.setIntを直接使用
   Future<bool> saveInt(String key, int value) async {
     if (!_initialized) {
       debugPrint('❌ FlutterDataManager not initialized');
       return false;
     }
-    
+
     try {
       final success = await _prefs!.setInt(key, value);
       if (success) {
@@ -118,16 +124,16 @@ class FlutterDataManager {
       return false;
     }
   }
-  
+
   /// 整数データ読み込み
-  /// 
+  ///
   /// Flutter公式パターン: SharedPreferences.getIntを直接使用
   int? loadInt(String key, {int? defaultValue}) {
     if (!_initialized) {
       debugPrint('❌ FlutterDataManager not initialized');
       return defaultValue;
     }
-    
+
     try {
       final value = _prefs!.getInt(key) ?? defaultValue;
       if (_debugMode && value != null) {
@@ -139,16 +145,16 @@ class FlutterDataManager {
       return defaultValue;
     }
   }
-  
+
   /// 浮動小数点データ保存
-  /// 
+  ///
   /// Flutter公式パターン: SharedPreferences.setDoubleを直接使用
   Future<bool> saveDouble(String key, double value) async {
     if (!_initialized) {
       debugPrint('❌ FlutterDataManager not initialized');
       return false;
     }
-    
+
     try {
       final success = await _prefs!.setDouble(key, value);
       if (success) {
@@ -163,16 +169,16 @@ class FlutterDataManager {
       return false;
     }
   }
-  
+
   /// 浮動小数点データ読み込み
-  /// 
+  ///
   /// Flutter公式パターン: SharedPreferences.getDoubleを直接使用
   double? loadDouble(String key, {double? defaultValue}) {
     if (!_initialized) {
       debugPrint('❌ FlutterDataManager not initialized');
       return defaultValue;
     }
-    
+
     try {
       final value = _prefs!.getDouble(key) ?? defaultValue;
       if (_debugMode && value != null) {
@@ -184,16 +190,16 @@ class FlutterDataManager {
       return defaultValue;
     }
   }
-  
+
   /// ブール値データ保存
-  /// 
+  ///
   /// Flutter公式パターン: SharedPreferences.setBoolを直接使用
   Future<bool> saveBool(String key, bool value) async {
     if (!_initialized) {
       debugPrint('❌ FlutterDataManager not initialized');
       return false;
     }
-    
+
     try {
       final success = await _prefs!.setBool(key, value);
       if (success) {
@@ -208,16 +214,16 @@ class FlutterDataManager {
       return false;
     }
   }
-  
+
   /// ブール値データ読み込み
-  /// 
+  ///
   /// Flutter公式パターン: SharedPreferences.getBoolを直接使用
   bool? loadBool(String key, {bool? defaultValue}) {
     if (!_initialized) {
       debugPrint('❌ FlutterDataManager not initialized');
       return defaultValue;
     }
-    
+
     try {
       final value = _prefs!.getBool(key) ?? defaultValue;
       if (_debugMode && value != null) {
@@ -229,16 +235,16 @@ class FlutterDataManager {
       return defaultValue;
     }
   }
-  
+
   /// 文字列リストデータ保存
-  /// 
+  ///
   /// Flutter公式パターン: SharedPreferences.setStringListを直接使用
   Future<bool> saveStringList(String key, List<String> value) async {
     if (!_initialized) {
       debugPrint('❌ FlutterDataManager not initialized');
       return false;
     }
-    
+
     try {
       final success = await _prefs!.setStringList(key, value);
       if (success) {
@@ -253,16 +259,16 @@ class FlutterDataManager {
       return false;
     }
   }
-  
+
   /// 文字列リストデータ読み込み
-  /// 
+  ///
   /// Flutter公式パターン: SharedPreferences.getStringListを直接使用
   List<String>? loadStringList(String key, {List<String>? defaultValue}) {
     if (!_initialized) {
       debugPrint('❌ FlutterDataManager not initialized');
       return defaultValue;
     }
-    
+
     try {
       final value = _prefs!.getStringList(key) ?? defaultValue;
       if (_debugMode && value != null) {
@@ -274,9 +280,9 @@ class FlutterDataManager {
       return defaultValue;
     }
   }
-  
+
   /// JSONオブジェクト保存
-  /// 
+  ///
   /// Flutter公式推奨: JSONエンコードしてSharedPreferences.setStringで保存
   Future<bool> saveJson(String key, Map<String, dynamic> value) async {
     try {
@@ -287,31 +293,34 @@ class FlutterDataManager {
       return false;
     }
   }
-  
+
   /// JSONオブジェクト読み込み
-  /// 
+  ///
   /// Flutter公式推奨: SharedPreferencesから文字列を取得してJSONデコード
-  Map<String, dynamic>? loadJson(String key, {Map<String, dynamic>? defaultValue}) {
+  Map<String, dynamic>? loadJson(
+    String key, {
+    Map<String, dynamic>? defaultValue,
+  }) {
     try {
       final jsonString = loadString(key);
       if (jsonString == null) return defaultValue;
-      
+
       return jsonDecode(jsonString) as Map<String, dynamic>;
     } catch (e) {
       debugPrint('❌ Failed to decode JSON for $key: $e');
       return defaultValue;
     }
   }
-  
+
   /// データ削除
-  /// 
+  ///
   /// Flutter公式パターン: SharedPreferences.removeを直接使用
   Future<bool> remove(String key) async {
     if (!_initialized) {
       debugPrint('❌ FlutterDataManager not initialized');
       return false;
     }
-    
+
     try {
       final success = await _prefs!.remove(key);
       if (success) {
@@ -326,16 +335,16 @@ class FlutterDataManager {
       return false;
     }
   }
-  
+
   /// 全データクリア
-  /// 
+  ///
   /// Flutter公式パターン: SharedPreferences.clearを直接使用
   Future<bool> clear() async {
     if (!_initialized) {
       debugPrint('❌ FlutterDataManager not initialized');
       return false;
     }
-    
+
     try {
       final success = await _prefs!.clear();
       if (success) {
@@ -350,40 +359,40 @@ class FlutterDataManager {
       return false;
     }
   }
-  
+
   /// データ存在確認
-  /// 
+  ///
   /// Flutter公式パターン: SharedPreferences.containsKeyを直接使用
   bool containsKey(String key) {
     if (!_initialized) {
       debugPrint('❌ FlutterDataManager not initialized');
       return false;
     }
-    
+
     return _prefs!.containsKey(key);
   }
-  
+
   /// 保存済みキー一覧取得
-  /// 
+  ///
   /// Flutter公式パターン: SharedPreferences.getKeysを直接使用
   Set<String> getKeys() {
     if (!_initialized) {
       debugPrint('❌ FlutterDataManager not initialized');
       return <String>{};
     }
-    
+
     return _prefs!.getKeys();
   }
-  
+
   /// 再読み込み
-  /// 
+  ///
   /// Flutter公式パターン: SharedPreferences.reloadを直接使用
   Future<void> reload() async {
     if (!_initialized) {
       debugPrint('❌ FlutterDataManager not initialized');
       return;
     }
-    
+
     try {
       await _prefs!.reload();
       if (_debugMode) {
@@ -393,72 +402,75 @@ class FlutterDataManager {
       debugPrint('❌ Failed to reload SharedPreferences: $e');
     }
   }
-  
+
   /// ゲーム専用メソッド: ハイスコア保存
-  /// 
+  ///
   /// Flutter公式準拠: setIntを使用したシンプルな実装
   Future<bool> saveHighScore(int score, {String category = 'default'}) async {
     final key = 'highScore_$category';
     final currentScore = loadInt(key, defaultValue: 0) ?? 0;
-    
+
     if (score > currentScore) {
       return await saveInt(key, score);
     }
-    
+
     return true; // より低いスコアでも成功扱い
   }
-  
+
   /// ゲーム専用メソッド: ハイスコア読み込み
-  /// 
+  ///
   /// Flutter公式準拠: getIntを使用したシンプルな実装
   int loadHighScore({String category = 'default'}) {
     return loadInt('highScore_$category', defaultValue: 0) ?? 0;
   }
-  
+
   /// ゲーム専用メソッド: ユーザー設定保存
-  /// 
+  ///
   /// Flutter公式準拠: JSONエンコードして保存
   Future<bool> saveUserSettings(Map<String, dynamic> settings) async {
     return await saveJson('userSettings', settings);
   }
-  
+
   /// ゲーム専用メソッド: ユーザー設定読み込み
-  /// 
+  ///
   /// Flutter公式準拠: JSONデコードして読み込み
   Map<String, dynamic> loadUserSettings() {
-    return loadJson('userSettings', defaultValue: <String, dynamic>{}) ?? <String, dynamic>{};
+    return loadJson('userSettings', defaultValue: <String, dynamic>{}) ??
+        <String, dynamic>{};
   }
-  
+
   /// ゲーム専用メソッド: ゲーム進行状況保存
-  /// 
+  ///
   /// Flutter公式準拠: JSONエンコードして保存
   Future<bool> saveGameProgress(Map<String, dynamic> progress) async {
     return await saveJson('gameProgress', progress);
   }
-  
+
   /// ゲーム専用メソッド: ゲーム進行状況読み込み
-  /// 
+  ///
   /// Flutter公式準拠: JSONデコードして読み込み
   Map<String, dynamic> loadGameProgress() {
-    return loadJson('gameProgress', defaultValue: <String, dynamic>{}) ?? <String, dynamic>{};
+    return loadJson('gameProgress', defaultValue: <String, dynamic>{}) ??
+        <String, dynamic>{};
   }
-  
+
   /// ゲーム専用メソッド: 統計データ保存
-  /// 
+  ///
   /// Flutter公式準拠: JSONエンコードして保存
   Future<bool> saveStatistics(Map<String, dynamic> stats) async {
     return await saveJson('statistics', stats);
   }
-  
+
   /// ゲーム専用メソッド: 統計データ読み込み
-  /// 
+  ///
   /// Flutter公式準拠: JSONデコードして読み込み
   Map<String, dynamic> loadStatistics() {
-    return loadJson('statistics', defaultValue: <String, dynamic>{}) ?? <String, dynamic>{};
+    return loadJson('statistics', defaultValue: <String, dynamic>{}) ??
+        <String, dynamic>{};
   }
-  
+
   /// デバッグ情報取得
-  /// 
+  ///
   /// Flutter公式準拠: SharedPreferencesの情報を直接取得
   Map<String, dynamic> getDebugInfo() {
     return <String, dynamic>{
@@ -474,6 +486,6 @@ class FlutterDataManager {
 }
 
 /// 後方互換性のためのエイリアス
-/// 
+///
 /// 既存コードが引き続き動作するようにするため
 typedef DataManager = FlutterDataManager;

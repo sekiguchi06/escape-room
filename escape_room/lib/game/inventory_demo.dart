@@ -32,16 +32,18 @@ class InventoryDemoGame extends FlameGame {
 
     // デモ用アイテムを追加
     await _addDemoItems();
-    
+
     // 背景色を設定
-    camera.backdrop.add(RectangleComponent(
-      size: size,
-      paint: Paint()..color = Colors.grey.shade900,
-    ));
-    
+    camera.backdrop.add(
+      RectangleComponent(
+        size: size,
+        paint: Paint()..color = Colors.grey.shade900,
+      ),
+    );
+
     // タイトル表示
     _addDemoTitle();
-    
+
     // 操作説明を追加
     _addInstructions();
   }
@@ -51,10 +53,10 @@ class InventoryDemoGame extends FlameGame {
     // 少し遅延してアイテムを順次追加（デモ効果）
     await Future.delayed(const Duration(milliseconds: 500));
     _inventoryUI.addItem('key');
-    
+
     await Future.delayed(const Duration(milliseconds: 500));
     _inventoryUI.addItem('tool');
-    
+
     await Future.delayed(const Duration(milliseconds: 500));
     _inventoryUI.addItem('code');
   }
@@ -98,11 +100,17 @@ class InventoryDemoGame extends FlameGame {
         text: instructions[i],
         textRenderer: TextPaint(
           style: TextStyle(
-            color: instructions[i].isEmpty ? Colors.transparent : 
-                   instructions[i].startsWith('•') ? Colors.lightBlue.shade200 :
-                   instructions[i].endsWith(':') ? Colors.yellow.shade300 : Colors.white,
+            color: instructions[i].isEmpty
+                ? Colors.transparent
+                : instructions[i].startsWith('•')
+                ? Colors.lightBlue.shade200
+                : instructions[i].endsWith(':')
+                ? Colors.yellow.shade300
+                : Colors.white,
             fontSize: size.y * 0.025,
-            fontWeight: instructions[i].endsWith(':') ? FontWeight.bold : FontWeight.normal,
+            fontWeight: instructions[i].endsWith(':')
+                ? FontWeight.bold
+                : FontWeight.normal,
             fontFamily: 'Noto Sans JP',
           ),
         ),
@@ -117,7 +125,7 @@ class InventoryDemoGame extends FlameGame {
   @override
   void onGameResize(Vector2 size) {
     super.onGameResize(size);
-    
+
     // 画面サイズ変更時にインベントリUIを更新
     if (isLoaded && children.contains(_inventoryUI)) {
       _inventoryUI.removeFromParent();

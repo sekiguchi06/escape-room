@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 /// Flutter公式準拠のエラーハンドリングシステム
-/// 
+///
 /// 参考ドキュメント:
 /// - https://flutter.dev/docs/testing/errors
 /// - https://api.flutter.dev/flutter/foundation/FlutterError-class.html
 /// - https://api.flutter.dev/flutter/widgets/ErrorWidget-class.html
-/// 
+///
 /// 設計原則:
 /// 1. FlutterError.onErrorを使用したグローバルエラーハンドリング
 /// 2. 具体的なエラータイプの定義と処理
@@ -19,18 +19,25 @@ import 'package:flutter/services.dart';
 enum GameErrorType {
   /// ネットワーク関連エラー
   network,
+
   /// 広告読み込みエラー
   adLoad,
+
   /// 音声再生エラー
   audioPlayback,
+
   /// ゲームロジックエラー
   gameLogic,
+
   /// リソース読み込みエラー
   resourceLoad,
+
   /// 設定エラー
   configuration,
+
   /// 権限エラー
   permission,
+
   /// 不明なエラー
   unknown,
 }
@@ -43,7 +50,7 @@ class GameError implements Exception {
   final dynamic originalError;
   final StackTrace? stackTrace;
   final DateTime timestamp;
-  
+
   const GameError({
     required this.type,
     required this.message,
@@ -52,7 +59,7 @@ class GameError implements Exception {
     this.stackTrace,
     required this.timestamp,
   });
-  
+
   /// ユーザー向けメッセージ取得
   String get userMessage {
     switch (type) {
@@ -74,7 +81,7 @@ class GameError implements Exception {
         return '予期しないエラーが発生しました';
     }
   }
-  
+
   /// 開発者向け詳細情報
   Map<String, dynamic> toDetailedMap() {
     return {
@@ -87,7 +94,7 @@ class GameError implements Exception {
       'stackTrace': stackTrace?.toString(),
     };
   }
-  
+
   @override
   String toString() => 'GameError($type): $message';
 }
@@ -96,7 +103,7 @@ class GameError implements Exception {
 abstract class ErrorRecoveryStrategy {
   /// エラーから回復を試みる
   Future<bool> attemptRecovery(GameError error);
-  
+
   /// この戦略が適用可能かチェック
   bool canHandle(GameError error);
 }
@@ -106,30 +113,30 @@ class NetworkErrorRecoveryStrategy implements ErrorRecoveryStrategy {
   final int maxRetries;
   final Duration retryDelay;
   int _retryCount = 0;
-  
+
   NetworkErrorRecoveryStrategy({
     this.maxRetries = 3,
     this.retryDelay = const Duration(seconds: 2),
   });
-  
+
   @override
   bool canHandle(GameError error) {
     return error.type == GameErrorType.network && _retryCount < maxRetries;
   }
-  
+
   @override
   Future<bool> attemptRecovery(GameError error) async {
     if (!canHandle(error)) return false;
-    
+
     _retryCount++;
     await Future.delayed(retryDelay);
-    
+
     // ネットワーク再接続を試みる処理
     // 実際の実装では具体的な再接続ロジックを実装
-    
+
     return true; // 簡易実装
   }
-  
+
   void reset() {
     _retryCount = 0;
   }
@@ -144,7 +151,7 @@ class FlutterGameErrorHandler {
   final List<void Function(GameError)> _errorListeners = [];
   final int maxHistorySize;
   final bool debugMode;
-  
+
   /// Flutter公式推奨: シングルトンパターン
   factory FlutterGameErrorHandler({
     int maxHistorySize = 100,
@@ -156,14 +163,14 @@ class FlutterGameErrorHandler {
     );
     return _instance!;
   }
-  
+
   FlutterGameErrorHandler._internal({
     required this.maxHistorySize,
     required this.debugMode,
   });
-  
+
   /// エラーハンドラー初期化
-  /// 
+  ///
   /// Flutter公式パターン: FlutterError.onErrorに登録
   void initialize() {
     // Flutter公式エラーハンドラー登録
@@ -177,30 +184,30 @@ class FlutterGameErrorHandler {
         stackTrace: details.stack,
         timestamp: DateTime.now(),
       );
-      
+
       handleError(gameError);
-      
+
       // デバッグモードでは詳細を出力
       if (debugMode) {
         FlutterError.presentError(details);
       }
     };
-    
+
     // デフォルトリカバリー戦略追加
     addRecoveryStrategy(NetworkErrorRecoveryStrategy());
-    
+
     if (debugMode) {
       debugPrint('🛡️ FlutterGameErrorHandler initialized');
     }
   }
-  
+
   /// エラータイプ分類
   GameErrorType _classifyFlutterError(FlutterErrorDetails details) {
     final exception = details.exception;
     final message = exception.toString().toLowerCase();
-    
-    if (exception is NetworkImageLoadException || 
-        message.contains('network') || 
+
+    if (exception is NetworkImageLoadException ||
+        message.contains('network') ||
         message.contains('connection')) {
       return GameErrorType.network;
     } else if (exception is PlatformException) {
@@ -214,12 +221,12 @@ class FlutterGameErrorHandler {
     } else if (message.contains('config')) {
       return GameErrorType.configuration;
     }
-    
+
     return GameErrorType.unknown;
   }
-  
+
   /// エラー処理メイン関数
-  /// 
+  ///
   /// Flutter公式準拠: 具体的なエラー処理とリカバリー
   Future<void> handleError(GameError error) async {
     // エラー履歴に追加
@@ -227,10 +234,10 @@ class FlutterGameErrorHandler {
     if (_errorHistory.length > maxHistorySize) {
       _errorHistory.removeAt(0);
     }
-    
+
     // エラーカウント更新
     _errorCounts[error.type] = (_errorCounts[error.type] ?? 0) + 1;
-    
+
     // デバッグ出力
     if (debugMode) {
       debugPrint('❌ ${error.type.name}: ${error.message}');
@@ -238,7 +245,7 @@ class FlutterGameErrorHandler {
         debugPrint('   Details: ${error.details}');
       }
     }
-    
+
     // リカバリー戦略実行
     bool recovered = false;
     for (final strategy in _recoveryStrategies) {
@@ -247,20 +254,20 @@ class FlutterGameErrorHandler {
         if (recovered) break;
       }
     }
-    
+
     // リスナー通知
     for (final listener in _errorListeners) {
       listener(error);
     }
-    
+
     // リカバリー失敗時の処理
     if (!recovered && debugMode) {
       debugPrint('⚠️ Error recovery failed for ${error.type.name}');
     }
   }
-  
+
   /// 具体的なエラー処理ヘルパー
-  /// 
+  ///
   /// ネットワークエラー処理
   Future<T?> handleNetworkOperation<T>(
     Future<T> Function() operation, {
@@ -281,7 +288,7 @@ class FlutterGameErrorHandler {
       return null;
     }
   }
-  
+
   /// 広告エラー処理
   Future<bool> handleAdOperation(
     Future<void> Function() operation, {
@@ -303,7 +310,7 @@ class FlutterGameErrorHandler {
       return false;
     }
   }
-  
+
   /// 音声エラー処理
   Future<bool> handleAudioOperation(
     Future<void> Function() operation, {
@@ -325,43 +332,48 @@ class FlutterGameErrorHandler {
       return false;
     }
   }
-  
+
   /// リカバリー戦略追加
   void addRecoveryStrategy(ErrorRecoveryStrategy strategy) {
     _recoveryStrategies.add(strategy);
   }
-  
+
   /// エラーリスナー追加
   void addErrorListener(void Function(GameError) listener) {
     _errorListeners.add(listener);
   }
-  
+
   /// エラーリスナー削除
   void removeErrorListener(void Function(GameError) listener) {
     _errorListeners.remove(listener);
   }
-  
+
   /// エラー統計取得
   Map<String, dynamic> getErrorStatistics() {
     return {
       'totalErrors': _errorHistory.length,
       'errorCounts': Map<String, int>.from(
-        _errorCounts.map((key, value) => MapEntry(key.name, value))
+        _errorCounts.map((key, value) => MapEntry(key.name, value)),
       ),
-      'recentErrors': _errorHistory.reversed.take(10).map((e) => {
-        'type': e.type.name,
-        'message': e.message,
-        'timestamp': e.timestamp.toIso8601String(),
-      }).toList(),
+      'recentErrors': _errorHistory.reversed
+          .take(10)
+          .map(
+            (e) => {
+              'type': e.type.name,
+              'message': e.message,
+              'timestamp': e.timestamp.toIso8601String(),
+            },
+          )
+          .toList(),
     };
   }
-  
+
   /// エラー履歴クリア
   void clearErrorHistory() {
     _errorHistory.clear();
     _errorCounts.clear();
   }
-  
+
   /// デバッグ情報取得
   Map<String, dynamic> getDebugInfo() {
     return {
@@ -375,32 +387,28 @@ class FlutterGameErrorHandler {
       'statistics': getErrorStatistics(),
     };
   }
-  
+
   /// リソース解放
   void dispose() {
     _errorHistory.clear();
     _errorCounts.clear();
     _recoveryStrategies.clear();
     _errorListeners.clear();
-    
+
     // FlutterError.onErrorをデフォルトに戻す
     FlutterError.onError = FlutterError.presentError;
   }
 }
 
 /// エラー表示ウィジェット
-/// 
+///
 /// Flutter公式準拠: ErrorWidgetをカスタマイズ
 class GameErrorWidget extends StatelessWidget {
   final GameError error;
   final VoidCallback? onRetry;
-  
-  const GameErrorWidget({
-    super.key,
-    required this.error,
-    this.onRetry,
-  });
-  
+
+  const GameErrorWidget({super.key, required this.error, this.onRetry});
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -429,16 +437,13 @@ class GameErrorWidget extends StatelessWidget {
           ],
           if (onRetry != null) ...[
             const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: onRetry,
-              child: const Text('再試行'),
-            ),
+            ElevatedButton(onPressed: onRetry, child: const Text('再試行')),
           ],
         ],
       ),
     );
   }
-  
+
   IconData _getErrorIcon() {
     switch (error.type) {
       case GameErrorType.network:

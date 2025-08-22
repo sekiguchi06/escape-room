@@ -9,7 +9,7 @@ class InventorySystem extends ChangeNotifier {
   // インベントリ状態（5個のスロット、null = 空）
   final List<String?> _inventory = List.filled(5, null);
   int? _selectedSlotIndex; // 選択中のスロット（null = 未選択）
-  
+
   // 取得済みアイテムのID管理（ホットスポットID + アイテムIDの組み合わせ）
   final Set<String> _acquiredItems = {};
 
@@ -34,13 +34,13 @@ class InventorySystem extends ChangeNotifier {
   /// ホットスポットからアイテムを取得（重複取得防止付き）
   bool acquireItemFromHotspot(String hotspotId, String itemId) {
     final acquisitionKey = '${hotspotId}_$itemId';
-    
+
     // 既に取得済みかチェック
     if (_acquiredItems.contains(acquisitionKey)) {
       debugPrint('🚫 Already acquired: $itemId from $hotspotId');
       return false;
     }
-    
+
     // インベントリに追加を試行
     final success = addItem(itemId);
     if (success) {
@@ -48,7 +48,7 @@ class InventorySystem extends ChangeNotifier {
       _acquiredItems.add(acquisitionKey);
       debugPrint('✅ First-time acquisition: $itemId from $hotspotId');
     }
-    
+
     return success;
   }
 
@@ -133,7 +133,7 @@ class InventorySystem extends ChangeNotifier {
   bool canCombineSelectedItems() {
     final selectedItem = selectedItemId;
     if (selectedItem == null) return false;
-    
+
     // 他のアイテムと組み合わせ可能かチェック
     for (final item in _inventory) {
       if (item != null && item != selectedItem) {
@@ -156,29 +156,30 @@ class InventorySystem extends ChangeNotifier {
   bool combineItemWithSelected(String targetItemId) {
     final selectedItem = selectedItemId;
     if (selectedItem == null) return false;
-    
+
     if (!canCombineItems(selectedItem, targetItemId)) {
       return false;
     }
-    
+
     // coin + key → master_key
-    if ((selectedItem == 'coin' && targetItemId == 'key') || 
+    if ((selectedItem == 'coin' && targetItemId == 'key') ||
         (selectedItem == 'key' && targetItemId == 'coin')) {
-      
       // 元のアイテムを削除
       removeItemById(selectedItem);
       removeItemById(targetItemId);
-      
+
       // 新しいアイテムを追加
       addItem('master_key');
-      
+
       // 選択を解除
       _selectedSlotIndex = null;
-      
-      debugPrint('🔧 Item combination: $selectedItem + $targetItemId → master_key');
+
+      debugPrint(
+        '🔧 Item combination: $selectedItem + $targetItemId → master_key',
+      );
       return true;
     }
-    
+
     return false;
   }
 }

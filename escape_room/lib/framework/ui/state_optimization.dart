@@ -1,7 +1,7 @@
 /// setState最適化ユーティリティ
-/// 
+///
 /// StatefulWidgetでの局所的なsetState呼び出しパターンと状態管理の最適化
-library state_optimization;
+library;
 
 import 'package:flutter/material.dart';
 
@@ -29,7 +29,10 @@ mixin StateOptimization<T extends StatefulWidget> on State<T> {
   }
 
   /// 非同期処理後のsetState
-  Future<void> asyncSetState(Future<void> Function() asyncOperation, [VoidCallback? onComplete]) async {
+  Future<void> asyncSetState(
+    Future<void> Function() asyncOperation, [
+    VoidCallback? onComplete,
+  ]) async {
     try {
       await asyncOperation();
       if (onComplete != null) {
@@ -46,11 +49,7 @@ class LocalStateBuilder extends StatefulWidget {
   final Widget Function(BuildContext context, StateSetter setState) builder;
   final VoidCallback? onInit;
 
-  const LocalStateBuilder({
-    super.key,
-    required this.builder,
-    this.onInit,
-  });
+  const LocalStateBuilder({super.key, required this.builder, this.onInit});
 
   @override
   State<LocalStateBuilder> createState() => _LocalStateBuilderState();
@@ -88,7 +87,6 @@ class OptimizedPressButton extends StatefulWidget {
 
 class _OptimizedPressButtonState extends State<OptimizedPressButton>
     with StateOptimization, TickerProviderStateMixin {
-  bool _isPressed = false;
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
 
@@ -105,18 +103,15 @@ class _OptimizedPressButtonState extends State<OptimizedPressButton>
   }
 
   void _handleTapDown() {
-    safeSetState(() => _isPressed = true);
     _animationController.forward();
   }
 
   void _handleTapUp() {
-    safeSetState(() => _isPressed = false);
     _animationController.reverse();
     widget.onPressed?.call();
   }
 
   void _handleTapCancel() {
-    safeSetState(() => _isPressed = false);
     _animationController.reverse();
   }
 
@@ -148,7 +143,13 @@ class _OptimizedPressButtonState extends State<OptimizedPressButton>
 /// インベントリ状態管理の最適化
 class OptimizedInventoryState extends StatefulWidget {
   final List<String?> initialItems;
-  final Widget Function(BuildContext context, List<String?> items, Function(int, String) addItem, Function(int) selectSlot) builder;
+  final Widget Function(
+    BuildContext context,
+    List<String?> items,
+    Function(int, String) addItem,
+    Function(int) selectSlot,
+  )
+  builder;
 
   const OptimizedInventoryState({
     super.key,
@@ -157,10 +158,12 @@ class OptimizedInventoryState extends StatefulWidget {
   });
 
   @override
-  State<OptimizedInventoryState> createState() => _OptimizedInventoryStateState();
+  State<OptimizedInventoryState> createState() =>
+      _OptimizedInventoryStateState();
 }
 
-class _OptimizedInventoryStateState extends State<OptimizedInventoryState> with StateOptimization {
+class _OptimizedInventoryStateState extends State<OptimizedInventoryState>
+    with StateOptimization {
   late List<String?> _inventory;
   int _selectedSlotIndex = 0;
 
@@ -194,7 +197,12 @@ class _OptimizedInventoryStateState extends State<OptimizedInventoryState> with 
 /// 設定変更の最適化されたハンドラー
 class OptimizedConfigurationWidget<T> extends StatefulWidget {
   final T initialConfig;
-  final Widget Function(BuildContext context, T config, Function(T) updateConfig) builder;
+  final Widget Function(
+    BuildContext context,
+    T config,
+    Function(T) updateConfig,
+  )
+  builder;
   final void Function(T oldConfig, T newConfig)? onConfigChanged;
 
   const OptimizedConfigurationWidget({
@@ -205,10 +213,13 @@ class OptimizedConfigurationWidget<T> extends StatefulWidget {
   });
 
   @override
-  State<OptimizedConfigurationWidget<T>> createState() => _OptimizedConfigurationWidgetState<T>();
+  State<OptimizedConfigurationWidget<T>> createState() =>
+      _OptimizedConfigurationWidgetState<T>();
 }
 
-class _OptimizedConfigurationWidgetState<T> extends State<OptimizedConfigurationWidget<T>> with StateOptimization {
+class _OptimizedConfigurationWidgetState<T>
+    extends State<OptimizedConfigurationWidget<T>>
+    with StateOptimization {
   late T _currentConfig;
 
   @override
@@ -230,14 +241,11 @@ class _OptimizedConfigurationWidgetState<T> extends State<OptimizedConfiguration
   }
 
   void _updateConfig(T newConfig) {
-    conditionalSetState(
-      newConfig != _currentConfig,
-      () {
-        final oldConfig = _currentConfig;
-        _currentConfig = newConfig;
-        widget.onConfigChanged?.call(oldConfig, _currentConfig);
-      },
-    );
+    conditionalSetState(newConfig != _currentConfig, () {
+      final oldConfig = _currentConfig;
+      _currentConfig = newConfig;
+      widget.onConfigChanged?.call(oldConfig, _currentConfig);
+    });
   }
 
   @override

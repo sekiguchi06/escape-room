@@ -25,7 +25,7 @@ class ClearScreenWidget extends StatelessWidget {
     final seconds = clearTime % 60;
 
     return Material(
-      color: Colors.black.withOpacity(0.8),
+      color: Colors.black.withValues(alpha: 0.8),
       child: Center(
         child: Container(
           width: 350,
@@ -35,7 +35,7 @@ class ClearScreenWidget extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.3),
+                color: Colors.black.withValues(alpha: 0.3),
                 blurRadius: 20,
                 offset: const Offset(0, 8),
               ),
@@ -45,11 +45,7 @@ class ClearScreenWidget extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               // 🎉 クリアタイトル
-              const Icon(
-                Icons.emoji_events,
-                size: 64,
-                color: Colors.amber,
-              ),
+              const Icon(Icons.emoji_events, size: 64, color: Colors.amber),
               const SizedBox(height: 16),
               const Text(
                 '🎉 脱出成功！',
@@ -71,9 +67,15 @@ class ClearScreenWidget extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
-                    _buildStatRow('⏱️ クリア時間', '${minutes}分${seconds.toString().padLeft(2, '0')}秒'),
+                    _buildStatRow(
+                      '⏱️ クリア時間',
+                      '${minutes}分${seconds.toString().padLeft(2, '0')}秒',
+                    ),
                     const SizedBox(height: 8),
-                    _buildStatRow('🎒 アイテム収集', '$itemsCollected / $totalItems個'),
+                    _buildStatRow(
+                      '🎒 アイテム収集',
+                      '$itemsCollected / $totalItems個',
+                    ),
                   ],
                 ),
               ),
@@ -97,7 +99,7 @@ class ClearScreenWidget extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  
+
                   // リスタートボタン
                   Expanded(
                     child: ElevatedButton.icon(
@@ -128,13 +130,7 @@ class ClearScreenWidget extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 16,
-            color: Colors.grey,
-          ),
-        ),
+        Text(label, style: const TextStyle(fontSize: 16, color: Colors.grey)),
         Text(
           value,
           style: const TextStyle(

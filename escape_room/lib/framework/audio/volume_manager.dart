@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:audioplayers/audioplayers.dart';
 import 'package:flame_audio/flame_audio.dart';
 
 /// ゲーム内音量管理システム
@@ -36,7 +35,9 @@ class VolumeManager extends ChangeNotifier {
     try {
       await _loadSettings();
       _isInitialized = true;
-      debugPrint('🔊 VolumeManager initialized - BGM: ${(_bgmVolume * 100).round()}%, SFX: ${(_sfxVolume * 100).round()}%');
+      debugPrint(
+        '🔊 VolumeManager initialized - BGM: ${(_bgmVolume * 100).round()}%, SFX: ${(_sfxVolume * 100).round()}%',
+      );
     } catch (e) {
       debugPrint('❌ VolumeManager initialization failed: $e');
     }
@@ -49,11 +50,11 @@ class VolumeManager extends ChangeNotifier {
       _bgmVolume = prefs.getDouble('bgm_volume') ?? 0.7;
       _sfxVolume = prefs.getDouble('sfx_volume') ?? 0.8;
       _isMuted = prefs.getBool('is_muted') ?? false;
-      
+
       // 範囲チェック
       _bgmVolume = _bgmVolume.clamp(0.0, 1.0);
       _sfxVolume = _sfxVolume.clamp(0.0, 1.0);
-      
+
       debugPrint('📂 Volume settings loaded from storage');
     } catch (e) {
       debugPrint('⚠️ Failed to load volume settings: $e');
@@ -110,10 +111,14 @@ class VolumeManager extends ChangeNotifier {
 
       _bgmPlayer = AudioPlayer();
       await _bgmPlayer!.setVolume(effectiveBgmVolume);
-      await _bgmPlayer!.setReleaseMode(loop ? ReleaseMode.loop : ReleaseMode.release);
+      await _bgmPlayer!.setReleaseMode(
+        loop ? ReleaseMode.loop : ReleaseMode.release,
+      );
       await _bgmPlayer!.play(AssetSource(audioPath));
-      
-      debugPrint('🎵 BGM started: $audioPath (volume: ${(effectiveBgmVolume * 100).round()}%)');
+
+      debugPrint(
+        '🎵 BGM started: $audioPath (volume: ${(effectiveBgmVolume * 100).round()}%)',
+      );
     } catch (e) {
       debugPrint('❌ Failed to play BGM: $e');
     }
@@ -162,7 +167,9 @@ class VolumeManager extends ChangeNotifier {
     try {
       // Flame Audioを使用して効果音を再生
       await FlameAudio.play(audioPath, volume: effectiveSfxVolume);
-      debugPrint('🔔 SFX played: $audioPath (volume: ${(effectiveSfxVolume * 100).round()}%)');
+      debugPrint(
+        '🔔 SFX played: $audioPath (volume: ${(effectiveSfxVolume * 100).round()}%)',
+      );
     } catch (e) {
       debugPrint('❌ Failed to play SFX: $e');
     }
@@ -174,13 +181,13 @@ class VolumeManager extends ChangeNotifier {
       final player = AudioPlayer();
       await player.setVolume(effectiveSfxVolume);
       await player.play(AssetSource(audioPath));
-      
+
       // 再生完了後にプレイヤーを破棄
       player.onPlayerComplete.listen((_) {
         player.dispose();
         _sfxPlayers.remove(player);
       });
-      
+
       _sfxPlayers.add(player);
       debugPrint('🔔 SFX played with player: $audioPath');
     } catch (e) {
@@ -191,7 +198,7 @@ class VolumeManager extends ChangeNotifier {
   /// ゲーム固有の効果音
   Future<void> playGameSfx(GameSfxType type) async {
     String audioPath;
-    
+
     switch (type) {
       case GameSfxType.buttonTap:
         audioPath = 'sounds/button_tap.wav';
@@ -233,7 +240,7 @@ class VolumeManager extends ChangeNotifier {
   /// 全ての音声を停止
   Future<void> stopAllAudio() async {
     await stopBgm();
-    
+
     // 全ての効果音プレイヤーを停止
     for (final player in _sfxPlayers) {
       try {
@@ -244,11 +251,12 @@ class VolumeManager extends ChangeNotifier {
       }
     }
     _sfxPlayers.clear();
-    
+
     debugPrint('🔇 All audio stopped');
   }
 
   /// リソースの解放
+  @override
   Future<void> dispose() async {
     await stopAllAudio();
     _isInitialized = false;
@@ -260,11 +268,11 @@ class VolumeManager extends ChangeNotifier {
     _bgmVolume = 0.7;
     _sfxVolume = 0.8;
     _isMuted = false;
-    
+
     await _updateBgmVolume();
     await _saveSettings();
     notifyListeners();
-    
+
     debugPrint('🔄 Volume settings reset to defaults');
   }
 
@@ -281,11 +289,11 @@ class VolumeManager extends ChangeNotifier {
 
 /// ゲーム効果音の種類
 enum GameSfxType {
-  buttonTap,    // ボタンタップ音
-  itemFound,    // アイテム発見音
+  buttonTap, // ボタンタップ音
+  itemFound, // アイテム発見音
   puzzleSolved, // パズル解決音
-  error,        // エラー音
-  success,      // 成功音
-  doorOpen,     // ドア開放音
-  escape,       // 脱出成功音
+  error, // エラー音
+  success, // 成功音
+  doorOpen, // ドア開放音
+  escape, // 脱出成功音
 }

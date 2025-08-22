@@ -14,16 +14,15 @@ void main() {
     });
 
     test('Flame公式API使用確認', () {
-      
       // ParticleSystemComponentが正しく使用されているか
       expect(ParticleSystemComponent, isNotNull);
-      
+
       // 各種パーティクルタイプが使用可能か確認
       expect(AcceleratedParticle, isNotNull);
       expect(MovingParticle, isNotNull);
       expect(ComputedParticle, isNotNull);
       expect(CircleParticle, isNotNull);
-      
+
       // Particle.generateメソッドが使用可能か確認
       final testParticle = Particle.generate(
         count: 5,
@@ -34,41 +33,35 @@ void main() {
         ),
       );
       expect(testParticle, isNotNull);
-      
     });
-    
+
     test('パーティクル設定正常性確認', () {
-      
       final config = ParticleConfiguration(
         particleCount: 10,
         lifespan: 2.0,
         minRadius: 1.0,
         maxRadius: 5.0,
       );
-      
+
       expect(config.particleCount, equals(10));
       expect(config.lifespan, equals(2.0));
       expect(config.minRadius, equals(1.0));
       expect(config.maxRadius, equals(5.0));
-      
     });
-    
+
     test('エフェクト登録確認', () {
-      
-      final config = ParticleConfiguration(
-        particleCount: 15,
-        lifespan: 1.5,
-      );
-      
+      final config = ParticleConfiguration(particleCount: 15, lifespan: 1.5);
+
       particleManager.registerEffect('test_effect', config);
-      
+
       // プライベートフィールドのため直接確認はできないが、エラーなく登録完了
-      expect(() => particleManager.registerEffect('test_effect2', config), returnsNormally);
-      
+      expect(
+        () => particleManager.registerEffect('test_effect2', config),
+        returnsNormally,
+      );
     });
-    
+
     test('Flame公式パーティクル直接作成確認', () {
-      
       // AcceleratedParticle作成テスト
       final acceleratedParticle = AcceleratedParticle(
         acceleration: Vector2(0, 100),
@@ -78,7 +71,7 @@ void main() {
         ),
       );
       expect(acceleratedParticle, isNotNull);
-      
+
       // MovingParticle作成テスト
       final movingParticle = MovingParticle(
         from: Vector2(0, 0),
@@ -89,7 +82,7 @@ void main() {
         ),
       );
       expect(movingParticle, isNotNull);
-      
+
       // ComputedParticle作成テスト
       final computedParticle = ComputedParticle(
         renderer: (canvas, particle) {
@@ -97,11 +90,9 @@ void main() {
         },
       );
       expect(computedParticle, isNotNull);
-      
     });
-    
+
     test('パーティクルシステム統合確認', () {
-      
       // Flame公式推奨パターンでのParticleSystemComponent作成
       final particle = Particle.generate(
         count: 10,
@@ -114,10 +105,9 @@ void main() {
           ),
         ),
       );
-      
+
       final particleSystem = ParticleSystemComponent(particle: particle);
       expect(particleSystem, isNotNull);
-      
     });
   });
 }

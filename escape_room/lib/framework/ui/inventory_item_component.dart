@@ -11,27 +11,24 @@ class InventoryItemComponent extends PositionComponent with TapCallbacks {
   final String itemId;
   final GameItem item;
   final Function(String) onItemTapped;
-  
+
   late final InventoryItemRenderer _renderer;
   late final InventoryItemInteraction _interaction;
-  
+
   InventoryItemComponent({
     required this.itemId,
     required this.item,
     required this.onItemTapped,
     required Vector2 position,
     required Vector2 size,
-  }) : super(
-    position: position,
-    size: size,
-  );
-  
+  }) : super(position: position, size: size);
+
   @override
   Future<void> onLoad() async {
     await super.onLoad();
     await _initializeComponents();
   }
-  
+
   /// コンポーネント初期化
   Future<void> _initializeComponents() async {
     // レンダリング担当
@@ -41,7 +38,7 @@ class InventoryItemComponent extends PositionComponent with TapCallbacks {
       item: item,
       size: size,
     );
-    
+
     // インタラクション担当
     _interaction = InventoryItemInteraction(
       parent: this,
@@ -49,18 +46,18 @@ class InventoryItemComponent extends PositionComponent with TapCallbacks {
       size: size,
       onItemTapped: onItemTapped,
     );
-    
+
     // 初期化実行
     await _renderer.render();
     _interaction.initialize();
   }
-  
+
   @override
   void onTapUp(TapUpEvent event) {
     _interaction.handleTap();
     // Flame推奨：継続非伝播
   }
-  
+
   /// 選択状態を更新（外部から呼び出し）
   void updateSelectionState(bool selected) {
     // 初期化完了後のみ更新
@@ -72,7 +69,7 @@ class InventoryItemComponent extends PositionComponent with TapCallbacks {
       }
     }
   }
-  
+
   /// 選択状態を取得
   bool get isSelected {
     try {
@@ -81,17 +78,17 @@ class InventoryItemComponent extends PositionComponent with TapCallbacks {
       return false; // 初期化前はfalse
     }
   }
-  
+
   /// アイテム情報を更新（外部から呼び出し）
   void updateItem(GameItem newItem) {
     _renderer.updateItem(newItem);
   }
-  
+
   /// ツールチップ表示（外部から呼び出し）
   void showTooltip() {
     _interaction.showTooltip(item.description);
   }
-  
+
   /// ツールチップ非表示（外部から呼び出し）
   void hideTooltip() {
     _interaction.hideTooltip();

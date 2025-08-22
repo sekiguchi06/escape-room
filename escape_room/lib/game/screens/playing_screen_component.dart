@@ -7,13 +7,13 @@ import '../simple_game.dart';
 class PlayingScreenComponent extends PositionComponent {
   late TextUIComponent _timerText;
   late GameComponent _testCircle;
-  
+
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    
+
     final game = findGame()! as SimpleGame;
-    
+
     // 背景
     final background = RectangleComponent(
       position: Vector2.zero(),
@@ -22,7 +22,7 @@ class PlayingScreenComponent extends PositionComponent {
     );
     background.priority = UILayerPriority.background;
     add(background);
-    
+
     // タイマー背景
     final timerBg = RectangleComponent(
       position: Vector2(game.size.x / 2 - 100, 25),
@@ -30,7 +30,7 @@ class PlayingScreenComponent extends PositionComponent {
       paint: Paint()..color = Colors.black.withValues(alpha: 0.8),
     );
     add(timerBg);
-    
+
     // タイマーテキスト
     _timerText = TextUIComponent(
       text: 'TIME: 5.0',
@@ -40,7 +40,7 @@ class PlayingScreenComponent extends PositionComponent {
     _timerText.anchor = Anchor.center;
     _timerText.setTextColor(Colors.white);
     add(_timerText);
-    
+
     // ゲームオブジェクト
     _testCircle = GameComponent(
       position: Vector2(game.size.x / 2, game.size.y / 2 + 100),
@@ -50,7 +50,7 @@ class PlayingScreenComponent extends PositionComponent {
     _testCircle.paint.color = Colors.blue;
     _testCircle.paint.style = PaintingStyle.fill;
     add(_testCircle);
-    
+
     // 説明テキスト
     final instructionText = TextUIComponent(
       text: 'TAP THE BLUE CIRCLE',
@@ -61,7 +61,7 @@ class PlayingScreenComponent extends PositionComponent {
     instructionText.setTextColor(Colors.white);
     add(instructionText);
   }
-  
+
   /// タイマー表示更新（外部から呼び出し）
   void updateTimer(double timeRemaining) {
     if (_timerText.isMounted) {
@@ -69,15 +69,15 @@ class PlayingScreenComponent extends PositionComponent {
       _timerText.setTextColor(Colors.white);
     }
   }
-  
+
   /// サークルタップ処理
   bool handleCircleTap(Vector2 tapPosition) {
     final distance = (tapPosition - _testCircle.position).length;
-    
+
     if (distance <= _testCircle.size.x / 2) {
       AnimationPresets.buttonTap(_testCircle);
-      final game = findGame()! as SimpleGame;
-      game.managers.audioManager.playSfx('tap', volumeMultiplier: 0.7);
+      // TODO: Implement audio manager access
+      debugPrint('🔊 Play tap sound effect');
       return true;
     }
     return false;

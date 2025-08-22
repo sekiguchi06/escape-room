@@ -98,101 +98,269 @@ abstract class AppLocalizations {
     Locale('ja'),
   ];
 
-  /// アプリケーションのタイトル
+  /// Main app title displayed in UI
   ///
-  /// In ja, this message translates to:
-  /// **'カジュアルゲームテンプレート'**
+  /// In en, this message translates to:
+  /// **'Escape Master'**
   String get appTitle;
 
-  /// 脱出ゲームボタンのタイトル
+  /// App tagline/subtitle
   ///
-  /// In ja, this message translates to:
-  /// **'🔓 脱出ゲームをプレイ'**
-  String get escapeGameTitle;
+  /// In en, this message translates to:
+  /// **'Ultimate Escape Puzzle Game'**
+  String get appSubtitle;
 
-  /// タップファイアゲームボタン
+  /// Start new game button
   ///
-  /// In ja, this message translates to:
-  /// **'Tap Fire Gameをプレイ'**
-  String get playTapFireGame;
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get buttonStart;
 
-  /// シンプルゲームボタン
+  /// Continue saved game button
   ///
-  /// In ja, this message translates to:
-  /// **'Simple Gameをプレイ'**
-  String get playSimpleGame;
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get buttonContinue;
 
-  /// タップシューターボタン
+  /// How to play instructions button
   ///
-  /// In ja, this message translates to:
-  /// **'Simple Tap Shooterをプレイ'**
-  String get playTapShooter;
+  /// In en, this message translates to:
+  /// **'How to Play'**
+  String get buttonHowToPlay;
 
-  /// ゲーム終了メッセージ
+  /// Settings button
   ///
-  /// In ja, this message translates to:
-  /// **'ゲームオーバー'**
-  String get gameOver;
-
-  /// ゲームクリアメッセージ
-  ///
-  /// In ja, this message translates to:
-  /// **'クリア！'**
-  String get clear;
-
-  /// プレイボタン
-  ///
-  /// In ja, this message translates to:
-  /// **'プレイ'**
-  String get play;
-
-  /// 設定ボタン
-  ///
-  /// In ja, this message translates to:
-  /// **'設定'**
+  /// In en, this message translates to:
+  /// **'Settings'**
   String get settings;
 
-  /// 戻るボタン
+  /// Close dialog button
   ///
-  /// In ja, this message translates to:
-  /// **'戻る'**
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get buttonClose;
+
+  /// Cancel action button
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get buttonCancel;
+
+  /// Confirm action button
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get buttonConfirm;
+
+  /// Back button
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
   String get back;
 
-  /// リスタートボタン
+  /// New game confirmation option
   ///
-  /// In ja, this message translates to:
-  /// **'リスタート'**
+  /// In en, this message translates to:
+  /// **'Start New Game'**
+  String get gameStartNewGame;
+
+  /// Warning when overwriting saved progress
+  ///
+  /// In en, this message translates to:
+  /// **'Starting a new game will delete current progress. Do you want to continue?'**
+  String get gameOverwriteWarning;
+
+  /// Confirm button to delete progress and start new game
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Progress and Start'**
+  String get gameDeleteProgressConfirm;
+
+  /// Game over message
+  ///
+  /// In en, this message translates to:
+  /// **'Game Over'**
+  String get gameOver;
+
+  /// Game clear message
+  ///
+  /// In en, this message translates to:
+  /// **'Clear!'**
+  String get clear;
+
+  /// Play button
+  ///
+  /// In en, this message translates to:
+  /// **'Play'**
+  String get play;
+
+  /// Restart button
+  ///
+  /// In en, this message translates to:
+  /// **'Restart'**
   String get restart;
 
-  /// 一時停止ボタン
+  /// Pause button
   ///
-  /// In ja, this message translates to:
-  /// **'一時停止'**
+  /// In en, this message translates to:
+  /// **'Pause'**
   String get pause;
 
-  /// 再開ボタン
+  /// Resume button
   ///
-  /// In ja, this message translates to:
-  /// **'再開'**
+  /// In en, this message translates to:
+  /// **'Resume'**
   String get resume;
 
-  /// メニューボタン
+  /// Menu button
   ///
-  /// In ja, this message translates to:
-  /// **'メニュー'**
+  /// In en, this message translates to:
+  /// **'Menu'**
   String get menu;
 
-  /// スコア表示
+  /// Score display
   ///
-  /// In ja, this message translates to:
-  /// **'スコア'**
+  /// In en, this message translates to:
+  /// **'Score'**
   String get score;
 
-  /// 残り時間表示
+  /// Time remaining display
   ///
-  /// In ja, this message translates to:
-  /// **'残り時間'**
+  /// In en, this message translates to:
+  /// **'Time Remaining'**
   String get timeRemaining;
+
+  /// Count of items with proper plural support
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No items} =1{1 item} other{{count} items}}'**
+  String itemsCount(int count);
+
+  /// Volume settings button tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Volume settings'**
+  String get tooltipVolumeSettings;
+
+  /// Ranking button tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Ranking'**
+  String get tooltipRanking;
+
+  /// Achievements button tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Achievements'**
+  String get tooltipAchievements;
+
+  /// Settings button tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get tooltipSettings;
+
+  /// App info button tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'App info'**
+  String get tooltipAppInfo;
+
+  /// Settings dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settingsTitle;
+
+  /// Vibration setting label
+  ///
+  /// In en, this message translates to:
+  /// **'Vibration'**
+  String get settingsVibration;
+
+  /// Vibration setting description
+  ///
+  /// In en, this message translates to:
+  /// **'Haptic feedback on tap'**
+  String get settingsVibrationDesc;
+
+  /// Push notification setting label
+  ///
+  /// In en, this message translates to:
+  /// **'Push Notifications'**
+  String get settingsPushNotification;
+
+  /// Push notification setting description
+  ///
+  /// In en, this message translates to:
+  /// **'Game updates and hint notifications'**
+  String get settingsPushNotificationDesc;
+
+  /// Auto save setting label
+  ///
+  /// In en, this message translates to:
+  /// **'Auto Save'**
+  String get settingsAutoSave;
+
+  /// Auto save setting description
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic progress saving'**
+  String get settingsAutoSaveDesc;
+
+  /// Volume settings dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Volume Settings'**
+  String get volumeTitle;
+
+  /// Background music volume label
+  ///
+  /// In en, this message translates to:
+  /// **'BGM Volume'**
+  String get volumeBgm;
+
+  /// Sound effects volume label
+  ///
+  /// In en, this message translates to:
+  /// **'Sound Effects Volume'**
+  String get volumeSfx;
+
+  /// Muted status label
+  ///
+  /// In en, this message translates to:
+  /// **'Muted'**
+  String get volumeMuted;
+
+  /// Reset volume settings button
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get volumeReset;
+
+  /// Test sound button
+  ///
+  /// In en, this message translates to:
+  /// **'Test'**
+  String get volumeTest;
+
+  /// Error message when save data loading fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load save data'**
+  String get errorLoadSaveData;
+
+  /// Generic error message with placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred: {error}'**
+  String errorOccurred(String error);
+
+  /// Not implemented feature message
+  ///
+  /// In en, this message translates to:
+  /// **'{feature} feature (coming soon)'**
+  String messageNotImplemented(String feature);
 }
 
 class _AppLocalizationsDelegate

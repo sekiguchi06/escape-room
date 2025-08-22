@@ -6,25 +6,18 @@ import 'package:flutter/material.dart';
 /// 様々な設定パターンをテストして最適解を特定する
 void main() {
   group('Web日本語フォント表示パターンテスト', () {
-    
     test('パターン1: fontFamily指定なし（Flutterデフォルト）', () {
       final textPaint = TextPaint(
-        style: const TextStyle(
-          fontSize: 16,
-          color: Colors.white,
-        ),
+        style: const TextStyle(fontSize: 16, color: Colors.white),
       );
-      
-      final component = TextComponent(
-        text: '鍵',
-        textRenderer: textPaint,
-      );
-      
+
+      final component = TextComponent(text: '鍵', textRenderer: textPaint);
+
       expect(component.text, equals('鍵'));
-      print('✅ パターン1 - フォント指定なし: "${component.text}"');
-      print('   スタイル: ${textPaint.style}');
+      debugPrint('✅ パターン1 - フォント指定なし: "${component.text}"');
+      debugPrint('   スタイル: ${textPaint.style}');
     });
-    
+
     test('パターン2: fontFamilyFallbackのみ指定', () {
       final textPaint = TextPaint(
         style: const TextStyle(
@@ -39,17 +32,14 @@ void main() {
           ],
         ),
       );
-      
-      final component = TextComponent(
-        text: 'インベントリ',
-        textRenderer: textPaint,
-      );
-      
+
+      final component = TextComponent(text: 'インベントリ', textRenderer: textPaint);
+
       expect(component.text, equals('インベントリ'));
-      print('✅ パターン2 - fontFamilyFallbackのみ: "${component.text}"');
-      print('   フォールバック: ${textPaint.style.fontFamilyFallback}');
+      debugPrint('✅ パターン2 - fontFamilyFallbackのみ: "${component.text}"');
+      debugPrint('   フォールバック: ${textPaint.style.fontFamilyFallback}');
     });
-    
+
     test('パターン3: fontFamily + fontFamilyFallback', () {
       final textPaint = TextPaint(
         style: const TextStyle(
@@ -64,18 +54,17 @@ void main() {
           ],
         ),
       );
-      
-      final component = TextComponent(
-        text: 'ドライバー',
-        textRenderer: textPaint,
-      );
-      
+
+      final component = TextComponent(text: 'ドライバー', textRenderer: textPaint);
+
       expect(component.text, equals('ドライバー'));
-      print('✅ パターン3 - fontFamily + fontFamilyFallback: "${component.text}"');
-      print('   プライマリ: ${textPaint.style.fontFamily}');
-      print('   フォールバック: ${textPaint.style.fontFamilyFallback}');
+      debugPrint(
+        '✅ パターン3 - fontFamily + fontFamilyFallback: "${component.text}"',
+      );
+      debugPrint('   プライマリ: ${textPaint.style.fontFamily}');
+      debugPrint('   フォールバック: ${textPaint.style.fontFamilyFallback}');
     });
-    
+
     test('パターン4: システムフォント指定', () {
       final textPaint = TextPaint(
         style: const TextStyle(
@@ -91,17 +80,14 @@ void main() {
           ],
         ),
       );
-      
-      final component = TextComponent(
-        text: 'メモ',
-        textRenderer: textPaint,
-      );
-      
+
+      final component = TextComponent(text: 'メモ', textRenderer: textPaint);
+
       expect(component.text, equals('メモ'));
-      print('✅ パターン4 - システムフォント: "${component.text}"');
-      print('   システムフォント: ${textPaint.style.fontFamily}');
+      debugPrint('✅ パターン4 - システムフォント: "${component.text}"');
+      debugPrint('   システムフォント: ${textPaint.style.fontFamily}');
     });
-    
+
     test('パターン5: Web専用フォント設定', () {
       final textPaint = TextPaint(
         style: const TextStyle(
@@ -125,17 +111,14 @@ void main() {
           ],
         ),
       );
-      
-      final component = TextComponent(
-        text: '本',
-        textRenderer: textPaint,
-      );
-      
+
+      final component = TextComponent(text: '本', textRenderer: textPaint);
+
       expect(component.text, equals('本'));
-      print('✅ パターン5 - Web専用フォント設定: "${component.text}"');
-      print('   全フォールバック: ${textPaint.style.fontFamilyFallback}');
+      debugPrint('✅ パターン5 - Web専用フォント設定: "${component.text}"');
+      debugPrint('   全フォールバック: ${textPaint.style.fontFamilyFallback}');
     });
-    
+
     test('パターン6: 最小設定（inherit: false）', () {
       final textPaint = TextPaint(
         style: const TextStyle(
@@ -144,20 +127,26 @@ void main() {
           color: Colors.white,
         ),
       );
-      
-      final component = TextComponent(
-        text: '箱',
-        textRenderer: textPaint,
-      );
-      
+
+      final component = TextComponent(text: '箱', textRenderer: textPaint);
+
       expect(component.text, equals('箱'));
-      print('✅ パターン6 - 最小設定 inherit:false: "${component.text}"');
-      print('   inherit: ${textPaint.style.inherit}');
+      debugPrint('✅ パターン6 - 最小設定 inherit:false: "${component.text}"');
+      debugPrint('   inherit: ${textPaint.style.inherit}');
     });
-    
+
     test('パターン7: Unicode明示 + フォールバック', () {
-      final unicodeText = String.fromCharCodes([37749, 12489, 12521, 12452, 12496, 12540, 12513, 12514]); // 鍵ドライバーメモ
-      
+      final unicodeText = String.fromCharCodes([
+        37749,
+        12489,
+        12521,
+        12452,
+        12496,
+        12540,
+        12513,
+        12514,
+      ]); // 鍵ドライバーメモ
+
       final textPaint = TextPaint(
         style: const TextStyle(
           fontSize: 16,
@@ -171,15 +160,17 @@ void main() {
           ],
         ),
       );
-      
+
       final component = TextComponent(
         text: unicodeText,
         textRenderer: textPaint,
       );
-      
+
       expect(component.text, equals(unicodeText));
-      print('✅ パターン7 - Unicode明示 + フォールバック: "${component.text}"');
-      print('   Unicode長: ${unicodeText.length}, Runes: ${unicodeText.runes.toList()}');
+      debugPrint('✅ パターン7 - Unicode明示 + フォールバック: "${component.text}"');
+      debugPrint(
+        '   Unicode長: ${unicodeText.length}, Runes: ${unicodeText.runes.toList()}',
+      );
     });
   });
 }

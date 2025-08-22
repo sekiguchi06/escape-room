@@ -15,7 +15,7 @@ class ParticleConfiguration {
   final Color startColor;
   final Color endColor;
   final bool fadeOut;
-  
+
   ParticleConfiguration({
     this.particleCount = 20,
     this.lifespan = 1.0,
@@ -37,110 +37,131 @@ class ParticleEffectManager extends Component {
   final Map<String, ParticleConfiguration> _effectConfigs = {};
   final Map<String, ParticleSystemComponent> _activeEffects = {};
   final Random _random = Random();
-  
+
   @override
   Future<void> onLoad() async {
     _registerDefaultEffects();
   }
-  
+
   /// デフォルトエフェクトの登録
   void _registerDefaultEffects() {
     // 爆発エフェクト
-    registerEffect('explosion', ParticleConfiguration(
-      particleCount: 30,
-      lifespan: 1.5,
-      minRadius: 2.0,
-      maxRadius: 5.0,
-      startColor: Colors.orange,
-      endColor: Colors.red,
-    ));
-    
+    registerEffect(
+      'explosion',
+      ParticleConfiguration(
+        particleCount: 30,
+        lifespan: 1.5,
+        minRadius: 2.0,
+        maxRadius: 5.0,
+        startColor: Colors.orange,
+        endColor: Colors.red,
+      ),
+    );
+
     // キラキラエフェクト
-    registerEffect('sparkle', ParticleConfiguration(
-      particleCount: 15,
-      lifespan: 2.0,
-      minRadius: 1.0,
-      maxRadius: 2.0,
-      startColor: Colors.yellow,
-      endColor: Colors.white,
-    ));
-    
+    registerEffect(
+      'sparkle',
+      ParticleConfiguration(
+        particleCount: 15,
+        lifespan: 2.0,
+        minRadius: 1.0,
+        maxRadius: 2.0,
+        startColor: Colors.yellow,
+        endColor: Colors.white,
+      ),
+    );
+
     // 軌跡エフェクト
-    registerEffect('trail', ParticleConfiguration(
-      particleCount: 10,
-      lifespan: 0.8,
-      minRadius: 1.5,
-      maxRadius: 3.0,
-      startColor: Colors.blue,
-      endColor: Colors.cyan,
-    ));
-    
+    registerEffect(
+      'trail',
+      ParticleConfiguration(
+        particleCount: 10,
+        lifespan: 0.8,
+        minRadius: 1.5,
+        maxRadius: 3.0,
+        startColor: Colors.blue,
+        endColor: Colors.cyan,
+      ),
+    );
+
     // アイテム発見エフェクト（黄金のキラキラ）
-    registerEffect('itemDiscovery', ParticleConfiguration(
-      particleCount: 25,
-      lifespan: 2.5,
-      minRadius: 2.0,
-      maxRadius: 4.0,
-      startColor: Color(0xFFFFD700), // ゴールド
-      endColor: Color(0xFFFFA500), // オレンジ
-    ));
-    
+    registerEffect(
+      'itemDiscovery',
+      ParticleConfiguration(
+        particleCount: 25,
+        lifespan: 2.5,
+        minRadius: 2.0,
+        maxRadius: 4.0,
+        startColor: Color(0xFFFFD700), // ゴールド
+        endColor: Color(0xFFFFA500), // オレンジ
+      ),
+    );
+
     // アイテム発見強化エフェクト（より多くの粒子）
-    registerEffect('itemDiscoveryEnhanced', ParticleConfiguration(
-      particleCount: 40,
-      lifespan: 3.0,
-      minRadius: 1.5,
-      maxRadius: 5.0,
-      startColor: Color(0xFFFFD700), // ゴールド
-      endColor: Color(0xFFFFFFFF), // ホワイト
-    ));
+    registerEffect(
+      'itemDiscoveryEnhanced',
+      ParticleConfiguration(
+        particleCount: 40,
+        lifespan: 3.0,
+        minRadius: 1.5,
+        maxRadius: 5.0,
+        startColor: Color(0xFFFFD700), // ゴールド
+        endColor: Color(0xFFFFFFFF), // ホワイト
+      ),
+    );
   }
-  
+
   /// エフェクト設定の登録
   void registerEffect(String name, ParticleConfiguration config) {
     _effectConfigs[name] = config;
   }
-  
+
   /// エフェクト再生
   void playEffect(String name, Vector2 position) {
-    
     final config = _effectConfigs[name];
     if (config == null) {
       return;
     }
-    
-    
+
     // コンポーネントとその親のマウント状態を厳密に確認
     if (!isMounted || parent == null || !parent!.isMounted) {
       return;
     }
-    
+
     try {
       final particle = _createParticle(name, config, position);
       final system = ParticleSystemComponent(particle: particle);
-      
+
       // 非同期でエフェクトを追加
       Future.microtask(() {
         if (isMounted && parent != null && parent!.isMounted) {
           add(system);
           _activeEffects[name] = system;
-          
+
           // 自動削除
-          Future.delayed(Duration(milliseconds: (config.lifespan * 1000).round()), () {
-            if (system.isMounted) {
-              system.removeFromParent();
-            }
-            _activeEffects.remove(name);
-          });
-        } else {
-        }
+          Future.delayed(
+            Duration(milliseconds: (config.lifespan * 1000).round()),
+            () {
+              if (system.isMounted) {
+                system.removeFromParent();
+              }
+              _activeEffects.remove(name);
+            },
+          );
+        } else {}
       });
     } catch (e) {
+      // エフェクト生成エラーをログ出力
+      debugPrint('パーティクルエフェクト生成エラー: $e');
     }
   }
-  
+
   /// パーティクル生成
-  Particle _createParticle(String name, ParticleConfiguration config, Vector2 position) {
+  Particle _createParticle(
+    String name,
+    ParticleConfiguration config,
+    Vector2 position,
+  ) {
     switch (name) {
       case 'explosion':
         return _createExplosionParticle(config, position);
@@ -156,9 +177,12 @@ class ParticleEffectManager extends Component {
         return _createDefaultParticle(config, position);
     }
   }
-  
+
   /// 爆発パーティクル
-  Particle _createExplosionParticle(ParticleConfiguration config, Vector2 position) {
+  Particle _createExplosionParticle(
+    ParticleConfiguration config,
+    Vector2 position,
+  ) {
     return Particle.generate(
       count: config.particleCount,
       lifespan: config.lifespan,
@@ -166,7 +190,7 @@ class ParticleEffectManager extends Component {
         final angle = (i / config.particleCount) * 2 * pi;
         final speed = 50.0 + _random.nextDouble() * 100.0;
         final velocity = Vector2(cos(angle), sin(angle)) * speed;
-        
+
         return AcceleratedParticle(
           acceleration: Vector2(0, 100), // 重力
           child: MovingParticle(
@@ -175,14 +199,17 @@ class ParticleEffectManager extends Component {
             child: ComputedParticle(
               renderer: (canvas, particle) {
                 final progress = particle.progress;
-                final radius = (config.maxRadius * (1 - progress)).clamp(config.minRadius, config.maxRadius);
-                final color = Color.lerp(config.startColor, config.endColor, progress)!;
-                
-                canvas.drawCircle(
-                  Offset.zero,
-                  radius,
-                  Paint()..color = color,
+                final radius = (config.maxRadius * (1 - progress)).clamp(
+                  config.minRadius,
+                  config.maxRadius,
                 );
+                final color = Color.lerp(
+                  config.startColor,
+                  config.endColor,
+                  progress,
+                )!;
+
+                canvas.drawCircle(Offset.zero, radius, Paint()..color = color);
               },
             ),
           ),
@@ -190,9 +217,12 @@ class ParticleEffectManager extends Component {
       },
     );
   }
-  
+
   /// キラキラパーティクル
-  Particle _createSparkleParticle(ParticleConfiguration config, Vector2 position) {
+  Particle _createSparkleParticle(
+    ParticleConfiguration config,
+    Vector2 position,
+  ) {
     return Particle.generate(
       count: config.particleCount,
       lifespan: config.lifespan,
@@ -201,7 +231,7 @@ class ParticleEffectManager extends Component {
           (_random.nextDouble() - 0.5) * 100,
           (_random.nextDouble() - 0.5) * 100,
         );
-        
+
         return MovingParticle(
           from: position,
           to: position + randomOffset,
@@ -209,12 +239,17 @@ class ParticleEffectManager extends Component {
             renderer: (canvas, particle) {
               final progress = particle.progress;
               final opacity = (sin(progress * pi) * 255).toInt();
-              final radius = config.minRadius + (config.maxRadius - config.minRadius) * sin(progress * pi);
-              
+              final radius =
+                  config.minRadius +
+                  (config.maxRadius - config.minRadius) * sin(progress * pi);
+
               canvas.drawCircle(
                 Offset.zero,
                 radius,
-                Paint()..color = config.startColor.withValues(alpha: opacity / 255.0),
+                Paint()
+                  ..color = config.startColor.withValues(
+                    alpha: opacity / 255.0,
+                  ),
               );
             },
           ),
@@ -222,60 +257,73 @@ class ParticleEffectManager extends Component {
       },
     );
   }
-  
+
   /// 軌跡パーティクル
-  Particle _createTrailParticle(ParticleConfiguration config, Vector2 position) {
+  Particle _createTrailParticle(
+    ParticleConfiguration config,
+    Vector2 position,
+  ) {
     return Particle.generate(
       count: config.particleCount,
       lifespan: config.lifespan,
       generator: (i) {
         final delay = i * 0.1;
-        
+
         return MovingParticle(
           from: position,
           to: position + Vector2(0, -50),
           child: ComputedParticle(
             renderer: (canvas, particle) {
               if (particle.progress < delay) return;
-              
-              final adjustedProgress = ((particle.progress - delay) / (1 - delay)).clamp(0.0, 1.0);
+
+              final adjustedProgress =
+                  ((particle.progress - delay) / (1 - delay)).clamp(0.0, 1.0);
               final radius = config.maxRadius * (1 - adjustedProgress);
-              final color = Color.lerp(config.startColor, config.endColor, adjustedProgress)!;
-              
-              canvas.drawCircle(
-                Offset.zero,
-                radius,
-                Paint()..color = color,
-              );
+              final color = Color.lerp(
+                config.startColor,
+                config.endColor,
+                adjustedProgress,
+              )!;
+
+              canvas.drawCircle(Offset.zero, radius, Paint()..color = color);
             },
           ),
         );
       },
     );
   }
-  
+
   /// デフォルトパーティクル
-  Particle _createDefaultParticle(ParticleConfiguration config, Vector2 position) {
+  Particle _createDefaultParticle(
+    ParticleConfiguration config,
+    Vector2 position,
+  ) {
     return Particle.generate(
       count: config.particleCount,
       lifespan: config.lifespan,
       generator: (i) => CircleParticle(
-        radius: config.minRadius + _random.nextDouble() * (config.maxRadius - config.minRadius),
+        radius:
+            config.minRadius +
+            _random.nextDouble() * (config.maxRadius - config.minRadius),
         paint: Paint()..color = config.startColor,
       ),
     );
   }
-  
+
   /// アイテム発見パーティクル（黄金のキラキラ）
-  Particle _createItemDiscoveryParticle(ParticleConfiguration config, Vector2 position) {
+  Particle _createItemDiscoveryParticle(
+    ParticleConfiguration config,
+    Vector2 position,
+  ) {
     return Particle.generate(
       count: config.particleCount,
       lifespan: config.lifespan,
       generator: (i) {
         final angle = _random.nextDouble() * 2 * pi;
         final distance = 20.0 + _random.nextDouble() * 80.0;
-        final targetPosition = position + Vector2(cos(angle), sin(angle)) * distance;
-        
+        final targetPosition =
+            position + Vector2(cos(angle), sin(angle)) * distance;
+
         return MovingParticle(
           from: position,
           to: targetPosition,
@@ -285,8 +333,12 @@ class ParticleEffectManager extends Component {
               // 輝く星形エフェクト
               final brightness = sin(progress * pi);
               final radius = config.maxRadius * brightness;
-              final color = Color.lerp(config.startColor, config.endColor, progress)!;
-              
+              final color = Color.lerp(
+                config.startColor,
+                config.endColor,
+                progress,
+              )!;
+
               // 星型の描画
               _drawStar(canvas, Offset.zero, radius, color);
             },
@@ -295,17 +347,21 @@ class ParticleEffectManager extends Component {
       },
     );
   }
-  
+
   /// アイテム発見強化パーティクル（より多くの粒子）
-  Particle _createItemDiscoveryEnhancedParticle(ParticleConfiguration config, Vector2 position) {
+  Particle _createItemDiscoveryEnhancedParticle(
+    ParticleConfiguration config,
+    Vector2 position,
+  ) {
     return Particle.generate(
       count: config.particleCount,
       lifespan: config.lifespan,
       generator: (i) {
-        final angle = (i / config.particleCount) * 2 * pi + _random.nextDouble() * 0.5;
+        final angle =
+            (i / config.particleCount) * 2 * pi + _random.nextDouble() * 0.5;
         final speed = 30.0 + _random.nextDouble() * 70.0;
         final velocity = Vector2(cos(angle), sin(angle)) * speed;
-        
+
         return AcceleratedParticle(
           acceleration: Vector2(0, -20), // 軽い上昇効果
           child: MovingParticle(
@@ -317,9 +373,12 @@ class ParticleEffectManager extends Component {
                 final pulsation = sin(progress * pi * 3) * 0.3 + 0.7;
                 final radius = config.maxRadius * pulsation;
                 final opacity = (sin(progress * pi) * 255).toInt();
-                final color = Color.lerp(config.startColor, config.endColor, progress)!
-                    .withValues(alpha: opacity / 255.0);
-                
+                final color = Color.lerp(
+                  config.startColor,
+                  config.endColor,
+                  progress,
+                )!.withValues(alpha: opacity / 255.0);
+
                 // 輝く円の描画
                 canvas.drawCircle(
                   Offset.zero,
@@ -336,21 +395,21 @@ class ParticleEffectManager extends Component {
       },
     );
   }
-  
+
   /// 星型の描画ヘルパーメソッド
   void _drawStar(Canvas canvas, Offset center, double radius, Color color) {
     const int points = 5;
     final double outerRadius = radius;
     final double innerRadius = radius * 0.4;
-    
+
     final path = Path();
-    
+
     for (int i = 0; i < points * 2; i++) {
       final double angle = (i * pi) / points;
       final double currentRadius = i.isEven ? outerRadius : innerRadius;
       final double x = center.dx + cos(angle - pi / 2) * currentRadius;
       final double y = center.dy + sin(angle - pi / 2) * currentRadius;
-      
+
       if (i == 0) {
         path.moveTo(x, y);
       } else {
@@ -358,7 +417,7 @@ class ParticleEffectManager extends Component {
       }
     }
     path.close();
-    
+
     canvas.drawPath(
       path,
       Paint()
@@ -367,10 +426,10 @@ class ParticleEffectManager extends Component {
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 1.0),
     );
   }
-  
+
   /// アクティブエフェクト数
   int get activeEffectCount => _activeEffects.length;
-  
+
   /// 全エフェクト停止
   void stopAllEffects() {
     for (final effect in _activeEffects.values) {
@@ -380,7 +439,7 @@ class ParticleEffectManager extends Component {
     }
     _activeEffects.clear();
   }
-  
+
   @override
   void onRemove() {
     stopAllEffects();

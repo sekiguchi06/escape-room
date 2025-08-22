@@ -11,50 +11,45 @@ import '../effects/particle_system.dart';
 
 /// アイテム発見モーダルのデモンストレーション
 /// 実際の動作確認用のコンポーネント
-class ItemDiscoveryDemo extends FlameGame with HasTapCallbacks {
+class ItemDiscoveryDemo extends FlameGame {
   late ModalManager _modalManager;
   late ConcentrationLinesManager _concentrationLinesManager;
   late ParticleEffectManager _particleEffectManager;
   late ItemDiscoveryDisplayStrategy _itemDiscoveryStrategy;
-  
+
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    
+
     // エフェクトマネージャーの初期化
     _concentrationLinesManager = ConcentrationLinesManager();
     _particleEffectManager = ParticleEffectManager();
     _modalManager = ModalManager();
-    
+
     // ItemDiscoveryDisplayStrategyの初期化とエフェクトマネージャーの設定
     _itemDiscoveryStrategy = ItemDiscoveryDisplayStrategy();
     _itemDiscoveryStrategy.setEffectManagers(
       concentrationLinesManager: _concentrationLinesManager,
       particleEffectManager: _particleEffectManager,
     );
-    
+
     // エフェクトマネージャーをモーダルマネージャーに設定
     _modalManager.setEffectManagers(
       concentrationLinesManager: _concentrationLinesManager,
       particleEffectManager: _particleEffectManager,
     );
-    
+
     // コンポーネント追加
     add(_concentrationLinesManager);
     add(_particleEffectManager);
     add(_modalManager);
-    
+
+    // タップハンドリング用のコンポーネント追加
+    add(TapHandler(onTapCallback: _showItemDiscoveryModal));
   }
-  
-  @override
-  bool onTapDown(TapDownEvent event) {
-    _showItemDiscoveryModal();
-    return true;
-  }
-  
+
   /// アイテム発見モーダルを表示
   void _showItemDiscoveryModal() {
-    
     final config = ModalConfig.itemDiscovery(
       title: '新しいアイテムを発見！',
       content: '貴重なアイテムを手に入れました',
@@ -64,20 +59,20 @@ class ItemDiscoveryDemo extends FlameGame with HasTapCallbacks {
         _modalManager.hideTopModal();
       },
     );
-    
+
     _modalManager.showModal(config, size);
   }
-  
+
   @override
   void render(Canvas canvas) {
     super.render(canvas);
-    
+
     // 背景を白に設定
     canvas.drawRect(
       Rect.fromLTWH(0, 0, size.x, size.y),
       Paint()..color = Colors.white,
     );
-    
+
     // 説明テキストを描画
     final textPainter = TextPainter(
       text: const TextSpan(
@@ -90,7 +85,7 @@ class ItemDiscoveryDemo extends FlameGame with HasTapCallbacks {
       ),
       textDirection: TextDirection.ltr,
     );
-    
+
     textPainter.layout();
     textPainter.paint(
       canvas,
@@ -102,10 +97,22 @@ class ItemDiscoveryDemo extends FlameGame with HasTapCallbacks {
   }
 }
 
+/// タップハンドリング用のコンポーネント
+class TapHandler extends PositionComponent with HasGameRef {
+  final VoidCallback onTapCallback;
+
+  TapHandler({required this.onTapCallback});
+
+  bool onTapDown(TapDownEvent event) {
+    onTapCallback();
+    return true;
+  }
+}
+
 /// デモ用のFlutterWidgetラッパー
 class ItemDiscoveryDemoWidget extends StatelessWidget {
   const ItemDiscoveryDemoWidget({super.key});
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

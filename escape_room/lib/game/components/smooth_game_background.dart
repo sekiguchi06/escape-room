@@ -95,7 +95,7 @@ class _SmoothGameBackgroundState extends State<SmoothGameBackground>
           children: [
             // 常に黒背景を維持
             Container(color: Colors.black),
-            
+
             // 前の背景（黒へフェードアウト）
             if (_previousConfig != null)
               AnimatedBuilder(
@@ -126,12 +126,15 @@ class _SmoothGameBackgroundState extends State<SmoothGameBackground>
   }
 
   /// 背景レイヤーを構築
-  Widget _buildBackgroundLayer(GameBackgroundConfig config, BoxConstraints constraints) {
+  Widget _buildBackgroundLayer(
+    GameBackgroundConfig config,
+    BoxConstraints constraints,
+  ) {
     return Stack(
       children: [
         // VTR風ぼかし背景レイヤー
         _buildBlurredBackground(config),
-        
+
         // メイン画像レイヤー
         _buildMainImageLayer(config, constraints),
       ],
@@ -173,13 +176,23 @@ class _SmoothGameBackgroundState extends State<SmoothGameBackground>
   }
 
   /// メイン画像レイヤーを構築
-  Widget _buildMainImageLayer(GameBackgroundConfig config, BoxConstraints constraints) {
+  Widget _buildMainImageLayer(
+    GameBackgroundConfig config,
+    BoxConstraints constraints,
+  ) {
     final screenWidth = constraints.maxWidth;
-    final availableHeight = constraints.maxHeight - config.topReservedHeight - widget.bottomReservedHeight;
-    
+    final availableHeight =
+        constraints.maxHeight -
+        config.topReservedHeight -
+        widget.bottomReservedHeight;
+
     // メイン画像の最適サイズ計算
-    final imageLayout = _calculateImageLayout(config, screenWidth, availableHeight);
-    
+    final imageLayout = _calculateImageLayout(
+      config,
+      screenWidth,
+      availableHeight,
+    );
+
     return Positioned(
       top: config.topReservedHeight + imageLayout.offsetY,
       left: imageLayout.offsetX,
@@ -210,10 +223,14 @@ class _SmoothGameBackgroundState extends State<SmoothGameBackground>
   }
 
   /// 画像レイアウト計算
-  ImageLayout _calculateImageLayout(GameBackgroundConfig config, double screenWidth, double availableHeight) {
+  ImageLayout _calculateImageLayout(
+    GameBackgroundConfig config,
+    double screenWidth,
+    double availableHeight,
+  ) {
     // 常に横幅100%を使用
     final widthBasedHeight = screenWidth / config.aspectRatio;
-    
+
     if (widthBasedHeight <= availableHeight) {
       // 横幅100%でフィット
       return ImageLayout(
@@ -246,10 +263,12 @@ class OptimizedSmoothGameBackground extends StatefulWidget {
   });
 
   @override
-  State<OptimizedSmoothGameBackground> createState() => _OptimizedSmoothGameBackgroundState();
+  State<OptimizedSmoothGameBackground> createState() =>
+      _OptimizedSmoothGameBackgroundState();
 }
 
-class _OptimizedSmoothGameBackgroundState extends State<OptimizedSmoothGameBackground> {
+class _OptimizedSmoothGameBackgroundState
+    extends State<OptimizedSmoothGameBackground> {
   GameBackgroundConfig? _currentConfig;
 
   @override
@@ -309,10 +328,7 @@ class _OptimizedSmoothGameBackgroundState extends State<OptimizedSmoothGameBackg
         // 常に黒背景を維持
         Container(color: Colors.black),
         // 画像をフェードイン（黒から画像へ）
-        FadeTransition(
-          opacity: animation,
-          child: child,
-        ),
+        FadeTransition(opacity: animation, child: child),
       ],
     );
   }

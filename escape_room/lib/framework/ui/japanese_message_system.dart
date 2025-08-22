@@ -37,21 +37,21 @@ class JapaneseMessageSystem {
     'bookshelf_discovery_message': '本の間から古い鍵を発見した！',
     'box_discovery_message': '箱の中から古い工具を発見した！',
   };
-  
+
   /// メッセージを取得
   static String getMessage(String messageKey, {Map<String, String>? params}) {
     var message = messages[messageKey] ?? messageKey;
-    
+
     // パラメータ置換
     if (params != null) {
       params.forEach((key, value) {
         message = message.replaceAll('{$key}', value);
       });
     }
-    
+
     return message;
   }
-  
+
   /// メッセージコンポーネントを作成
   static TextComponent createMessageComponent(
     String messageKey, {
@@ -64,12 +64,16 @@ class JapaneseMessageSystem {
   }) {
     return TextComponent(
       text: getMessage(messageKey, params: params),
-      textRenderer: JapaneseFontSystem.getTextPaint(fontSize, color, fontWeight),
+      textRenderer: JapaneseFontSystem.getTextPaint(
+        fontSize,
+        color,
+        fontWeight,
+      ),
       position: position,
       anchor: anchor,
     );
   }
-  
+
   /// 一時的なメッセージを表示
   static Component createTemporaryMessage(
     String messageKey, {
@@ -88,7 +92,7 @@ class JapaneseMessageSystem {
       anchor: Anchor.center,
       params: params,
     );
-    
+
     // フェードアウト効果を追加
     component.add(
       OpacityEffect.fadeOut(
@@ -96,10 +100,10 @@ class JapaneseMessageSystem {
         onComplete: () => component.removeFromParent(),
       ),
     );
-    
+
     return component;
   }
-  
+
   /// インベントリ用のメッセージを取得
   static String getInventoryMessage(String itemId, String action) {
     final itemName = getMessage('item_$itemId');
@@ -141,7 +145,7 @@ class JapaneseMessageSystem {
 /// プロジェクト全体で統一されたフォント設定（文字化け対策）
 class JapaneseFontSystem {
   static const String fontFamily = 'Noto Sans JP';
-  
+
   /// Web環境での日本語フォント設定（調査結果に基づく最適化）
   static const List<String> fontFamilyFallback = [
     // システムフォント優先（Web最適化）
@@ -162,10 +166,10 @@ class JapaneseFontSystem {
     // フォールバック
     'sans-serif',
   ];
-  
+
   /// テキストペイントを取得（CanvasKit日本語文字化け対策）
   static TextPaint getTextPaint(
-    double fontSize, 
+    double fontSize,
     Color color, [
     FontWeight fontWeight = FontWeight.normal,
   ]) {
@@ -179,25 +183,17 @@ class JapaneseFontSystem {
       ),
     );
   }
-  
+
   /// インベントリ用のテキストスタイルを取得
   static TextPaint getInventoryTextStyle(double screenHeight, Color color) {
-    return getTextPaint(
-      screenHeight * 0.025,
-      color,
-      FontWeight.bold,
-    );
+    return getTextPaint(screenHeight * 0.025, color, FontWeight.bold);
   }
-  
+
   /// アイテム名用のテキストスタイルを取得
   static TextPaint getItemNameTextStyle(double itemHeight, Color color) {
-    return getTextPaint(
-      itemHeight * 0.15,
-      color,
-      FontWeight.bold,
-    );
+    return getTextPaint(itemHeight * 0.15, color, FontWeight.bold);
   }
-  
+
   /// ツールチップ用のテキストスタイルを取得
   static TextPaint getTooltipTextStyle() {
     return TextPaint(
@@ -210,22 +206,14 @@ class JapaneseFontSystem {
       ),
     );
   }
-  
+
   /// エラーメッセージ用のテキストスタイルを取得
   static TextPaint getErrorTextStyle(double fontSize) {
-    return getTextPaint(
-      fontSize,
-      Colors.red,
-      FontWeight.bold,
-    );
+    return getTextPaint(fontSize, Colors.red, FontWeight.bold);
   }
-  
+
   /// 成功メッセージ用のテキストスタイルを取得
   static TextPaint getSuccessTextStyle(double fontSize) {
-    return getTextPaint(
-      fontSize,
-      Colors.green,
-      FontWeight.bold,
-    );
+    return getTextPaint(fontSize, Colors.green, FontWeight.bold);
   }
 }

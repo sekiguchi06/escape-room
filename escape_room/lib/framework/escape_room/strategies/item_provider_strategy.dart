@@ -8,17 +8,14 @@ class ItemProviderStrategy implements InteractionStrategy {
   final String itemId;
   final String message;
   bool _hasProvided = false;
-  
-  ItemProviderStrategy({
-    required this.itemId,
-    required this.message,
-  });
-  
+
+  ItemProviderStrategy({required this.itemId, required this.message});
+
   @override
   bool canInteract() {
-    return true; // 繰り返しタップ可能
+    return !_hasProvided; // 提供済みの場合はインタラクト不可
   }
-  
+
   @override
   InteractionResult execute() {
     if (!_hasProvided) {
@@ -29,17 +26,15 @@ class ItemProviderStrategy implements InteractionStrategy {
         shouldActivate: true,
       );
     } else {
-      return InteractionResult.success(
-        message: '${JapaneseMessageSystem.getMessage('already_examined_prefix')}: $message',
-        itemsToAdd: [],
-        shouldActivate: false,
+      return InteractionResult.failure(
+        '${JapaneseMessageSystem.getMessage('already_examined_prefix')}: $message',
       );
     }
   }
-  
+
   @override
   String get strategyName => 'ItemProvider';
-  
+
   /// 状態リセット（テスト用）
   void reset() {
     _hasProvided = false;

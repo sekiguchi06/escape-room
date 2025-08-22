@@ -23,10 +23,10 @@ void main() {
 
       // スコア表示の確認
       expect(find.text('1500'), findsOneWidget);
-      
+
       // タイマー表示の確認
       expect(find.text('01:30'), findsOneWidget);
-      
+
       // アクションボタンの存在確認
       expect(find.byIcon(Icons.pause), findsOneWidget);
       expect(find.byIcon(Icons.refresh), findsOneWidget);
@@ -34,23 +34,19 @@ void main() {
 
     testWidgets('CustomScoreWidget グラデーション表示テスト', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: CustomScoreWidget(score: 2500),
-          ),
-        ),
+        MaterialApp(home: Scaffold(body: CustomScoreWidget(score: 2500))),
       );
 
       // スコア数値の確認
       expect(find.text('2500'), findsOneWidget);
-      
+
       // アイコンの存在確認
       expect(find.byIcon(Icons.stars), findsOneWidget);
 
       // Container Decorationの確認（グラデーション）
       final container = tester.widget<Container>(find.byType(Container).first);
       expect(container.decoration, isA<BoxDecoration>());
-      
+
       final boxDecoration = container.decoration as BoxDecoration;
       expect(boxDecoration.gradient, isA<LinearGradient>());
       expect(boxDecoration.borderRadius, isA<BorderRadius>());
@@ -61,35 +57,29 @@ void main() {
       // 緑色（通常時間）
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: CustomTimerWidget(timeRemaining: '02:00'),
-          ),
+          home: Scaffold(body: CustomTimerWidget(timeRemaining: '02:00')),
         ),
       );
-      
+
       expect(find.text('02:00'), findsOneWidget);
       expect(find.byIcon(Icons.timer), findsOneWidget);
 
       // オレンジ色（60秒以下）
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: CustomTimerWidget(timeRemaining: '00:45'),
-          ),
+          home: Scaffold(body: CustomTimerWidget(timeRemaining: '00:45')),
         ),
       );
-      
+
       expect(find.text('00:45'), findsOneWidget);
 
-      // 赤色（30秒以下）  
+      // 赤色（30秒以下）
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: CustomTimerWidget(timeRemaining: '00:15'),
-          ),
+          home: Scaffold(body: CustomTimerWidget(timeRemaining: '00:15')),
         ),
       );
-      
+
       expect(find.text('00:15'), findsOneWidget);
     });
 
@@ -143,7 +133,7 @@ void main() {
 
       // ゲームオーバータイトルの確認
       expect(find.text('GAME OVER'), findsOneWidget);
-      
+
       // 最終スコアの確認
       expect(find.text('3500'), findsOneWidget);
       expect(find.text('Final Score'), findsOneWidget);

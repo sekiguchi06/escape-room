@@ -5,7 +5,7 @@ import 'interaction_result.dart';
 abstract interface class InteractableInterface {
   /// インタラクション可能性判定
   bool canInteract();
-  
+
   /// インタラクション実行
   InteractionResult performInteraction();
 }

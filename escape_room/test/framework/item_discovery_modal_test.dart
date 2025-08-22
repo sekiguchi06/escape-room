@@ -4,7 +4,6 @@ import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 
 import '../../lib/framework/ui/modal_config.dart';
-import '../../lib/framework/ui/modal_manager.dart';
 import '../../lib/framework/ui/modal_display_strategy.dart';
 import '../../lib/framework/ui/concentration_lines_component.dart';
 import '../../lib/framework/effects/particle_system.dart';
@@ -41,7 +40,7 @@ void main() {
     test('ItemDiscoveryDisplayStrategy が正しく初期化される', () {
       // Strategy の初期化確認
       final strategy = ItemDiscoveryDisplayStrategy();
-      
+
       expect(strategy.strategyName, 'item_discovery_display');
       expect(strategy.canHandle(ModalType.itemDiscovery), true);
       expect(strategy.canHandle(ModalType.item), false);
@@ -53,11 +52,11 @@ void main() {
       // コンテキストに戦略が含まれているかチェック
       final context = ModalDisplayContext();
       context.initializeDefaultStrategies();
-      
+
       final availableStrategies = context.availableStrategies;
       expect(availableStrategies, contains('item_discovery_display'));
       expect(availableStrategies.length, 4); // 4つの戦略が登録されている
-      
+
       // itemDiscovery タイプの戦略が選択できるかチェック
       final selectedStrategy = context.selectStrategy(ModalType.itemDiscovery);
       expect(selectedStrategy, isNotNull);
@@ -86,7 +85,7 @@ void main() {
       // 集中線マネージャーの動作確認
       final manager = ConcentrationLinesManager();
       expect(manager.activeEffectCount, 0);
-      
+
       // エフェクト追加のテスト（実際にはコンポーネントがマウントされていないのでエラーになる）
       // これは統合テスト時に確認
     });
@@ -94,10 +93,10 @@ void main() {
     test('ParticleEffectManager にアイテム発見エフェクトが登録されている', () {
       // パーティクルマネージャーのエフェクト確認
       final particleManager = ParticleEffectManager();
-      
+
       // onLoad を呼んでデフォルトエフェクトを登録
       particleManager.onLoad();
-      
+
       // itemDiscovery エフェクトが登録されているかは内部状態なので直接確認不可
       // 実際の動作は統合テスト時に確認
       expect(particleManager.activeEffectCount, 0);
@@ -106,10 +105,7 @@ void main() {
     test('入力検証が正しく動作する', () {
       // ItemDiscoveryDisplayStrategy の入力検証
       final strategy = ItemDiscoveryDisplayStrategy();
-      final config = ModalConfig.itemDiscovery(
-        title: 'テスト',
-        content: 'テスト内容',
-      );
+      final config = ModalConfig.itemDiscovery(title: 'テスト', content: 'テスト内容');
 
       // アイテム発見演出は入力検証不要なので常にtrue
       expect(strategy.validateInput('any_input', config), true);
@@ -119,25 +115,27 @@ void main() {
     test('確認処理が正しく実行される', () {
       // executeConfirm の動作確認
       bool confirmCalled = false;
-      
+
       final config = ModalConfig.itemDiscovery(
         title: 'テスト',
         content: 'テスト内容',
         onConfirm: () => confirmCalled = true,
       );
-      
+
       final strategy = ItemDiscoveryDisplayStrategy();
       strategy.executeConfirm(config, null);
-      
+
       expect(confirmCalled, true);
     });
   });
 
   group('Integration Tests', () {
-    testWidgets('ModalManager で ItemDiscovery モーダルを作成できる', (WidgetTester tester) async {
+    testWidgets('ModalManager で ItemDiscovery モーダルを作成できる', (
+      WidgetTester tester,
+    ) async {
       // 統合テストはwidgetTestで実行
       // 実際のFlameゲーム環境での動作確認
-      
+
       // TODO: Flameゲーム環境でのテスト実装
       // 現在は基本的な機能テストのみ実装
       expect(true, true); // プレースホルダー

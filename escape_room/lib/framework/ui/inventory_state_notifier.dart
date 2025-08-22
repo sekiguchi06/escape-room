@@ -6,26 +6,25 @@ import '../components/inventory_manager.dart';
 class InventoryStateNotifier extends ChangeNotifier {
   String? _selectedItemId;
   final InventoryManager _manager;
-  
-  InventoryStateNotifier({
-    required InventoryManager manager,
-  }) : _manager = manager;
-  
+
+  InventoryStateNotifier({required InventoryManager manager})
+    : _manager = manager;
+
   /// 現在選択中のアイテムID
   String? get selectedItemId => _selectedItemId;
-  
+
   /// 現在のアイテムリスト
   List<String> get items => _manager.items;
-  
+
   /// インベントリが満杯かどうか
   bool get isFull => _manager.isFull;
-  
+
   /// インベントリが空かどうか
   bool get isEmpty => _manager.isEmpty;
-  
+
   /// 使用率
   double get usageRate => _manager.usageRate;
-  
+
   /// アイテム選択
   void selectItem(String itemId) {
     if (_manager.hasItem(itemId)) {
@@ -35,7 +34,7 @@ class InventoryStateNotifier extends ChangeNotifier {
       debugPrint('🎒 Item selected via notifier: $itemId');
     }
   }
-  
+
   /// アイテム追加
   bool addItem(String itemId) {
     final added = _manager.addItem(itemId);
@@ -45,7 +44,7 @@ class InventoryStateNotifier extends ChangeNotifier {
     }
     return added;
   }
-  
+
   /// アイテム削除
   bool removeItem(String itemId) {
     final removed = _manager.removeItem(itemId);
@@ -59,7 +58,7 @@ class InventoryStateNotifier extends ChangeNotifier {
     }
     return removed;
   }
-  
+
   /// インベントリクリア
   void clearInventory() {
     _manager.clear();
@@ -67,17 +66,17 @@ class InventoryStateNotifier extends ChangeNotifier {
     notifyListeners();
     debugPrint('🎒 Inventory cleared via notifier');
   }
-  
+
   /// 選択解除
   void clearSelection() {
     _selectedItemId = null;
     notifyListeners();
     debugPrint('🎒 Selection cleared');
   }
-  
+
   /// アイテム所持チェック
   bool hasItem(String itemId) => _manager.hasItem(itemId);
-  
+
   /// 状態リセット
   void reset() {
     clearInventory();

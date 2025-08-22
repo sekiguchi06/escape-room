@@ -29,7 +29,7 @@ class InputEventData {
   final Duration? duration;
   final int? fingerCount;
   final Map<String, dynamic> additionalData;
-  
+
   const InputEventData({
     required this.type,
     this.position,
@@ -41,7 +41,7 @@ class InputEventData {
     this.fingerCount,
     this.additionalData = const {},
   });
-  
+
   @override
   String toString() {
     return 'InputEventData(type: $type, position: $position, distance: $distance, velocity: $velocity)';
@@ -64,28 +64,28 @@ abstract class InputConfiguration {
 class DefaultInputConfiguration implements InputConfiguration {
   @override
   final double tapSensitivity;
-  
+
   @override
   final int doubleTapInterval;
-  
+
   @override
   final int longPressDuration;
-  
+
   @override
   final double swipeMinDistance;
-  
+
   @override
   final int swipeMaxDuration;
-  
+
   @override
   final double pinchSensitivity;
-  
+
   @override
   final Set<InputEventType> enabledInputTypes;
-  
+
   @override
   final bool debugMode;
-  
+
   const DefaultInputConfiguration({
     this.tapSensitivity = 10.0,
     this.doubleTapInterval = 300,
@@ -130,32 +130,32 @@ abstract class InputProcessor {
 class FlameInputProcessor implements InputProcessor {
   late InputConfiguration _config;
   final List<void Function(InputEventData event)> _listeners = [];
-  
+
   // ダブルタップ検出用
   DateTime? _lastTapTime;
   Vector2? _lastTapPosition;
-  
+
   @override
   void initialize(InputConfiguration config) {
     _config = config;
     debugPrint('🎮 FlameInputProcessor initialized (Flame公式events準拠)');
   }
-  
+
   @override
   void updateConfiguration(InputConfiguration config) {
     _config = config;
   }
-  
+
   @override
   void addInputListener(void Function(InputEventData event) listener) {
     _listeners.add(listener);
   }
-  
+
   @override
   void removeInputListener(void Function(InputEventData event) listener) {
     _listeners.remove(listener);
   }
-  
+
   /// Flame公式TapCallbacks: onTapDown相当の処理
   @override
   bool processTapDown(Vector2 position) {
@@ -164,21 +164,25 @@ class FlameInputProcessor implements InputProcessor {
     }
     return true;
   }
-  
+
   /// Flame公式TapCallbacks: onTapUp相当の処理
   @override
   bool processTapUp(Vector2 position) {
     final now = DateTime.now();
-    
+
     // ダブルタップ検出
-    if (_lastTapTime != null && _lastTapPosition != null &&
+    if (_lastTapTime != null &&
+        _lastTapPosition != null &&
         _config.enabledInputTypes.contains(InputEventType.doubleTap)) {
       final timeDiff = now.difference(_lastTapTime!).inMilliseconds;
       final positionDiff = (_lastTapPosition! - position).length;
-      
-      debugPrint('FlameInputProcessor: checking double tap - timeDiff=$timeDiff, positionDiff=$positionDiff');
-      
-      if (timeDiff <= _config.doubleTapInterval && positionDiff <= _config.tapSensitivity) {
+
+      debugPrint(
+        'FlameInputProcessor: checking double tap - timeDiff=$timeDiff, positionDiff=$positionDiff',
+      );
+
+      if (timeDiff <= _config.doubleTapInterval &&
+          positionDiff <= _config.tapSensitivity) {
         // ダブルタップイベント
         debugPrint('FlameInputProcessor: double tap detected!');
         final event = InputEventData(
@@ -188,14 +192,14 @@ class FlameInputProcessor implements InputProcessor {
           additionalData: {'timestamp': now.millisecondsSinceEpoch},
         );
         _notifyListeners(event);
-        
+
         // ダブルタップ後はリセット
         _lastTapTime = null;
         _lastTapPosition = null;
         return true;
       }
     }
-    
+
     // 通常のタップイベント
     if (_config.enabledInputTypes.contains(InputEventType.tap)) {
       final event = InputEventData(
@@ -208,19 +212,19 @@ class FlameInputProcessor implements InputProcessor {
     } else {
       debugPrint('FlameInputProcessor: tap events disabled in config');
     }
-    
+
     // 次のダブルタップ検出用に記録
     _lastTapTime = now;
     _lastTapPosition = position;
-    
+
     return true;
   }
-  
+
   @override
   bool processTapCancel() {
     return true;
   }
-  
+
   /// Flame公式DragCallbacks: onDragStart相当の処理
   @override
   bool processPanStart(Vector2 position) {
@@ -229,42 +233,50 @@ class FlameInputProcessor implements InputProcessor {
     }
     return true;
   }
-  
+
   /// Flame公式DragCallbacks: onDragUpdate相当の処理
   @override
   bool processPanUpdate(Vector2 position, Vector2 delta) {
     if (_config.debugMode) {
-      debugPrint('🎮 Flame公式DragCallbacks: onDragUpdate at $position, delta: $delta');
+      debugPrint(
+        '🎮 Flame公式DragCallbacks: onDragUpdate at $position, delta: $delta',
+      );
     }
     return true;
   }
-  
+
   /// Flame公式DragCallbacks: onDragEnd相当の処理
   @override
   bool processPanEnd(Vector2 position, Vector2 velocity) {
     if (_config.debugMode) {
-      debugPrint('🎮 Flame公式DragCallbacks: onDragEnd at $position, velocity: $velocity');
+      debugPrint(
+        '🎮 Flame公式DragCallbacks: onDragEnd at $position, velocity: $velocity',
+      );
     }
     return true;
   }
-  
+
   /// Flame公式ScaleCallbacks準拠のスケール処理
   @override
   bool processScaleStart(Vector2 focalPoint, double scale) {
     if (_config.debugMode) {
-      debugPrint('🎮 Flame公式ScaleCallbacks: onScaleStart at $focalPoint, scale: $scale');
+      debugPrint(
+        '🎮 Flame公式ScaleCallbacks: onScaleStart at $focalPoint, scale: $scale',
+      );
     }
     return true;
   }
-  
+
   @override
   bool processScaleUpdate(Vector2 focalPoint, double scale) {
     if (_config.debugMode) {
-      debugPrint('🎮 Flame公式ScaleCallbacks: onScaleUpdate at $focalPoint, scale: $scale');
+      debugPrint(
+        '🎮 Flame公式ScaleCallbacks: onScaleUpdate at $focalPoint, scale: $scale',
+      );
     }
     return true;
   }
-  
+
   @override
   bool processScaleEnd() {
     if (_config.debugMode) {
@@ -272,12 +284,12 @@ class FlameInputProcessor implements InputProcessor {
     }
     return true;
   }
-  
+
   @override
   void update(double dt) {
     // Flame公式ではコンポーネント自体が更新を管理
   }
-  
+
   /// イベント通知
   void _notifyListeners(InputEventData event) {
     for (final listener in _listeners) {
@@ -296,103 +308,105 @@ class FlameInputProcessor implements InputProcessor {
 class FlameInputManager {
   InputProcessor _processor;
   InputConfiguration _configuration;
-  
+
   /// Flame公式events準拠のInputManager
   /// TapCallbacks, DragCallbacks, ScaleCallbacks等を内部で使用
   FlameInputManager({
     InputProcessor? processor,
     InputConfiguration? configuration,
   }) : _processor = processor ?? FlameInputProcessor(),
-        _configuration = configuration ?? const DefaultInputConfiguration();
-  
+       _configuration = configuration ?? const DefaultInputConfiguration();
+
   /// 現在のプロセッサー
   InputProcessor get processor => _processor;
-  
+
   /// 現在の設定
   InputConfiguration get configuration => _configuration;
-  
+
   /// 初期化
   void initialize() {
     _processor.initialize(_configuration);
     debugPrint('🎮 FlameInputManager initialized (Flame公式events準拠)');
   }
-  
+
   /// プロセッサー変更
   void setProcessor(InputProcessor newProcessor) {
     _processor = newProcessor;
     _processor.initialize(_configuration);
   }
-  
+
   /// 設定更新
   void updateConfiguration(InputConfiguration newConfiguration) {
     _configuration = newConfiguration;
     _processor.updateConfiguration(_configuration);
   }
-  
+
   /// 入力イベントリスナー登録
   void addInputListener(void Function(InputEventData event) listener) {
     _processor.addInputListener(listener);
   }
-  
+
   /// 入力イベントリスナー削除
   void removeInputListener(void Function(InputEventData event) listener) {
     _processor.removeInputListener(listener);
   }
-  
+
   /// Flame公式TapCallbacks準拠のタップダウン処理
   void handleTapDown(Vector2 position) {
     debugPrint('FlameInputManager: handleTapDown at $position');
     _processor.processTapDown(position);
   }
-  
+
   /// Flame公式TapCallbacks準拠のタップアップ処理
   void handleTapUp(Vector2 position) {
     debugPrint('FlameInputManager: handleTapUp at $position');
     _processor.processTapUp(position);
   }
-  
+
   /// Flame公式TapCallbacks準拠のタップキャンセル処理
   void handleTapCancel() {
     _processor.processTapCancel();
   }
-  
+
   /// Flame公式DragCallbacks準拠のドラッグ処理
   void handlePanStart(Vector2 position) {
     _processor.processPanStart(position);
   }
-  
+
   void handlePanUpdate(Vector2 position, Vector2 delta) {
     _processor.processPanUpdate(position, delta);
   }
-  
+
   void handlePanEnd(Vector2 position, Vector2 velocity) {
     _processor.processPanEnd(position, velocity);
   }
-  
+
   /// Flame公式ScaleCallbacks準拠のスケール処理
   void handleScaleStart(Vector2 focalPoint, double scale) {
     _processor.processScaleStart(focalPoint, scale);
   }
-  
+
   void handleScaleUpdate(Vector2 focalPoint, double scale) {
     _processor.processScaleUpdate(focalPoint, scale);
   }
-  
+
   void handleScaleEnd() {
     _processor.processScaleEnd();
   }
-  
+
   /// フレーム更新
   void update(double dt) {
     _processor.update(dt);
   }
-  
+
   /// デバッグ情報取得
   Map<String, dynamic> getDebugInfo() {
     return {
       'processor_type': _processor.runtimeType.toString(),
       'configuration_type': _configuration.runtimeType.toString(),
-      'enabled_input_types': _configuration.enabledInputTypes.map((e) => e.name).toList(),
+      'enabled_input_types': _configuration.enabledInputTypes
+          .map((e) => e.name)
+          .toList(),
       'tap_sensitivity': _configuration.tapSensitivity,
       'double_tap_interval': _configuration.doubleTapInterval,
       'debug_mode': _configuration.debugMode,

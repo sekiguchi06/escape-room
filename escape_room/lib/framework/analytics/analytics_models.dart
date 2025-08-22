@@ -1,9 +1,9 @@
 /// 分析イベントの重要度
 enum EventPriority {
-  critical,   // 課金、エラー等
-  high,       // レベルクリア、ゲームオーバー等
-  medium,     // ゲーム開始、アイテム使用等
-  low,        // UI操作、画面表示等
+  critical, // 課金、エラー等
+  high, // レベルクリア、ゲームオーバー等
+  medium, // ゲーム開始、アイテム使用等
+  low, // UI操作、画面表示等
 }
 
 /// 分析イベントデータ
@@ -14,7 +14,7 @@ class AnalyticsEvent {
   final DateTime timestamp;
   final String? userId;
   final String? sessionId;
-  
+
   const AnalyticsEvent({
     required this.name,
     this.parameters = const {},
@@ -23,7 +23,7 @@ class AnalyticsEvent {
     this.userId,
     this.sessionId,
   });
-  
+
   Map<String, dynamic> toJson() {
     return {
       'name': name,
@@ -34,7 +34,7 @@ class AnalyticsEvent {
       'session_id': sessionId,
     };
   }
-  
+
   @override
   String toString() {
     return 'AnalyticsEvent(name: $name, priority: $priority, params: ${parameters.length})';

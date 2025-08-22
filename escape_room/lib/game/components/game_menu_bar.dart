@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'hint_dialog.dart';
 import '../escape_room.dart';
-import '../../framework/transitions/fade_page_route.dart';
 import 'room_navigation_system.dart';
 import 'lighting_system.dart';
 import 'inventory_system.dart';
@@ -9,9 +8,9 @@ import 'inventory_system.dart';
 /// ゲーム上部メニューバー
 class GameMenuBar extends StatelessWidget {
   final VoidCallback? onAddItem;
-  
+
   const GameMenuBar({super.key, this.onAddItem});
-  
+
   /// メニューバーの高さを取得（他のコンポーネントから参照用）
   static double getHeight(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
@@ -47,14 +46,10 @@ class GameMenuBar extends StatelessWidget {
                   Navigator.of(context).pop();
                 },
               ),
-              
+
               // 区切り線
-              Container(
-                width: 1,
-                height: 30,
-                color: Colors.brown[400],
-              ),
-              
+              Container(width: 1, height: 30, color: Colors.brown[400]),
+
               // リトライボタン
               _buildMenuButton(
                 icon: Icons.refresh,
@@ -65,14 +60,10 @@ class GameMenuBar extends StatelessWidget {
                   _showRetryConfirmDialog(context);
                 },
               ),
-              
+
               // 区切り線
-              Container(
-                width: 1,
-                height: 30,
-                color: Colors.brown[400],
-              ),
-              
+              Container(width: 1, height: 30, color: Colors.brown[400]),
+
               // ヒントボタン
               _buildMenuButton(
                 icon: Icons.lightbulb_outline,
@@ -104,11 +95,7 @@ class GameMenuBar extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                icon,
-                color: Colors.white,
-                size: 20,
-              ),
+              Icon(icon, color: Colors.white, size: 20),
               const SizedBox(height: 2),
               Text(
                 label,
@@ -140,10 +127,7 @@ class GameMenuBar extends StatelessWidget {
             children: [
               Icon(Icons.refresh, color: Colors.white),
               const SizedBox(width: 8),
-              const Text(
-                'ゲームをリスタート',
-                style: TextStyle(color: Colors.white),
-              ),
+              const Text('ゲームをリスタート', style: TextStyle(color: Colors.white)),
             ],
           ),
           content: const Text(
@@ -155,10 +139,7 @@ class GameMenuBar extends StatelessWidget {
               onPressed: () {
                 Navigator.of(context).pop(); // ダイアログを閉じる
               },
-              child: Text(
-                'キャンセル',
-                style: TextStyle(color: Colors.brown[300]),
-              ),
+              child: Text('キャンセル', style: TextStyle(color: Colors.brown[300])),
             ),
             ElevatedButton(
               onPressed: () {
@@ -180,7 +161,7 @@ class GameMenuBar extends StatelessWidget {
   /// ゲームを実際にリスタート
   void _restartGame(BuildContext context) {
     debugPrint('🔄 Restarting escape room game with fade transition...');
-    
+
     // フェードオーバーレイを表示してリスタート
     _showFadeRestartOverlay(context);
   }
@@ -189,7 +170,7 @@ class GameMenuBar extends StatelessWidget {
   void _showFadeRestartOverlay(BuildContext context) {
     // Navigatorの参照を事前に取得
     final navigator = Navigator.of(context);
-    
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -201,15 +182,16 @@ class GameMenuBar extends StatelessWidget {
             RoomNavigationSystem().resetToInitialRoom();
             LightingSystem().resetToInitialState();
             InventorySystem().initializeEmpty(); // インベントリを空で初期化
-            
+
             // オーバーレイを閉じてから画面遷移（スライドなし）
             Navigator.of(overlayContext).pop();
-            
+
             // 少し待ってから画面遷移（即座の置き換えでスライドを防ぐ）
             Future.delayed(const Duration(milliseconds: 50), () {
               navigator.pushReplacement(
                 PageRouteBuilder(
-                  pageBuilder: (context, animation, secondaryAnimation) => const EscapeRoom(),
+                  pageBuilder: (context, animation, secondaryAnimation) =>
+                      const EscapeRoom(),
                   transitionDuration: Duration.zero, // スライドアニメーション除去
                   reverseTransitionDuration: Duration.zero,
                 ),
@@ -226,9 +208,7 @@ class GameMenuBar extends StatelessWidget {
 class _FadeRestartOverlay extends StatefulWidget {
   final VoidCallback onComplete;
 
-  const _FadeRestartOverlay({
-    required this.onComplete,
-  });
+  const _FadeRestartOverlay({required this.onComplete});
 
   @override
   State<_FadeRestartOverlay> createState() => _FadeRestartOverlayState();
@@ -242,18 +222,16 @@ class _FadeRestartOverlayState extends State<_FadeRestartOverlay>
   @override
   void initState() {
     super.initState();
-    
+
     _controller = AnimationController(
       duration: const Duration(milliseconds: 800), // 部屋移動より長め
       vsync: this,
     );
-    
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeInOut,
-      ),
-    );
+
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
 
     // フェード開始
     _controller.forward().then((_) {
@@ -278,7 +256,7 @@ class _FadeRestartOverlayState extends State<_FadeRestartOverlay>
         return Container(
           width: double.infinity,
           height: double.infinity,
-          color: Colors.black.withOpacity(_fadeAnimation.value),
+          color: Colors.black.withValues(alpha: _fadeAnimation.value),
           child: _fadeAnimation.value > 0.5
               ? const Center(
                   child: CircularProgressIndicator(

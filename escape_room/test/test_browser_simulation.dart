@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:escape_room/game/simple_game.dart';
 
-
 /// 最小限のブラウザ実動作テスト
 void main() {
   runApp(const CasualGameTestApp());

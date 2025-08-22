@@ -1,7 +1,7 @@
 /// constコンストラクタ最適化ユーティリティ
-/// 
+///
 /// ウィジェットのconstコンストラクタ使用によるパフォーマンス最適化
-library const_optimization;
+library;
 
 import 'package:flutter/material.dart';
 
@@ -22,23 +22,23 @@ class ConstOptimizedWidgets {
   static const sizedBox8 = SizedBox(width: 8, height: 8);
   static const sizedBox16 = SizedBox(width: 16, height: 16);
   static const sizedBox24 = SizedBox(width: 24, height: 24);
-  
+
   /// 最適化されたPadding
   static const padding8 = EdgeInsets.all(8.0);
   static const padding16 = EdgeInsets.all(16.0);
   static const padding24 = EdgeInsets.all(24.0);
-  
+
   /// 最適化されたDivider
   static const divider = Divider();
   static const verticalDivider = VerticalDivider();
-  
+
   /// 最適化されたIcon
   static const iconHome = Icon(Icons.home);
   static const iconSettings = Icon(Icons.settings);
   static const iconClose = Icon(Icons.close);
   static const iconArrowBack = Icon(Icons.arrow_back);
   static const iconArrowForward = Icon(Icons.arrow_forward);
-  
+
   /// 最適化されたText
   static const textEmpty = Text('');
   static const textLoading = Text('Loading...');
@@ -58,14 +58,14 @@ class ConstOptimizationChecker {
     }
     return true;
   }
-  
+
   /// const使用推奨のウィジェットかチェック
   static bool shouldUseConst(Widget widget) {
     return widget is SizedBox ||
-           widget is Padding ||
-           widget is Divider ||
-           widget is Icon ||
-           (widget is Text && widget.data != null);
+        widget is Padding ||
+        widget is Divider ||
+        widget is Icon ||
+        (widget is Text && widget.data != null);
   }
 }
 
@@ -91,7 +91,7 @@ class ConstOptimizedBuilder {
       child: child,
     );
   }
-  
+
   /// const対応のColumn
   static Widget constColumn({
     Key? key,
@@ -106,7 +106,7 @@ class ConstOptimizedBuilder {
       children: children,
     );
   }
-  
+
   /// const対応のRow
   static Widget constRow({
     Key? key,
@@ -129,7 +129,7 @@ mixin ConstOptimizationMixin {
   Widget buildConstWidget() {
     return const SizedBox.shrink();
   }
-  
+
   /// constを推奨するウィジェットの生成
   Widget buildOptimizedSizedBox({double? width, double? height}) {
     if (width == null && height == null) {
@@ -146,7 +146,7 @@ mixin ConstOptimizationMixin {
     }
     return SizedBox(width: width, height: height);
   }
-  
+
   /// constを推奨するPaddingの生成
   Widget buildOptimizedPadding(EdgeInsetsGeometry padding, Widget child) {
     if (padding == const EdgeInsets.all(8.0)) {
@@ -171,7 +171,7 @@ class OptimizedSpacer {
   static const Widget horizontal16 = SizedBox(width: 16);
   static const Widget horizontal20 = SizedBox(width: 20);
   static const Widget horizontal24 = SizedBox(width: 24);
-  
+
   /// 垂直方向のスペース
   static const Widget vertical4 = SizedBox(height: 4);
   static const Widget vertical8 = SizedBox(height: 8);
@@ -190,7 +190,7 @@ class GameConstWidgets {
   static const iconPlay = Icon(Icons.play_arrow, color: Colors.white);
   static const iconVolume = Icon(Icons.volume_up, color: Colors.white);
   static const iconVolumeOff = Icon(Icons.volume_off, color: Colors.white);
-  
+
   /// スタイル済みテキスト
   static const scoreLabel = Text(
     'Score',
@@ -200,7 +200,7 @@ class GameConstWidgets {
       fontWeight: FontWeight.bold,
     ),
   );
-  
+
   static const timeLabel = Text(
     'Time',
     style: TextStyle(
@@ -209,10 +209,10 @@ class GameConstWidgets {
       fontWeight: FontWeight.bold,
     ),
   );
-  
+
   /// 黒背景コンテナ
   static const blackBackground = ColoredBox(color: Colors.black);
-  
+
   /// 透明コンテナ
   static const transparentBackground = ColoredBox(color: Colors.transparent);
 }

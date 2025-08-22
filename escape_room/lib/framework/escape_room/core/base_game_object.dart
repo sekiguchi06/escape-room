@@ -5,9 +5,9 @@ import 'package:flame/events.dart';
 /// 🎯 目的: Flame PositionComponent拡張の基底クラス
 abstract class BaseGameObject extends PositionComponent with TapCallbacks {
   final String objectId;
-  
+
   BaseGameObject({required this.objectId});
-  
+
   /// オブジェクトの現在状態を取得
   Map<String, dynamic> getState() {
     return {
@@ -16,7 +16,7 @@ abstract class BaseGameObject extends PositionComponent with TapCallbacks {
       'size': {'width': size.x, 'height': size.y},
     };
   }
-  
+
   @override
   String toString() {
     return '$runtimeType(id: $objectId)';

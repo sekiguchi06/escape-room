@@ -7,25 +7,25 @@ import 'package:flutter/material.dart';
 abstract class UITheme {
   /// テキストスタイルを取得（既存互換）
   TextStyle getTextStyle(String styleId);
-  
+
   /// 色を取得
   Color getColor(String key);
-  
+
   /// サイズ・寸法を取得（既存互換）
   double getDimension(String dimensionId);
-  
+
   /// フォントサイズを取得
   double getFontSize(String key);
-  
+
   /// フォント重みを取得（既存互換）
   FontWeight getFontWeight(String weightId);
-  
+
   /// マージン/パディングを取得
   double getSpacing(String key);
-  
+
   /// アニメーション設定を取得（既存互換）
   Duration getAnimationDuration(String animationId);
-  
+
   /// Flutter公式ThemeDataに変換
   ThemeData toThemeData();
 }
@@ -41,7 +41,7 @@ class FlutterUITheme implements UITheme {
   final Map<String, FontWeight> fontWeights;
   final Map<String, Duration> animationDurations;
   final ThemeData _themeData;
-  
+
   /// Flutter公式ThemeData準拠のUITheme
   /// Material Design ColorSchemeを内部で使用
   const FlutterUITheme({
@@ -54,7 +54,7 @@ class FlutterUITheme implements UITheme {
     this.animationDurations = const {},
     required ThemeData themeData,
   }) : _themeData = themeData;
-  
+
   /// Material Design Light準拠のテーマ作成
   factory FlutterUITheme.light({
     Map<String, Color>? customColors,
@@ -69,12 +69,12 @@ class FlutterUITheme implements UITheme {
       seedColor: Colors.blue,
       brightness: Brightness.light,
     );
-    
+
     final themeData = ThemeData(
       colorScheme: lightColorScheme,
       useMaterial3: true, // Material Design 3準拠
     );
-    
+
     return FlutterUITheme(
       colors: {
         'primary': lightColorScheme.primary,
@@ -101,7 +101,7 @@ class FlutterUITheme implements UITheme {
       themeData: themeData,
     );
   }
-  
+
   /// Material Design Dark準拠のテーマ作成
   factory FlutterUITheme.dark({
     Map<String, Color>? customColors,
@@ -112,12 +112,12 @@ class FlutterUITheme implements UITheme {
       seedColor: Colors.blue,
       brightness: Brightness.dark,
     );
-    
+
     final themeData = ThemeData(
       colorScheme: darkColorScheme,
       useMaterial3: true, // Material Design 3準拠
     );
-    
+
     return FlutterUITheme(
       colors: {
         'primary': darkColorScheme.primary,
@@ -144,7 +144,7 @@ class FlutterUITheme implements UITheme {
       themeData: themeData,
     );
   }
-  
+
   /// ゲーム用カスタムテーマ作成
   factory FlutterUITheme.game({
     Map<String, Color>? customColors,
@@ -155,12 +155,12 @@ class FlutterUITheme implements UITheme {
       seedColor: Colors.orange,
       brightness: Brightness.dark,
     );
-    
+
     final themeData = ThemeData(
       colorScheme: gameColorScheme,
       useMaterial3: true,
     );
-    
+
     return FlutterUITheme(
       colors: {
         'primary': Colors.orange,
@@ -187,29 +187,29 @@ class FlutterUITheme implements UITheme {
       themeData: themeData,
     );
   }
-  
+
   @override
   Color getColor(String key) {
     return colors[key] ?? _themeData.colorScheme.primary;
   }
-  
+
   @override
   double getFontSize(String key) {
     return fontSizes[key] ?? 16.0;
   }
-  
+
   @override
   double getSpacing(String key) {
     return spacings[key] ?? 16.0;
   }
-  
+
   @override
   TextStyle getTextStyle(String styleId) {
     // 既存のtextStylesマップがあれば使用、なければデフォルトスタイルを作成
     if (textStyles.containsKey(styleId)) {
       return textStyles[styleId]!;
     }
-    
+
     // Flutter公式準拠のTextStyle作成
     return TextStyle(
       fontSize: getFontSize(styleId),
@@ -217,44 +217,54 @@ class FlutterUITheme implements UITheme {
       fontWeight: FontWeight.w400,
     );
   }
-  
+
   @override
   double getDimension(String dimensionId) {
     return dimensions[dimensionId] ?? 16.0;
   }
-  
+
   @override
   FontWeight getFontWeight(String weightId) {
     if (fontWeights.containsKey(weightId)) {
       return fontWeights[weightId]!;
     }
-    
+
     // デフォルトのFontWeight値
     switch (weightId) {
-      case 'light': return FontWeight.w300;
-      case 'normal': return FontWeight.w400;
-      case 'medium': return FontWeight.w500;
-      case 'bold': return FontWeight.w700;
-      case 'heavy': return FontWeight.w900;
-      default: return FontWeight.w400;
+      case 'light':
+        return FontWeight.w300;
+      case 'normal':
+        return FontWeight.w400;
+      case 'medium':
+        return FontWeight.w500;
+      case 'bold':
+        return FontWeight.w700;
+      case 'heavy':
+        return FontWeight.w900;
+      default:
+        return FontWeight.w400;
     }
   }
-  
+
   @override
   Duration getAnimationDuration(String animationId) {
     if (animationDurations.containsKey(animationId)) {
       return animationDurations[animationId]!;
     }
-    
+
     // デフォルトのDuration値
     switch (animationId) {
-      case 'fast': return const Duration(milliseconds: 150);
-      case 'normal': return const Duration(milliseconds: 250);
-      case 'slow': return const Duration(milliseconds: 400);
-      default: return const Duration(milliseconds: 250);
+      case 'fast':
+        return const Duration(milliseconds: 150);
+      case 'normal':
+        return const Duration(milliseconds: 250);
+      case 'slow':
+        return const Duration(milliseconds: 400);
+      default:
+        return const Duration(milliseconds: 250);
     }
   }
-  
+
   @override
   ThemeData toThemeData() {
     return _themeData;
@@ -267,67 +277,67 @@ class FlutterThemeManager {
   static final FlutterThemeManager _instance = FlutterThemeManager._internal();
   factory FlutterThemeManager() => _instance;
   FlutterThemeManager._internal();
-  
+
   final Map<String, UITheme> _themes = {};
   String _currentTheme = 'light';
   final List<void Function(String)> _listeners = [];
-  
+
   /// Flutter公式ThemeData準拠のテーママネージャー
   /// Material Design 3準拠のテーマ管理
-  
+
   /// テーマを登録
   void registerTheme(String id, UITheme theme) {
     _themes[id] = theme;
-    
+
     // デフォルトテーマがない場合は最初に登録されたテーマをデフォルトに
     if (_themes.length == 1) {
       _currentTheme = id;
     }
-    
+
     debugPrint('🎨 Flutter公式ThemeData準拠: テーマ登録 $id');
   }
-  
+
   /// テーマを設定
   void setTheme(String themeId) {
     if (_themes.containsKey(themeId)) {
       final oldTheme = _currentTheme;
       _currentTheme = themeId;
-      
+
       if (oldTheme != _currentTheme) {
         _notifyListeners();
         debugPrint('🎨 Flutter公式ThemeData準拠: テーマ変更 $oldTheme → $themeId');
       }
     }
   }
-  
+
   /// 現在のテーマを取得
   UITheme get currentTheme {
     return _themes[_currentTheme] ?? _getDefaultTheme();
   }
-  
+
   /// 現在のテーマIDを取得
   String get currentThemeId => _currentTheme;
-  
+
   /// 現在のFlutter公式ThemeDataを取得
   ThemeData get currentThemeData {
     return currentTheme.toThemeData();
   }
-  
+
   /// 利用可能なテーマ一覧を取得
   List<String> getAvailableThemes() {
     return _themes.keys.toList();
   }
-  
+
   /// テーマ変更リスナーを追加
   void addThemeChangeListener(void Function(String) listener) {
     _listeners.add(listener);
   }
-  
+
   /// テーマ変更リスナーを削除
   void removeThemeChangeListener(void Function(String) listener) {
     _listeners.remove(listener);
   }
-  
+
   void _notifyListeners() {
     for (final listener in _listeners) {
       try {
@@ -337,25 +347,25 @@ class FlutterThemeManager {
       }
     }
   }
-  
+
   UITheme _getDefaultTheme() {
     return FlutterUITheme.light();
   }
-  
+
   /// Material Design 3準拠のデフォルトテーマを初期化
   void initializeDefaultThemes() {
     // Material Design Light テーマ
     registerTheme('light', FlutterUITheme.light());
-    
+
     // Material Design Dark テーマ
     registerTheme('dark', FlutterUITheme.dark());
-    
+
     // ゲーム用カスタムテーマ
     registerTheme('game', FlutterUITheme.game());
-    
+
     debugPrint('🎨 Flutter公式ThemeData準拠: デフォルトテーマ初期化完了');
   }
-  
+
   /// システムテーマモード取得（Flutter公式準拠）
   ThemeMode getSystemThemeMode() {
     // システム設定に応じた自動切り替え
@@ -368,7 +378,7 @@ class FlutterThemeManager {
         return ThemeMode.system; // システム設定に従う
     }
   }
-  
+
   /// デバッグ情報取得
   Map<String, dynamic> getDebugInfo() {
     return {
@@ -391,7 +401,7 @@ abstract class FlutterThemedUIComponent {
   /// Material Design準拠のテーマ取得
   UITheme getTheme(BuildContext context) {
     final themeData = Theme.of(context);
-    
+
     // ThemeDataからUIThemeに変換
     return FlutterUITheme(
       colors: {

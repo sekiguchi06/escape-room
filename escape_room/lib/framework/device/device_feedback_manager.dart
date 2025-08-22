@@ -3,7 +3,8 @@ import 'package:flutter/services.dart';
 
 /// シンプルなデバイスフィードバック管理クラス
 class DeviceFeedbackManager {
-  static final DeviceFeedbackManager _instance = DeviceFeedbackManager._internal();
+  static final DeviceFeedbackManager _instance =
+      DeviceFeedbackManager._internal();
   factory DeviceFeedbackManager() => _instance;
   DeviceFeedbackManager._internal();
 
@@ -28,7 +29,7 @@ class DeviceFeedbackManager {
   /// 初期化処理
   Future<void> initialize() async {
     if (_isInitialized) return;
-    
+
     try {
       await _loadSettings();
       _isInitialized = true;
@@ -54,14 +55,18 @@ class DeviceFeedbackManager {
   Future<void> _saveSettings() async {
     try {
       // SharedPreferencesに設定を保存（実際の実装では必要）
-      debugPrint('💾 Settings saved: vibration=$_vibrationEnabled, notifications=$_notificationsEnabled');
+      debugPrint(
+        '💾 Settings saved: vibration=$_vibrationEnabled, notifications=$_notificationsEnabled',
+      );
     } catch (e) {
       debugPrint('❌ Failed to save settings: $e');
     }
   }
 
   /// バイブレーション実行（基本実装）
-  Future<void> vibrate({VibrationPattern pattern = VibrationPattern.light}) async {
+  Future<void> vibrate({
+    VibrationPattern pattern = VibrationPattern.light,
+  }) async {
     if (!_vibrationEnabled) return;
 
     try {
@@ -148,19 +153,18 @@ class DeviceFeedbackManager {
 
 /// バイブレーションパターン
 enum VibrationPattern {
-  light,    // 軽いタップ
-  medium,   // 中程度の振動
-  heavy,    // 強い振動
-  success,  // 成功パターン
-  error,    // エラーパターン
+  light, // 軽いタップ
+  medium, // 中程度の振動
+  heavy, // 強い振動
+  success, // 成功パターン
+  error, // エラーパターン
 }
 
 /// ゲームアクション
 enum GameAction {
-  buttonTap,     // ボタンタップ
-  itemFound,     // アイテム発見
-  puzzleSolved,  // パズル解決
-  error,         // エラー
-  escape,        // 脱出成功
+  buttonTap, // ボタンタップ
+  itemFound, // アイテム発見
+  puzzleSolved, // パズル解決
+  error, // エラー
+  escape, // 脱出成功
 }
-

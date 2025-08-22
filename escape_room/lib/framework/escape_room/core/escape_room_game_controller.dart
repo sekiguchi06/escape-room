@@ -9,9 +9,7 @@ class EscapeRoomGameController {
   final InventoryManager inventoryManager;
   final Set<String> _interactedObjects = <String>{};
 
-  EscapeRoomGameController({
-    required this.inventoryManager,
-  });
+  EscapeRoomGameController({required this.inventoryManager});
 
   /// アイテムをインベントリに追加
   bool addItemToInventory(String itemId) {

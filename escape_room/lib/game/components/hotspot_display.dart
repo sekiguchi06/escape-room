@@ -3,19 +3,13 @@ import 'room_hotspot_system.dart';
 import 'room_navigation_system.dart';
 import 'inventory_system.dart';
 import '../../gen/assets.gen.dart';
-import '../../framework/ui/modal_config.dart';
-import '../../framework/ui/escape_room_modal_system.dart';
 
 /// ホットスポット表示ウィジェット
 class HotspotDisplay extends StatefulWidget {
   final Size gameSize;
   final dynamic game; // EscapeRoomGameインスタンス
 
-  const HotspotDisplay({
-    super.key,
-    required this.gameSize,
-    this.game,
-  });
+  const HotspotDisplay({super.key, required this.gameSize, this.game});
 
   @override
   State<HotspotDisplay> createState() => _HotspotDisplayState();
@@ -28,14 +22,14 @@ class _HotspotDisplayState extends State<HotspotDisplay> {
     // パズルモーダル表示コールバックを設定
     RoomHotspotSystem().setPuzzleModalCallback(_showPuzzleModal);
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
       listenable: RoomNavigationSystem(),
       builder: (context, _) {
         final hotspots = RoomHotspotSystem().getCurrentRoomHotspots();
-        
+
         return Stack(
           children: hotspots.map((hotspot) {
             return _buildHotspot(hotspot);
@@ -59,52 +53,51 @@ class _HotspotDisplayState extends State<HotspotDisplay> {
       child: GestureDetector(
         onTap: () => _onHotspotTapped(hotspot),
         child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              // デバッグ用の薄い境界線（本番では削除可能）
-              border: Border.all(
-                color: Colors.yellow.withValues(alpha: 0.3),
-                width: 1,
-              ),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            // デバッグ用の薄い境界線（本番では削除可能）
+            border: Border.all(
+              color: Colors.yellow.withValues(alpha: 0.3),
+              width: 1,
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: hotspot.asset.image(
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) {
-                  // 画像が見つからない場合のフォールバック
-                  return Container(
-                    color: Colors.amber.withValues(alpha: 0.5),
-                    child: const Center(
-                      child: Icon(
-                        Icons.help_outline,
-                        color: Colors.white,
-                        size: 24,
-                      ),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: hotspot.asset.image(
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) {
+                // 画像が見つからない場合のフォールバック
+                return Container(
+                  color: Colors.amber.withValues(alpha: 0.5),
+                  child: const Center(
+                    child: Icon(
+                      Icons.help_outline,
+                      color: Colors.white,
+                      size: 24,
                     ),
-                  );
-                },
-              ),
+                  ),
+                );
+              },
             ),
           ),
         ),
+      ),
     );
   }
 
   void _onHotspotTapped(HotspotData hotspot) {
-    
     // 背景タップエフェクトも発動させるため、手動でInkWellのタップを呼び出し
-    
+
     // パーティクルエフェクトはGlobalTapDetectorが自動的に処理
-    
+
     // ホットスポット操作を記録（統一的に処理）
     RoomHotspotSystem().recordHotspotInteraction(hotspot.id);
-    
+
     // 特別なギミック処理
     if (widget.game != null) {
       _handleSpecialGimmicks(hotspot);
     }
-    
+
     // カスタムコールバックがある場合は実行（ダミー座標）
     if (hotspot.onTap != null) {
       hotspot.onTap!(const Offset(0, 0)); // InkWellでは具体的な座標は不要
@@ -128,7 +121,7 @@ class _HotspotDisplayState extends State<HotspotDisplay> {
     // 特別なギミックオブジェクトは何もしない（モーダル表示のみ）
     // ギミック発動はモーダル内のボタンで処理
   }
-  
+
   /// パズルモーダルを表示
   void _showPuzzleModal({
     required String hotspotId,
@@ -141,7 +134,7 @@ class _HotspotDisplayState extends State<HotspotDisplay> {
     required AssetGenImage rewardAsset,
   }) {
     debugPrint('🧩 Puzzle modal requested for $hotspotId');
-    
+
     showDialog(
       context: context,
       barrierDismissible: false, // パズル中は外側タップで閉じない
@@ -169,7 +162,6 @@ class _HotspotDisplayState extends State<HotspotDisplay> {
       },
     );
   }
-
 }
 
 /// ホットスポット詳細モーダル
@@ -195,10 +187,7 @@ class _HotspotDetailModal extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.brown[800],
               borderRadius: BorderRadius.circular(15),
-              border: Border.all(
-                color: Colors.amber[700]!,
-                width: 2,
-              ),
+              border: Border.all(color: Colors.amber[700]!, width: 2),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.7),
@@ -254,7 +243,6 @@ class _HotspotDetailModal extends StatelessWidget {
     );
   }
 
-
   /// ギミック実行可能かチェック
   bool _canExecuteGimmick() {
     final inventorySystem = InventorySystem();
@@ -273,7 +261,7 @@ class _HotspotDetailModal extends StatelessWidget {
     if (!_canExecuteGimmick()) return;
 
     final inventorySystem = InventorySystem();
-    
+
     switch (hotspot.id) {
       case 'treasure_chest':
         // 宝箱のギミック解除
@@ -281,7 +269,7 @@ class _HotspotDetailModal extends StatelessWidget {
         if (success) {
           // master_keyを消費
           inventorySystem.removeItemById('master_key');
-          
+
           debugPrint('🗝️ 脱出の鍵を取得しました！master_keyを消費');
           RoomHotspotSystem().notifyItemDiscovered(
             itemId: 'escape_key',
@@ -289,17 +277,17 @@ class _HotspotDetailModal extends StatelessWidget {
             description: '宝箱から取り出した最終的な脱出の鍵。これで城から脱出できる！',
             itemAsset: Assets.images.items.key,
           );
-          
+
           Navigator.of(context).pop();
           _showGimmickSuccessMessage(context, '宝箱が開いた！最終的な脱出の鍵を発見！');
         }
         break;
-        
+
       case 'entrance_door':
         // 扉のギミック解除
         // escape_keyを消費
         inventorySystem.removeItemById('escape_key');
-        
+
         debugPrint('🎉 脱出成功！ゲームクリア！escape_keyを消費');
         Navigator.of(context).pop();
         _showGameClearMessage(context);
@@ -315,12 +303,12 @@ class _HotspotDetailModal extends StatelessWidget {
         backgroundColor: Colors.brown[800],
         title: Text(
           '🔓 ギミック解除成功！',
-          style: TextStyle(color: Colors.amber[200], fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: Colors.amber[200],
+            fontWeight: FontWeight.bold,
+          ),
         ),
-        content: Text(
-          message,
-          style: TextStyle(color: Colors.brown[100]),
-        ),
+        content: Text(message, style: TextStyle(color: Colors.brown[100])),
         actions: [
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -344,7 +332,11 @@ class _HotspotDetailModal extends StatelessWidget {
         backgroundColor: Colors.amber[800],
         title: Text(
           '🎉 ゲームクリア！',
-          style: TextStyle(color: Colors.brown[800], fontWeight: FontWeight.bold, fontSize: 24),
+          style: TextStyle(
+            color: Colors.brown[800],
+            fontWeight: FontWeight.bold,
+            fontSize: 24,
+          ),
         ),
         content: Text(
           '脱出成功！\n城から無事に脱出することができました！',
@@ -372,23 +364,23 @@ class _HotspotDetailModal extends StatelessWidget {
   void _onModalTap(BuildContext context) {
     final inventorySystem = InventorySystem();
     final selectedItem = inventorySystem.selectedItemId;
-    
+
     // 選択されたアイテムがない場合は何もしない
     if (selectedItem == null) return;
-    
+
     switch (hotspot.id) {
       case 'treasure_chest':
         if (selectedItem == 'master_key') {
           _executeGimmick(context);
         }
         break;
-        
+
       case 'entrance_door':
         if (selectedItem == 'escape_key') {
           _executeGimmick(context);
         }
         break;
-        
+
       default:
         // その他のホットスポットでは何もしない
         break;
@@ -459,18 +451,15 @@ class _PuzzleModalDialogState extends State<_PuzzleModalDialog> {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
-            
+
             // 説明
             Text(
               widget.description,
-              style: TextStyle(
-                color: Colors.brown[100],
-                fontSize: 14,
-              ),
+              style: TextStyle(color: Colors.brown[100], fontSize: 14),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
-            
+
             // 数字入力フィールド
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -493,10 +482,7 @@ class _PuzzleModalDialogState extends State<_PuzzleModalDialog> {
                 decoration: InputDecoration(
                   border: InputBorder.none,
                   hintText: '4桁の数字',
-                  hintStyle: TextStyle(
-                    color: Colors.brown[400],
-                    fontSize: 16,
-                  ),
+                  hintStyle: TextStyle(color: Colors.brown[400], fontSize: 16),
                   counterText: '',
                 ),
                 onChanged: (value) {
@@ -507,7 +493,7 @@ class _PuzzleModalDialogState extends State<_PuzzleModalDialog> {
               ),
             ),
             const SizedBox(height: 20),
-            
+
             // ボタン
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,

@@ -4,22 +4,22 @@ import 'package:flutter/foundation.dart';
 abstract class PersistenceConfiguration {
   /// 自動保存間隔 (秒)
   int get autoSaveInterval;
-  
+
   /// 暗号化有効フラグ
   bool get encryptionEnabled;
-  
+
   /// 暗号化キー（暗号化有効時）
   String? get encryptionKey;
-  
+
   /// クラウド同期有効フラグ
   bool get cloudSyncEnabled;
-  
+
   /// データバージョン（マイグレーション用）
   int get dataVersion;
-  
+
   /// デバッグモード
   bool get debugMode;
-  
+
   /// 保存対象データキー一覧
   Set<String> get trackedKeys;
 }
@@ -28,25 +28,25 @@ abstract class PersistenceConfiguration {
 class DefaultPersistenceConfiguration implements PersistenceConfiguration {
   @override
   final int autoSaveInterval;
-  
+
   @override
   final bool encryptionEnabled;
-  
+
   @override
   final String? encryptionKey;
-  
+
   @override
   final bool cloudSyncEnabled;
-  
+
   @override
   final int dataVersion;
-  
+
   @override
   final bool debugMode;
-  
+
   @override
   final Set<String> trackedKeys;
-  
+
   const DefaultPersistenceConfiguration({
     this.autoSaveInterval = 30,
     this.encryptionEnabled = false,
@@ -56,7 +56,7 @@ class DefaultPersistenceConfiguration implements PersistenceConfiguration {
     this.debugMode = kDebugMode,
     this.trackedKeys = const {},
   });
-  
+
   /// 設定のコピーを作成（一部パラメータの変更可能）
   DefaultPersistenceConfiguration copyWith({
     int? autoSaveInterval,

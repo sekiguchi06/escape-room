@@ -84,10 +84,7 @@ class CombinationResult {
   }
 
   static CombinationResult createFailure(String message) {
-    return CombinationResult(
-      success: false,
-      message: message,
-    );
+    return CombinationResult(success: false, message: message);
   }
 }
 
@@ -100,7 +97,8 @@ class ItemCombinationManager extends ChangeNotifier {
   final Set<String> _activatedGimmicks = <String>{};
 
   /// 組み合わせルール一覧（読み取り専用）
-  List<CombinationRule> get combinationRules => _combinationRules.values.toList();
+  List<CombinationRule> get combinationRules =>
+      _combinationRules.values.toList();
 
   /// ギミックルール一覧（読み取り専用）
   List<GimmickRule> get gimmickRules => _gimmickRules.values.toList();
@@ -168,9 +166,9 @@ class ItemCombinationManager extends ChangeNotifier {
 
     // 組み合わせ成功
     _usedCombinations.add(ruleId);
-    
+
     final consumedItems = rule.consumeItems ? rule.requiredItems : <String>[];
-    
+
     debugPrint('✅ Combination successful: ${rule.id} -> ${rule.resultItem}');
     notifyListeners();
 
@@ -202,28 +200,26 @@ class ItemCombinationManager extends ChangeNotifier {
 
     // ギミック解除成功
     _activatedGimmicks.add(ruleId);
-    
+
     final consumedItems = rule.consumeItems ? rule.requiredItems : <String>[];
-    
+
     debugPrint('🔓 Gimmick activated: ${rule.id} on ${rule.targetObjectId}');
     notifyListeners();
 
     return CombinationResult.createSuccess(
       consumedItems: consumedItems,
       message: rule.successMessage,
-      metadata: {
-        'targetObjectId': rule.targetObjectId,
-        ...rule.metadata,
-      },
+      metadata: {'targetObjectId': rule.targetObjectId, ...rule.metadata},
     );
   }
 
   /// 利用可能な組み合わせを取得
   List<CombinationRule> getAvailableCombinations(List<String> availableItems) {
     return _combinationRules.values
-        .where((rule) => 
-          !_usedCombinations.contains(rule.id) && 
-          rule.canCombine(availableItems)
+        .where(
+          (rule) =>
+              !_usedCombinations.contains(rule.id) &&
+              rule.canCombine(availableItems),
         )
         .toList();
   }
@@ -231,9 +227,10 @@ class ItemCombinationManager extends ChangeNotifier {
   /// 利用可能なギミックを取得
   List<GimmickRule> getAvailableGimmicks(List<String> availableItems) {
     return _gimmickRules.values
-        .where((rule) => 
-          !_activatedGimmicks.contains(rule.id) && 
-          rule.canActivate(availableItems)
+        .where(
+          (rule) =>
+              !_activatedGimmicks.contains(rule.id) &&
+              rule.canActivate(availableItems),
         )
         .toList();
   }

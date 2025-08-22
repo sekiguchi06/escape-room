@@ -2,10 +2,10 @@ import 'package:flutter/foundation.dart';
 
 /// クリア条件タイプ
 enum ClearConditionType {
-  collectItems,     // アイテム収集
-  solvePuzzles,     // パズル解決
+  collectItems, // アイテム収集
+  solvePuzzles, // パズル解決
   useItemCombination, // アイテム組み合わせ
-  interactObjects,  // オブジェクト操作
+  interactObjects, // オブジェクト操作
 }
 
 /// 個別クリア条件
@@ -62,15 +62,19 @@ class ClearConditionManager extends ChangeNotifier {
   bool get isGameCleared => _isGameCleared;
 
   /// クリア率（0.0-1.0）
-  double get clearProgress => totalCount > 0 ? _completedCount / totalCount : 0.0;
+  double get clearProgress =>
+      totalCount > 0 ? _completedCount / totalCount : 0.0;
 
   /// ゲーム経過時間（秒）
-  int get elapsedTimeSeconds => DateTime.now().difference(_gameStartTime).inSeconds;
+  int get elapsedTimeSeconds =>
+      DateTime.now().difference(_gameStartTime).inSeconds;
 
   /// クリア条件を追加
   void addCondition(ClearCondition condition) {
     _conditions[condition.id] = condition;
-    debugPrint('🎯 Clear condition added: ${condition.id} - ${condition.description}');
+    debugPrint(
+      '🎯 Clear condition added: ${condition.id} - ${condition.description}',
+    );
     notifyListeners();
   }
 
@@ -99,7 +103,9 @@ class ClearConditionManager extends ChangeNotifier {
     _conditions[conditionId] = condition.copyWith(isCompleted: true);
     _completedCount++;
 
-    debugPrint('✅ Clear condition completed: $conditionId ($completedCount/$totalCount)');
+    debugPrint(
+      '✅ Clear condition completed: $conditionId ($completedCount/$totalCount)',
+    );
 
     // 全条件完了チェック
     _checkGameClear();
@@ -109,14 +115,22 @@ class ClearConditionManager extends ChangeNotifier {
   }
 
   /// アイテム収集条件の進捗更新
-  bool updateItemCollectionProgress(String conditionId, List<String> collectedItems) {
+  bool updateItemCollectionProgress(
+    String conditionId,
+    List<String> collectedItems,
+  ) {
     final condition = _conditions[conditionId];
-    if (condition == null || condition.type != ClearConditionType.collectItems) {
+    if (condition == null ||
+        condition.type != ClearConditionType.collectItems) {
       return false;
     }
 
-    final requiredItems = List<String>.from(condition.data['requiredItems'] ?? []);
-    final hasAllItems = requiredItems.every((item) => collectedItems.contains(item));
+    final requiredItems = List<String>.from(
+      condition.data['requiredItems'] ?? [],
+    );
+    final hasAllItems = requiredItems.every(
+      (item) => collectedItems.contains(item),
+    );
 
     if (hasAllItems && !condition.isCompleted) {
       return completeCondition(conditionId);
@@ -128,12 +142,17 @@ class ClearConditionManager extends ChangeNotifier {
   /// パズル解決条件の進捗更新
   bool updatePuzzleProgress(String conditionId, List<String> solvedPuzzles) {
     final condition = _conditions[conditionId];
-    if (condition == null || condition.type != ClearConditionType.solvePuzzles) {
+    if (condition == null ||
+        condition.type != ClearConditionType.solvePuzzles) {
       return false;
     }
 
-    final requiredPuzzles = List<String>.from(condition.data['requiredPuzzles'] ?? []);
-    final hasAllPuzzles = requiredPuzzles.every((puzzle) => solvedPuzzles.contains(puzzle));
+    final requiredPuzzles = List<String>.from(
+      condition.data['requiredPuzzles'] ?? [],
+    );
+    final hasAllPuzzles = requiredPuzzles.every(
+      (puzzle) => solvedPuzzles.contains(puzzle),
+    );
 
     if (hasAllPuzzles && !condition.isCompleted) {
       return completeCondition(conditionId);
@@ -143,14 +162,22 @@ class ClearConditionManager extends ChangeNotifier {
   }
 
   /// オブジェクト操作条件の進捗更新
-  bool updateObjectInteractionProgress(String conditionId, List<String> interactedObjects) {
+  bool updateObjectInteractionProgress(
+    String conditionId,
+    List<String> interactedObjects,
+  ) {
     final condition = _conditions[conditionId];
-    if (condition == null || condition.type != ClearConditionType.interactObjects) {
+    if (condition == null ||
+        condition.type != ClearConditionType.interactObjects) {
       return false;
     }
 
-    final requiredObjects = List<String>.from(condition.data['requiredObjects'] ?? []);
-    final hasAllObjects = requiredObjects.every((obj) => interactedObjects.contains(obj));
+    final requiredObjects = List<String>.from(
+      condition.data['requiredObjects'] ?? [],
+    );
+    final hasAllObjects = requiredObjects.every(
+      (obj) => interactedObjects.contains(obj),
+    );
 
     if (hasAllObjects && !condition.isCompleted) {
       return completeCondition(conditionId);
@@ -194,12 +221,16 @@ class ClearConditionManager extends ChangeNotifier {
       'clearProgress': clearProgress,
       'isGameCleared': isGameCleared,
       'elapsedTimeSeconds': elapsedTimeSeconds,
-      'conditions': _conditions.values.map((c) => {
-        'id': c.id,
-        'type': c.type.name,
-        'description': c.description,
-        'isCompleted': c.isCompleted,
-      }).toList(),
+      'conditions': _conditions.values
+          .map(
+            (c) => {
+              'id': c.id,
+              'type': c.type.name,
+              'description': c.description,
+              'isCompleted': c.isCompleted,
+            },
+          )
+          .toList(),
     };
   }
 }

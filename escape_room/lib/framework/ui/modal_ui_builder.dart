@@ -16,13 +16,13 @@ class ModalUIBuilder {
     Vector2 panelSize,
   ) {
     final elements = ModalUIElements();
-    
+
     // 背景オーバーレイ（半透明黒）
     elements.background = RectangleComponent(
       size: modalSize,
       paint: Paint()..color = Colors.black.withValues(alpha: 0.6),
     );
-    
+
     // モーダルパネル（80%正方形）
     final squareSize = modalSize.x * 0.8;
     final squarePanelSize = Vector2(squareSize, squareSize);
@@ -30,13 +30,13 @@ class ModalUIBuilder {
       (modalSize.x - squareSize) / 2,
       (modalSize.y - squareSize) / 2,
     );
-    
+
     elements.modalPanel = RectangleComponent(
       position: squarePanelPosition,
       size: squarePanelSize,
       paint: Paint()..color = Colors.white,
     );
-    
+
     // 画像表示（95%サイズ・文字表示なし）
     if (config.imagePath.isNotEmpty) {
       elements.imageComponent = _createImageComponent(
@@ -46,7 +46,7 @@ class ModalUIBuilder {
         config.onTap,
       );
     }
-    
+
     // モーダルタイプ別の追加UI（画像なしの場合のみ）
     if (config.imagePath.isEmpty && config.type == ModalType.puzzle) {
       final correctAnswer = config.data['correctAnswer'] as String? ?? '';
@@ -59,10 +59,10 @@ class ModalUIBuilder {
         size: Vector2(squarePanelSize.x - 40, 100),
       );
     }
-    
+
     return elements;
   }
-  
+
   /// 画像コンポーネント作成（95%表示・タップ対応）
   static Component _createImageComponent(
     String imagePath,
@@ -75,7 +75,7 @@ class ModalUIBuilder {
       panelPosition.x + (panelSize.x - imageSize.x) / 2,
       panelPosition.y + (panelSize.y - imageSize.y) / 2,
     );
-    
+
     return _ImageModalComponent(
       imagePath: imagePath,
       position: imagePosition,
@@ -83,7 +83,7 @@ class ModalUIBuilder {
       onTap: onTap,
     );
   }
-  
+
   /// 確認ボタン作成
   static ButtonUIComponent createConfirmButton(
     Vector2 panelPosition,
@@ -97,7 +97,7 @@ class ModalUIBuilder {
       panelPosition.x + panelSize.x - buttonSize.x - 20,
       panelPosition.y + panelSize.y - buttonSize.y - 20,
     );
-    
+
     return ButtonUIComponent(
       text: 'OK',
       position: buttonPosition,
@@ -105,7 +105,7 @@ class ModalUIBuilder {
       onPressed: onPressed,
     );
   }
-  
+
   /// キャンセルボタン作成
   static ButtonUIComponent createCancelButton(
     Vector2 panelPosition,
@@ -117,7 +117,7 @@ class ModalUIBuilder {
       panelPosition.x + panelSize.x - 220, // OK button左側
       panelPosition.y + panelSize.y - buttonSize.y - 20,
     );
-    
+
     return ButtonUIComponent(
       text: 'キャンセル',
       position: buttonPosition,
@@ -141,18 +141,18 @@ class ModalUIElements {
 class _ImageModalComponent extends PositionComponent with TapCallbacks {
   final String imagePath;
   final VoidCallback? onTap;
-  
+
   _ImageModalComponent({
     required this.imagePath,
     required Vector2 position,
     required Vector2 size,
     this.onTap,
   }) : super(position: position, size: size);
-  
+
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    
+
     try {
       final sprite = await Sprite.load(imagePath);
       final spriteComponent = SpriteComponent(
@@ -172,7 +172,7 @@ class _ImageModalComponent extends PositionComponent with TapCallbacks {
       add(fallbackComponent);
     }
   }
-  
+
   @override
   void onTapUp(TapUpEvent event) {
     onTap?.call();

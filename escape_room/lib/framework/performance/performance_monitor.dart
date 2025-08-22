@@ -1,6 +1,7 @@
 /// パフォーマンス監視クラス
 /// Flutter Guide第10章に基づくProfileモード対応
 /// フレームレート、メモリ使用量、ビルド時間の監視機能
+library;
 
 import 'dart:async';
 import 'dart:developer' as developer;
@@ -26,7 +27,7 @@ class PerformanceMonitor {
   /// パフォーマンス監視開始
   void startMonitoring() {
     if (_isMonitoring) return;
-    
+
     _isMonitoring = true;
     _frameTimes.clear();
     _memoryUsages.clear();
@@ -64,7 +65,7 @@ class PerformanceMonitor {
     for (final timing in timings) {
       final frameTime = timing.totalSpan;
       _frameTimes.add(frameTime);
-      
+
       // フレーム時間が基準値を超えた場合の警告
       if (frameTime.inMilliseconds > maxFrameTimeMs) {
         developer.log(
@@ -108,17 +109,21 @@ class PerformanceMonitor {
   /// 現在のパフォーマンスレポート取得
   PerformanceReport getReport() {
     final avgFrameTime = _frameTimes.isNotEmpty
-        ? _frameTimes.map((t) => t.inMicroseconds).reduce((a, b) => a + b) / _frameTimes.length / 1000
+        ? _frameTimes.map((t) => t.inMicroseconds).reduce((a, b) => a + b) /
+              _frameTimes.length /
+              1000
         : 0.0;
-    
+
     final currentFps = avgFrameTime > 0 ? 1000 / avgFrameTime : 0.0;
-    
+
     final avgMemory = _memoryUsages.isNotEmpty
         ? _memoryUsages.reduce((a, b) => a + b) / _memoryUsages.length
         : 0.0;
 
-    final frameDrops = _frameTimes.where((t) => t.inMilliseconds > maxFrameTimeMs).length;
-    
+    final frameDrops = _frameTimes
+        .where((t) => t.inMilliseconds > maxFrameTimeMs)
+        .length;
+
     return PerformanceReport(
       averageFrameTimeMs: avgFrameTime,
       currentFps: currentFps,

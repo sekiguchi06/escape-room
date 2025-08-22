@@ -18,10 +18,7 @@ class ItemDetailModal {
               _executeItemGimmick(context, itemId);
             },
             child: Container(
-              constraints: const BoxConstraints(
-                maxWidth: 300,
-                maxHeight: 300,
-              ),
+              constraints: const BoxConstraints(maxWidth: 300, maxHeight: 300),
               decoration: BoxDecoration(
                 color: Colors.brown[800], // 外枠の色
                 borderRadius: BorderRadius.circular(15),
@@ -31,7 +28,7 @@ class ItemDetailModal {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.7),
+                    color: Colors.black.withValues(alpha: 0.7),
                     blurRadius: 20,
                     offset: const Offset(0, 10),
                   ),
@@ -41,7 +38,8 @@ class ItemDetailModal {
                 padding: const EdgeInsets.all(3), // 3pxの余白
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: _getItemImage(itemId, 
+                  child: _getItemImage(
+                    itemId,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
                       // 画像が見つからない場合の代替表示
@@ -69,7 +67,7 @@ class ItemDetailModal {
   /// アイテムのギミックを実行
   static void _executeItemGimmick(BuildContext context, String itemId) {
     Navigator.of(context).pop(); // モーダルを閉じる
-    
+
     switch (itemId) {
       case 'key':
         debugPrint('🔑 鍵ギミック実行: ドアを開ける');
@@ -106,15 +104,13 @@ class ItemDetailModal {
   };
 
   /// アイテム画像を取得（型安全なflutter_gen使用）
-  static Image _getItemImage(String itemId, {
+  static Image _getItemImage(
+    String itemId, {
     BoxFit? fit,
     ImageErrorWidgetBuilder? errorBuilder,
   }) {
     final asset = _itemAssets[itemId] ?? Assets.images.items.key; // デフォルト
-    return asset.image(
-      fit: fit,
-      errorBuilder: errorBuilder,
-    );
+    return asset.image(fit: fit, errorBuilder: errorBuilder);
   }
 
   /// アイテムアイコンを取得

@@ -101,10 +101,7 @@ class HintDialog {
                 ),
                 child: const Text(
                   '✨ 頑張って脱出しよう！',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -113,9 +110,12 @@ class HintDialog {
       },
     );
   }
-  
+
   /// デモ用アイテム追加ボタン
-  static Widget _buildItemButtons(BuildContext context, VoidCallback? onAddItem) {
+  static Widget _buildItemButtons(
+    BuildContext context,
+    VoidCallback? onAddItem,
+  ) {
     return Row(
       children: [
         Expanded(

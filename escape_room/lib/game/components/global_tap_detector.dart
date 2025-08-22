@@ -7,33 +7,23 @@ import 'flutter_particle_system.dart';
 class GlobalTapDetector extends StatefulWidget {
   final Widget child;
 
-  const GlobalTapDetector({
-    super.key,
-    required this.child,
-  });
+  const GlobalTapDetector({super.key, required this.child});
 
   @override
   State<GlobalTapDetector> createState() => _GlobalTapDetectorState();
 }
 
 class _GlobalTapDetectorState extends State<GlobalTapDetector> {
-  Offset? _lastTapPosition;
-  int _tapCount = 0;
-
   void _handlePointerDown(PointerDownEvent event) {
     final tapPosition = event.position;
-    _lastTapPosition = tapPosition;
-    _tapCount++;
-    
-    
+
     // メインパーティクルエフェクト
     _triggerMainParticleEffect(tapPosition);
   }
 
   void _handlePointerUp(PointerUpEvent event) {
     final tapPosition = event.position;
-    
-    
+
     // 追加のパーティクルエフェクト
     _triggerSecondaryParticleEffect(tapPosition);
   }

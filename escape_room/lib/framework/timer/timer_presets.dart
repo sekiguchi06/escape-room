@@ -30,17 +30,17 @@ class TimerPresets {
       resetOnComplete: true,
     ),
   };
-  
+
   /// プリセット設定を取得
   static TimerConfiguration? getPreset(String name) {
     return _presets[name];
   }
-  
+
   /// 利用可能なプリセット一覧を取得
   static List<String> getAvailablePresets() {
     return _presets.keys.toList();
   }
-  
+
   /// カスタムプリセットを作成
   static TimerConfiguration createCustomPreset({
     required Duration duration,

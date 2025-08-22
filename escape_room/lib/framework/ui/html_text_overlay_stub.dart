@@ -9,26 +9,25 @@ class HtmlTextOverlay extends Component {
   final Vector2 position;
   final double fontSize;
   final Color color;
-  
+
   HtmlTextOverlay({
     required this.text,
     required this.position,
     required this.fontSize,
     required this.color,
   });
-  
+
   @override
   Future<void> onLoad() async {
     super.onLoad();
     // iOS/Androidでは何もしない
   }
-  
-  
+
   /// テキスト内容を更新（スタブ）
   void updateText(String newText) {
     // iOS/Androidでは何もしない
   }
-  
+
   /// 位置を更新（スタブ）
   void updatePosition(Vector2 newPosition) {
     // iOS/Androidでは何もしない
@@ -38,7 +37,7 @@ class HtmlTextOverlay extends Component {
 /// HtmlTextOverlay管理ヘルパー（スタブ版）
 class HtmlTextManager {
   static final Map<String, HtmlTextOverlay> _overlays = {};
-  
+
   /// HTMLテキストオーバーレイを作成（スタブ）
   static HtmlTextOverlay createText({
     required String id,
@@ -49,18 +48,18 @@ class HtmlTextManager {
   }) {
     // 既存のオーバーレイを削除
     removeText(id);
-    
+
     final overlay = HtmlTextOverlay(
       text: text,
       position: position,
       fontSize: fontSize,
       color: color,
     );
-    
+
     _overlays[id] = overlay;
     return overlay;
   }
-  
+
   /// HTMLテキストオーバーレイを削除（スタブ）
   static void removeText(String id) {
     final existing = _overlays[id];
@@ -69,7 +68,7 @@ class HtmlTextManager {
       _overlays.remove(id);
     }
   }
-  
+
   /// 全てのオーバーレイをクリア（スタブ）
   static void clearAll() {
     for (final overlay in _overlays.values) {

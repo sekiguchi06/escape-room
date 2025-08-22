@@ -1,67 +1,47 @@
 {
   "@@locale": "ja",
-  "appTitle": "カジュアルゲームテンプレート",
-  "@appTitle": {
-    "description": "アプリケーションのタイトル"
-  },
-  "escapeGameTitle": "🔓 脱出ゲームをプレイ",
-  "@escapeGameTitle": {
-    "description": "脱出ゲームボタンのタイトル"
-  },
-  "playTapFireGame": "Tap Fire Gameをプレイ",
-  "@playTapFireGame": {
-    "description": "タップファイアゲームボタン"
-  },
-  "playSimpleGame": "Simple Gameをプレイ",
-  "@playSimpleGame": {
-    "description": "シンプルゲームボタン"
-  },
-  "playTapShooter": "Simple Tap Shooterをプレイ",
-  "@playTapShooter": {
-    "description": "タップシューターボタン"
-  },
-  "gameOver": "ゲームオーバー",
-  "@gameOver": {
-    "description": "ゲーム終了メッセージ"
-  },
-  "clear": "クリア！",
-  "@clear": {
-    "description": "ゲームクリアメッセージ"
-  },
-  "play": "プレイ",
-  "@play": {
-    "description": "プレイボタン"
-  },
+  "appTitle": "Escape Master",
+  "appSubtitle": "究極の脱出パズルゲーム",
+  "buttonStart": "はじめる",
+  "buttonContinue": "つづきから",
+  "buttonHowToPlay": "あそびかた",
   "settings": "設定",
-  "@settings": {
-    "description": "設定ボタン"
-  },
+  "buttonClose": "閉じる",
+  "buttonCancel": "キャンセル",
+  "buttonConfirm": "確認", 
   "back": "戻る",
-  "@back": {
-    "description": "戻るボタン"
-  },
+  "gameStartNewGame": "新しいゲームを開始",
+  "gameOverwriteWarning": "新しいゲームを開始すると、現在の進行状況が削除されます。続けますか？",
+  "gameDeleteProgressConfirm": "データを削除して開始", 
+  "gameOver": "ゲームオーバー",
+  "clear": "クリア！",
+  "play": "プレイ",
   "restart": "リスタート",
-  "@restart": {
-    "description": "リスタートボタン"
-  },
   "pause": "一時停止",
-  "@pause": {
-    "description": "一時停止ボタン"
-  },
   "resume": "再開",
-  "@resume": {
-    "description": "再開ボタン"
-  },
   "menu": "メニュー",
-  "@menu": {
-    "description": "メニューボタン"
-  },
   "score": "スコア",
-  "@score": {
-    "description": "スコア表示"
-  },
   "timeRemaining": "残り時間",
-  "@timeRemaining": {
-    "description": "残り時間表示"
-  }
+  "itemsCount": "{count, plural, =0{アイテムなし} =1{1個のアイテム} other{{count}個のアイテム}}",
+  "tooltipVolumeSettings": "音量設定",
+  "tooltipRanking": "ランキング",
+  "tooltipAchievements": "実績", 
+  "tooltipSettings": "設定",
+  "tooltipAppInfo": "アプリ情報",
+  "settingsTitle": "設定",
+  "settingsVibration": "バイブレーション", 
+  "settingsVibrationDesc": "タップ時の振動フィードバック",
+  "settingsPushNotification": "プッシュ通知",
+  "settingsPushNotificationDesc": "ゲーム更新やヒントの通知", 
+  "settingsAutoSave": "自動セーブ",
+  "settingsAutoSaveDesc": "進行状況の自動保存",
+  "volumeTitle": "音量設定",
+  "volumeBgm": "BGM音量",
+  "volumeSfx": "効果音音量", 
+  "volumeMuted": "ミュート中",
+  "volumeReset": "リセット",
+  "volumeTest": "テスト",
+  "errorLoadSaveData": "セーブデータの読み込みに失敗しました",
+  "errorOccurred": "エラーが発生しました: {error}",
+  "messageNotImplemented": "{feature}機能（実装予定）"
 }

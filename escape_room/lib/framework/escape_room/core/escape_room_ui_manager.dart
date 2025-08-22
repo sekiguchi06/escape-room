@@ -20,7 +20,7 @@ class EscapeRoomUIManager {
       manager: inventoryManager,
       screenSize: screenSize,
     );
-    
+
     gameComponent.add(_inventoryUI!);
   }
 
@@ -31,7 +31,8 @@ class EscapeRoomUIManager {
 
   /// 画面サイズ変更時の処理
   void onScreenResize(Vector2 newSize) {
-    if (_inventoryUI != null && gameComponent.children.contains(_inventoryUI!)) {
+    if (_inventoryUI != null &&
+        gameComponent.children.contains(_inventoryUI!)) {
       _inventoryUI!.removeFromParent();
       _inventoryUI = InventoryUIComponent(
         manager: inventoryManager,
@@ -43,7 +44,8 @@ class EscapeRoomUIManager {
 
   /// UIコンポーネントのクリーンアップ
   void dispose() {
-    if (_inventoryUI != null && gameComponent.children.contains(_inventoryUI!)) {
+    if (_inventoryUI != null &&
+        gameComponent.children.contains(_inventoryUI!)) {
       _inventoryUI!.removeFromParent();
     }
     _inventoryUI = null;

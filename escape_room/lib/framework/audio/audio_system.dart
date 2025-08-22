@@ -4,31 +4,31 @@ import 'package:flutter/foundation.dart';
 abstract class AudioConfiguration {
   /// BGM設定
   Map<String, String> get bgmAssets;
-  
+
   /// 効果音設定
   Map<String, String> get sfxAssets;
-  
+
   /// マスター音量 (0.0 - 1.0)
   double get masterVolume;
-  
+
   /// BGM音量 (0.0 - 1.0)
   double get bgmVolume;
-  
+
   /// 効果音音量 (0.0 - 1.0)
   double get sfxVolume;
-  
+
   /// BGM有効フラグ
   bool get bgmEnabled;
-  
+
   /// 効果音有効フラグ
   bool get sfxEnabled;
-  
+
   /// プリロード対象アセット
   List<String> get preloadAssets;
-  
+
   /// ループ設定
   Map<String, bool> get loopSettings;
-  
+
   /// デバッグモード
   bool get debugMode;
 }
@@ -37,34 +37,34 @@ abstract class AudioConfiguration {
 class DefaultAudioConfiguration implements AudioConfiguration {
   @override
   final Map<String, String> bgmAssets;
-  
+
   @override
   final Map<String, String> sfxAssets;
-  
+
   @override
   final double masterVolume;
-  
+
   @override
   final double bgmVolume;
-  
+
   @override
   final double sfxVolume;
-  
+
   @override
   final bool bgmEnabled;
-  
+
   @override
   final bool sfxEnabled;
-  
+
   @override
   final List<String> preloadAssets;
-  
+
   @override
   final Map<String, bool> loopSettings;
-  
+
   @override
   final bool debugMode;
-  
+
   const DefaultAudioConfiguration({
     this.bgmAssets = const {},
     this.sfxAssets = const {},
@@ -77,7 +77,7 @@ class DefaultAudioConfiguration implements AudioConfiguration {
     this.loopSettings = const {},
     this.debugMode = false,
   });
-  
+
   DefaultAudioConfiguration copyWith({
     Map<String, String>? bgmAssets,
     Map<String, String>? sfxAssets,
@@ -109,49 +109,49 @@ class DefaultAudioConfiguration implements AudioConfiguration {
 abstract class AudioProvider {
   /// 初期化
   Future<void> initialize(AudioConfiguration config);
-  
+
   /// BGM再生
   Future<void> playBgm(String assetId, {bool loop = true});
-  
+
   /// BGM停止
   Future<void> stopBgm();
-  
+
   /// BGM一時停止
   Future<void> pauseBgm();
-  
+
   /// BGM再開
   Future<void> resumeBgm();
-  
+
   /// BGM音量設定
   Future<void> setBgmVolume(double volume);
-  
+
   /// 効果音再生
   Future<void> playSfx(String assetId, {double volume = 1.0});
-  
+
   /// 効果音停止
   Future<void> stopSfx(String assetId);
-  
+
   /// 全効果音停止
   Future<void> stopAllSfx();
-  
+
   /// 効果音音量設定
   Future<void> setSfxVolume(double volume);
-  
+
   /// マスター音量設定
   Future<void> setMasterVolume(double volume);
-  
+
   /// BGM有効/無効切り替え
   void setBgmEnabled(bool enabled);
-  
+
   /// 効果音有効/無効切り替え
   void setSfxEnabled(bool enabled);
-  
+
   /// 現在のBGM再生状態
   bool get isBgmPlaying;
-  
+
   /// 現在のBGM一時停止状態
   bool get isBgmPaused;
-  
+
   /// リソース解放
   Future<void> dispose();
 }
@@ -161,15 +161,15 @@ class SilentAudioProvider implements AudioProvider {
   bool _bgmPlaying = false;
   bool _bgmPaused = false;
   String? _currentBgm;
-  
+
   /// 現在再生中のBGMを取得
   String? get currentBgm => _currentBgm;
-  
+
   @override
   Future<void> initialize(AudioConfiguration config) async {
     debugPrint('SilentAudioProvider initialized');
   }
-  
+
   @override
   Future<void> playBgm(String assetId, {bool loop = true}) async {
     _currentBgm = assetId;
@@ -177,7 +177,7 @@ class SilentAudioProvider implements AudioProvider {
     _bgmPaused = false;
     debugPrint('Silent BGM play: $assetId (loop: $loop)');
   }
-  
+
   @override
   Future<void> stopBgm() async {
     _bgmPlaying = false;
@@ -185,65 +185,65 @@ class SilentAudioProvider implements AudioProvider {
     _currentBgm = null;
     debugPrint('Silent BGM stop');
   }
-  
+
   @override
   Future<void> pauseBgm() async {
     _bgmPaused = true;
     debugPrint('Silent BGM pause');
   }
-  
+
   @override
   Future<void> resumeBgm() async {
     _bgmPaused = false;
     debugPrint('Silent BGM resume');
   }
-  
+
   @override
   Future<void> setBgmVolume(double volume) async {
     debugPrint('Silent BGM volume: $volume');
   }
-  
+
   @override
   Future<void> playSfx(String assetId, {double volume = 1.0}) async {
     debugPrint('Silent SFX play: $assetId (volume: $volume)');
   }
-  
+
   @override
   Future<void> stopSfx(String assetId) async {
     debugPrint('Silent SFX stop: $assetId');
   }
-  
+
   @override
   Future<void> stopAllSfx() async {
     debugPrint('Silent SFX stop all');
   }
-  
+
   @override
   Future<void> setSfxVolume(double volume) async {
     debugPrint('Silent SFX volume: $volume');
   }
-  
+
   @override
   Future<void> setMasterVolume(double volume) async {
     debugPrint('Silent master volume: $volume');
   }
-  
+
   @override
   void setBgmEnabled(bool enabled) {
     debugPrint('Silent BGM enabled: $enabled');
   }
-  
+
   @override
   void setSfxEnabled(bool enabled) {
     debugPrint('Silent SFX enabled: $enabled');
   }
-  
+
   @override
   bool get isBgmPlaying => _bgmPlaying;
-  
+
   @override
   bool get isBgmPaused => _bgmPaused;
-  
+
   @override
   Future<void> dispose() async {
     debugPrint('SilentAudioProvider disposed');
@@ -254,30 +254,31 @@ class SilentAudioProvider implements AudioProvider {
 class AudioManager {
   AudioProvider _provider;
   AudioConfiguration _configuration;
-  
+
   AudioManager({
     required AudioProvider provider,
     required AudioConfiguration configuration,
-  }) : _provider = provider, _configuration = configuration;
-  
+  }) : _provider = provider,
+       _configuration = configuration;
+
   /// 現在のプロバイダー
   AudioProvider get provider => _provider;
-  
+
   /// 現在の設定
   AudioConfiguration get configuration => _configuration;
-  
+
   /// 初期化
   Future<void> initialize() async {
     await _provider.initialize(_configuration);
   }
-  
+
   /// プロバイダー変更
   Future<void> setProvider(AudioProvider newProvider) async {
     await _provider.dispose();
     _provider = newProvider;
     await _provider.initialize(_configuration);
   }
-  
+
   /// 設定更新
   Future<void> updateConfiguration(AudioConfiguration newConfiguration) async {
     debugPrint('🎵 AudioManager.updateConfiguration() called');
@@ -286,65 +287,67 @@ class AudioManager {
     await _provider.initialize(_configuration);
     debugPrint('🎵 Provider initialized with new configuration');
   }
-  
+
   /// BGM再生
   Future<void> playBgm(String bgmId) async {
     if (!_configuration.bgmEnabled) return;
-    
+
     // BGMアセットの存在確認（AudioPlayersProviderが実際のパス解決を行う）
     if (!_configuration.bgmAssets.containsKey(bgmId)) {
       debugPrint('BGM asset not found: $bgmId');
       return;
     }
-    
+
     final loop = _configuration.loopSettings[bgmId] ?? true;
     await _provider.playBgm(bgmId, loop: loop);
   }
-  
+
   /// 効果音再生
   Future<void> playSfx(String sfxId, {double volumeMultiplier = 1.0}) async {
     debugPrint('🎵 AudioManager.playSfx() called for: $sfxId');
     debugPrint('🎵 SFX enabled: ${_configuration.sfxEnabled}');
-    debugPrint('🎵 Available SFX assets: ${_configuration.sfxAssets.keys.join(", ")}');
+    debugPrint(
+      '🎵 Available SFX assets: ${_configuration.sfxAssets.keys.join(", ")}',
+    );
     debugPrint('🎵 Looking for asset: $sfxId');
-    
+
     if (!_configuration.sfxEnabled) {
       debugPrint('🎵 SFX disabled, skipping: $sfxId');
       return;
     }
-    
+
     // SFXアセットの存在確認（AudioPlayersProviderが実際のパス解決を行う）
     if (!_configuration.sfxAssets.containsKey(sfxId)) {
       debugPrint('SFX asset not found: $sfxId');
       debugPrint('🎵 Available assets: ${_configuration.sfxAssets}');
       return;
     }
-    
+
     debugPrint('🎵 SFX asset found, playing: $sfxId');
     final volume = _configuration.sfxVolume * volumeMultiplier;
     await _provider.playSfx(sfxId, volume: volume);
   }
-  
+
   /// BGM停止
   Future<void> stopBgm() async {
     await _provider.stopBgm();
   }
-  
+
   /// BGM一時停止
   Future<void> pauseBgm() async {
     await _provider.pauseBgm();
   }
-  
+
   /// BGM再開
   Future<void> resumeBgm() async {
     await _provider.resumeBgm();
   }
-  
+
   /// 全効果音停止
   Future<void> stopAllSfx() async {
     await _provider.stopAllSfx();
   }
-  
+
   /// BGM有効/無効切り替え
   void setBgmEnabled(bool enabled) {
     _provider.setBgmEnabled(enabled);
@@ -352,7 +355,7 @@ class AudioManager {
       _provider.stopBgm();
     }
   }
-  
+
   /// 効果音有効/無効切り替え
   void setSfxEnabled(bool enabled) {
     _provider.setSfxEnabled(enabled);
@@ -360,7 +363,7 @@ class AudioManager {
       _provider.stopAllSfx();
     }
   }
-  
+
   /// 音量調整
   Future<void> setVolumes({
     double? masterVolume,
@@ -377,13 +380,13 @@ class AudioManager {
       await _provider.setSfxVolume(sfxVolume);
     }
   }
-  
+
   /// BGM再生状態
   bool get isBgmPlaying => _provider.isBgmPlaying;
-  
+
   /// BGM一時停止状態
   bool get isBgmPaused => _provider.isBgmPaused;
-  
+
   /// デバッグ情報
   Map<String, dynamic> getDebugInfo() {
     return {
@@ -399,7 +402,7 @@ class AudioManager {
       'sfx_assets_count': _configuration.sfxAssets.length,
     };
   }
-  
+
   /// リソース解放
   Future<void> dispose() async {
     await _provider.dispose();

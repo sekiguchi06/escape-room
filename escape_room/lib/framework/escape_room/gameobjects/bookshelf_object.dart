@@ -8,21 +8,25 @@ import '../../ui/japanese_message_system.dart';
 /// 本棚オブジェクト - AI生成画像使用
 /// 🎯 目的: 鍵アイテムの提供
 class BookshelfObject extends InteractableGameObject {
-  BookshelfObject({required Vector2 position, required Vector2 size}) 
-      : super(objectId: 'bookshelf') {
+  BookshelfObject({required Vector2 position, required Vector2 size})
+    : super(objectId: 'bookshelf') {
     this.position = position;
     this.size = size;
   }
-  
+
   @override
   Future<void> initialize() async {
     // アイテム提供戦略を設定
-    setInteractionStrategy(ItemProviderStrategy(
-      itemId: 'key',
-      message: JapaneseMessageSystem.getMessage('bookshelf_discovery_message'),
-    ));
+    setInteractionStrategy(
+      ItemProviderStrategy(
+        itemId: 'key',
+        message: JapaneseMessageSystem.getMessage(
+          'bookshelf_discovery_message',
+        ),
+      ),
+    );
   }
-  
+
   @override
   Future<void> loadAssets() async {
     // DualSpriteComponentで画像管理
@@ -33,7 +37,7 @@ class BookshelfObject extends InteractableGameObject {
       componentSize: size,
     );
   }
-  
+
   @override
   void onActivated() {
     debugPrint('Bookshelf activated: key item added');

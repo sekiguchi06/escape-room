@@ -8,7 +8,7 @@ void main() {
   group('SimpleGameConfig テスト', () {
     test('デフォルト設定の確認', () {
       final config = SimpleGameConfiguration.defaultConfig.config;
-      
+
       expect(config.gameDuration, const Duration(seconds: 10));
       expect(config.stateTexts['start'], '⚪ NORMAL: 10秒\nTAP TO START');
       expect(config.stateTexts['gameOver'], '⚪ NORMAL OVER\nTAP TO RESTART');
@@ -20,7 +20,7 @@ void main() {
       SimpleGameConfigPresets.initialize();
       final config = SimpleGameConfigPresets.getPreset('easy');
       expect(config, isNotNull);
-      
+
       if (config != null) {
         expect(config.gameDuration, const Duration(seconds: 15));
         expect(config.stateTexts['start']?.contains('EASY'), true);
@@ -32,7 +32,7 @@ void main() {
       SimpleGameConfigPresets.initialize();
       final config = SimpleGameConfigPresets.getPreset('hard');
       expect(config, isNotNull);
-      
+
       if (config != null) {
         expect(config.gameDuration, const Duration(seconds: 5));
         expect(config.stateTexts['start']?.contains('HARD'), true);
@@ -41,12 +41,12 @@ void main() {
 
     test('JSON変換テスト', () {
       final config = SimpleGameConfiguration.defaultConfig.config;
-      
+
       // JSON変換
       final json = config.toJson();
       expect(json['gameDurationMs'], config.gameDuration.inMilliseconds);
       expect(json['stateTexts'], config.stateTexts);
-      
+
       // JSON復元
       final restored = SimpleGameConfig.fromJson(json);
       expect(restored.gameDuration, config.gameDuration);
@@ -66,11 +66,7 @@ void main() {
           'playing': Colors.cyan,
           'gameOver': Colors.lime,
         },
-        fontSizes: const {
-          'small': 12.0,
-          'medium': 16.0,
-          'large': 24.0,
-        },
+        fontSizes: const {'small': 12.0, 'medium': 16.0, 'large': 24.0},
         fontWeights: const {
           'normal': FontWeight.normal,
           'bold': FontWeight.bold,
@@ -78,7 +74,7 @@ void main() {
         enableDebugMode: false,
         enableAnalytics: true,
       );
-      
+
       expect(customConfig.gameDuration.inSeconds, 15);
       expect(customConfig.stateTexts['start'], 'CUSTOM GAME\\nTAP TO START');
       expect(customConfig.stateColors['start'], Colors.purple);
@@ -87,7 +83,7 @@ void main() {
 
     test('プリセット初期化と取得', () {
       SimpleGameConfigPresets.initialize();
-      
+
       expect(SimpleGameConfigPresets.getPreset('default'), isNotNull);
       expect(SimpleGameConfigPresets.getPreset('easy'), isNotNull);
       expect(SimpleGameConfigPresets.getPreset('hard'), isNotNull);
@@ -98,25 +94,25 @@ void main() {
   group('SimpleGameStateProvider テスト', () {
     test('初期状態の確認', () {
       final provider = SimpleGameStateProvider();
-      
+
       expect(provider.currentState, isA<SimpleGameStartState>());
       expect(provider.currentState.name, 'start');
     });
 
     test('状態遷移の確認', () {
       final provider = SimpleGameStateProvider();
-      
+
       // ゲーム開始
       provider.startGame(5.0);
       expect(provider.currentState, isA<SimpleGamePlayingState>());
       expect(provider.currentState.name, 'playing');
-      
+
       // ゲーム終了（状態更新）
       provider.updateTimer(0.0);
       // タイマーが0になるとGameOver状態に遷移する
       expect(provider.currentState, isA<SimpleGameOverState>());
       expect(provider.currentState.name, 'gameOver');
-      
+
       // 再スタート
       provider.restart(3.0);
       expect(provider.currentState, isA<SimpleGamePlayingState>());
@@ -126,12 +122,12 @@ void main() {
     test('タイマー更新', () {
       final provider = SimpleGameStateProvider();
       provider.startGame(5.0);
-      
+
       // タイマー更新
       provider.updateTimer(3.5);
       final playingState = provider.currentState as SimpleGamePlayingState;
       expect(playingState.timeRemaining, 3.5);
-      
+
       // タイマーが0になるとGameOver状態に遷移
       provider.updateTimer(0.0);
       expect(provider.currentState, isA<SimpleGameOverState>());
@@ -142,11 +138,11 @@ void main() {
     test('状態変更通知', () {
       final provider = SimpleGameStateProvider();
       bool notified = false;
-      
+
       provider.addListener(() {
         notified = true;
       });
-      
+
       provider.startGame(5.0);
       expect(notified, true);
     });

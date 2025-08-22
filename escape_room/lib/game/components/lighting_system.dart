@@ -38,7 +38,7 @@ class LightingSystem extends ChangeNotifier {
       debugPrint('💡 この部屋では照明を操作できません');
       return;
     }
-    
+
     _isLightOn = !_isLightOn;
     notifyListeners();
     debugPrint(_isLightOn ? '💡 照明オン（図書館）' : '🌙 照明オフ（図書館）');
@@ -58,9 +58,8 @@ class LightingSystem extends ChangeNotifier {
 
   /// 現在の照明状態に応じた背景設定を取得
   GameBackgroundConfig getCurrentBackgroundConfig() {
-    return _isLightOn 
-        ? GameBackgroundConfig.escapeRoom 
+    return _isLightOn
+        ? GameBackgroundConfig.escapeRoom
         : GameBackgroundConfig.escapeRoomNight;
   }
 }
-

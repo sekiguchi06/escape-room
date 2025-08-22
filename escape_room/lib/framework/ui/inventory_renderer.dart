@@ -10,16 +10,13 @@ class InventoryRenderer {
   final ResponsiveLayoutCalculator layoutCalculator;
   final Vector2 screenSize;
 
-  InventoryRenderer({
-    required this.layoutCalculator,
-    required this.screenSize,
-  });
+  InventoryRenderer({required this.layoutCalculator, required this.screenSize});
 
   /// インベントリ背景を作成
   RectangleComponent createInventoryBackground() {
     final inventoryArea = layoutCalculator.calculateInventoryArea();
     final inventoryPos = layoutCalculator.calculateInventoryPosition();
-    
+
     return RectangleComponent(
       size: inventoryArea,
       position: inventoryPos,
@@ -31,17 +28,17 @@ class InventoryRenderer {
   TextComponent createInventoryTitle() {
     final inventoryPos = layoutCalculator.calculateInventoryPosition();
     final inventoryArea = layoutCalculator.calculateInventoryArea();
-    
+
     // 確実に中央配置するため、直接TextComponentを作成
     final titleComponent = TextComponent(
       text: JapaneseMessageSystem.getMessage('inventory_title'),
       textRenderer: JapaneseFontSystem.getTextPaint(
-        screenSize.y * 0.025, 
-        Colors.yellow, 
+        screenSize.y * 0.025,
+        Colors.yellow,
         FontWeight.bold,
       ),
       position: Vector2(
-        inventoryPos.x + inventoryArea.x / 2, 
+        inventoryPos.x + inventoryArea.x / 2,
         inventoryPos.y + inventoryArea.y * 0.15,
       ),
       anchor: Anchor.center,
@@ -52,38 +49,42 @@ class InventoryRenderer {
 
   /// 矢印ボタンを作成
   List<Component> createNavigationArrows(
-    VoidCallback onLeftPressed, 
+    VoidCallback onLeftPressed,
     VoidCallback onRightPressed,
   ) {
     final components = <Component>[];
-    
+
     // 左矢印ボタン
-    components.addAll(_createArrowButton(
-      '◀',
-      layoutCalculator.calculateLeftArrowPosition(),
-      layoutCalculator.calculateArrowSize(),
-      Colors.grey.shade600,
-      onLeftPressed,
-    ));
-    
-    // 右矢印ボタン  
-    components.addAll(_createArrowButton(
-      '▶',
-      layoutCalculator.calculateRightArrowPosition(),
-      layoutCalculator.calculateArrowSize(),
-      Colors.grey.shade600,
-      onRightPressed,
-    ));
-    
+    components.addAll(
+      _createArrowButton(
+        '◀',
+        layoutCalculator.calculateLeftArrowPosition(),
+        layoutCalculator.calculateArrowSize(),
+        Colors.grey.shade600,
+        onLeftPressed,
+      ),
+    );
+
+    // 右矢印ボタン
+    components.addAll(
+      _createArrowButton(
+        '▶',
+        layoutCalculator.calculateRightArrowPosition(),
+        layoutCalculator.calculateArrowSize(),
+        Colors.grey.shade600,
+        onRightPressed,
+      ),
+    );
+
     return components;
   }
 
   /// 矢印ボタン作成ヘルパー
   List<Component> _createArrowButton(
-    String text, 
-    Vector2 position, 
-    Vector2 size, 
-    Color color, 
+    String text,
+    Vector2 position,
+    Vector2 size,
+    Color color,
     VoidCallback onPressed,
   ) {
     // ボタン背景
@@ -93,7 +94,7 @@ class InventoryRenderer {
       paint: Paint()..color = color,
     );
     buttonBg.priority = InventoryUILayerPriority.inventoryItems;
-    
+
     // ボタンテキスト（矢印）
     final buttonText = TextComponent(
       text: text,
@@ -106,7 +107,7 @@ class InventoryRenderer {
       anchor: Anchor.center,
     );
     buttonText.priority = InventoryUILayerPriority.inventoryItems + 1;
-    
+
     return [buttonBg, buttonText];
   }
 
@@ -114,11 +115,11 @@ class InventoryRenderer {
   TextComponent createEmptyMessage() {
     final inventoryPos = layoutCalculator.calculateInventoryPosition();
     final inventoryArea = layoutCalculator.calculateInventoryArea();
-    
+
     final emptyComponent = JapaneseMessageSystem.createMessageComponent(
       'inventory_empty',
       position: Vector2(
-        inventoryPos.x + inventoryArea.x / 2, 
+        inventoryPos.x + inventoryArea.x / 2,
         inventoryPos.y + inventoryArea.y / 2,
       ),
       fontSize: screenSize.y * 0.025,
