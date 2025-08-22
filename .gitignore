@@ -44,6 +44,14 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+# Gradle cache and lock files
+**/.gradle/*/checksums/
+**/.gradle/*/fileHashes/
+**/.gradle/buildOutputCleanup/
+**/.gradle/*/
+*.gradle.cache
+*.gradle.lock
+
 # iOS build artifacts
 **/ios/build/
 **/ios/Runner.xcworkspace/xcuserdata/
@@ -115,3 +123,7 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# AI Services specific ignores
+ai-services/server/node_modules/
+ai-services/**/node_modules/
