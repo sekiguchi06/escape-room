@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'item_detail_modal.dart';
 import 'room_navigation_system.dart';
 import 'inventory_system.dart';
+import '../../framework/ui/multi_floor_navigation_system.dart';
+import '../../framework/escape_room/core/room_types.dart';
 
 /// インベントリ管理ウィジェット
 class InventoryWidget extends StatefulWidget {
@@ -140,18 +142,21 @@ class _InventoryWidgetState extends State<InventoryWidget> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // 左移動ボタン（正方形）
+                    // 左移動ボタン（階層対応・隠し部屋では戻るボタン）
                     ListenableBuilder(
-                      listenable: RoomNavigationSystem(),
+                      listenable: MultiFloorNavigationSystem(),
                       builder: (context, _) {
-                        final canMoveLeft = RoomNavigationSystem().canMoveLeft;
+                        final navigationSystem = MultiFloorNavigationSystem();
+                        final canReturnFromHidden = navigationSystem.canReturnFromHiddenRoom();
+                        final canMoveLeft = navigationSystem.canMoveLeft;
+                        
                         return _buildSquareButton(
-                          icon: Icons.arrow_back,
+                          icon: canReturnFromHidden ? Icons.arrow_downward : Icons.arrow_back,
                           size: itemSize,
-                          onPressed: canMoveLeft
-                              ? () => RoomNavigationSystem().moveLeft()
-                              : null,
-                          isEnabled: canMoveLeft,
+                          onPressed: canReturnFromHidden
+                              ? () => navigationSystem.returnFromHiddenRoom()
+                              : (canMoveLeft ? () => navigationSystem.moveLeft() : null),
+                          isEnabled: canReturnFromHidden || canMoveLeft,
                         );
                       },
                     ),
@@ -163,19 +168,21 @@ class _InventoryWidgetState extends State<InventoryWidget> {
 
                     SizedBox(width: itemSpacing),
 
-                    // 右移動ボタン（正方形）
+                    // 右移動ボタン（階層対応・隠し部屋では戻るボタン）
                     ListenableBuilder(
-                      listenable: RoomNavigationSystem(),
+                      listenable: MultiFloorNavigationSystem(),
                       builder: (context, _) {
-                        final canMoveRight =
-                            RoomNavigationSystem().canMoveRight;
+                        final navigationSystem = MultiFloorNavigationSystem();
+                        final canReturnFromHidden = navigationSystem.canReturnFromHiddenRoom();
+                        final canMoveRight = navigationSystem.canMoveRight;
+                        
                         return _buildSquareButton(
-                          icon: Icons.arrow_forward,
+                          icon: canReturnFromHidden ? Icons.arrow_downward : Icons.arrow_forward,
                           size: itemSize,
-                          onPressed: canMoveRight
-                              ? () => RoomNavigationSystem().moveRight()
-                              : null,
-                          isEnabled: canMoveRight,
+                          onPressed: canReturnFromHidden
+                              ? () => navigationSystem.returnFromHiddenRoom()
+                              : (canMoveRight ? () => navigationSystem.moveRight() : null),
+                          isEnabled: canReturnFromHidden || canMoveRight,
                         );
                       },
                     ),
@@ -195,6 +202,7 @@ class _InventoryWidgetState extends State<InventoryWidget> {
     required double size,
     required VoidCallback? onPressed,
     bool isEnabled = true,
+    Color? color,
   }) {
     return Container(
       width: size,

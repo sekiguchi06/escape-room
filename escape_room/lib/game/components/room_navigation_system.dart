@@ -1,16 +1,7 @@
 import 'package:flutter/material.dart';
 import 'game_background.dart';
 import '../../gen/assets.gen.dart';
-
-/// 部屋の種類
-enum RoomType {
-  leftmost, // 最左端の部屋（-2）
-  left, // 左の部屋（-1）
-  center, // 中央の部屋（0）開始地点
-  right, // 右の部屋（+1）
-  rightmost, // 最右端の部屋（+2）
-  testRoom, // テスト用部屋
-}
+import '../../framework/escape_room/core/room_types.dart';
 
 /// 部屋ナビゲーションシステム
 class RoomNavigationSystem extends ChangeNotifier {
@@ -39,14 +30,39 @@ class RoomNavigationSystem extends ChangeNotifier {
         return 2;
       case RoomType.testRoom:
         return 99; // テスト用特別値
+      // 地下は1階ナビゲーションシステムでは処理しない
+      case RoomType.underground_leftmost:
+      case RoomType.underground_left:
+      case RoomType.underground_center:
+      case RoomType.underground_right:
+      case RoomType.underground_rightmost:
+        return 0; // デフォルト値
+      // 隠し部屋・最終謎部屋も処理しない
+      case RoomType.hiddenA:
+      case RoomType.hiddenB:
+      case RoomType.hiddenC:
+      case RoomType.hiddenD:
+      case RoomType.finalPuzzle:
+        return 0; // デフォルト値
     }
   }
 
   /// 左に移動可能かチェック
-  bool get canMoveLeft => _currentRoom != RoomType.leftmost;
+  bool get canMoveLeft => _currentRoom != RoomType.leftmost && 
+      !_isUndergroundRoom(_currentRoom);
 
   /// 右に移動可能かチェック
-  bool get canMoveRight => _currentRoom != RoomType.rightmost;
+  bool get canMoveRight => _currentRoom != RoomType.rightmost && 
+      !_isUndergroundRoom(_currentRoom);
+  
+  /// 地下の部屋かどうかチェック
+  bool _isUndergroundRoom(RoomType room) {
+    return room == RoomType.underground_leftmost ||
+           room == RoomType.underground_left ||
+           room == RoomType.underground_center ||
+           room == RoomType.underground_right ||
+           room == RoomType.underground_rightmost;
+  }
 
   /// 左の部屋に移動
   void moveLeft() {
@@ -69,6 +85,20 @@ class RoomNavigationSystem extends ChangeNotifier {
         return; // 既に最左端
       case RoomType.testRoom:
         return; // テスト部屋は移動不可
+      // 地下は1階ナビゲーションシステムでは移動処理しない
+      case RoomType.underground_leftmost:
+      case RoomType.underground_left:
+      case RoomType.underground_center:
+      case RoomType.underground_right:
+      case RoomType.underground_rightmost:
+        return; // 地下移動はMultiFloorNavigationSystemで処理
+      // 隠し部屋・最終謎部屋も移動不可
+      case RoomType.hiddenA:
+      case RoomType.hiddenB:
+      case RoomType.hiddenC:
+      case RoomType.hiddenD:
+      case RoomType.finalPuzzle:
+        return; // 隠し部屋は左右移動不可
     }
 
     notifyListeners();
@@ -96,6 +126,20 @@ class RoomNavigationSystem extends ChangeNotifier {
         return; // 既に最右端
       case RoomType.testRoom:
         return; // テスト部屋は移動不可
+      // 地下は1階ナビゲーションシステムでは移動処理しない
+      case RoomType.underground_leftmost:
+      case RoomType.underground_left:
+      case RoomType.underground_center:
+      case RoomType.underground_right:
+      case RoomType.underground_rightmost:
+        return; // 地下移動はMultiFloorNavigationSystemで処理
+      // 隠し部屋・最終謎部屋も移動不可
+      case RoomType.hiddenA:
+      case RoomType.hiddenB:
+      case RoomType.hiddenC:
+      case RoomType.hiddenD:
+      case RoomType.finalPuzzle:
+        return; // 隠し部屋は左右移動不可
     }
 
     notifyListeners();
@@ -149,6 +193,48 @@ class RoomNavigationSystem extends ChangeNotifier {
           aspectRatio: 5 / 8,
           topReservedHeight: 84.0,
         );
+      // 地下の部屋（1階ナビゲーションシステムでは処理しないが、背景は提供）
+      case RoomType.underground_leftmost:
+        return GameBackgroundConfig(
+          asset: Assets.images.undergroundLeftmost,
+          aspectRatio: 5 / 8,
+          topReservedHeight: 84.0,
+        );
+      case RoomType.underground_left:
+        return GameBackgroundConfig(
+          asset: Assets.images.undergroundLeft,
+          aspectRatio: 5 / 8,
+          topReservedHeight: 84.0,
+        );
+      case RoomType.underground_center:
+        return GameBackgroundConfig(
+          asset: Assets.images.undergroundCenter,
+          aspectRatio: 5 / 8,
+          topReservedHeight: 84.0,
+        );
+      case RoomType.underground_right:
+        return GameBackgroundConfig(
+          asset: Assets.images.undergroundRight,
+          aspectRatio: 5 / 8,
+          topReservedHeight: 84.0,
+        );
+      case RoomType.underground_rightmost:
+        return GameBackgroundConfig(
+          asset: Assets.images.undergroundRightmost,
+          aspectRatio: 5 / 8,
+          topReservedHeight: 84.0,
+        );
+      // 隠し部屋・最終謎部屋もプレースホルダー
+      case RoomType.hiddenA:
+      case RoomType.hiddenB:
+      case RoomType.hiddenC:
+      case RoomType.hiddenD:
+      case RoomType.finalPuzzle:
+        return GameBackgroundConfig(
+          asset: Assets.images.escapeRoomBg, // プレースホルダー
+          aspectRatio: 5 / 8,
+          topReservedHeight: 84.0,
+        );
     }
   }
 
@@ -167,6 +253,20 @@ class RoomNavigationSystem extends ChangeNotifier {
         return Assets.images.roomRightmostNight;
       case RoomType.testRoom:
         return Assets.images.escapeRoomBgNight; // テスト用
+      // 地下は1階ナビゲーションシステムでは処理しない（プレースホルダー返却）
+      case RoomType.underground_leftmost:
+      case RoomType.underground_left:
+      case RoomType.underground_center:
+      case RoomType.underground_right:
+      case RoomType.underground_rightmost:
+        return Assets.images.escapeRoomBgNight; // プレースホルダー
+      // 隠し部屋・最終謎部屋もプレースホルダー
+      case RoomType.hiddenA:
+      case RoomType.hiddenB:
+      case RoomType.hiddenC:
+      case RoomType.hiddenD:
+      case RoomType.finalPuzzle:
+        return Assets.images.escapeRoomBgNight; // プレースホルダー
     }
   }
 
@@ -192,6 +292,28 @@ class RoomNavigationSystem extends ChangeNotifier {
         return '最右端の部屋';
       case RoomType.testRoom:
         return 'テスト部屋';
+      // 地下は1階ナビゲーションシステムでは処理しない
+      case RoomType.underground_leftmost:
+        return '地下最左端の部屋';
+      case RoomType.underground_left:
+        return '地下左の部屋';
+      case RoomType.underground_center:
+        return '地下中央の部屋';
+      case RoomType.underground_right:
+        return '地下右の部屋';
+      case RoomType.underground_rightmost:
+        return '地下最右端の部屋';
+      // 隠し部屋・最終謎部屋
+      case RoomType.hiddenA:
+        return '隠し部屋A';
+      case RoomType.hiddenB:
+        return '隠し部屋B';
+      case RoomType.hiddenC:
+        return '隠し部屋C';
+      case RoomType.hiddenD:
+        return '隠し部屋D';
+      case RoomType.finalPuzzle:
+        return '最終謎部屋';
     }
   }
 }

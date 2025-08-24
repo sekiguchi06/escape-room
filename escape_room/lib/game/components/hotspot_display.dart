@@ -3,6 +3,10 @@ import 'room_hotspot_system.dart';
 import 'room_navigation_system.dart';
 import 'inventory_system.dart';
 import '../../gen/assets.gen.dart';
+import '../../framework/ui/multi_floor_navigation_system.dart';
+import '../../framework/escape_room/core/room_types.dart';
+import '../../framework/escape_room/core/floor_transition_service.dart';
+import 'models/hotspot_models.dart';
 
 /// ホットスポット表示ウィジェット
 class HotspotDisplay extends StatefulWidget {
@@ -28,7 +32,7 @@ class _HotspotDisplayState extends State<HotspotDisplay> {
     return ListenableBuilder(
       listenable: RoomNavigationSystem(),
       builder: (context, _) {
-        final hotspots = RoomHotspotSystem().getCurrentRoomHotspots();
+        final hotspots = RoomHotspotSystem().getCurrentRoomHotspots(context: context);
 
         return Stack(
           children: hotspots.map((hotspot) {
@@ -90,8 +94,7 @@ class _HotspotDisplayState extends State<HotspotDisplay> {
 
     // パーティクルエフェクトはGlobalTapDetectorが自動的に処理
 
-    // ホットスポット操作を記録（統一的に処理）
-    RoomHotspotSystem().recordHotspotInteraction(hotspot.id);
+    // ホットスポット操作を記録（RoomHotspotSystemのonTapで処理されるため、ここでは不要）
 
     // 特別なギミック処理
     if (widget.game != null) {
@@ -120,7 +123,9 @@ class _HotspotDisplayState extends State<HotspotDisplay> {
 
     // 特別なギミックオブジェクトは何もしない（モーダル表示のみ）
     // ギミック発動はモーダル内のボタンで処理
+    // 隠し部屋進入処理はモーダルタップ時に_onModalTapで処理
   }
+  
 
   /// パズルモーダルを表示
   void _showPuzzleModal({
@@ -365,10 +370,18 @@ class _HotspotDetailModal extends StatelessWidget {
     final inventorySystem = InventorySystem();
     final selectedItem = inventorySystem.selectedItemId;
 
-    // 選択されたアイテムがない場合は何もしない
-    if (selectedItem == null) return;
-
     switch (hotspot.id) {
+      case 'underground_stairs':
+        // 地下への移動処理（main_escape_keyが必要）
+        if (selectedItem == 'main_escape_key') {
+          // main_escape_keyを使って地下の階段を解放
+          inventorySystem.removeItemById('main_escape_key');
+          debugPrint('🗝️ main_escape_keyを使用して地下の階段が解放されました');
+          Navigator.of(context).pop();
+        }
+        // 条件が満たされていない場合は何も起こらない（モーダルも閉じない）
+        break;
+
       case 'treasure_chest':
         if (selectedItem == 'master_key') {
           _executeGimmick(context);
@@ -378,6 +391,55 @@ class _HotspotDetailModal extends StatelessWidget {
       case 'entrance_door':
         if (selectedItem == 'escape_key') {
           _executeGimmick(context);
+        }
+        break;
+
+      // 隠し部屋入口の処理
+      case 'hidden_room_entrance_a':
+        // 1階にいる場合のみ隠し部屋Aに移動
+        final navigationSystem = MultiFloorNavigationSystem();
+        if (navigationSystem.currentFloor == FloorType.floor1) {
+          navigationSystem.moveToRoom(RoomType.hiddenA);
+          debugPrint('🏠 隠し部屋Aに移動');
+          Navigator.of(context).pop(); // モーダルを閉じる
+        } else {
+          debugPrint('❌ 1階でのみ隠し部屋Aに移動できます');
+        }
+        break;
+        
+      case 'hidden_room_entrance_b':
+        // 1階にいる場合のみ隠し部屋Bに移動
+        final navigationSystem = MultiFloorNavigationSystem();
+        if (navigationSystem.currentFloor == FloorType.floor1) {
+          navigationSystem.moveToRoom(RoomType.hiddenB);
+          debugPrint('🏠 隠し部屋Bに移動');
+          Navigator.of(context).pop(); // モーダルを閉じる
+        } else {
+          debugPrint('❌ 1階でのみ隠し部屋Bに移動できます');
+        }
+        break;
+        
+      case 'hidden_room_entrance_c':
+        // 地下にいる場合のみ隠し部屋Cに移動
+        final navigationSystem = MultiFloorNavigationSystem();
+        if (navigationSystem.currentFloor == FloorType.underground) {
+          navigationSystem.moveToRoom(RoomType.hiddenC);
+          debugPrint('🏠 隠し部屋Cに移動');
+          Navigator.of(context).pop(); // モーダルを閉じる
+        } else {
+          debugPrint('❌ 地下でのみ隠し部屋Cに移動できます');
+        }
+        break;
+        
+      case 'hidden_room_entrance_d':
+        // 地下にいる場合のみ隠し部屋Dに移動
+        final navigationSystem = MultiFloorNavigationSystem();
+        if (navigationSystem.currentFloor == FloorType.underground) {
+          navigationSystem.moveToRoom(RoomType.hiddenD);
+          debugPrint('🏠 隠し部屋Dに移動');
+          Navigator.of(context).pop(); // モーダルを閉じる
+        } else {
+          debugPrint('❌ 地下でのみ隠し部屋Dに移動できます');
         }
         break;
 
