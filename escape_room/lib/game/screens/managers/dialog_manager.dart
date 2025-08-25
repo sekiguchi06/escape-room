@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../framework/device/device_feedback_manager.dart';
 import '../../../framework/audio/volume_manager.dart';
+import '../../../framework/audio/audio_service.dart';
 
 /// Manages all dialog operations for the game selection screen
 class DialogManager {
@@ -41,7 +42,11 @@ class DialogManager {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () {
+                // 閉じる音を再生
+                AudioService().playUI(AudioAssets.close);
+                Navigator.of(context).pop();
+              },
               child: const Text('閉じる'),
             ),
           ],
@@ -217,73 +222,6 @@ class DialogManager {
     );
   }
 
-  static void showSettingsDialog(BuildContext context) {
-    final deviceManager = DeviceFeedbackManager();
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: const Text('⚙️ 設定'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SwitchListTile(
-                    title: const Text('バイブレーション'),
-                    subtitle: const Text('タップ時の振動フィードバック'),
-                    value: deviceManager.vibrationEnabled,
-                    onChanged: (value) {
-                      setState(() {
-                        deviceManager.vibrationEnabled = value;
-                      });
-                      if (value) {
-                        deviceManager.vibrate(pattern: VibrationPattern.light);
-                      }
-                    },
-                  ),
-                  SwitchListTile(
-                    title: const Text('プッシュ通知'),
-                    subtitle: const Text('ゲーム更新やヒントの通知'),
-                    value: deviceManager.notificationsEnabled,
-                    onChanged: (value) {
-                      setState(() {
-                        deviceManager.notificationsEnabled = value;
-                      });
-                      if (value) {
-                        deviceManager.showLocalNotification(
-                          title: '通知が有効になりました',
-                          body: 'Escape Masterからの通知を受け取れます',
-                        );
-                      }
-                    },
-                  ),
-                  SwitchListTile(
-                    title: const Text('自動セーブ'),
-                    subtitle: const Text('進行状況の自動保存'),
-                    value: true,
-                    onChanged: (value) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('自動セーブ機能（実装予定）')),
-                      );
-                    },
-                  ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('閉じる'),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
 
   static void showAboutDialog(BuildContext context) {
     showDialog(

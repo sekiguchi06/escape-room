@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 
 import '../widgets/circular_icon_button.dart';
 import '../managers/dialog_manager.dart';
+import '../../../screens/debug/audio_debug_screen.dart';
 
 /// Bottom navigation bar component with icon buttons
 class GameBottomNavigationBar extends StatelessWidget {
@@ -22,41 +24,21 @@ class GameBottomNavigationBar extends StatelessWidget {
             tooltip: '音量設定',
           ),
 
-          CircularIconButton(
-            icon: Icons.leaderboard,
-            onPressed: () {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('ランキング機能（実装予定）')));
-            },
-            tooltip: 'ランキング',
-          ),
+          // デバッグモードでのみ表示
+          if (kDebugMode)
+            CircularIconButton(
+              icon: Icons.audio_file,
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const AudioDebugScreen(),
+                  ),
+                );
+              },
+              tooltip: '音響テスト (デバッグ)',
+            ),
 
-          CircularIconButton(
-            icon: Icons.emoji_events,
-            onPressed: () {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('実績機能（実装予定）')));
-            },
-            tooltip: '実績',
-          ),
 
-          CircularIconButton(
-            icon: Icons.settings,
-            onPressed: () {
-              DialogManager.showSettingsDialog(context);
-            },
-            tooltip: '設定',
-          ),
-
-          CircularIconButton(
-            icon: Icons.info_outline,
-            onPressed: () {
-              DialogManager.showAboutDialog(context);
-            },
-            tooltip: 'アプリ情報',
-          ),
         ],
       ),
     );

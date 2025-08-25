@@ -8,7 +8,7 @@ class DeviceFeedbackManager {
   factory DeviceFeedbackManager() => _instance;
   DeviceFeedbackManager._internal();
 
-  bool _vibrationEnabled = true;
+  bool _vibrationEnabled = false; // バイブレーション機能をデフォルト無効化
   bool _notificationsEnabled = false; // プッシュ通知機能無効化
   bool _isInitialized = false;
 
@@ -44,7 +44,7 @@ class DeviceFeedbackManager {
     try {
       // SharedPreferencesから設定を読み込み（実際の実装では必要）
       // 現在はデフォルト値を使用
-      _vibrationEnabled = true;
+      _vibrationEnabled = false; // バイブレーション機能をデフォルト無効化
       _notificationsEnabled = false; // プッシュ通知機能無効化
     } catch (e) {
       debugPrint('⚠️ Failed to load settings: $e');

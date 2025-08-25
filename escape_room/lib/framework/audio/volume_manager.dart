@@ -9,8 +9,8 @@ class VolumeManager extends ChangeNotifier {
   VolumeManager._internal();
 
   // 音量設定 (0.0 ~ 1.0)
-  double _bgmVolume = 0.7;
-  double _sfxVolume = 0.8;
+  double _bgmVolume = 0.5; // デフォルト50%
+  double _sfxVolume = 0.5; // デフォルト50%
   bool _isMuted = false;
   bool _isInitialized = false;
 
@@ -47,8 +47,8 @@ class VolumeManager extends ChangeNotifier {
   Future<void> _loadSettings() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      _bgmVolume = prefs.getDouble('bgm_volume') ?? 0.7;
-      _sfxVolume = prefs.getDouble('sfx_volume') ?? 0.8;
+      _bgmVolume = prefs.getDouble('bgm_volume') ?? 0.5; // デフォルト50%
+      _sfxVolume = prefs.getDouble('sfx_volume') ?? 0.5; // デフォルト50%
       _isMuted = prefs.getBool('is_muted') ?? false;
 
       // 範囲チェック
@@ -59,8 +59,8 @@ class VolumeManager extends ChangeNotifier {
     } catch (e) {
       debugPrint('⚠️ Failed to load volume settings: $e');
       // デフォルト値を使用
-      _bgmVolume = 0.7;
-      _sfxVolume = 0.8;
+      _bgmVolume = 0.5; // デフォルト50%
+      _sfxVolume = 0.5; // デフォルト50%
       _isMuted = false;
     }
   }
@@ -201,25 +201,25 @@ class VolumeManager extends ChangeNotifier {
 
     switch (type) {
       case GameSfxType.buttonTap:
-        audioPath = 'sounds/button_tap.wav';
+        audioPath = 'decision_button.mp3';  // 暫定的にdecision_button.mp3を使用
         break;
       case GameSfxType.itemFound:
-        audioPath = 'sounds/item_found.wav';
+        audioPath = 'decision_button.mp3';  // 暫定的にdecision_button.mp3を使用
         break;
       case GameSfxType.puzzleSolved:
-        audioPath = 'sounds/puzzle_solved.wav';
+        audioPath = 'decision_button.mp3';  // 暫定的にdecision_button.mp3を使用
         break;
       case GameSfxType.error:
-        audioPath = 'sounds/error.wav';
+        audioPath = 'decision_button.mp3';  // 暫定的にdecision_button.mp3を使用
         break;
       case GameSfxType.success:
-        audioPath = 'sounds/success.wav';
+        audioPath = 'decision_button.mp3';  // 暫定的にdecision_button.mp3を使用
         break;
       case GameSfxType.doorOpen:
-        audioPath = 'sounds/door_open.wav';
+        audioPath = 'decision_button.mp3';  // 暫定的にdecision_button.mp3を使用
         break;
       case GameSfxType.escape:
-        audioPath = 'sounds/escape.wav';
+        audioPath = 'decision_button.mp3';  // 暫定的にdecision_button.mp3を使用
         break;
     }
 
@@ -265,8 +265,8 @@ class VolumeManager extends ChangeNotifier {
 
   /// 音量設定のリセット
   Future<void> resetToDefaults() async {
-    _bgmVolume = 0.7;
-    _sfxVolume = 0.8;
+    _bgmVolume = 0.5; // デフォルト50%
+    _sfxVolume = 0.5; // デフォルト50%
     _isMuted = false;
 
     await _updateBgmVolume();

@@ -6,7 +6,6 @@ class CustomStartUI extends StatelessWidget {
   final VoidCallback? onStartPressed;
   final VoidCallback? onContinuePressed;
   final VoidCallback? onRetryPressed;
-  final VoidCallback? onSettingsPressed;
   final String title;
   final bool hasProgress;
   final String? progressInfo;
@@ -16,7 +15,6 @@ class CustomStartUI extends StatelessWidget {
     this.onStartPressed,
     this.onContinuePressed,
     this.onRetryPressed,
-    this.onSettingsPressed,
     this.title = 'Simple Game',
     this.hasProgress = false,
     this.progressInfo,
@@ -89,16 +87,6 @@ class CustomStartUI extends StatelessWidget {
           // ゲームボタン群
           _buildGameButtons(context),
 
-          // 設定ボタン
-          Positioned(
-            top: 60,
-            right: 20,
-            child: CustomActionButton(
-              icon: Icons.settings,
-              onPressed: onSettingsPressed,
-              color: Colors.grey.shade600,
-            ),
-          ),
         ],
       ),
     );
