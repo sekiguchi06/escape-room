@@ -28,7 +28,7 @@ void main() {
       debugPrint('  ✅ 初期状態: ${stateMachine.currentState.name}');
 
       // 状態遷移実行
-      final activeState = TestGameActiveState(level: 1, progress: 0.0);
+      final activeState = const TestGameActiveState(level: 1, progress: 0.0);
       final success = stateMachine.transitionTo(activeState);
 
       expect(success, isTrue);
@@ -37,7 +37,7 @@ void main() {
 
       // 遷移可能性チェック
       final canTransitionToCompleted = stateMachine.canTransitionTo(
-        TestGameCompletedState(
+        const TestGameCompletedState(
           finalLevel: 5,
           completionTime: Duration(seconds: 30),
         ),

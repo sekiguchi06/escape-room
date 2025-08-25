@@ -115,7 +115,7 @@ class EscapeRoomGame extends FlameGame with TapCallbacks {
   void _setupDefaultClearConditions() {
     // アイテム収集条件（現在のゲームの実際のアイテム）
     _clearConditionManager.addCondition(
-      ClearCondition(
+      const ClearCondition(
         id: 'collect_basic_items',
         type: ClearConditionType.collectItems,
         description: '基本アイテムを収集する',
@@ -127,7 +127,7 @@ class EscapeRoomGame extends FlameGame with TapCallbacks {
 
     // ホットスポット探索条件
     _clearConditionManager.addCondition(
-      ClearCondition(
+      const ClearCondition(
         id: 'explore_key_hotspots',
         type: ClearConditionType.interactObjects,
         description: '重要なホットスポットを探索する',
@@ -147,20 +147,48 @@ class EscapeRoomGame extends FlameGame with TapCallbacks {
 
   /// デフォルト組み合わせルールの設定
   void _setupDefaultCombinationRules() {
-    // アイテム組み合わせルール（現在のゲームに基づく）
+    // アイテム組み合わせルール（特定アイテムでのみ発生）
     _itemCombinationManager.addCombinationRules([
-      CombinationRule(
+      // 主要組み合わせ: 古い石+光のクリスタル+秘密の鍵 → 脱出の鍵
+      const CombinationRule(
+        id: 'main_escape_key_creation',
+        requiredItems: ['ancient_stone', 'light_crystal', 'secret_key'],
+        resultItem: 'main_escape_key',
+        description: '古い石、光のクリスタル、秘密の鍵を組み合わせて脱出の鍵を作成',
+        consumeItems: true,
+      ),
+      // 従来の組み合わせも保持（後方互換性）
+      const CombinationRule(
         id: 'coin_key_combination',
         requiredItems: ['coin', 'key'],
         resultItem: 'master_key',
         description: 'コインと鍵を組み合わせて特別な鍵を作成',
         consumeItems: true,
       ),
+      // 地下組み合わせルール
+      const CombinationRule(
+        id: 'underground_master_key_creation',
+        requiredItems: ['dark_crystal', 'ritual_stone', 'pure_water'],
+        resultItem: 'underground_master_key',
+        description: '闇のクリスタル、儀式の石、清浄な水を組み合わせて地下マスターキーを作成',
+        consumeItems: true,
+      ),
     ]);
 
-    // ギミック解除ルール（現在のホットスポットに基づく）
+    // ギミック解除ルール（シンプルな構成）
     _itemCombinationManager.addGimmickRules([
-      GimmickRule(
+      // メイン脱出ルート
+      const GimmickRule(
+        id: 'main_escape_door_unlock',
+        targetObjectId: 'entrance_door',
+        requiredItems: ['main_escape_key'],
+        description: '脱出の鍵で扉を開ける',
+        successMessage: '重厚な扉が開いた！脱出成功！',
+        failureMessage: 'この扉には特別な鍵が必要だ。アイテムを組み合わせよう',
+        consumeItems: true,
+      ),
+      // 従来のルールも保持（後方互換性）
+      const GimmickRule(
         id: 'treasure_chest_unlock',
         targetObjectId: 'treasure_chest',
         requiredItems: ['master_key'],
@@ -169,7 +197,7 @@ class EscapeRoomGame extends FlameGame with TapCallbacks {
         failureMessage: 'この宝箱には特別な鍵が必要だ',
         consumeItems: false,
       ),
-      GimmickRule(
+      const GimmickRule(
         id: 'entrance_door_unlock',
         targetObjectId: 'entrance_door',
         requiredItems: ['escape_key'],

@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
-import '../lib/framework/effects/particle_system.dart';
+import 'package:escape_room/framework/effects/particle_system.dart';
 
 void main() {
   group('ParticleEffectManager Tests', () {

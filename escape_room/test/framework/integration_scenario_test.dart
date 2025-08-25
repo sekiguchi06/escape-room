@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'test_config.dart';
 import 'test_state_provider.dart';
@@ -13,7 +12,7 @@ void main() {
       debugPrint('🎮 統合シナリオテスト開始...');
 
       // 設定作成
-      final config = TestGameConfig(
+      final config = const TestGameConfig(
         maxTime: Duration(seconds: 30),
         maxLevel: 3,
         messages: {
@@ -59,7 +58,7 @@ void main() {
       debugPrint('    📈 最終レベル到達: レベル${currentState.level}');
 
       // Phase 3: ゲーム完了
-      final completionTime = Duration(seconds: 25);
+      final completionTime = const Duration(seconds: 25);
       final completeSuccess = stateProvider.completeGame(3, completionTime);
       expect(completeSuccess, isTrue);
       expect(stateProvider.currentState, isA<TestGameCompletedState>());

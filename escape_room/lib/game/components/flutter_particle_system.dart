@@ -5,22 +5,22 @@ import 'dart:math';
 class FlutterParticleSystem extends StatefulWidget {
   const FlutterParticleSystem({super.key});
 
-  static final GlobalKey<_FlutterParticleSystemState> _globalKey =
-      GlobalKey<_FlutterParticleSystemState>();
+  static final GlobalKey<State<FlutterParticleSystem>> _globalKey =
+      GlobalKey<State<FlutterParticleSystem>>();
 
   /// パーティクルエフェクトを発生させる
   static void triggerParticleEffect(Offset position) {
     final state = _globalKey.currentState;
-    if (state != null) {
+    if (state is _FlutterParticleSystemState) {
       state.addParticleEffect(position);
-    } else {}
+    }
   }
 
   @override
   State<FlutterParticleSystem> createState() => _FlutterParticleSystemState();
 
   /// グローバルキーを取得
-  static GlobalKey<_FlutterParticleSystemState> get globalKey => _globalKey;
+  static GlobalKey<State<FlutterParticleSystem>> get globalKey => _globalKey;
 }
 
 /// パーティクルの種類（固定）
@@ -66,7 +66,7 @@ class Particle {
 
 class _FlutterParticleSystemState extends State<FlutterParticleSystem>
     with TickerProviderStateMixin {
-  List<Particle> _particles = [];
+  final List<Particle> _particles = [];
   late AnimationController _animationController;
 
   @override

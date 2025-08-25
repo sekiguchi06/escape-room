@@ -5,7 +5,6 @@ import 'inventory_system.dart';
 import '../../gen/assets.gen.dart';
 import '../../framework/ui/multi_floor_navigation_system.dart';
 import '../../framework/escape_room/core/room_types.dart';
-import '../../framework/escape_room/core/floor_transition_service.dart';
 import 'models/hotspot_models.dart';
 
 /// ホットスポット表示ウィジェット
@@ -23,8 +22,6 @@ class _HotspotDisplayState extends State<HotspotDisplay> {
   @override
   void initState() {
     super.initState();
-    // パズルモーダル表示コールバックを設定
-    RoomHotspotSystem().setPuzzleModalCallback(_showPuzzleModal);
   }
 
   @override
@@ -124,48 +121,6 @@ class _HotspotDisplayState extends State<HotspotDisplay> {
     // 特別なギミックオブジェクトは何もしない（モーダル表示のみ）
     // ギミック発動はモーダル内のボタンで処理
     // 隠し部屋進入処理はモーダルタップ時に_onModalTapで処理
-  }
-  
-
-  /// パズルモーダルを表示
-  void _showPuzzleModal({
-    required String hotspotId,
-    required String title,
-    required String description,
-    required String correctAnswer,
-    required String rewardItemId,
-    required String rewardItemName,
-    required String rewardDescription,
-    required AssetGenImage rewardAsset,
-  }) {
-    debugPrint('🧩 Puzzle modal requested for $hotspotId');
-
-    showDialog(
-      context: context,
-      barrierDismissible: false, // パズル中は外側タップで閉じない
-      builder: (BuildContext context) {
-        return _PuzzleModalDialog(
-          title: title,
-          description: description,
-          correctAnswer: correctAnswer,
-          onSuccess: () {
-            Navigator.of(context).pop();
-            // パズル解決成功処理
-            RoomHotspotSystem().onPuzzleSolved(
-              hotspotId: hotspotId,
-              rewardItemId: rewardItemId,
-              rewardItemName: rewardItemName,
-              rewardDescription: rewardDescription,
-              rewardAsset: rewardAsset,
-            );
-          },
-          onCancel: () {
-            Navigator.of(context).pop();
-            debugPrint('🧩 Puzzle cancelled');
-          },
-        );
-      },
-    );
   }
 }
 
@@ -442,6 +397,42 @@ class _HotspotDetailModal extends StatelessWidget {
           debugPrint('❌ 地下でのみ隠し部屋Dに移動できます');
         }
         break;
+        
+      case 'hidden_room_entrance_e':
+        // 1階にいる場合のみ隠し部屋Eに移動
+        final navigationSystem = MultiFloorNavigationSystem();
+        if (navigationSystem.currentFloor == FloorType.floor1) {
+          navigationSystem.moveToRoom(RoomType.hiddenE);
+          debugPrint('🏠 隠し部屋Eに移動');
+          Navigator.of(context).pop(); // モーダルを閉じる
+        } else {
+          debugPrint('❌ 1階でのみ隠し部屋Eに移動できます');
+        }
+        break;
+        
+      case 'hidden_room_entrance_f':
+        // 地下にいる場合のみ隠し部屋Fに移動
+        final navigationSystem = MultiFloorNavigationSystem();
+        if (navigationSystem.currentFloor == FloorType.underground) {
+          navigationSystem.moveToRoom(RoomType.hiddenF);
+          debugPrint('🏠 隠し部屋Fに移動');
+          Navigator.of(context).pop(); // モーダルを閉じる
+        } else {
+          debugPrint('❌ 地下でのみ隠し部屋Fに移動できます');
+        }
+        break;
+        
+      case 'hidden_room_entrance_g':
+        // 地下にいる場合のみ隠し部屋Gに移動
+        final navigationSystem = MultiFloorNavigationSystem();
+        if (navigationSystem.currentFloor == FloorType.underground) {
+          navigationSystem.moveToRoom(RoomType.hiddenG);
+          debugPrint('🏠 隠し部屋Gに移動');
+          Navigator.of(context).pop(); // モーダルを閉じる
+        } else {
+          debugPrint('❌ 地下でのみ隠し部屋Gに移動できます');
+        }
+        break;
 
       default:
         // その他のホットスポットでは何もしない
@@ -592,7 +583,7 @@ class _PuzzleModalDialogState extends State<_PuzzleModalDialog> {
       // 不正解
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
+          content: const Text(
             '間違った暗号です。もう一度お試しください。',
             style: TextStyle(color: Colors.white),
           ),

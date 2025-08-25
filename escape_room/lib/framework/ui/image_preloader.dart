@@ -206,8 +206,8 @@ class _PreloadedAppState extends State<PreloadedApp> {
 
   /// 初期ローディング画面（無音版）
   Widget _buildInitialLoadingScreen() {
-    return MaterialApp(
-      home: const Scaffold(
+    return const MaterialApp(
+      home: Scaffold(
         backgroundColor: Colors.black,
         body: SizedBox.shrink(), // 完全に無音
       ),
@@ -216,8 +216,8 @@ class _PreloadedAppState extends State<PreloadedApp> {
 
   /// プリロード中画面（無音版）
   Widget _buildPreloadingScreen() {
-    return MaterialApp(
-      home: const Scaffold(
+    return const MaterialApp(
+      home: Scaffold(
         backgroundColor: Colors.black,
         body: SizedBox.shrink(), // 完全に無音
       ),

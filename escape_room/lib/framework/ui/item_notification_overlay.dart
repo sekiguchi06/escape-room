@@ -112,7 +112,7 @@ class _ItemNotificationOverlayState extends State<ItemNotificationOverlay>
       elevation: 100, // モーダルより高いelevation
       borderRadius: BorderRadius.circular(12),
       color: Colors.transparent,
-      child: Container(
+      child: SizedBox(
         height: 120.0, // インベントリと同じ高さ
         child: SlideTransition(
           position: _slideAnimation,

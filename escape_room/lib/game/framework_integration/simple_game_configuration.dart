@@ -51,7 +51,7 @@ class SimpleGameConfig {
       'gameDurationMs': gameDuration.inMilliseconds,
       'stateTexts': stateTexts,
       'stateColors': stateColors.map(
-        (key, value) => MapEntry(key, value.value),
+        (key, value) => MapEntry(key, value.r.toInt() << 16 | value.g.toInt() << 8 | value.b.toInt()),
       ),
       'fontSizes': fontSizes,
       'fontWeights': fontWeights.map(
@@ -170,7 +170,7 @@ class SimpleGameStateProvider extends GameStateProvider<SimpleGameState> {
   void _setupStateTransitions() {
     // Start -> Playing の遷移を許可
     defineTransition(
-      StateTransition<SimpleGameState>(
+      const StateTransition<SimpleGameState>(
         fromState: SimpleGameStartState,
         toState: SimpleGamePlayingState,
       ),
@@ -178,7 +178,7 @@ class SimpleGameStateProvider extends GameStateProvider<SimpleGameState> {
 
     // Playing -> GameOver の遷移を許可
     defineTransition(
-      StateTransition<SimpleGameState>(
+      const StateTransition<SimpleGameState>(
         fromState: SimpleGamePlayingState,
         toState: SimpleGameOverState,
       ),
@@ -186,7 +186,7 @@ class SimpleGameStateProvider extends GameStateProvider<SimpleGameState> {
 
     // GameOver -> Playing の遷移を許可（リスタート）
     defineTransition(
-      StateTransition<SimpleGameState>(
+      const StateTransition<SimpleGameState>(
         fromState: SimpleGameOverState,
         toState: SimpleGamePlayingState,
       ),
@@ -194,7 +194,7 @@ class SimpleGameStateProvider extends GameStateProvider<SimpleGameState> {
 
     // GameOver -> Start の遷移を許可（完全リセット）
     defineTransition(
-      StateTransition<SimpleGameState>(
+      const StateTransition<SimpleGameState>(
         fromState: SimpleGameOverState,
         toState: SimpleGameStartState,
       ),
@@ -202,7 +202,7 @@ class SimpleGameStateProvider extends GameStateProvider<SimpleGameState> {
 
     // Playing -> Playing の遷移を許可（タイマー更新等）
     defineTransition(
-      StateTransition<SimpleGameState>(
+      const StateTransition<SimpleGameState>(
         fromState: SimpleGamePlayingState,
         toState: SimpleGamePlayingState,
       ),
@@ -367,9 +367,9 @@ class SimpleGameConfiguration
   final Map<String, SimpleGameConfig> variants;
 
   SimpleGameConfiguration({
-    required SimpleGameConfig config,
+    required super.config,
     this.variants = const {},
-  }) : super(config: config);
+  });
 
   static final defaultConfig = SimpleGameConfiguration(
     config: const SimpleGameConfig(),
@@ -416,7 +416,8 @@ class SimpleGameConfiguration
   @override
   bool isValidConfig(SimpleGameConfig config) => true;
 
-  SimpleGameConfig getConfigForVariant(String variant) {
-    return variants[variant] ?? config;
+  @override
+  SimpleGameConfig getConfigForVariant(String variantId) {
+    return variants[variantId] ?? config;
   }
 }

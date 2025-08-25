@@ -50,6 +50,7 @@ class AlchemyHotspots {
 class TreasureHotspots {
   static List<HotspotData> getHotspots({
     required Function(String) recordInteraction,
+    required BuildContext context,
   }) {
     return [
       HotspotData(
@@ -87,6 +88,19 @@ class TreasureHotspots {
         onTap: (tapPosition) {
           debugPrint('🏆 聖杯を調べています...');
           debugPrint('🔍 調査結果: 古代の祝福が込められている');
+        },
+      ),
+      // 地下への階段（2段階タップ仕様）
+      HotspotData(
+        id: 'underground_stairs',
+        asset: Assets.images.hotspots.libraryDesk,
+        name: '地下への階段',
+        description: '宝物庫の奥に隠された古い石の階段。地下深くへと続いている。',
+        position: const Offset(0.1, 0.8),
+        size: const Size(0.15, 0.15),
+        onTap: (tapPosition) async {
+          debugPrint('🪜 【地下への階段ホットスポット】タップ - 既存モーダル表示');
+          // 既存のモーダルシステムが自動的に処理します
         },
       ),
     ];

@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flame/components.dart';
-import '../../lib/framework/escape_room/gameobjects/code_pad_object.dart';
+import 'package:escape_room/framework/escape_room/gameobjects/code_pad_object.dart';
 
 void main() {
   group('CodePadObject Tests', () {

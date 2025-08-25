@@ -1,6 +1,4 @@
 import 'package:flame/components.dart';
-import 'package:flame/events.dart';
-import 'package:flutter/material.dart';
 import 'hotspot_component.dart';
 
 /// レスポンシブ対応ホットスポットコンポーネント
@@ -16,19 +14,15 @@ class ResponsiveHotspotComponent extends HotspotComponent {
   static final Vector2 unifiedBackgroundSize = Vector2(400, 600);
 
   ResponsiveHotspotComponent({
-    required String id,
-    required Function(String) onTap,
+    required super.id,
+    required super.onTap,
     required this.relativePosition,
     required this.relativeSize,
-    bool invisible = true,    // デフォルトで透明
-    bool debugMode = false,
+    super.invisible = true,    // デフォルトで透明
+    super.debugMode,
   }) : super(
-    id: id,
-    onTap: onTap,
     position: Vector2.zero(), // 初期値、updateForScreenSizeで更新
-    size: Vector2.zero(),     // 初期値、updateForScreenSizeで更新
-    invisible: invisible,
-    debugMode: debugMode,
+    size: Vector2.zero(),
   );
 
   /// 画面サイズ変更時に座標・サイズを自動調整

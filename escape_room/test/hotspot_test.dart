@@ -92,7 +92,7 @@ void main() {
         {'id': 'floor_object', 'pos': Vector2(140, 420)}, // 35%, 70%
       ];
 
-      for (var testData in testPositions) {
+      for (final testData in testPositions) {
         final hotspot = HotspotComponent(
           id: testData['id'] as String,
           onTap: (id) {},
@@ -138,13 +138,13 @@ void main() {
 
       // テストケース: 相対座標 → 期待される絶対座標
       final testCases = [
-        {'relative': Offset(0.1, 0.4), 'absolute': Offset(40, 240)},
-        {'relative': Offset(0.4, 0.1), 'absolute': Offset(160, 60)},
-        {'relative': Offset(0.75, 0.3), 'absolute': Offset(300, 180)},
-        {'relative': Offset(0.35, 0.7), 'absolute': Offset(140, 420)},
+        {'relative': const Offset(0.1, 0.4), 'absolute': const Offset(40, 240)},
+        {'relative': const Offset(0.4, 0.1), 'absolute': const Offset(160, 60)},
+        {'relative': const Offset(0.75, 0.3), 'absolute': const Offset(300, 180)},
+        {'relative': const Offset(0.35, 0.7), 'absolute': const Offset(140, 420)},
       ];
 
-      for (var testCase in testCases) {
+      for (final testCase in testCases) {
         final relative = testCase['relative'] as Offset;
         final expected = testCase['absolute'] as Offset;
 
@@ -162,12 +162,12 @@ void main() {
       const gameSize = Size(400, 600);
 
       final testCases = [
-        {'relative': Size(0.15, 0.2), 'absolute': Size(60, 120)},
-        {'relative': Size(0.2, 0.15), 'absolute': Size(80, 90)},
-        {'relative': Size(0.3, 0.2), 'absolute': Size(120, 120)},
+        {'relative': const Size(0.15, 0.2), 'absolute': const Size(60, 120)},
+        {'relative': const Size(0.2, 0.15), 'absolute': const Size(80, 90)},
+        {'relative': const Size(0.3, 0.2), 'absolute': const Size(120, 120)},
       ];
 
-      for (var testCase in testCases) {
+      for (final testCase in testCases) {
         final relative = testCase['relative'] as Size;
         final expected = testCase['absolute'] as Size;
 

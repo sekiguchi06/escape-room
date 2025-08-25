@@ -361,6 +361,144 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{feature} feature (coming soon)'**
   String messageNotImplemented(String feature);
+
+  /// 1st floor indicator label
+  ///
+  /// In en, this message translates to:
+  /// **'1st Floor'**
+  String get floor_indicator_1f;
+
+  /// Underground floor indicator label
+  ///
+  /// In en, this message translates to:
+  /// **'Underground'**
+  String get floor_indicator_underground;
+
+  /// Floor progress widget title
+  ///
+  /// In en, this message translates to:
+  /// **'Progress'**
+  String get floor_progress_title;
+
+  /// 1st floor progress label
+  ///
+  /// In en, this message translates to:
+  /// **'1st Floor Exploration'**
+  String get floor_progress_floor1;
+
+  /// Underground progress label
+  ///
+  /// In en, this message translates to:
+  /// **'Underground Exploration'**
+  String get floor_progress_underground;
+
+  /// Final puzzle progress label
+  ///
+  /// In en, this message translates to:
+  /// **'Final Puzzle'**
+  String get floor_progress_final;
+
+  /// Transition to underground button
+  ///
+  /// In en, this message translates to:
+  /// **'Go to Underground'**
+  String get floor_transition_to_underground;
+
+  /// Transition to 1st floor button
+  ///
+  /// In en, this message translates to:
+  /// **'Return to 1st Floor'**
+  String get floor_transition_to_floor1;
+
+  /// Locked floor transition message
+  ///
+  /// In en, this message translates to:
+  /// **'Not yet unlocked'**
+  String get floor_transition_locked;
+
+  /// Dark crystal item name
+  ///
+  /// In en, this message translates to:
+  /// **'Dark Crystal'**
+  String get item_dark_crystal_name;
+
+  /// Dark crystal item description
+  ///
+  /// In en, this message translates to:
+  /// **'A crystal emitting dark light found deep underground. Seems to have been used in some ritual.'**
+  String get item_dark_crystal_description;
+
+  /// Ritual stone item name
+  ///
+  /// In en, this message translates to:
+  /// **'Ritual Stone'**
+  String get item_ritual_stone_name;
+
+  /// Ritual stone item description
+  ///
+  /// In en, this message translates to:
+  /// **'A mystical stone that appears to have been used in ancient rituals. It emits a warm glow.'**
+  String get item_ritual_stone_description;
+
+  /// Pure water item name
+  ///
+  /// In en, this message translates to:
+  /// **'Pure Water'**
+  String get item_pure_water_name;
+
+  /// Pure water item description
+  ///
+  /// In en, this message translates to:
+  /// **'Clear, clean water that springs from underground sources. It might possess sacred power.'**
+  String get item_pure_water_description;
+
+  /// Ancient rune item name
+  ///
+  /// In en, this message translates to:
+  /// **'Ancient Rune'**
+  String get item_ancient_rune_name;
+
+  /// Ancient rune item description
+  ///
+  /// In en, this message translates to:
+  /// **'An ancient stone tablet with mysterious script carved into it. It contains powerful magical force.'**
+  String get item_ancient_rune_description;
+
+  /// Underground key item name
+  ///
+  /// In en, this message translates to:
+  /// **'Underground Key'**
+  String get item_underground_key_name;
+
+  /// Underground key item description
+  ///
+  /// In en, this message translates to:
+  /// **'A heavy key discovered deep underground. It seems to be able to open special doors.'**
+  String get item_underground_key_description;
+
+  /// Underground master key item name
+  ///
+  /// In en, this message translates to:
+  /// **'Underground Master Key'**
+  String get item_underground_master_key_name;
+
+  /// Underground master key item description
+  ///
+  /// In en, this message translates to:
+  /// **'A special key born from the fusion of three powers. It can open doors to the deepest parts of the underground.'**
+  String get item_underground_master_key_description;
+
+  /// Underground master key combination message
+  ///
+  /// In en, this message translates to:
+  /// **'Combined the three underground powers to create a special key'**
+  String get combination_underground_master_key;
+
+  /// Underground master key combination description
+  ///
+  /// In en, this message translates to:
+  /// **'The powers of the dark crystal, ritual stone, and pure water have fused to complete the underground master key.'**
+  String get combination_underground_master_key_description;
 }
 
 class _AppLocalizationsDelegate

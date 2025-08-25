@@ -8,8 +8,9 @@ import 'components/game_menu_bar.dart';
 import 'components/ad_area.dart';
 import 'components/room_with_hotspots.dart';
 import 'components/lighting_system.dart';
-import 'components/room_navigation_system.dart';
 import 'components/room_indicator.dart';
+import 'components/floor_indicator.dart';
+import '../framework/ui/multi_floor_navigation_system.dart';
 import 'widgets/custom_game_clear_ui.dart';
 import '../framework/escape_room/state/escape_room_state_riverpod.dart';
 import 'components/inventory_system.dart';
@@ -46,6 +47,17 @@ class _EscapeRoomState extends ConsumerState<EscapeRoom> {
 
     // ゲーム開始時間を記録（クリア時間計算用）
     _gameStartTime = DateTime.now();
+    
+    // デバッグ用案内メッセージ
+    Future.delayed(const Duration(seconds: 2), () {
+      debugPrint('🎮 脱出ゲーム開始！');
+      debugPrint('📋 地下への道筋（デバッグモード）:');
+      debugPrint('  1. 右矢印ボタンを連打してrightmost部屋に到達');
+      debugPrint('  2. rightmost部屋の左下「地下への階段」ホットスポットをタップ');
+      debugPrint('  3. 地下中央に移動');
+      debugPrint('  4. 地下で左右矢印ボタンで探索可能');
+      debugPrint('  5. 地下中央の「上への階段」で1階に戻れます');
+    });
   }
 
   Future<void> _initializeProgressSystem() async {
@@ -55,27 +67,35 @@ class _EscapeRoomState extends ConsumerState<EscapeRoom> {
     // ゲーム内イベントのリスナーを設定
     _setupGameEventListeners();
 
-    print('🎮 EscapeRoom: Progress system initialized');
+    debugPrint('🎮 EscapeRoom: Progress system initialized');
   }
 
   void _setupGameEventListeners() {
     // インベントリシステムのリスナー設定
     InventorySystem().addListener(_onInventoryChanged);
 
-    print('🎮 EscapeRoom: Event listeners set up');
+    debugPrint('🎮 EscapeRoom: Event listeners set up');
   }
 
   void _onInventoryChanged() {
-    print('📦 Inventory changed - updating progress...');
+    debugPrint('📦 Inventory changed - updating progress...');
     final inventory = InventorySystem().inventory;
     final nonNullItems = inventory
         .where((item) => item != null)
         .cast<String>()
         .toList();
-    print('📦 Current inventory: ${nonNullItems.join(', ')}');
+    debugPrint('📦 Current inventory: ${nonNullItems.join(', ')}');
+
+    // 地下解放条件をチェック
+    MultiFloorNavigationSystem().checkAndUnlockUnderground(nonNullItems);
 
     // アイテム取得時の進行度更新
     _updateProgressFromInventory();
+    
+    // UI更新
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   Future<void> _updateProgressFromInventory() async {
@@ -105,8 +125,8 @@ class _EscapeRoomState extends ConsumerState<EscapeRoom> {
       );
 
       await _progressManager!.manualSave();
-      print('💾 Progress updated and saved from EscapeRoom');
-      print('💾 Total items in progress: ${nonNullItems.length}');
+      debugPrint('💾 Progress updated and saved from EscapeRoom');
+      debugPrint('💾 Total items in progress: ${nonNullItems.length}');
     }
   }
 
@@ -166,12 +186,12 @@ class _EscapeRoomState extends ConsumerState<EscapeRoom> {
                       bottom: 0,
                       child: ListenableBuilder(
                         listenable: Listenable.merge([
-                          RoomNavigationSystem(),
+                          MultiFloorNavigationSystem(),
                           LightingSystem(),
                         ]),
                         builder: (context, _) {
                           final isLightOn = LightingSystem().isLightOn;
-                          final currentConfig = RoomNavigationSystem()
+                          final currentConfig = MultiFloorNavigationSystem()
                               .getCurrentRoomBackground(isLightOn);
                           return LayoutBuilder(
                             builder: (context, constraints) {
@@ -202,9 +222,31 @@ class _EscapeRoomState extends ConsumerState<EscapeRoom> {
                       },
                     ),
 
-                    // 部屋インジケーター（メニューバー下部）
+                    // 階層表示（メニューバー下部）
                     Positioned(
                       top: menuBarHeight + 8,
+                      left: 0,
+                      right: 0,
+                      child: Center(
+                        child: ListenableBuilder(
+                          listenable: MultiFloorNavigationSystem(),
+                          builder: (context, _) {
+                            return FloorIndicatorWidget(
+                              currentFloor: MultiFloorNavigationSystem().currentFloor,
+                              isUndergroundUnlocked: MultiFloorNavigationSystem().isUndergroundUnlocked,
+                              onFloorTap: () {
+                                // 階層変更時の処理
+                                setState(() {});
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+
+                    // 部屋インジケーター（階層表示下部）
+                    Positioned(
+                      top: menuBarHeight + 50, // 階層表示の分だけ下げる
                       left: 0,
                       right: 0,
                       child: const Center(child: RoomIndicator()),
@@ -260,7 +302,7 @@ class _EscapeRoomState extends ConsumerState<EscapeRoom> {
   /// ゲームリスタート処理
   void _restartGame() {
     // ゲーム状態をリセット
-    RoomNavigationSystem().resetToInitialRoom();
+    MultiFloorNavigationSystem().resetToInitialState();
     LightingSystem().resetToInitialState();
     InventorySystem().initializeEmpty();
 

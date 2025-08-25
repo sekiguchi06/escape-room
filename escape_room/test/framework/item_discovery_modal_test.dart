@@ -3,10 +3,10 @@ import 'package:flame/game.dart';
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 
-import '../../lib/framework/ui/modal_config.dart';
-import '../../lib/framework/ui/modal_display_strategy.dart';
-import '../../lib/framework/ui/concentration_lines_component.dart';
-import '../../lib/framework/effects/particle_system.dart';
+import 'package:escape_room/framework/ui/modal_config.dart';
+import 'package:escape_room/framework/ui/modal_display_strategy.dart';
+import 'package:escape_room/framework/ui/concentration_lines_component.dart';
+import 'package:escape_room/framework/effects/particle_system.dart';
 
 /// アイテム発見モーダルのテスト
 /// issue #14 の実装確認

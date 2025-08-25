@@ -41,7 +41,10 @@ class MultiFloorNavigationSystem extends ChangeNotifier {
     return currentRoom == RoomType.hiddenA ||
            currentRoom == RoomType.hiddenB ||
            currentRoom == RoomType.hiddenC ||
-           currentRoom == RoomType.hiddenD;
+           currentRoom == RoomType.hiddenD ||
+           currentRoom == RoomType.hiddenE ||
+           currentRoom == RoomType.hiddenF ||
+           currentRoom == RoomType.hiddenG;
   }
   
   /// 隠し部屋から元の部屋に戻れるかチェック
@@ -51,7 +54,7 @@ class MultiFloorNavigationSystem extends ChangeNotifier {
   
   /// 左の部屋に移動
   void moveLeft() {
-    debugPrint('⬅️ 左移動ボタン押下（現在: ${currentRoomName}）');
+    debugPrint('⬅️ 左移動ボタン押下（現在: $currentRoomName）');
     if (canMoveLeft) {
       _floorService.moveLeft();
       notifyListeners();
@@ -62,7 +65,7 @@ class MultiFloorNavigationSystem extends ChangeNotifier {
   
   /// 右の部屋に移動
   void moveRight() {
-    debugPrint('➡️ 右移動ボタン押下（現在: ${currentRoomName}）');
+    debugPrint('➡️ 右移動ボタン押下（現在: $currentRoomName）');
     if (canMoveRight) {
       _floorService.moveRight();
       notifyListeners();
@@ -84,14 +87,14 @@ class MultiFloorNavigationSystem extends ChangeNotifier {
     if (currentRoom == RoomType.rightmost && canMoveToUnderground) {
       // 地下右奥に移動
       await _floorService.transitionToFloor(FloorType.underground);
-      _floorService.moveToRoom(RoomType.underground_rightmost);
+      _floorService.moveToRoom(RoomType.undergroundRightmost);
       notifyListeners();
     }
   }
 
   /// 地下右奥から1階右奥に移動（同一位置での階層移動）
   Future<void> moveToFloor1FromUndergroundRightmost() async {
-    if (currentRoom == RoomType.underground_rightmost && canMoveToFloor1) {
+    if (currentRoom == RoomType.undergroundRightmost && canMoveToFloor1) {
       // 1階右奥に移動
       await _floorService.transitionToFloor(FloorType.floor1);
       _floorService.moveToRoom(RoomType.rightmost);
@@ -123,10 +126,19 @@ class MultiFloorNavigationSystem extends ChangeNotifier {
         targetRoom = RoomType.right; // 1階右の部屋に戻る
         break;
       case RoomType.hiddenC:
-        targetRoom = RoomType.underground_left; // 地下左の部屋に戻る
+        targetRoom = RoomType.undergroundLeft; // 地下左の部屋に戻る
         break;
       case RoomType.hiddenD:
-        targetRoom = RoomType.underground_right; // 地下右の部屋に戻る
+        targetRoom = RoomType.undergroundRight; // 地下右の部屋に戻る
+        break;
+      case RoomType.hiddenE:
+        targetRoom = RoomType.leftmost; // 1階左奥の部屋に戻る
+        break;
+      case RoomType.hiddenF:
+        targetRoom = RoomType.undergroundLeft; // 地下左の部屋に戻る
+        break;
+      case RoomType.hiddenG:
+        targetRoom = RoomType.undergroundLeftmost; // 地下左奥の部屋に戻る
         break;
       default:
         return;
@@ -246,31 +258,31 @@ class MultiFloorNavigationSystem extends ChangeNotifier {
         );
         
       // 地下の部屋
-      case RoomType.underground_leftmost:
+      case RoomType.undergroundLeftmost:
         return GameBackgroundConfig(
           asset: Assets.images.undergroundLeftmost,
           aspectRatio: 5 / 8,
           topReservedHeight: 84.0,
         );
-      case RoomType.underground_left:
+      case RoomType.undergroundLeft:
         return GameBackgroundConfig(
           asset: Assets.images.undergroundLeft,
           aspectRatio: 5 / 8,
           topReservedHeight: 84.0,
         );
-      case RoomType.underground_center:
+      case RoomType.undergroundCenter:
         return GameBackgroundConfig(
           asset: Assets.images.undergroundCenter,
           aspectRatio: 5 / 8,
           topReservedHeight: 84.0,
         );
-      case RoomType.underground_right:
+      case RoomType.undergroundRight:
         return GameBackgroundConfig(
           asset: Assets.images.undergroundRight,
           aspectRatio: 5 / 8,
           topReservedHeight: 84.0,
         );
-      case RoomType.underground_rightmost:
+      case RoomType.undergroundRightmost:
         return GameBackgroundConfig(
           asset: Assets.images.undergroundRightmost,
           aspectRatio: 5 / 8,
@@ -282,6 +294,9 @@ class MultiFloorNavigationSystem extends ChangeNotifier {
       case RoomType.hiddenB:
       case RoomType.hiddenC:
       case RoomType.hiddenD:
+      case RoomType.hiddenE:
+      case RoomType.hiddenF:
+      case RoomType.hiddenG:
       case RoomType.finalPuzzle:
         return GameBackgroundConfig(
           asset: Assets.images.escapeRoomBg, // プレースホルダー
@@ -307,15 +322,18 @@ class MultiFloorNavigationSystem extends ChangeNotifier {
       case RoomType.testRoom:
         return Assets.images.escapeRoomBgNight; // テスト用
       // 地下・隠し部屋・最終謎部屋には夜モードなし（必要に応じて追加）
-      case RoomType.underground_leftmost:
-      case RoomType.underground_left:
-      case RoomType.underground_center:
-      case RoomType.underground_right:
-      case RoomType.underground_rightmost:
+      case RoomType.undergroundLeftmost:
+      case RoomType.undergroundLeft:
+      case RoomType.undergroundCenter:
+      case RoomType.undergroundRight:
+      case RoomType.undergroundRightmost:
       case RoomType.hiddenA:
       case RoomType.hiddenB:
       case RoomType.hiddenC:
       case RoomType.hiddenD:
+      case RoomType.hiddenE:
+      case RoomType.hiddenF:
+      case RoomType.hiddenG:
       case RoomType.finalPuzzle:
         return Assets.images.escapeRoomBgNight;
     }
@@ -341,10 +359,10 @@ class NavigationListener extends StatefulWidget {
   final Function(FloorType floor, RoomType room)? onNavigationChanged;
   
   const NavigationListener({
-    Key? key,
+    super.key,
     required this.child,
     this.onNavigationChanged,
-  }) : super(key: key);
+  });
 
   @override
   State<NavigationListener> createState() => _NavigationListenerState();

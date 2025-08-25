@@ -154,4 +154,81 @@ class AppLocalizationsEn extends AppLocalizations {
   String messageNotImplemented(String feature) {
     return '$feature feature (coming soon)';
   }
+
+  @override
+  String get floor_indicator_1f => '1st Floor';
+
+  @override
+  String get floor_indicator_underground => 'Underground';
+
+  @override
+  String get floor_progress_title => 'Progress';
+
+  @override
+  String get floor_progress_floor1 => '1st Floor Exploration';
+
+  @override
+  String get floor_progress_underground => 'Underground Exploration';
+
+  @override
+  String get floor_progress_final => 'Final Puzzle';
+
+  @override
+  String get floor_transition_to_underground => 'Go to Underground';
+
+  @override
+  String get floor_transition_to_floor1 => 'Return to 1st Floor';
+
+  @override
+  String get floor_transition_locked => 'Not yet unlocked';
+
+  @override
+  String get item_dark_crystal_name => 'Dark Crystal';
+
+  @override
+  String get item_dark_crystal_description =>
+      'A crystal emitting dark light found deep underground. Seems to have been used in some ritual.';
+
+  @override
+  String get item_ritual_stone_name => 'Ritual Stone';
+
+  @override
+  String get item_ritual_stone_description =>
+      'A mystical stone that appears to have been used in ancient rituals. It emits a warm glow.';
+
+  @override
+  String get item_pure_water_name => 'Pure Water';
+
+  @override
+  String get item_pure_water_description =>
+      'Clear, clean water that springs from underground sources. It might possess sacred power.';
+
+  @override
+  String get item_ancient_rune_name => 'Ancient Rune';
+
+  @override
+  String get item_ancient_rune_description =>
+      'An ancient stone tablet with mysterious script carved into it. It contains powerful magical force.';
+
+  @override
+  String get item_underground_key_name => 'Underground Key';
+
+  @override
+  String get item_underground_key_description =>
+      'A heavy key discovered deep underground. It seems to be able to open special doors.';
+
+  @override
+  String get item_underground_master_key_name => 'Underground Master Key';
+
+  @override
+  String get item_underground_master_key_description =>
+      'A special key born from the fusion of three powers. It can open doors to the deepest parts of the underground.';
+
+  @override
+  String get combination_underground_master_key =>
+      'Combined the three underground powers to create a special key';
+
+  @override
+  String get combination_underground_master_key_description =>
+      'The powers of the dark crystal, ritual stone, and pure water have fused to complete the underground master key.';
 }

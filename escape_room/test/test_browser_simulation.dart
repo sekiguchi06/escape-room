@@ -51,7 +51,7 @@ class _GameTestScreenState extends State<GameTestScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // ゲーム表示
-            Text('Simple Game Test'),
+            const Text('Simple Game Test'),
             const SizedBox(height: 20),
             // 基本的な操作ボタン
             ElevatedButton(

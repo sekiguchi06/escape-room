@@ -124,9 +124,20 @@ class InventorySystem extends ChangeNotifier {
 
   /// 組み合わせ可能なアイテムかチェック
   bool canCombineItems(String item1, String item2) {
-    // coin + key = master_key の組み合わせのみ対応
     final items = {item1, item2};
-    return items.contains('coin') && items.contains('key');
+    
+    // 既存の組み合わせ
+    if (items.contains('coin') && items.contains('key')) {
+      return true;
+    }
+    
+    // 地下3個アイテム組み合わせ（2個ずつのチェック）
+    final undergroundItems = {'dark_crystal', 'ritual_stone', 'pure_water'};
+    if (undergroundItems.contains(item1) && undergroundItems.contains(item2)) {
+      return true;
+    }
+    
+    return false;
   }
 
   /// 2つのアイテムが組み合わせ可能かチェック
@@ -180,6 +191,38 @@ class InventorySystem extends ChangeNotifier {
       return true;
     }
 
+    // 地下3個アイテム組み合わせチェック
+    final undergroundItems = {'dark_crystal', 'ritual_stone', 'pure_water'};
+    if (undergroundItems.contains(selectedItem) && undergroundItems.contains(targetItemId)) {
+      // 3個すべて持っているかチェック
+      if (hasAllUndergroundMasterKeyItems()) {
+        // 元の3個のアイテムを削除
+        removeItemById('dark_crystal');
+        removeItemById('ritual_stone'); 
+        removeItemById('pure_water');
+
+        // 結果アイテムを追加
+        addItem('underground_master_key');
+
+        // 選択を解除
+        _selectedSlotIndex = null;
+
+        debugPrint('🔧 Underground combination: dark_crystal + ritual_stone + pure_water → underground_master_key');
+
+        return true;
+      } else {
+        debugPrint('⚠️ 地下マスターキー作成には3つすべてのアイテムが必要です');
+        return false;
+      }
+    }
+
     return false;
+  }
+  
+  /// 地下マスターキー作成に必要な3個のアイテムをすべて持っているかチェック
+  bool hasAllUndergroundMasterKeyItems() {
+    return inventory.contains('dark_crystal') &&
+           inventory.contains('ritual_stone') &&
+           inventory.contains('pure_water');
   }
 }

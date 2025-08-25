@@ -57,7 +57,7 @@ class GameBackground extends StatelessWidget {
             Positioned(
               top: topReservedHeight + verticalMargin,
               left: 0,
-              child: Container(
+              child: SizedBox(
                 width: mainImageWidth,
                 height: mainImageHeight,
                 child: asset.image(fit: BoxFit.cover),

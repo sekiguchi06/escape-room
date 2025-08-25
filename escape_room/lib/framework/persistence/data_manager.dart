@@ -21,7 +21,7 @@ class DataManager {
   static DataManager defaultInstance() {
     _defaultInstance ??= DataManager(
       provider: LocalStorageProvider(),
-      configuration: DefaultPersistenceConfiguration(),
+      configuration: const DefaultPersistenceConfiguration(),
     );
     return _defaultInstance!;
   }

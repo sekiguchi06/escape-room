@@ -13,13 +13,13 @@ void main() {
       final countdownTimer = FlameGameTimer(
         'countdown_test',
         TimerConfiguration(
-          duration: Duration(seconds: 3),
+          duration: const Duration(seconds: 3),
           type: TimerType.countdown,
           onComplete: () => countdownCompleted = true,
         ),
       );
 
-      expect(countdownTimer.remaining, equals(Duration(seconds: 3)));
+      expect(countdownTimer.remaining, equals(const Duration(seconds: 3)));
       expect(countdownTimer.type, equals(TimerType.countdown));
       debugPrint('    ✅ 初期値: ${countdownTimer.remaining.inSeconds}秒');
 
@@ -44,13 +44,13 @@ void main() {
       final countupTimer = FlameGameTimer(
         'countup_test',
         TimerConfiguration(
-          duration: Duration(seconds: 5),
+          duration: const Duration(seconds: 5),
           type: TimerType.countup,
           onComplete: () => countupCompleted = true,
         ),
       );
 
-      expect(countupTimer.remaining, equals(Duration(seconds: 5)));
+      expect(countupTimer.remaining, equals(const Duration(seconds: 5)));
       expect(countupTimer.type, equals(TimerType.countup));
 
       countupTimer.start();
@@ -70,7 +70,7 @@ void main() {
       final intervalTimer = FlameGameTimer(
         'interval_test',
         TimerConfiguration(
-          duration: Duration(seconds: 2),
+          duration: const Duration(seconds: 2),
           type: TimerType.interval,
           onComplete: () => intervalCount++,
         ),
@@ -104,7 +104,7 @@ void main() {
 
       controlTimer.reset();
       expect(controlTimer.isRunning, isFalse);
-      expect(controlTimer.remaining, equals(Duration(seconds: 10)));
+      expect(controlTimer.remaining, equals(const Duration(seconds: 10)));
       debugPrint('    ✅ 制御操作 (開始/一時停止/再開/リセット) 成功');
 
       debugPrint('🎉 汎用タイマーシステムテスト完了！');

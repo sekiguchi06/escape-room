@@ -43,5 +43,34 @@
   "volumeTest": "テスト",
   "errorLoadSaveData": "セーブデータの読み込みに失敗しました",
   "errorOccurred": "エラーが発生しました: {error}",
-  "messageNotImplemented": "{feature}機能（実装予定）"
+  "messageNotImplemented": "{feature}機能（実装予定）",
+  
+  "@_FLOOR_SYSTEM": {},
+  "floor_indicator_1f": "1階",
+  "floor_indicator_underground": "地下",
+  "floor_progress_title": "進行状況",
+  "floor_progress_floor1": "1階探索",
+  "floor_progress_underground": "地下探索", 
+  "floor_progress_final": "最終謎",
+  "floor_transition_to_underground": "地下へ降りる",
+  "floor_transition_to_floor1": "1階へ戻る",
+  "floor_transition_locked": "まだ開放されていません",
+  
+  "@_UNDERGROUND_ITEMS": {},
+  "item_dark_crystal_name": "闇のクリスタル",
+  "item_dark_crystal_description": "地下深くで見つけた暗い光を放つクリスタル。何かの儀式に使われていたようだ。",
+  "item_ritual_stone_name": "儀式の石",
+  "item_ritual_stone_description": "古代の儀式に使われていたと思われる神秘的な石。温かみのある光を放っている。",
+  "item_pure_water_name": "清浄な水",
+  "item_pure_water_description": "地下水源から湧き出る透明で清らかな水。神聖な力を持っているかもしれない。",
+  "item_ancient_rune_name": "古代ルーン",
+  "item_ancient_rune_description": "謎めいた文字が刻まれた古代の石版。強い魔法の力を秘めている。",
+  "item_underground_key_name": "地下の鍵",
+  "item_underground_key_description": "地下の奥深くで発見された重厚な鍵。特別な扉を開けることができそうだ。",
+  "item_underground_master_key_name": "地下マスターキー",
+  "item_underground_master_key_description": "3つの力が融合して生まれた特別な鍵。地下の最深部へ続く扉を開けられる。",
+  
+  "@_UNDERGROUND_COMBINATIONS": {},
+  "combination_underground_master_key": "地下の3つの力を統合して特別な鍵を作成した",
+  "combination_underground_master_key_description": "闇のクリスタル、儀式の石、清浄な水の力が融合し、地下マスターキーが完成した。"
 }

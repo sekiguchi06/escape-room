@@ -69,7 +69,7 @@ class ClearScreenWidget extends StatelessWidget {
                   children: [
                     _buildStatRow(
                       '⏱️ クリア時間',
-                      '${minutes}分${seconds.toString().padLeft(2, '0')}秒',
+                      '$minutes分${seconds.toString().padLeft(2, '0')}秒',
                     ),
                     const SizedBox(height: 8),
                     _buildStatRow(

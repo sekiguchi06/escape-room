@@ -25,7 +25,7 @@ void main() {
     });
 
     test('音響設定クラス作成テスト', () {
-      final config = DefaultAudioConfiguration(
+      final config = const DefaultAudioConfiguration(
         bgmAssets: {
           'menu': 'menu.mp3',
           'exploration_ambient': 'exploration_ambient.mp3',
@@ -60,7 +60,7 @@ void main() {
 
     test('音響設定バリデーション', () {
       // 無効な設定でのバリデーション
-      final invalidConfig = DefaultAudioConfiguration(
+      final invalidConfig = const DefaultAudioConfiguration(
         bgmAssets: {},
         sfxAssets: {},
         masterVolume: -1.0, // 無効な値
@@ -69,7 +69,7 @@ void main() {
       expect(invalidConfig.masterVolume, lessThan(0.0));
 
       // 有効な設定でのバリデーション
-      final validConfig = DefaultAudioConfiguration(
+      final validConfig = const DefaultAudioConfiguration(
         bgmAssets: {'menu': 'menu.mp3'},
         sfxAssets: {'tap': 'tap.wav'},
         masterVolume: 0.8,
@@ -88,7 +88,7 @@ void main() {
       expect(mockProvider.isInitialized, isFalse);
       expect(mockProvider.isBgmPlaying, isFalse);
 
-      final config = DefaultAudioConfiguration(
+      final config = const DefaultAudioConfiguration(
         bgmAssets: {'test': 'test.mp3'},
         sfxAssets: {'test': 'test.wav'},
       );
@@ -108,7 +108,7 @@ void main() {
 
     test('MockAudioProvider SFX機能', () async {
       final mockProvider = MockAudioProvider();
-      final config = DefaultAudioConfiguration(
+      final config = const DefaultAudioConfiguration(
         bgmAssets: {},
         sfxAssets: {'test_sfx': 'test.wav'},
       );
@@ -127,7 +127,7 @@ void main() {
 
     test('MockAudioProvider 有効無効切り替え', () async {
       final mockProvider = MockAudioProvider();
-      final config = DefaultAudioConfiguration(
+      final config = const DefaultAudioConfiguration(
         bgmAssets: {'test': 'test.mp3'},
         sfxAssets: {'test': 'test.wav'},
       );
@@ -155,7 +155,7 @@ void main() {
 
     test('MockAudioProvider デバッグ情報', () async {
       final mockProvider = MockAudioProvider();
-      final config = DefaultAudioConfiguration(
+      final config = const DefaultAudioConfiguration(
         bgmAssets: {'test': 'test.mp3'},
         sfxAssets: {'test': 'test.wav'},
       );

@@ -108,13 +108,13 @@ class TestGameConfiguration extends GameConfiguration<GameState, TestGameConfig>
     switch (variantId) {
       case 'easy':
         return config.copyWith(
-          maxTime: Duration(seconds: 120),
+          maxTime: const Duration(seconds: 120),
           maxLevel: 3,
           difficultyMultiplier: 0.5,
         );
       case 'hard':
         return config.copyWith(
-          maxTime: Duration(seconds: 30),
+          maxTime: const Duration(seconds: 30),
           maxLevel: 10,
           difficultyMultiplier: 2.0,
         );

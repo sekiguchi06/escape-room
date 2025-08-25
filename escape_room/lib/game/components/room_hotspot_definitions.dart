@@ -80,6 +80,12 @@ class RoomHotspotDefinitions {
       'relativeSize': Vector2(0.15, 0.1),       // 60/400, 60/600
       'description': '出口への手がかり',
     },
+    {
+      'id': 'hidden_room_entrance_e',
+      'relativePosition': Vector2(0.85, 0.35),  // 340/400, 210/600
+      'relativeSize': Vector2(0.125, 0.083),    // 50/400, 50/600
+      'description': '隠し部屋E入口',
+    },
   ];
 
   /// 宝物庫（room_rightmost.png）のホットスポット定義
@@ -124,6 +130,12 @@ class RoomHotspotDefinitions {
       'relativeSize': Vector2(0.125, 0.083),
       'description': '隠し部屋C入口',
     },
+    {
+      'id': 'hidden_room_entrance_f',
+      'relativePosition': Vector2(0.85, 0.3),
+      'relativeSize': Vector2(0.125, 0.083),
+      'description': '隠し部屋F入口',
+    },
   ];
   
   static List<Map<String, dynamic>> get undergroundRightHotspots => [
@@ -138,6 +150,22 @@ class RoomHotspotDefinitions {
       'relativePosition': Vector2(0.9, 0.5),
       'relativeSize': Vector2(0.125, 0.083),
       'description': '隠し部屋D入口',
+    },
+  ];
+  
+  /// 地下左奥のホットスポット定義を追加
+  static List<Map<String, dynamic>> get undergroundLeftmostHotspots => [
+    {
+      'id': 'underground_ancient_altar',
+      'relativePosition': Vector2(0.5, 0.45),
+      'relativeSize': Vector2(0.2, 0.133),
+      'description': '地下左奥：古代祭壇',
+    },
+    {
+      'id': 'hidden_room_entrance_g',
+      'relativePosition': Vector2(0.15, 0.3),
+      'relativeSize': Vector2(0.125, 0.083),
+      'description': '隠し部屋G入口',
     },
   ];
   
@@ -177,6 +205,33 @@ class RoomHotspotDefinitions {
       'description': '隠し部屋D：封印D',
     },
   ];
+  
+  static List<Map<String, dynamic>> get hiddenRoomEHotspots => [
+    {
+      'id': 'hidden_artifact_e_location',
+      'relativePosition': Vector2(0.5, 0.4),
+      'relativeSize': Vector2(0.15, 0.1),
+      'description': '隠し部屋E：古代遺物E',
+    },
+  ];
+  
+  static List<Map<String, dynamic>> get hiddenRoomFHotspots => [
+    {
+      'id': 'hidden_artifact_f_location',
+      'relativePosition': Vector2(0.5, 0.4),
+      'relativeSize': Vector2(0.15, 0.1),
+      'description': '隠し部屋F：古代遺物F',
+    },
+  ];
+  
+  static List<Map<String, dynamic>> get hiddenRoomGHotspots => [
+    {
+      'id': 'hidden_artifact_g_location',
+      'relativePosition': Vector2(0.5, 0.4),
+      'relativeSize': Vector2(0.15, 0.1),
+      'description': '隠し部屋G：古代遺物G',
+    },
+  ];
 
   /// 部屋タイプに応じたホットスポット定義を取得
   static List<Map<String, dynamic>> getHotspotsForRoom(String roomType) {
@@ -189,10 +244,12 @@ class RoomHotspotDefinitions {
         return roomLeftmostHotspots;
       case 'room_rightmost':
         return roomRightmostHotspots;
-      case 'underground_left':
+      case 'undergroundLeft':
         return undergroundLeftHotspots;
-      case 'underground_right':
+      case 'undergroundRight':
         return undergroundRightHotspots;
+      case 'undergroundLeftmost':
+        return undergroundLeftmostHotspots;
       case 'hidden_room_a':
         return hiddenRoomAHotspots;
       case 'hidden_room_b':
@@ -201,6 +258,12 @@ class RoomHotspotDefinitions {
         return hiddenRoomCHotspots;
       case 'hidden_room_d':
         return hiddenRoomDHotspots;
+      case 'hidden_room_e':
+        return hiddenRoomEHotspots;
+      case 'hidden_room_f':
+        return hiddenRoomFHotspots;
+      case 'hidden_room_g':
+        return hiddenRoomGHotspots;
       default:
         return [];
     }

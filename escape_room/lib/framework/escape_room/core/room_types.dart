@@ -20,17 +20,20 @@ enum RoomType {
   testRoom,         // テスト用部屋
   
   // 地下（新規）
-  underground_leftmost,   // 地下最左端
-  underground_left,       // 地下左
-  underground_center,     // 地下中央（エントランス）
-  underground_right,      // 地下右
-  underground_rightmost,  // 地下最右端
+  undergroundLeftmost,   // 地下最左端
+  undergroundLeft,       // 地下左
+  undergroundCenter,     // 地下中央（エントランス）
+  undergroundRight,      // 地下右
+  undergroundRightmost,  // 地下最右端
   
   // 特殊部屋（隠し部屋・最終謎部屋）
   hiddenA,                // 隠し部屋A
   hiddenB,                // 隠し部屋B
   hiddenC,                // 隠し部屋C
   hiddenD,                // 隠し部屋D
+  hiddenE,                // 隠し部屋E（1階左奥）
+  hiddenF,                // 隠し部屋F（地下左）
+  hiddenG,                // 隠し部屋G（地下左奥）
   finalPuzzle,            // 最終謎部屋
 }
 
@@ -73,28 +76,31 @@ class RoomUtils {
       case RoomType.testRoom:
         return FloorType.floor1;
         
-      case RoomType.underground_leftmost:
-      case RoomType.underground_left:
-      case RoomType.underground_center:
-      case RoomType.underground_right:
-      case RoomType.underground_rightmost:
+      case RoomType.undergroundLeftmost:
+      case RoomType.undergroundLeft:
+      case RoomType.undergroundCenter:
+      case RoomType.undergroundRight:
+      case RoomType.undergroundRightmost:
         return FloorType.underground;
         
-      // 隠し部屋A/Bは1階の特別部屋
+      // 隠し部屋A/B/Eは1階の特別部屋
       case RoomType.hiddenA:
       case RoomType.hiddenB:
+      case RoomType.hiddenE:
         return FloorType.floor1;
       
-      // 隠し部屋C/Dは地下の特別部屋  
+      // 隠し部屋C/D/F/Gは地下の特別部屋  
       case RoomType.hiddenC:
       case RoomType.hiddenD:
+      case RoomType.hiddenF:
+      case RoomType.hiddenG:
         return FloorType.underground;
       case RoomType.finalPuzzle:
         return FloorType.finalPuzzleRoom;
     }
   }
   
-  /// 階層の1階部屋リストを取得（隠し部屋A/B含む）
+  /// 階層の1階部屋リストを取得（通常移動可能な部屋のみ）
   static List<RoomType> getFloor1Rooms() {
     return [
       RoomType.leftmost,
@@ -102,21 +108,17 @@ class RoomUtils {
       RoomType.center,
       RoomType.right,
       RoomType.rightmost,
-      RoomType.hiddenA,
-      RoomType.hiddenB,
     ];
   }
   
-  /// 階層の地下部屋リストを取得（隠し部屋C/D含む）
+  /// 階層の地下部屋リストを取得
   static List<RoomType> getUndergroundRooms() {
     return [
-      RoomType.underground_leftmost,
-      RoomType.underground_left,
-      RoomType.underground_center,
-      RoomType.underground_right,
-      RoomType.underground_rightmost,
-      RoomType.hiddenC,
-      RoomType.hiddenD,
+      RoomType.undergroundLeftmost,
+      RoomType.undergroundLeft,
+      RoomType.undergroundCenter,
+      RoomType.undergroundRight,
+      RoomType.undergroundRightmost,
     ];
   }
   
@@ -134,9 +136,9 @@ class RoomUtils {
   static List<RoomType> getRoomsForFloor(FloorType floor) {
     switch (floor) {
       case FloorType.floor1:
-        return getFloor1Rooms(); // 隠し部屋A/B含む
+        return getFloor1Rooms(); // 通常移動可能な部屋のみ
       case FloorType.underground:
-        return getUndergroundRooms(); // 隠し部屋C/D含む
+        return getUndergroundRooms(); // 通常移動可能な部屋のみ
       case FloorType.hiddenRoomA:
         return [RoomType.hiddenA]; // 廃止予定（互換性のため残す）
       case FloorType.hiddenRoomB:
@@ -168,15 +170,15 @@ class RoomUtils {
         return 99; // テスト用特別値
         
       // 地下
-      case RoomType.underground_leftmost:
+      case RoomType.undergroundLeftmost:
         return -2;
-      case RoomType.underground_left:
+      case RoomType.undergroundLeft:
         return -1;
-      case RoomType.underground_center:
+      case RoomType.undergroundCenter:
         return 0;
-      case RoomType.underground_right:
+      case RoomType.undergroundRight:
         return 1;
-      case RoomType.underground_rightmost:
+      case RoomType.undergroundRightmost:
         return 2;
         
       // 特殊部屋（隠し部屋・最終謎部屋）
@@ -188,6 +190,12 @@ class RoomUtils {
         return 102;
       case RoomType.hiddenD:
         return 103;
+      case RoomType.hiddenE:
+        return 104; // 1階左奥隠し部屋
+      case RoomType.hiddenF:
+        return 105; // 地下左隠し部屋
+      case RoomType.hiddenG:
+        return 106; // 地下左奥隠し部屋
       case RoomType.finalPuzzle:
         return 200; // 最終謎部屋用特別値
     }
@@ -211,15 +219,15 @@ class RoomUtils {
         return 'テスト用部屋';
         
       // 地下
-      case RoomType.underground_leftmost:
+      case RoomType.undergroundLeftmost:
         return '地下最左端の部屋';
-      case RoomType.underground_left:
+      case RoomType.undergroundLeft:
         return '地下左の部屋';
-      case RoomType.underground_center:
+      case RoomType.undergroundCenter:
         return '地下中央の部屋';
-      case RoomType.underground_right:
+      case RoomType.undergroundRight:
         return '地下右の部屋';
-      case RoomType.underground_rightmost:
+      case RoomType.undergroundRightmost:
         return '地下最右端の部屋';
         
       // 特殊部屋
@@ -231,6 +239,12 @@ class RoomUtils {
         return '隠し部屋C';
       case RoomType.hiddenD:
         return '隠し部屋D';
+      case RoomType.hiddenE:
+        return '隠し部屋E（1階左奥）';
+      case RoomType.hiddenF:
+        return '隠し部屋F（地下左）';
+      case RoomType.hiddenG:
+        return '隠し部屋G（地下左奥）';
       case RoomType.finalPuzzle:
         return '最終謎部屋';
     }

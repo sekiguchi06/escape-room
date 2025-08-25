@@ -98,7 +98,7 @@ class ItemDiscoveryDemo extends FlameGame {
 }
 
 /// タップハンドリング用のコンポーネント
-class TapHandler extends PositionComponent with HasGameRef {
+class TapHandler extends PositionComponent with HasGameReference {
   final VoidCallback onTapCallback;
 
   TapHandler({required this.onTapCallback});
@@ -120,7 +120,7 @@ class ItemDiscoveryDemoWidget extends StatelessWidget {
         title: const Text('Item Discovery Modal Demo'),
         backgroundColor: Colors.blue,
       ),
-      body: GameWidget<ItemDiscoveryDemo>.controlled(
+      body: const GameWidget<ItemDiscoveryDemo>.controlled(
         gameFactory: ItemDiscoveryDemo.new,
       ),
     );

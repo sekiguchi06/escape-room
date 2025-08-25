@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flame/game.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -23,8 +24,14 @@ import 'framework/state/game_autosave_system.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Firebase初期化
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  // Firebase初期化（Web環境では無効化）
+  if (!kIsWeb) {
+    try {
+      await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    } catch (e) {
+      debugPrint('Firebase初期化エラー: $e');
+    }
+  }
 
   runApp(const ProviderScope(child: PreloadedApp(child: EscapeRoomApp())));
 }
@@ -113,22 +120,22 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen>
     await _progressManager!.initialize();
 
     // デバッグ情報を表示
-    print('🔍 Progress Manager Debug:');
-    print('  Has Progress: ${_progressManager!.progressManager.hasProgress}');
-    print(
+    debugPrint('🔍 Progress Manager Debug:');
+    debugPrint('  Has Progress: ${_progressManager!.progressManager.hasProgress}');
+    debugPrint(
       '  Current Progress: ${_progressManager!.progressManager.currentProgress}',
     );
     if (_progressManager!.progressManager.currentProgress != null) {
       final progress = _progressManager!.progressManager.currentProgress!;
-      print('  Game ID: ${progress.gameId}');
-      print('  Level: ${progress.currentLevel}');
-      print('  Completion: ${progress.completionRate}');
+      debugPrint('  Game ID: ${progress.gameId}');
+      debugPrint('  Level: ${progress.currentLevel}');
+      debugPrint('  Completion: ${progress.completionRate}');
     }
 
     if (mounted) {
       setState(() {
         _hasProgress = _progressManager!.progressManager.hasProgress;
-        print('🎮 UI Updated - Has Progress: $_hasProgress');
+        debugPrint('🎮 UI Updated - Has Progress: $_hasProgress');
       });
     }
   }
@@ -143,13 +150,13 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen>
 
   Future<void> _refreshProgressState() async {
     if (_progressManager != null) {
-      print('🔄 Refreshing progress state...');
+      debugPrint('🔄 Refreshing progress state...');
       await _progressManager!.progressManager.initialize();
 
       if (mounted) {
         setState(() {
           _hasProgress = _progressManager!.progressManager.hasProgress;
-          print('🔄 Progress state refreshed - Has Progress: $_hasProgress');
+          debugPrint('🔄 Progress state refreshed - Has Progress: $_hasProgress');
         });
       }
     }
@@ -918,12 +925,12 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen>
   Future<void> _startNewGame() async {
     if (_progressManager == null) return;
 
-    print('🆕 Starting new game...');
+    debugPrint('🆕 Starting new game...');
 
     // 既存の進行度があれば削除
     if (_hasProgress) {
       await _progressManager!.resetProgress();
-      print('🗑️ Previous progress data deleted');
+      debugPrint('🗑️ Previous progress data deleted');
     }
 
     // ゲーム開始時：すべての状態を初期化
@@ -934,9 +941,9 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen>
     // 新しいゲームを開始
     await _progressManager!.startNewGame('escape_room');
 
-    print('🆕 New game started successfully');
-    print('  Has Progress: ${_progressManager!.progressManager.hasProgress}');
-    print(
+    debugPrint('🆕 New game started successfully');
+    debugPrint('  Has Progress: ${_progressManager!.progressManager.hasProgress}');
+    debugPrint(
       '  Current Progress: ${_progressManager!.progressManager.currentProgress}',
     );
 
@@ -949,12 +956,12 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen>
   }
 
   Future<void> _loadSavedGame() async {
-    print('🔄 Loading saved game...');
-    print('  Progress Manager: ${_progressManager != null}');
-    print('  Has Progress: $_hasProgress');
+    debugPrint('🔄 Loading saved game...');
+    debugPrint('  Progress Manager: ${_progressManager != null}');
+    debugPrint('  Has Progress: $_hasProgress');
 
     if (_progressManager == null || !_hasProgress) {
-      print('❌ Cannot load: Manager is null or no progress');
+      debugPrint('❌ Cannot load: Manager is null or no progress');
       return;
     }
 
@@ -962,13 +969,13 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen>
       // 保存されたゲームを読み込み
       final progress = await _progressManager!.continueGame();
 
-      print('🔄 Continue game result: $progress');
+      debugPrint('🔄 Continue game result: $progress');
 
       if (progress != null) {
-        print('✅ Progress loaded successfully:');
-        print('  Game ID: ${progress.gameId}');
-        print('  Level: ${progress.currentLevel}');
-        print('  Completion: ${progress.completionRate}');
+        debugPrint('✅ Progress loaded successfully:');
+        debugPrint('  Game ID: ${progress.gameId}');
+        debugPrint('  Level: ${progress.currentLevel}');
+        debugPrint('  Completion: ${progress.completionRate}');
 
         // 進行度に基づいてゲーム状態を復元
         _restoreGameState(progress);
@@ -980,7 +987,7 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen>
           });
         }
       } else {
-        print('❌ Progress is null');
+        debugPrint('❌ Progress is null');
         if (mounted) {
           ScaffoldMessenger.of(
             context,
@@ -988,7 +995,7 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen>
         }
       }
     } catch (e) {
-      print('❌ Error loading saved game: $e');
+      debugPrint('❌ Error loading saved game: $e');
       if (mounted) {
         ScaffoldMessenger.of(
           context,

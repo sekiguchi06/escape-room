@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'game_background.dart';
 import 'room_navigation_system.dart';
+import '../../framework/escape_room/core/room_types.dart';
 
 /// 照明システムの状態管理
 class LightingSystem extends ChangeNotifier {

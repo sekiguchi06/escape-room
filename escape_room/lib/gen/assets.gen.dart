@@ -14,20 +14,65 @@ import 'package:flutter/widgets.dart';
 class $AssetsAudioGen {
   const $AssetsAudioGen();
 
-  /// File path: assets/audio/error.wav
-  String get error => 'assets/audio/error.wav';
+  /// File path: assets/audio/ambient_exploration.mp3
+  String get ambientExploration => 'assets/audio/ambient_exploration.mp3';
+
+  /// File path: assets/audio/button_press.mp3
+  String get buttonPress => 'assets/audio/button_press.mp3';
+
+  /// File path: assets/audio/error_sound.mp3
+  String get errorSound => 'assets/audio/error_sound.mp3';
+
+  /// File path: assets/audio/exploration_ambient.mp3
+  String get explorationAmbient => 'assets/audio/exploration_ambient.mp3';
+
+  /// File path: assets/audio/game_clear.mp3
+  String get gameClear => 'assets/audio/game_clear.mp3';
+
+  /// File path: assets/audio/gimmick_activate.mp3
+  String get gimmickActivate => 'assets/audio/gimmick_activate.mp3';
+
+  /// File path: assets/audio/hotspot_interact.mp3
+  String get hotspotInteract => 'assets/audio/hotspot_interact.mp3';
+
+  /// File path: assets/audio/item_get.mp3
+  String get itemGet => 'assets/audio/item_get.mp3';
 
   /// File path: assets/audio/menu.mp3
   String get menu => 'assets/audio/menu.mp3';
 
-  /// File path: assets/audio/success.wav
-  String get success => 'assets/audio/success.wav';
+  /// File path: assets/audio/menu_theme.mp3
+  String get menuTheme => 'assets/audio/menu_theme.mp3';
 
-  /// File path: assets/audio/tap.wav
-  String get tap => 'assets/audio/tap.wav';
+  /// File path: assets/audio/puzzle_success.mp3
+  String get puzzleSuccess => 'assets/audio/puzzle_success.mp3';
+
+  /// File path: assets/audio/puzzle_tension.mp3
+  String get puzzleTension => 'assets/audio/puzzle_tension.mp3';
+
+  /// File path: assets/audio/tap_general.mp3
+  String get tapGeneral => 'assets/audio/tap_general.mp3';
+
+  /// File path: assets/audio/victory_fanfare.mp3
+  String get victoryFanfare => 'assets/audio/victory_fanfare.mp3';
 
   /// List of all assets
-  List<String> get values => [error, menu, success, tap];
+  List<String> get values => [
+    ambientExploration,
+    buttonPress,
+    errorSound,
+    explorationAmbient,
+    gameClear,
+    gimmickActivate,
+    hotspotInteract,
+    itemGet,
+    menu,
+    menuTheme,
+    puzzleSuccess,
+    puzzleTension,
+    tapGeneral,
+    victoryFanfare,
+  ];
 }
 
 class $AssetsFontsGen {
@@ -42,6 +87,10 @@ class $AssetsFontsGen {
 
 class $AssetsImagesGen {
   const $AssetsImagesGen();
+
+  /// File path: assets/images/candle_mask_simple.png
+  AssetGenImage get candleMaskSimple =>
+      const AssetGenImage('assets/images/candle_mask_simple.png');
 
   /// File path: assets/images/escape_room_bg.png
   AssetGenImage get escapeRoomBg =>
@@ -93,8 +142,48 @@ class $AssetsImagesGen {
   AssetGenImage get roomRightmostNight =>
       const AssetGenImage('assets/images/room_rightmost_night.png');
 
+  /// File path: assets/images/room_test_new.png
+  AssetGenImage get roomTestNew =>
+      const AssetGenImage('assets/images/room_test_new.png');
+
+  /// File path: assets/images/test_candle_mask.png
+  AssetGenImage get testCandleMask =>
+      const AssetGenImage('assets/images/test_candle_mask.png');
+
+  /// File path: assets/images/test_mask_base.png
+  AssetGenImage get testMaskBase =>
+      const AssetGenImage('assets/images/test_mask_base.png');
+
+  /// File path: assets/images/test_room_background.png
+  AssetGenImage get testRoomBackground =>
+      const AssetGenImage('assets/images/test_room_background.png');
+
+  /// Directory path: assets/images/ui
+  $AssetsImagesUiGen get ui => const $AssetsImagesUiGen();
+
+  /// File path: assets/images/underground_center.png
+  AssetGenImage get undergroundCenter =>
+      const AssetGenImage('assets/images/underground_center.png');
+
+  /// File path: assets/images/underground_left.png
+  AssetGenImage get undergroundLeft =>
+      const AssetGenImage('assets/images/underground_left.png');
+
+  /// File path: assets/images/underground_leftmost.png
+  AssetGenImage get undergroundLeftmost =>
+      const AssetGenImage('assets/images/underground_leftmost.png');
+
+  /// File path: assets/images/underground_right.png
+  AssetGenImage get undergroundRight =>
+      const AssetGenImage('assets/images/underground_right.png');
+
+  /// File path: assets/images/underground_rightmost.png
+  AssetGenImage get undergroundRightmost =>
+      const AssetGenImage('assets/images/underground_rightmost.png');
+
   /// List of all assets
   List<AssetGenImage> get values => [
+    candleMaskSimple,
     escapeRoomBg,
     escapeRoomBgDark,
     escapeRoomBgNight,
@@ -106,6 +195,111 @@ class $AssetsImagesGen {
     roomRightNight,
     roomRightmost,
     roomRightmostNight,
+    roomTestNew,
+    testCandleMask,
+    testMaskBase,
+    testRoomBackground,
+    undergroundCenter,
+    undergroundLeft,
+    undergroundLeftmost,
+    undergroundRight,
+    undergroundRightmost,
+  ];
+}
+
+class $AssetsSoundsGen {
+  const $AssetsSoundsGen();
+
+  /// File path: assets/sounds/ambient_exploration.mp3
+  String get ambientExploration => 'assets/sounds/ambient_exploration.mp3';
+
+  /// File path: assets/sounds/button_press.mp3
+  String get buttonPress => 'assets/sounds/button_press.mp3';
+
+  /// File path: assets/sounds/button_tap.wav
+  String get buttonTap => 'assets/sounds/button_tap.wav';
+
+  /// File path: assets/sounds/door_open.wav
+  String get doorOpen => 'assets/sounds/door_open.wav';
+
+  /// File path: assets/sounds/error.wav
+  String get error => 'assets/sounds/error.wav';
+
+  /// File path: assets/sounds/error_sound.mp3
+  String get errorSound => 'assets/sounds/error_sound.mp3';
+
+  /// File path: assets/sounds/escape.wav
+  String get escape => 'assets/sounds/escape.wav';
+
+  /// File path: assets/sounds/exploration_ambient.mp3
+  String get explorationAmbient => 'assets/sounds/exploration_ambient.mp3';
+
+  /// File path: assets/sounds/game_clear.mp3
+  String get gameClear => 'assets/sounds/game_clear.mp3';
+
+  /// File path: assets/sounds/gimmick_activate.mp3
+  String get gimmickActivate => 'assets/sounds/gimmick_activate.mp3';
+
+  /// File path: assets/sounds/hotspot_interact.mp3
+  String get hotspotInteract => 'assets/sounds/hotspot_interact.mp3';
+
+  /// File path: assets/sounds/item_found.wav
+  String get itemFound => 'assets/sounds/item_found.wav';
+
+  /// File path: assets/sounds/item_get.mp3
+  String get itemGet => 'assets/sounds/item_get.mp3';
+
+  /// File path: assets/sounds/menu.mp3
+  String get menu => 'assets/sounds/menu.mp3';
+
+  /// File path: assets/sounds/menu_theme.mp3
+  String get menuTheme => 'assets/sounds/menu_theme.mp3';
+
+  /// File path: assets/sounds/puzzle_solved.wav
+  String get puzzleSolved => 'assets/sounds/puzzle_solved.wav';
+
+  /// File path: assets/sounds/puzzle_success.mp3
+  String get puzzleSuccess => 'assets/sounds/puzzle_success.mp3';
+
+  /// File path: assets/sounds/puzzle_tension.mp3
+  String get puzzleTension => 'assets/sounds/puzzle_tension.mp3';
+
+  /// File path: assets/sounds/success.wav
+  String get success => 'assets/sounds/success.wav';
+
+  /// File path: assets/sounds/tap.wav
+  String get tap => 'assets/sounds/tap.wav';
+
+  /// File path: assets/sounds/tap_general.mp3
+  String get tapGeneral => 'assets/sounds/tap_general.mp3';
+
+  /// File path: assets/sounds/victory_fanfare.mp3
+  String get victoryFanfare => 'assets/sounds/victory_fanfare.mp3';
+
+  /// List of all assets
+  List<String> get values => [
+    ambientExploration,
+    buttonPress,
+    buttonTap,
+    doorOpen,
+    error,
+    errorSound,
+    escape,
+    explorationAmbient,
+    gameClear,
+    gimmickActivate,
+    hotspotInteract,
+    itemFound,
+    itemGet,
+    menu,
+    menuTheme,
+    puzzleSolved,
+    puzzleSuccess,
+    puzzleTension,
+    success,
+    tap,
+    tapGeneral,
+    victoryFanfare,
   ];
 }
 
@@ -195,11 +389,19 @@ class $AssetsImagesHotspotsGen {
 class $AssetsImagesItemsGen {
   const $AssetsImagesItemsGen();
 
+  /// File path: assets/images/items/ancient_rune.png
+  AssetGenImage get ancientRune =>
+      const AssetGenImage('assets/images/items/ancient_rune.png');
+
   /// File path: assets/images/items/book.png
   AssetGenImage get book => const AssetGenImage('assets/images/items/book.png');
 
   /// File path: assets/images/items/coin.png
   AssetGenImage get coin => const AssetGenImage('assets/images/items/coin.png');
+
+  /// File path: assets/images/items/dark_crystal.png
+  AssetGenImage get darkCrystal =>
+      const AssetGenImage('assets/images/items/dark_crystal.png');
 
   /// File path: assets/images/items/gem.png
   AssetGenImage get gem => const AssetGenImage('assets/images/items/gem.png');
@@ -211,8 +413,64 @@ class $AssetsImagesItemsGen {
   AssetGenImage get lightbulb =>
       const AssetGenImage('assets/images/items/lightbulb.png');
 
+  /// File path: assets/images/items/pure_water.png
+  AssetGenImage get pureWater =>
+      const AssetGenImage('assets/images/items/pure_water.png');
+
+  /// File path: assets/images/items/ritual_stone.png
+  AssetGenImage get ritualStone =>
+      const AssetGenImage('assets/images/items/ritual_stone.png');
+
+  /// File path: assets/images/items/underground_key.png
+  AssetGenImage get undergroundKey =>
+      const AssetGenImage('assets/images/items/underground_key.png');
+
+  /// File path: assets/images/items/underground_master_key.png
+  AssetGenImage get undergroundMasterKey =>
+      const AssetGenImage('assets/images/items/underground_master_key.png');
+
   /// List of all assets
-  List<AssetGenImage> get values => [book, coin, gem, key, lightbulb];
+  List<AssetGenImage> get values => [
+    ancientRune,
+    book,
+    coin,
+    darkCrystal,
+    gem,
+    key,
+    lightbulb,
+    pureWater,
+    ritualStone,
+    undergroundKey,
+    undergroundMasterKey,
+  ];
+}
+
+class $AssetsImagesUiGen {
+  const $AssetsImagesUiGen();
+
+  /// File path: assets/images/ui/floor_indicator_1f.png
+  AssetGenImage get floorIndicator1f =>
+      const AssetGenImage('assets/images/ui/floor_indicator_1f.png');
+
+  /// File path: assets/images/ui/floor_indicator_uf.png
+  AssetGenImage get floorIndicatorUf =>
+      const AssetGenImage('assets/images/ui/floor_indicator_uf.png');
+
+  /// File path: assets/images/ui/stairs_down_icon.png
+  AssetGenImage get stairsDownIcon =>
+      const AssetGenImage('assets/images/ui/stairs_down_icon.png');
+
+  /// File path: assets/images/ui/stairs_up_icon.png
+  AssetGenImage get stairsUpIcon =>
+      const AssetGenImage('assets/images/ui/stairs_up_icon.png');
+
+  /// List of all assets
+  List<AssetGenImage> get values => [
+    floorIndicator1f,
+    floorIndicatorUf,
+    stairsDownIcon,
+    stairsUpIcon,
+  ];
 }
 
 class Assets {
@@ -221,6 +479,7 @@ class Assets {
   static const $AssetsAudioGen audio = $AssetsAudioGen();
   static const $AssetsFontsGen fonts = $AssetsFontsGen();
   static const $AssetsImagesGen images = $AssetsImagesGen();
+  static const $AssetsSoundsGen sounds = $AssetsSoundsGen();
 }
 
 class AssetGenImage {

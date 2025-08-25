@@ -23,7 +23,7 @@ class _HotspotTestDemoState extends State<HotspotTestDemo> {
   @override
   Widget build(BuildContext context) {
     // ゲームサイズ（統一規格400x600）
-    final gameSize = Size(400, 600);
+    final gameSize = const Size(400, 600);
 
     return Scaffold(
       backgroundColor: Colors.black,

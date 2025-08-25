@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'room_navigation_system.dart';
+import '../../framework/ui/multi_floor_navigation_system.dart';
 
 /// 部屋の位置を示すインジケーター
 class RoomIndicator extends StatelessWidget {
@@ -8,9 +8,9 @@ class RoomIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: RoomNavigationSystem(),
+      listenable: MultiFloorNavigationSystem(),
       builder: (context, _) {
-        final currentIndex = RoomNavigationSystem().currentRoomIndex;
+        final currentIndex = MultiFloorNavigationSystem().currentRoomIndex;
 
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

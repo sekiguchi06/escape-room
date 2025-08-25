@@ -1,12 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flame/components.dart';
-import '../../lib/framework/escape_room/core/interaction_result.dart';
-import '../../lib/framework/escape_room/strategies/item_provider_strategy.dart';
-import '../../lib/framework/escape_room/strategies/puzzle_strategy.dart';
-import '../../lib/framework/escape_room/gameobjects/bookshelf_object.dart';
-import '../../lib/framework/escape_room/gameobjects/safe_object.dart';
-import '../../lib/framework/escape_room/gameobjects/box_object.dart';
-import '../../lib/framework/escape_room/core/escape_room_game.dart';
+import 'package:escape_room/framework/escape_room/core/interaction_result.dart';
+import 'package:escape_room/framework/escape_room/strategies/item_provider_strategy.dart';
+import 'package:escape_room/framework/escape_room/strategies/puzzle_strategy.dart';
+import 'package:escape_room/framework/escape_room/gameobjects/bookshelf_object.dart';
+import 'package:escape_room/framework/escape_room/gameobjects/safe_object.dart';
+import 'package:escape_room/framework/escape_room/gameobjects/box_object.dart';
+import 'package:escape_room/framework/escape_room/core/escape_room_game.dart';
 
 void main() {
   group('新アーキテクチャ Escape Room', () {
@@ -162,7 +162,7 @@ void main() {
         await game.onLoad();
 
         // オブジェクトの初期化を待つ
-        await Future.delayed(Duration(milliseconds: 100));
+        await Future.delayed(const Duration(milliseconds: 100));
 
         final states = game.getAllObjectStates();
         expect(states.keys, containsAll(['bookshelf', 'safe', 'box']));

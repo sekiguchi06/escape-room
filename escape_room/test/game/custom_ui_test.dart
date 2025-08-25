@@ -34,7 +34,7 @@ void main() {
 
     testWidgets('CustomScoreWidget グラデーション表示テスト', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(home: Scaffold(body: CustomScoreWidget(score: 2500))),
+        const MaterialApp(home: Scaffold(body: CustomScoreWidget(score: 2500))),
       );
 
       // スコア数値の確認
@@ -56,7 +56,7 @@ void main() {
     testWidgets('CustomTimerWidget 色変化テスト', (WidgetTester tester) async {
       // 緑色（通常時間）
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(body: CustomTimerWidget(timeRemaining: '02:00')),
         ),
       );
@@ -66,7 +66,7 @@ void main() {
 
       // オレンジ色（60秒以下）
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(body: CustomTimerWidget(timeRemaining: '00:45')),
         ),
       );
@@ -75,7 +75,7 @@ void main() {
 
       // 赤色（30秒以下）
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(body: CustomTimerWidget(timeRemaining: '00:15')),
         ),
       );

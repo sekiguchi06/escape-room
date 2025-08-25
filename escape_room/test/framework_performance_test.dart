@@ -252,7 +252,7 @@ void main() {
 
       final config = PerfTestConfig(
         iterations: 10000,
-        duration: Duration(milliseconds: 5000),
+        duration: const Duration(milliseconds: 5000),
         dataSet: largeDataSet,
       );
 
@@ -436,7 +436,7 @@ void main() {
 
         // 各ゲームのコンポーネント作成
         final stateProvider = GameStateProvider<GameState>(
-          PerfTestState(0, 'game_gameId_start'),
+          const PerfTestState(0, 'game_gameId_start'),
         );
 
         // 状態遷移定義
@@ -453,7 +453,7 @@ void main() {
         final config = PerfTestConfiguration(
           config: PerfTestConfig(
             iterations: 100,
-            duration: Duration(seconds: 10),
+            duration: const Duration(seconds: 10),
             dataSet: List.generate(50, (i) => 'game_gameId_data_$i'),
           ),
         );
@@ -461,7 +461,7 @@ void main() {
         // メインタイマー追加
         timerManager.addTimer(
           'main',
-          TimerConfiguration(
+          const TimerConfiguration(
             duration: Duration(seconds: 5),
             type: TimerType.countdown,
             autoStart: true,

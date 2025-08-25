@@ -237,8 +237,8 @@ class AnimationPresets {
   static void buttonTap(PositionComponent button) {
     button.animateScaleBy(
       Vector2.all(0.9),
-      config: AnimationConfig(
-        duration: const Duration(milliseconds: 100),
+      config: const AnimationConfig(
+        duration: Duration(milliseconds: 100),
         autoReverse: true,
         curve: Curves.easeOutBack,
       ),

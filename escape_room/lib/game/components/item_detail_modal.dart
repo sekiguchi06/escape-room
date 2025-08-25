@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'lighting_system.dart';
+import 'inventory_system.dart';
 import '../../gen/assets.gen.dart';
+import '../../framework/ui/multi_floor_navigation_system.dart';
 
 /// アイテム詳細表示モーダル
 class ItemDetailModal {
@@ -89,9 +91,57 @@ class ItemDetailModal {
         debugPrint('💎 宝石ギミック実行: 魔法陣を起動');
         // TODO: 魔法陣ギミック実装
         break;
+      case 'main_escape_key':
+        debugPrint('🗝️ 地下の鍵ギミック実行: 階段を解放');
+        _useMainEscapeKey(context);
+        break;
       default:
         debugPrint('❓ 不明アイテム: ギミックなし');
     }
+  }
+
+  /// main_escape_keyを使用して地下の階段を解放
+  static void _useMainEscapeKey(BuildContext context) {
+    final inventorySystem = InventorySystem();
+    final multiFloorNav = MultiFloorNavigationSystem();
+    
+    // アイテムを消費
+    inventorySystem.removeItemById('main_escape_key');
+    
+    // 階段を解放
+    multiFloorNav.unlockStairsWithKey();
+    
+    debugPrint('🗝️ 地下の鍵を使用しました！');
+    debugPrint('🪜 階段が解放され、地下へのアクセスが可能になりました');
+    
+    // 成功メッセージを表示
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.brown[800],
+        title: Text(
+          '🗝️ 階段解放成功！',
+          style: TextStyle(
+            color: Colors.amber[200],
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: Text(
+          '地下の鍵を使用して階段が解放されました！\n今後は1階と地下を自由に行き来できます。',
+          style: TextStyle(color: Colors.brown[100]),
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.amber[700],
+              foregroundColor: Colors.brown[800],
+            ),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   /// アイテムアセットマップ（型安全性とスケーラビリティの両立）
@@ -101,6 +151,7 @@ class ItemDetailModal {
     'book': Assets.images.items.book,
     'coin': Assets.images.items.coin,
     'gem': Assets.images.items.gem,
+    'main_escape_key': Assets.images.items.key, // 仮画像
   };
 
   /// アイテム画像を取得（型安全なflutter_gen使用）
@@ -126,6 +177,8 @@ class ItemDetailModal {
         return Icons.monetization_on;
       case 'gem':
         return Icons.diamond;
+      case 'main_escape_key':
+        return Icons.vpn_key;
       default:
         return Icons.help_outline;
     }

@@ -5,7 +5,6 @@ output-class: AppLocalizations
 
 # 国際化設定オプション
 nullable-getter: true
-synthetic-package: false
 untranslated-messages-file: lib/l10n/untranslated_messages.json
 
 # 優先サポート言語（段階的国際化対応）

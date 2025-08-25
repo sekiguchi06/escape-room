@@ -94,7 +94,7 @@ class FirebaseAnalyticsProvider implements AnalyticsProvider {
       // Firebase Analyticsイベント送信
       await _analytics!.logEvent(
         name: _sanitizeEventName(event.name),
-        parameters: enrichedParams,
+        parameters: enrichedParams.cast<String, Object>(),
       );
 
       _eventCount++;
@@ -215,7 +215,7 @@ class FirebaseAnalyticsProvider implements AnalyticsProvider {
         parameters: {
           'session_id': sessionId,
           'timestamp': DateTime.now().millisecondsSinceEpoch,
-          if (_currentUserId != null) 'user_id': _currentUserId,
+          if (_currentUserId != null) 'user_id': _currentUserId!,
         },
       );
 
@@ -244,7 +244,7 @@ class FirebaseAnalyticsProvider implements AnalyticsProvider {
               ? DateTime.now().millisecondsSinceEpoch
               : 0,
           'events_tracked': _eventCount,
-          if (_currentUserId != null) 'user_id': _currentUserId,
+          if (_currentUserId != null) 'user_id': _currentUserId!,
         },
       );
 
@@ -299,8 +299,8 @@ class FirebaseAnalyticsProvider implements AnalyticsProvider {
               stackTrace.length > 1000 ? 1000 : stackTrace.length,
             ),
           'timestamp': DateTime.now().millisecondsSinceEpoch,
-          if (_currentSessionId != null) 'session_id': _currentSessionId,
-          if (_currentUserId != null) 'user_id': _currentUserId,
+          if (_currentSessionId != null) 'session_id': _currentSessionId!,
+          if (_currentUserId != null) 'user_id': _currentUserId!,
         },
       );
 
@@ -326,8 +326,8 @@ class FirebaseAnalyticsProvider implements AnalyticsProvider {
           'metric_name': name,
           'metric_value': value,
           'timestamp': DateTime.now().millisecondsSinceEpoch,
-          if (_currentSessionId != null) 'session_id': _currentSessionId,
-          if (_currentUserId != null) 'user_id': _currentUserId,
+          if (_currentSessionId != null) 'session_id': _currentSessionId!,
+          if (_currentUserId != null) 'user_id': _currentUserId!,
         },
       );
 

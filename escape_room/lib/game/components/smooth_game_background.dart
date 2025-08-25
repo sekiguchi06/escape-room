@@ -345,7 +345,7 @@ class _OptimizedSmoothGameBackgroundState
       // エラー時はフォールバック背景
       return Container(
         color: Colors.black,
-        child: Center(
+        child: const Center(
           child: Icon(
             Icons.image_not_supported,
             color: Colors.white30,

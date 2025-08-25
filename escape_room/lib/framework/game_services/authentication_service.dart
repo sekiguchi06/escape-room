@@ -53,7 +53,7 @@ class GameAuthenticationService {
         }
 
         // テスト用のモックプレイヤー
-        _currentPlayer = GamePlayer(
+        _currentPlayer = const GamePlayer(
           playerId: 'test_player',
           displayName: 'Test Player',
           isSignedIn: true,

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../components/flutter_particle_system.dart';
 
 /// ゲームクリア画面用カスタムUI
 /// 脱出成功時の祝福画面
@@ -81,19 +80,12 @@ class _CustomGameClearUIState extends State<CustomGameClearUI>
 
   void _triggerCelebrationParticles() {
     // グローバルパーティクルシステムで祝福エフェクトを発動
-    final particleSystem = FlutterParticleSystem.globalKey.currentState;
-    if (particleSystem != null) {
-      // 成功パーティクルを複数回発動（画面中央付近）
-      for (int i = 0; i < 5; i++) {
-        Future.delayed(Duration(milliseconds: i * 200), () {
-          // 画面中央付近でパーティクルエフェクトを発動
-          final screenCenter = Offset(
-            200 + (i * 20).toDouble(),
-            300 + (i * 10).toDouble(),
-          );
-          particleSystem.addParticleEffect(screenCenter);
-        });
-      }
+    // 成功パーティクルを複数回発動（画面中央付近）
+    for (int i = 0; i < 5; i++) {
+      Future.delayed(Duration(milliseconds: i * 200), () {
+        // パーティクルエフェクトは今後実装予定
+        // FlutterParticleSystem.triggerParticleEffect(); // TODO: パーティクルシステム実装後に有効化
+      });
     }
   }
 

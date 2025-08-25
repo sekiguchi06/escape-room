@@ -173,8 +173,8 @@ void main() {
 
       timerManager.addTimer(
         'updateTest',
-        TimerConfiguration(
-          duration: const Duration(seconds: 2),
+        const TimerConfiguration(
+          duration: Duration(seconds: 2),
           type: TimerType.countdown,
         ),
       );
@@ -183,8 +183,8 @@ void main() {
       expect(timer.duration, equals(const Duration(seconds: 2)));
 
       // 設定更新
-      final newConfig = TimerConfiguration(
-        duration: const Duration(seconds: 5),
+      final newConfig = const TimerConfiguration(
+        duration: Duration(seconds: 5),
         type: TimerType.countup,
       );
 
@@ -201,8 +201,8 @@ void main() {
 
       timerManager.addTimer(
         'debugTest',
-        TimerConfiguration(
-          duration: const Duration(seconds: 3),
+        const TimerConfiguration(
+          duration: Duration(seconds: 3),
           type: TimerType.countdown,
         ),
       );

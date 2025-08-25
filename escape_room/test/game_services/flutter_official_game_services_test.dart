@@ -37,7 +37,7 @@ void main() {
       });
 
       test('設定適用確認', () {
-        final config = GameServicesConfiguration(
+        final config = const GameServicesConfiguration(
           debugMode: true,
           autoSignInEnabled: false,
           leaderboardIds: {'highScore': 'test_leaderboard'},
@@ -66,7 +66,7 @@ void main() {
       test('設定更新確認', () {
         final manager = FlutterGameServicesManager();
 
-        final newConfig = GameServicesConfiguration(
+        final newConfig = const GameServicesConfiguration(
           debugMode: true,
           leaderboardIds: {'score': 'new_leaderboard'},
         );
@@ -306,7 +306,7 @@ void main() {
 
     group('ゲーム専用メソッドテスト', () {
       test('ハイスコア送信確認', () async {
-        final config = GameServicesConfiguration(
+        final config = const GameServicesConfiguration(
           leaderboardIds: {'highScore': 'main_leaderboard'},
         );
         final manager = FlutterGameServicesManager(config: config);
@@ -318,7 +318,7 @@ void main() {
       });
 
       test('レベルクリア実績解除確認', () async {
-        final config = GameServicesConfiguration(
+        final config = const GameServicesConfiguration(
           achievementIds: {'level_5': 'level_5_achievement'},
         );
         final manager = FlutterGameServicesManager(config: config);
@@ -330,7 +330,7 @@ void main() {
       });
 
       test('ゲーム開始回数増分確認', () async {
-        final config = GameServicesConfiguration(
+        final config = const GameServicesConfiguration(
           achievementIds: {'gameStarts': 'game_starts_achievement'},
         );
         final manager = FlutterGameServicesManager(config: config);
@@ -357,7 +357,7 @@ void main() {
       });
 
       test('デバッグ情報構造確認', () {
-        final config = GameServicesConfiguration(
+        final config = const GameServicesConfiguration(
           debugMode: true,
           leaderboardIds: {'main': 'main_board'},
         );
@@ -377,7 +377,7 @@ void main() {
       });
 
       test('設定反映確認', () {
-        final config = GameServicesConfiguration(
+        final config = const GameServicesConfiguration(
           leaderboardIds: {'test': 'test_id'},
           achievementIds: {'first': 'first_id'},
           signInRetryCount: 7,

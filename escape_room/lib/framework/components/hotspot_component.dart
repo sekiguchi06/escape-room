@@ -25,6 +25,7 @@ class HotspotComponent extends SpriteComponent with TapCallbacks {
   bool get isInvisible => _invisible;
 
   /// デバッグモード状態の取得
+  @override
   bool get debugMode => _debugMode;
 
   /// 透明状態の設定

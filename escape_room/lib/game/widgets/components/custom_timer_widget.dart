@@ -47,7 +47,7 @@ class CustomTimerWidget extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.timer, color: Colors.white, size: 18),
+          const Icon(Icons.timer, color: Colors.white, size: 18),
           const SizedBox(width: 8),
           Text(
             timeRemaining,

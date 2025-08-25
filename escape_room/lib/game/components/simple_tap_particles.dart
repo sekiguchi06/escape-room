@@ -16,7 +16,7 @@ class SimpleTapParticles extends StatelessWidget {
         onTap: () {
           // タップ時の処理
         },
-        child: Container(width: double.infinity, height: double.infinity),
+        child: const SizedBox(width: double.infinity, height: double.infinity),
       ),
     );
   }

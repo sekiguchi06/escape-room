@@ -98,7 +98,7 @@ void main() {
     late GameProgressManager progressManager;
 
     setUp(() {
-      final config = DefaultPersistenceConfiguration(
+      final config = const DefaultPersistenceConfiguration(
         debugMode: true,
         autoSaveInterval: 1, // テスト用に短い間隔
       );
@@ -261,7 +261,7 @@ void main() {
     late GameManualSaveSystem manualSaveSystem;
 
     setUp(() {
-      final config = DefaultPersistenceConfiguration(
+      final config = const DefaultPersistenceConfiguration(
         debugMode: true,
         autoSaveInterval: 1,
       );
@@ -362,7 +362,7 @@ void main() {
     late ProgressAwareDataManager manager;
 
     setUp(() {
-      final config = DefaultPersistenceConfiguration(
+      final config = const DefaultPersistenceConfiguration(
         debugMode: true,
         autoSaveInterval: 1,
       );

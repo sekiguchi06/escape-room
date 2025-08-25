@@ -87,7 +87,7 @@ class HintDialog {
             // デモ用のアイテム追加ボタン
             _buildItemButtons(context, onAddItem),
             const SizedBox(height: 12),
-            Container(
+            SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () => Navigator.of(context).pop(),

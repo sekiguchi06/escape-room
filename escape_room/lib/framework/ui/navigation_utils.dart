@@ -75,12 +75,12 @@ mixin NavigatorOptimization<T extends StatefulWidget> on State<T> {
   }
 
   /// 最適化されたpush操作
-  Future<T?> pushOptimized<T extends Object?>(Route<T> route) {
+  Future<R?> pushOptimized<R extends Object?>(Route<R> route) {
     return navigator.push(route);
   }
 
   /// 最適化されたpop操作
-  void popOptimized<T extends Object?>([T? result]) {
+  void popOptimized<R extends Object?>([R? result]) {
     navigator.pop(result);
   }
 }

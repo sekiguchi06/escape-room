@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'test_config.dart';
 
@@ -9,7 +8,7 @@ void main() {
       debugPrint('⚙️ 汎用設定管理システムテスト開始...');
 
       // テスト用設定作成
-      final config = TestGameConfig(
+      final config = const TestGameConfig(
         maxTime: Duration(seconds: 60),
         maxLevel: 5,
         messages: {'start': 'ゲーム開始', 'progress': '進行中', 'complete': '完了'},

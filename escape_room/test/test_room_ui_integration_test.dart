@@ -9,10 +9,10 @@ void main() {
     testWidgets('テスト部屋ウィジェットの基本表示テスト', (WidgetTester tester) async {
       // TestRoomWithHotspotsウィジェットをビルド
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: TestRoomWithHotspots(
             roomImagePath: 'assets/images/room_left.png',
-            gameSize: const Size(400, 600),
+            gameSize: Size(400, 600),
           ),
         ),
       );
@@ -33,7 +33,7 @@ void main() {
       const gameSize = Size(400, 600);
 
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: TestRoomWithHotspots(
             roomImagePath: 'assets/images/room_left.png',
             gameSize: gameSize,
@@ -49,10 +49,10 @@ void main() {
 
     testWidgets('ホットスポットタップシミュレーションテスト', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: TestRoomWithHotspots(
             roomImagePath: 'assets/images/room_left.png',
-            gameSize: const Size(400, 600),
+            gameSize: Size(400, 600),
           ),
         ),
       );
@@ -77,10 +77,10 @@ void main() {
 
     testWidgets('可視性切り替え機能テスト', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: TestRoomWithHotspots(
             roomImagePath: 'assets/images/room_left.png',
-            gameSize: const Size(400, 600),
+            gameSize: Size(400, 600),
           ),
         ),
       );
@@ -108,10 +108,10 @@ void main() {
       await tester.binding.setSurfaceSize(const Size(800, 1200));
 
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: TestRoomWithHotspots(
             roomImagePath: 'assets/images/room_left.png',
-            gameSize: const Size(400, 600),
+            gameSize: Size(400, 600),
           ),
         ),
       );

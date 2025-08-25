@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'item_detail_modal.dart';
-import 'room_navigation_system.dart';
 import 'inventory_system.dart';
 import '../../framework/ui/multi_floor_navigation_system.dart';
-import '../../framework/escape_room/core/room_types.dart';
 
 /// インベントリ管理ウィジェット
 class InventoryWidget extends StatefulWidget {
@@ -161,12 +159,12 @@ class _InventoryWidgetState extends State<InventoryWidget> {
                       },
                     ),
 
-                    SizedBox(width: itemSpacing),
+                    const SizedBox(width: itemSpacing),
 
                     // インベントリアイテム（5個の正方形）
                     ..._buildInventoryItems(itemSize, itemSpacing),
 
-                    SizedBox(width: itemSpacing),
+                    const SizedBox(width: itemSpacing),
 
                     // 右移動ボタン（階層対応・隠し部屋では戻るボタン）
                     ListenableBuilder(
@@ -202,9 +200,8 @@ class _InventoryWidgetState extends State<InventoryWidget> {
     required double size,
     required VoidCallback? onPressed,
     bool isEnabled = true,
-    Color? color,
   }) {
-    return Container(
+    return SizedBox(
       width: size,
       height: size,
       child: ElevatedButton(

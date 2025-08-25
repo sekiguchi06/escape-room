@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
-import '../../lib/framework/ui/japanese_message_system.dart';
+import 'package:escape_room/framework/ui/japanese_message_system.dart';
 
 void main() {
   group('日本語文字化け問題テスト', () {
@@ -51,7 +51,7 @@ void main() {
 
     test('Flutter TextStyleとFlame TextPaint比較テスト', () {
       // Flutter TextStyle
-      final flutterStyle = TextStyle(
+      final flutterStyle = const TextStyle(
         fontFamily: 'Noto Sans JP',
         fontSize: 16,
         color: Colors.black,
@@ -113,7 +113,7 @@ void main() {
     test('WebFont読み込み状態シミュレーション', () {
       // フォント読み込み失敗時のフォールバック動作テスト
       final textPaint = TextPaint(
-        style: TextStyle(
+        style: const TextStyle(
           fontFamily: 'NonExistentFont', // 存在しないフォント
           fontFamilyFallback: ['Noto Sans JP', 'sans-serif'],
           fontSize: 16,

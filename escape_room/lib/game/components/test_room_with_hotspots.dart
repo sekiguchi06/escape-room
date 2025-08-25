@@ -296,7 +296,7 @@ class _TestRoomWithHotspotsState extends State<TestRoomWithHotspots> {
   void _toggleHotspotVisibility() {
     setState(() {
       final newVisibility = !_hotspots.first.isVisible;
-      for (var hotspot in _hotspots) {
+      for (final hotspot in _hotspots) {
         hotspot.isVisible = newVisibility;
       }
     });

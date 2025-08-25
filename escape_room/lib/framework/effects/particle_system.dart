@@ -92,8 +92,8 @@ class ParticleEffectManager extends Component {
         lifespan: 2.5,
         minRadius: 2.0,
         maxRadius: 4.0,
-        startColor: Color(0xFFFFD700), // ゴールド
-        endColor: Color(0xFFFFA500), // オレンジ
+        startColor: const Color(0xFFFFD700), // ゴールド
+        endColor: const Color(0xFFFFA500), // オレンジ
       ),
     );
 
@@ -105,8 +105,8 @@ class ParticleEffectManager extends Component {
         lifespan: 3.0,
         minRadius: 1.5,
         maxRadius: 5.0,
-        startColor: Color(0xFFFFD700), // ゴールド
-        endColor: Color(0xFFFFFFFF), // ホワイト
+        startColor: const Color(0xFFFFD700), // ゴールド
+        endColor: const Color(0xFFFFFFFF), // ホワイト
       ),
     );
   }

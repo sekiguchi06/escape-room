@@ -54,20 +54,20 @@ void main() {
     });
 
     test('カスタム設定の作成', () {
-      final customConfig = SimpleGameConfig(
-        gameDuration: const Duration(seconds: 15),
-        stateTexts: const {
+      final customConfig = const SimpleGameConfig(
+        gameDuration: Duration(seconds: 15),
+        stateTexts: {
           'start': 'CUSTOM GAME\\nTAP TO START',
           'playing': 'CUSTOM TIME: {time}',
           'gameOver': 'CUSTOM OVER\\nTAP TO RESTART',
         },
-        stateColors: const {
+        stateColors: {
           'start': Colors.purple,
           'playing': Colors.cyan,
           'gameOver': Colors.lime,
         },
-        fontSizes: const {'small': 12.0, 'medium': 16.0, 'large': 24.0},
-        fontWeights: const {
+        fontSizes: {'small': 12.0, 'medium': 16.0, 'large': 24.0},
+        fontWeights: {
           'normal': FontWeight.normal,
           'bold': FontWeight.bold,
         },

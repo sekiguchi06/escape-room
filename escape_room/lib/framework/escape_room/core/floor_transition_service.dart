@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'room_types.dart';
-import 'escape_room_game.dart';
 
 /// 階層移動管理サービス
 class FloorTransitionService extends ChangeNotifier {
@@ -20,7 +19,7 @@ class FloorTransitionService extends ChangeNotifier {
   // 各階層での現在の部屋
   final Map<FloorType, RoomType> _floorCurrentRoom = {
     FloorType.floor1: RoomType.center,
-    FloorType.underground: RoomType.underground_center,
+    FloorType.underground: RoomType.undergroundCenter,
     FloorType.hiddenRoomA: RoomType.hiddenA,
     FloorType.hiddenRoomB: RoomType.hiddenB,
     FloorType.hiddenRoomC: RoomType.hiddenC,
@@ -47,24 +46,22 @@ class FloorTransitionService extends ChangeNotifier {
   
   /// 1階から地下への移動が可能かチェック
   bool canTransitionToUnderground() {
-    final canMove = _currentFloor == FloorType.floor1 &&
-                   currentRoom == RoomType.rightmost;
+    // デバッグ用：地下移動を完全に無条件で許可
+    final isOnFloor1 = _currentFloor == FloorType.floor1;
     
-    // デバッグ用：地下解放条件を一時的に無効化
-    debugPrint('🔍 地下移動チェック:');
+    debugPrint('🔍 地下移動チェック（デバッグモード）:');
     debugPrint('  現在階層: ${_getFloorName(_currentFloor)}');
     debugPrint('  現在部屋: ${RoomUtils.getRoomName(currentRoom)}');
-    debugPrint('  rightmost部屋にいる: ${currentRoom == RoomType.rightmost}');
-    debugPrint('  地下解放状態: ${_isUndergroundUnlocked ? "解放済み" : "未解放"}');
-    debugPrint('  移動可能: $canMove (アイテム条件無視)');
+    debugPrint('  1階にいる: $isOnFloor1');
+    debugPrint('  移動可能: $isOnFloor1 (デバッグ：条件無視)');
     
-    return canMove; // 一時的にアイテム条件を無視
+    return isOnFloor1; // デバッグ用：1階からなら無条件で地下移動可能
   }
   
   /// 地下から1階への移動が可能かチェック
   bool canTransitionToFloor1() {
     return _currentFloor == FloorType.underground &&
-           currentRoom == RoomType.underground_center;
+           currentRoom == RoomType.undergroundCenter;
   }
   
   /// 地下アクセスを解放
@@ -183,7 +180,7 @@ class FloorTransitionService extends ChangeNotifier {
     _isUndergroundUnlocked = false;
     _areStairsUnlocked = false;
     _floorCurrentRoom[FloorType.floor1] = RoomType.center;
-    _floorCurrentRoom[FloorType.underground] = RoomType.underground_center;
+    _floorCurrentRoom[FloorType.underground] = RoomType.undergroundCenter;
     _floorCurrentRoom[FloorType.hiddenRoomA] = RoomType.hiddenA;
     _floorCurrentRoom[FloorType.hiddenRoomB] = RoomType.hiddenB;
     _floorCurrentRoom[FloorType.hiddenRoomC] = RoomType.hiddenC;
@@ -193,11 +190,6 @@ class FloorTransitionService extends ChangeNotifier {
     notifyListeners();
   }
   
-  /// 階層移動アニメーション（プレースホルダー）
-  Future<void> _playTransitionAnimation(FloorType targetFloor) async {
-    // TODO: 実際のアニメーション実装
-    await Future.delayed(const Duration(milliseconds: 500));
-  }
   
   /// 隠し部屋・特殊部屋かどうかをチェック
   bool _isHiddenOrSpecialRoom(RoomType room) {
@@ -205,6 +197,9 @@ class FloorTransitionService extends ChangeNotifier {
            room == RoomType.hiddenB ||
            room == RoomType.hiddenC ||
            room == RoomType.hiddenD ||
+           room == RoomType.hiddenE ||
+           room == RoomType.hiddenF ||
+           room == RoomType.hiddenG ||
            room == RoomType.finalPuzzle;
   }
 

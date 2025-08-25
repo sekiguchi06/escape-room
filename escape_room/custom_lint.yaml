@@ -1,0 +1,7 @@
+# escape-room専用カスタムlint設定
+enable_all_lint_rules: false
+
+# 200行制限に関連する設定
+rules:
+  # ファイルサイズ制限の警告（custom_lintで実装される）
+  file_line_limit: 200

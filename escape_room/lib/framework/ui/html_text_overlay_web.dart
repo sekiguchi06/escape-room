@@ -38,7 +38,7 @@ class HtmlTextOverlay extends Component {
 
   /// HTML要素を作成してDOMに追加
   void _createHtmlElement() {
-    _textElement = web.HTMLDivElement()..text = text;
+    _textElement = web.HTMLDivElement()..textContent = text;
 
     final style = _textElement.style;
     style.position = 'absolute';
@@ -46,7 +46,7 @@ class HtmlTextOverlay extends Component {
     style.top = '${position.y}px';
     style.fontSize = '${fontSize}px';
     style.color =
-        '#${color.value.toRadixString(16).padLeft(8, '0').substring(2)}';
+        '#${color.r.toInt().toRadixString(16).padLeft(2, '0')}${color.g.toInt().toRadixString(16).padLeft(2, '0')}${color.b.toInt().toRadixString(16).padLeft(2, '0')}';
     style.fontFamily =
         'system-ui, -apple-system, "Hiragino Sans", "Yu Gothic Medium", "Meiryo", sans-serif';
     style.pointerEvents = 'none';
@@ -61,7 +61,7 @@ class HtmlTextOverlay extends Component {
   /// テキスト内容を更新
   void updateText(String newText) {
     if (kIsWeb) {
-      _textElement.text = newText;
+      _textElement.textContent = newText;
     }
   }
 

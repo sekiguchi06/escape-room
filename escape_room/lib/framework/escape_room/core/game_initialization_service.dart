@@ -77,7 +77,7 @@ class GameInitializationService {
   void _setupDefaultClearConditions(ClearConditionManager manager) {
     // アイテム収集条件（現在のゲームの実際のアイテム）
     manager.addCondition(
-      ClearCondition(
+      const ClearCondition(
         id: 'collect_basic_items',
         type: ClearConditionType.collectItems,
         description: '基本アイテムを収集する',
@@ -89,7 +89,7 @@ class GameInitializationService {
 
     // ホットスポット探索条件
     manager.addCondition(
-      ClearCondition(
+      const ClearCondition(
         id: 'explore_key_hotspots',
         type: ClearConditionType.interactObjects,
         description: '重要なホットスポットを探索する',
@@ -101,7 +101,7 @@ class GameInitializationService {
 
     // アイテム組み合わせ条件
     manager.addCondition(
-      ClearCondition(
+      const ClearCondition(
         id: 'use_master_key',
         type: ClearConditionType.useItemCombination,
         description: 'マスターキーを使用する',
@@ -116,7 +116,7 @@ class GameInitializationService {
   void _setupDefaultCombinationRules(ItemCombinationManager manager) {
     // マスターキー + 宝箱 = 脱出の鍵
     manager.addCombinationRule(
-      CombinationRule(
+      const CombinationRule(
         id: 'master_key_treasure_chest',
         requiredItems: ['master_key'],
         resultItem: 'escape_key',
@@ -127,7 +127,7 @@ class GameInitializationService {
 
     // 脱出の鍵 + 入り口の扉 = ゲームクリア
     manager.addGimmickRule(
-      GimmickRule(
+      const GimmickRule(
         id: 'escape_key_entrance_door',
         targetObjectId: 'entrance_door',
         requiredItems: ['escape_key'],

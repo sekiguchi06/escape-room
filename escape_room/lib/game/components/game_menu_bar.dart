@@ -90,7 +90,7 @@ class GameMenuBar extends StatelessWidget {
       child: InkWell(
         onTap: onPressed,
         borderRadius: BorderRadius.circular(25),
-        child: Container(
+        child: SizedBox(
           height: 50,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -123,11 +123,11 @@ class GameMenuBar extends StatelessWidget {
             borderRadius: BorderRadius.circular(15),
             side: BorderSide(color: Colors.brown[400]!, width: 2),
           ),
-          title: Row(
+          title: const Row(
             children: [
               Icon(Icons.refresh, color: Colors.white),
-              const SizedBox(width: 8),
-              const Text('ゲームをリスタート', style: TextStyle(color: Colors.white)),
+              SizedBox(width: 8),
+              Text('ゲームをリスタート', style: TextStyle(color: Colors.white)),
             ],
           ),
           content: const Text(

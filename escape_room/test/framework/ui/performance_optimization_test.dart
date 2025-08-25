@@ -204,15 +204,15 @@ void main() {
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(
             body: Column(
               children: [
-                const Text('First'),
+                Text('First'),
                 OptimizedSpacer.vertical16,
-                const Text('Second'),
+                Text('Second'),
                 OptimizedSpacer.vertical24,
-                const Text('Third'),
+                Text('Third'),
               ],
             ),
           ),
@@ -228,7 +228,7 @@ void main() {
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(
             body: Column(
               children: [

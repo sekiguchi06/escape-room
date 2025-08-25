@@ -6,7 +6,7 @@ void main() {
   group('収益化システム分割テスト', () {
     test('Monetization system can be imported and used', () {
       // Test that all classes can be imported and instantiated
-      final config = DefaultMonetizationConfiguration();
+      final config = const DefaultMonetizationConfiguration();
       final provider = MockAdProvider();
       final manager = MonetizationManager(
         provider: provider,

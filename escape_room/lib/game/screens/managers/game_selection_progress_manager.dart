@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../framework/state/game_progress_system.dart';
@@ -23,20 +24,24 @@ class GameSelectionProgressManager with WidgetsBindingObserver {
     _progressManager = ProgressAwareDataManager.defaultInstance();
     await _progressManager!.initialize();
 
-    print('🔍 Progress Manager Debug:');
-    print('  Has Progress: ${_progressManager!.progressManager.hasProgress}');
-    print(
-      '  Current Progress: ${_progressManager!.progressManager.currentProgress}',
-    );
-    if (_progressManager!.progressManager.currentProgress != null) {
-      final progress = _progressManager!.progressManager.currentProgress!;
-      print('  Game ID: ${progress.gameId}');
-      print('  Level: ${progress.currentLevel}');
-      print('  Completion: ${progress.completionRate}');
+    if (kDebugMode) {
+      debugPrint('🔍 Progress Manager Debug:');
+      debugPrint('  Has Progress: ${_progressManager!.progressManager.hasProgress}');
+      debugPrint(
+        '  Current Progress: ${_progressManager!.progressManager.currentProgress}',
+      );
+      if (_progressManager!.progressManager.currentProgress != null) {
+        final progress = _progressManager!.progressManager.currentProgress!;
+        debugPrint('  Game ID: ${progress.gameId}');
+        debugPrint('  Level: ${progress.currentLevel}');
+        debugPrint('  Completion: ${progress.completionRate}');
+      }
     }
 
     _hasProgress = _progressManager!.progressManager.hasProgress;
-    print('🎮 Progress Manager Initialized - Has Progress: $_hasProgress');
+    if (kDebugMode) {
+      debugPrint('🎮 Progress Manager Initialized - Has Progress: $_hasProgress');
+    }
     _onProgressChanged?.call();
   }
 
@@ -49,11 +54,15 @@ class GameSelectionProgressManager with WidgetsBindingObserver {
 
   Future<void> refreshProgressState() async {
     if (_progressManager != null) {
-      print('🔄 Refreshing progress state...');
+      if (kDebugMode) {
+        debugPrint('🔄 Refreshing progress state...');
+      }
       await _progressManager!.progressManager.initialize();
 
       _hasProgress = _progressManager!.progressManager.hasProgress;
-      print('🔄 Progress state refreshed - Has Progress: $_hasProgress');
+      if (kDebugMode) {
+        debugPrint('🔄 Progress state refreshed - Has Progress: $_hasProgress');
+      }
       _onProgressChanged?.call();
     }
   }
@@ -61,11 +70,15 @@ class GameSelectionProgressManager with WidgetsBindingObserver {
   Future<void> startNewGame() async {
     if (_progressManager == null) return;
 
-    print('🆕 Starting new game...');
+    if (kDebugMode) {
+      debugPrint('🆕 Starting new game...');
+    }
 
     if (_hasProgress) {
       await _progressManager!.resetProgress();
-      print('🗑️ Previous progress data deleted');
+      if (kDebugMode) {
+        debugPrint('🗑️ Previous progress data deleted');
+      }
     }
 
     RoomNavigationSystem().resetToInitialRoom();
@@ -74,45 +87,59 @@ class GameSelectionProgressManager with WidgetsBindingObserver {
 
     await _progressManager!.startNewGame('escape_room');
 
-    print('🆕 New game started successfully');
-    print('  Has Progress: ${_progressManager!.progressManager.hasProgress}');
-    print(
-      '  Current Progress: ${_progressManager!.progressManager.currentProgress}',
-    );
+    if (kDebugMode) {
+      debugPrint('🆕 New game started successfully');
+      debugPrint('  Has Progress: ${_progressManager!.progressManager.hasProgress}');
+      debugPrint(
+        '  Current Progress: ${_progressManager!.progressManager.currentProgress}',
+      );
+    }
 
     _hasProgress = _progressManager!.progressManager.hasProgress;
     _onProgressChanged?.call();
   }
 
   Future<GameProgress?> loadSavedGame() async {
-    print('🔄 Loading saved game...');
-    print('  Progress Manager: ${_progressManager != null}');
-    print('  Has Progress: $_hasProgress');
+    if (kDebugMode) {
+      debugPrint('🔄 Loading saved game...');
+      debugPrint('  Progress Manager: ${_progressManager != null}');
+      debugPrint('  Has Progress: $_hasProgress');
+    }
 
     if (_progressManager == null || !_hasProgress) {
-      print('❌ Cannot load: Manager is null or no progress');
+      if (kDebugMode) {
+        debugPrint('❌ Cannot load: Manager is null or no progress');
+      }
       return null;
     }
 
     try {
       final progress = await _progressManager!.continueGame();
 
-      print('🔄 Continue game result: $progress');
+      if (kDebugMode) {
+        debugPrint('🔄 Continue game result: $progress');
+      }
 
       if (progress != null) {
-        print('✅ Progress loaded successfully:');
-        print('  Game ID: ${progress.gameId}');
-        print('  Level: ${progress.currentLevel}');
-        print('  Completion: ${progress.completionRate}');
+        if (kDebugMode) {
+          debugPrint('✅ Progress loaded successfully:');
+          debugPrint('  Game ID: ${progress.gameId}');
+          debugPrint('  Level: ${progress.currentLevel}');
+          debugPrint('  Completion: ${progress.completionRate}');
+        }
 
         _restoreGameState(progress);
         return progress;
       } else {
-        print('❌ Progress is null');
+        if (kDebugMode) {
+          debugPrint('❌ Progress is null');
+        }
         return null;
       }
     } catch (e) {
-      print('❌ Error loading saved game: $e');
+      if (kDebugMode) {
+        debugPrint('❌ Error loading saved game: $e');
+      }
       rethrow;
     }
   }

@@ -70,7 +70,7 @@ class IntegrationTestGame
             duration: config.gameDuration,
             type: TimerType.countdown,
             onComplete: () {
-              final gameOverState = simple_states.SimpleGameOverState();
+              final gameOverState = const simple_states.SimpleGameOverState();
               stateProvider.transitionTo(gameOverState);
             },
           ),
@@ -102,7 +102,7 @@ class IntegrationTestGame
             duration: config.gameDuration,
             type: TimerType.countdown,
             onComplete: () {
-              final gameOverState = simple_states.SimpleGameOverState();
+              final gameOverState = const simple_states.SimpleGameOverState();
               stateProvider.transitionTo(gameOverState);
             },
           ),
@@ -110,7 +110,7 @@ class IntegrationTestGame
         timerManager.startTimer('main');
       } else if (currentState is simple_states.SimpleGameOverState) {
         // リスタート
-        final startState = simple_states.SimpleGameStartState();
+        final startState = const simple_states.SimpleGameStartState();
         stateProvider.transitionTo(startState);
       }
     }
@@ -180,8 +180,8 @@ void main() {
         // テスト用タイマーを作成
         game.timerManager.addTimer(
           'test',
-          TimerConfiguration(
-            duration: const Duration(seconds: 1),
+          const TimerConfiguration(
+            duration: Duration(seconds: 1),
             type: TimerType.countdown,
           ),
         );

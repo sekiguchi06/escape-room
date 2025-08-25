@@ -9,11 +9,11 @@ class FloorIndicatorWidget extends StatefulWidget {
   final VoidCallback? onFloorTap;
   
   const FloorIndicatorWidget({
-    Key? key,
+    super.key,
     required this.currentFloor,
     required this.isUndergroundUnlocked,
     this.onFloorTap,
-  }) : super(key: key);
+  });
 
   @override
   State<FloorIndicatorWidget> createState() => _FloorIndicatorWidgetState();
@@ -49,7 +49,7 @@ class _FloorIndicatorWidgetState extends State<FloorIndicatorWidget>
       decoration: BoxDecoration(
         color: Colors.black87,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.amber.withOpacity(0.3), width: 1),
+        border: Border.all(color: Colors.amber.withValues(alpha: 0.3), width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -65,7 +65,7 @@ class _FloorIndicatorWidgetState extends State<FloorIndicatorWidget>
           Container(
             width: 2,
             height: 24,
-            color: Colors.amber.withOpacity(0.5),
+            color: Colors.amber.withValues(alpha: 0.5),
           ),
           const SizedBox(width: 12),
           _buildFloorIndicator(
@@ -91,7 +91,7 @@ class _FloorIndicatorWidgetState extends State<FloorIndicatorWidget>
         ? Colors.amber 
         : isAccessible 
             ? Colors.white70 
-            : Colors.grey.withOpacity(0.5);
+            : Colors.grey.withValues(alpha: 0.5);
     
     return AnimatedBuilder(
       animation: _scaleAnimation,
@@ -106,7 +106,7 @@ class _FloorIndicatorWidgetState extends State<FloorIndicatorWidget>
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: isActive ? Colors.amber.withOpacity(0.2) : Colors.transparent,
+                color: isActive ? Colors.amber.withValues(alpha: 0.2) : Colors.transparent,
                 borderRadius: BorderRadius.circular(12),
                 border: isActive 
                     ? Border.all(color: Colors.amber, width: 1.5) 
@@ -133,7 +133,7 @@ class _FloorIndicatorWidgetState extends State<FloorIndicatorWidget>
                     const SizedBox(width: 4),
                     Icon(
                       Icons.lock,
-                      color: Colors.grey.withOpacity(0.5),
+                      color: Colors.grey.withValues(alpha: 0.5),
                       size: 14,
                     ),
                   ],
@@ -157,7 +157,7 @@ class _FloorIndicatorWidgetState extends State<FloorIndicatorWidget>
           transitionService.transitionToFloor(FloorType.underground);
           widget.onFloorTap?.call();
         } else {
-          _showCannotTransitionMessage('地下への移動条件が満たされていません\n最右端の部屋で1階をクリアしてください');
+          _showCannotTransitionMessage('地下への移動条件が満たされていません\nデバッグモード：1階にいるかチェックしてください');
         }
         break;
         
@@ -186,7 +186,7 @@ class _FloorIndicatorWidgetState extends State<FloorIndicatorWidget>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(message),
-          backgroundColor: Colors.red.withOpacity(0.8),
+          backgroundColor: Colors.red.withValues(alpha: 0.8),
           duration: const Duration(seconds: 3),
         ),
       );
@@ -201,11 +201,11 @@ class FloorProgressWidget extends StatelessWidget {
   final bool isUndergroundUnlocked;
   
   const FloorProgressWidget({
-    Key? key,
+    super.key,
     required this.currentFloor,
     required this.isFloor1Cleared,
     required this.isUndergroundUnlocked,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -219,7 +219,7 @@ class FloorProgressWidget extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             '進行状況',
             style: TextStyle(
               color: Colors.amber,

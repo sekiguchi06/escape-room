@@ -239,5 +239,120 @@
         "example": "Ranking"
       }
     }
+  },
+  
+  "floor_indicator_1f": "1st Floor",
+  "@floor_indicator_1f": {
+    "description": "1st floor indicator label"
+  },
+  
+  "floor_indicator_underground": "Underground",
+  "@floor_indicator_underground": {
+    "description": "Underground floor indicator label"
+  },
+  
+  "floor_progress_title": "Progress",
+  "@floor_progress_title": {
+    "description": "Floor progress widget title"
+  },
+  
+  "floor_progress_floor1": "1st Floor Exploration",
+  "@floor_progress_floor1": {
+    "description": "1st floor progress label"
+  },
+  
+  "floor_progress_underground": "Underground Exploration",
+  "@floor_progress_underground": {
+    "description": "Underground progress label"
+  },
+  
+  "floor_progress_final": "Final Puzzle",
+  "@floor_progress_final": {
+    "description": "Final puzzle progress label"
+  },
+  
+  "floor_transition_to_underground": "Go to Underground",
+  "@floor_transition_to_underground": {
+    "description": "Transition to underground button"
+  },
+  
+  "floor_transition_to_floor1": "Return to 1st Floor",
+  "@floor_transition_to_floor1": {
+    "description": "Transition to 1st floor button"
+  },
+  
+  "floor_transition_locked": "Not yet unlocked",
+  "@floor_transition_locked": {
+    "description": "Locked floor transition message"
+  },
+  
+  "item_dark_crystal_name": "Dark Crystal",
+  "@item_dark_crystal_name": {
+    "description": "Dark crystal item name"
+  },
+  
+  "item_dark_crystal_description": "A crystal emitting dark light found deep underground. Seems to have been used in some ritual.",
+  "@item_dark_crystal_description": {
+    "description": "Dark crystal item description"
+  },
+  
+  "item_ritual_stone_name": "Ritual Stone",
+  "@item_ritual_stone_name": {
+    "description": "Ritual stone item name"
+  },
+  
+  "item_ritual_stone_description": "A mystical stone that appears to have been used in ancient rituals. It emits a warm glow.",
+  "@item_ritual_stone_description": {
+    "description": "Ritual stone item description"
+  },
+  
+  "item_pure_water_name": "Pure Water",
+  "@item_pure_water_name": {
+    "description": "Pure water item name"
+  },
+  
+  "item_pure_water_description": "Clear, clean water that springs from underground sources. It might possess sacred power.",
+  "@item_pure_water_description": {
+    "description": "Pure water item description"
+  },
+  
+  "item_ancient_rune_name": "Ancient Rune",
+  "@item_ancient_rune_name": {
+    "description": "Ancient rune item name"
+  },
+  
+  "item_ancient_rune_description": "An ancient stone tablet with mysterious script carved into it. It contains powerful magical force.",
+  "@item_ancient_rune_description": {
+    "description": "Ancient rune item description"
+  },
+  
+  "item_underground_key_name": "Underground Key",
+  "@item_underground_key_name": {
+    "description": "Underground key item name"
+  },
+  
+  "item_underground_key_description": "A heavy key discovered deep underground. It seems to be able to open special doors.",
+  "@item_underground_key_description": {
+    "description": "Underground key item description"
+  },
+  
+  "item_underground_master_key_name": "Underground Master Key",
+  "@item_underground_master_key_name": {
+    "description": "Underground master key item name"
+  },
+  
+  "item_underground_master_key_description": "A special key born from the fusion of three powers. It can open doors to the deepest parts of the underground.",
+  "@item_underground_master_key_description": {
+    "description": "Underground master key item description"
+  },
+  
+  "combination_underground_master_key": "Combined the three underground powers to create a special key",
+  "@combination_underground_master_key": {
+    "description": "Underground master key combination message"
+  },
+  
+  "combination_underground_master_key_description": "The powers of the dark crystal, ritual stone, and pure water have fused to complete the underground master key.",
+  "@combination_underground_master_key_description": {
+    "description": "Underground master key combination description"
   }
 }

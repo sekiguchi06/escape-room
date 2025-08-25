@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
-import '../lib/game/components/inventory_system.dart';
+import 'package:escape_room/game/components/inventory_system.dart';
 
 void main() {
   group('アイテム組み合わせシステムテスト', () {

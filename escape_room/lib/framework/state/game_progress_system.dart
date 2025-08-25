@@ -321,10 +321,6 @@ class GameProgressManager extends ChangeNotifier {
     };
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
 }
 
 /// 進行度管理のユーティリティ
@@ -342,9 +338,9 @@ class GameProgressUtils {
     final remainingSeconds = seconds % 60;
 
     if (hours > 0) {
-      return '${hours}:${minutes.toString().padLeft(2, '0')}:${remainingSeconds.toString().padLeft(2, '0')}';
+      return '$hours:${minutes.toString().padLeft(2, '0')}:${remainingSeconds.toString().padLeft(2, '0')}';
     } else {
-      return '${minutes}:${remainingSeconds.toString().padLeft(2, '0')}';
+      return '$minutes:${remainingSeconds.toString().padLeft(2, '0')}';
     }
   }
 

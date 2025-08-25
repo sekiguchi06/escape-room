@@ -18,8 +18,8 @@ class ModalComponent extends PositionComponent with TapCallbacks {
   ModalDisplayStrategy? _strategy;
 
   // エフェクトマネージャーの参照
-  ConcentrationLinesManager? _concentrationLinesManager;
-  ParticleEffectManager? _particleEffectManager;
+  final ConcentrationLinesManager? _concentrationLinesManager;
+  final ParticleEffectManager? _particleEffectManager;
 
   bool _isVisible = false;
 
