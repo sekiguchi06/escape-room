@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class AudioAssets {
   static const String decisionButton = 'decision_button.mp3';
   static const String close = 'close.mp3';                         // 閉じる音（新規追加）
+  static const String walk = 'walk.mp3';                           // 歩く音（新規追加）
   static const String ambientExploration = 'decision_button.mp3';  // 暫定的にdecision_button.mp3を使用
   static const String buttonPress = 'decision_button.mp3';         // 暫定的にdecision_button.mp3を使用
   static const String itemGet = 'decision_button.mp3';             // 暫定的にdecision_button.mp3を使用

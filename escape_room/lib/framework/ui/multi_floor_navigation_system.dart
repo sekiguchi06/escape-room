@@ -3,6 +3,7 @@ import '../escape_room/core/room_types.dart';
 import '../escape_room/core/floor_transition_service.dart';
 import '../../game/components/game_background.dart';
 import '../../gen/assets.gen.dart';
+import '../audio/audio_service.dart';
 
 /// 多階層対応ナビゲーションシステム
 class MultiFloorNavigationSystem extends ChangeNotifier {
@@ -56,6 +57,9 @@ class MultiFloorNavigationSystem extends ChangeNotifier {
   void moveLeft() {
     debugPrint('⬅️ 左移動ボタン押下（現在: $currentRoomName）');
     if (canMoveLeft) {
+      // 歩く音を再生
+      AudioService().playSFX(AudioAssets.walk);
+      
       _floorService.moveLeft();
       notifyListeners();
     } else {
@@ -67,6 +71,9 @@ class MultiFloorNavigationSystem extends ChangeNotifier {
   void moveRight() {
     debugPrint('➡️ 右移動ボタン押下（現在: $currentRoomName）');
     if (canMoveRight) {
+      // 歩く音を再生
+      AudioService().playSFX(AudioAssets.walk);
+      
       _floorService.moveRight();
       notifyListeners();
     } else {
@@ -143,6 +150,9 @@ class MultiFloorNavigationSystem extends ChangeNotifier {
       default:
         return;
     }
+    
+    // 歩く音を再生（隠し部屋からの下移動）
+    AudioService().playSFX(AudioAssets.walk);
     
     // 同一階層内での部屋移動
     moveToRoom(targetRoom);

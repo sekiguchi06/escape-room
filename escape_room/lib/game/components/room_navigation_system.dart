@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'game_background.dart';
 import '../../gen/assets.gen.dart';
 import '../../framework/escape_room/core/room_types.dart';
+import '../../framework/audio/audio_service.dart';
 
 /// 部屋ナビゲーションシステム
 class RoomNavigationSystem extends ChangeNotifier {
@@ -107,6 +108,9 @@ class RoomNavigationSystem extends ChangeNotifier {
         return; // 隠し部屋は左右移動不可
     }
 
+    // 歩く音を再生
+    AudioService().playSFX(AudioAssets.walk);
+    
     notifyListeners();
     debugPrint('🔙 左に移動: ${_getRoomName()}');
   }
@@ -151,6 +155,9 @@ class RoomNavigationSystem extends ChangeNotifier {
         return; // 隠し部屋は左右移動不可
     }
 
+    // 歩く音を再生
+    AudioService().playSFX(AudioAssets.walk);
+    
     notifyListeners();
     debugPrint('🔜 右に移動: ${_getRoomName()}');
   }

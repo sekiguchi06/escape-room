@@ -262,6 +262,20 @@ JQL: status = 10003 AND labels NOT IN ("human-intervention-required")
 2. 残作業をAIが継続実行
 3. または新規サブタスクとして分割
 
+## 🔊 オーディオシステムの重要制約
+
+### FlameAudio必須制約
+**FlameAudioパッケージは`assets/audio/`ディレクトリを強制します。**
+- `assets/sounds/`や他のディレクトリは**エラーになります**
+- 詳細：`escape_room/docs/AUDIO_SYSTEM_CONSTRAINTS.md`参照
+
+### オーディオファイル追加時の必須ルール
+1. **必ず`assets/audio/`に配置**
+2. **FlameAudioではファイル名のみで再生**
+   ```dart
+   await FlameAudio.play('sound.mp3'); // パス不要
+   ```
+
 ## 脱出ゲーム開発プロジェクト設定
 
 ### プロジェクト概要
