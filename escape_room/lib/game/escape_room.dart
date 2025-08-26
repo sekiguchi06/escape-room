@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flame/game.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flame_audio/flame_audio.dart';
 import '../framework/escape_room/core/escape_room_game.dart';
 import 'components/inventory_widget.dart';
 import 'components/game_menu_bar.dart';
@@ -11,11 +13,12 @@ import 'components/lighting_system.dart';
 import 'components/room_indicator.dart';
 import 'components/floor_indicator.dart';
 import '../framework/ui/multi_floor_navigation_system.dart';
+import '../framework/escape_room/core/room_types.dart';
 import 'widgets/custom_game_clear_ui.dart';
 import '../framework/escape_room/state/escape_room_state_riverpod.dart';
 import 'components/inventory_system.dart';
 import '../framework/ui/item_notification_overlay.dart';
-import '../framework/state/game_autosave_system.dart';
+import '../framework/state/game_manual_save_system.dart';
 
 /// 新アーキテクチャ Escape Room ゲーム
 /// 🎯 目的: 縦画面固定設定付きブラウザ動作確認
@@ -29,6 +32,10 @@ class EscapeRoom extends ConsumerStatefulWidget {
 class _EscapeRoomState extends ConsumerState<EscapeRoom> {
   late EscapeRoomGame _game;
   ProgressAwareDataManager? _progressManager;
+  
+  // BGM管理用変数
+  FloorType? _currentFloor;
+  bool _isBgmPlaying = false;
 
   @override
   void initState() {
@@ -47,6 +54,9 @@ class _EscapeRoomState extends ConsumerState<EscapeRoom> {
 
     // ゲーム開始時間を記録（クリア時間計算用）
     _gameStartTime = DateTime.now();
+    
+    // FlameAudio BGM公式推奨初期化 + 階層変化監視
+    _initializeBgmSystem();
     
     // デバッグ用案内メッセージ
     Future.delayed(const Duration(seconds: 2), () {
@@ -134,6 +144,9 @@ class _EscapeRoomState extends ConsumerState<EscapeRoom> {
 
   @override
   void dispose() {
+    // BGMシステムを停止（公式推奨：dispose()は完全終了時のみ）
+    _stopFloorBgmSystem();
+    
     // ゲームイベントリスナーを削除
     InventorySystem().removeListener(_onInventoryChanged);
 
@@ -312,6 +325,240 @@ class _EscapeRoomState extends ConsumerState<EscapeRoom> {
     // ゲームの状態をリセット（EscapeRoomGameの初期状態に戻す）
     final stateNotifier = _game.stateNotifier;
     stateNotifier.resetToExploring();
+    
+    // BGMシステムもリセット
+    _initializeFloorBgmSystem();
+  }
+
+  /// 公式推奨：FlameAudio BGMシステム初期化
+  void _initializeBgmSystem() async {
+    try {
+      // 1. 公式推奨：BGMシステム初期化
+      await FlameAudio.bgm.initialize();
+      debugPrint('✅ FlameAudio BGM初期化完了');
+      
+      // 2. 階層別BGMシステムの初期化
+      _initializeFloorBgmSystem();
+    } catch (e) {
+      debugPrint('❌ BGM初期化エラー: $e');
+    }
+  }
+  
+  void _initializeFloorBgmSystem() {
+    debugPrint('🎵 階層別BGMシステム初期化開始');
+    final navigationSystem = MultiFloorNavigationSystem();
+    _currentFloor = navigationSystem.currentFloor;
+    
+    // BGM状態をリセット（新しいゲームセッション）
+    _isBgmPlaying = false;
+    
+    debugPrint('🎵 初期階層: ${_floorName(_currentFloor)}');
+    
+    // スタート画面からの遷移を考慮してBGMを開始
+    Future.delayed(const Duration(milliseconds: 1200), () {
+      _updateBgmForCurrentFloor();
+    });
+    
+    // 階層変化を監視
+    navigationSystem.addListener(_onFloorChanged);
+    debugPrint('✅ 階層別BGMシステム初期化完了');
+  }
+  
+  /// FlameAudioの動作テスト（iOS確認用）
+  void _testFlameAudio() async {
+    try {
+      debugPrint('🔧 FlameAudio動作テスト開始');
+      // 短い効果音で動作確認
+      await FlameAudio.play('close.mp3', volume: 0.5);
+      debugPrint('✅ FlameAudio動作テスト成功');
+    } catch (e) {
+      debugPrint('❌ FlameAudio動作テスト失敗: $e');
+    }
+  }
+  
+  /// 階層変化時のコールバック
+  void _onFloorChanged() {
+    final navigationSystem = MultiFloorNavigationSystem();
+    final newFloor = navigationSystem.currentFloor;
+    
+    if (_currentFloor != newFloor) {
+      debugPrint('🎵 階層変化を検出: ${_floorName(_currentFloor)} → ${_floorName(newFloor)}');
+      
+      // 強制的に現在のBGMを停止
+      _forceStopCurrentBgm();
+      
+      // 階層を更新
+      _currentFloor = newFloor;
+      
+      // 少し待ってから新しいBGMを開始
+      Future.delayed(const Duration(milliseconds: 300), () {
+        _updateBgmForCurrentFloor();
+      });
+    }
+  }
+  
+  /// 公式推奨：BGM停止
+  void _forceStopCurrentBgm() async {
+    try {
+      debugPrint('🔇 BGM停止開始');
+      await FlameAudio.bgm.stop();
+      _isBgmPlaying = false;
+      debugPrint('✅ BGM停止完了');
+    } catch (e) {
+      debugPrint('❌ BGM停止エラー: $e');
+      _isBgmPlaying = false;
+    }
+  }
+  
+  /// ベストプラクティス：Timer.periodicでBGMフェードアウト（1秒間）
+  Future<void> _fadeOutCurrentBgm() async {
+    if (!_isBgmPlaying) {
+      debugPrint('🔇 BGM再生中ではないためフェードアウトスキップ');
+      return;
+    }
+    
+    try {
+      debugPrint('🔇 BGMフェードアウト開始（1秒間）');
+      
+      const Duration fadeDuration = Duration(milliseconds: 1000);
+      const Duration updateInterval = Duration(milliseconds: 50);
+      const double initialVolume = 0.5;
+      
+      int totalSteps = fadeDuration.inMilliseconds ~/ updateInterval.inMilliseconds;
+      int currentStep = 0;
+      
+      final completer = Completer<void>();
+      
+      Timer.periodic(updateInterval, (timer) {
+        currentStep++;
+        double remainingPercent = 1.0 - (currentStep / totalSteps);
+        double targetVolume = initialVolume * remainingPercent;
+        
+        if (targetVolume < 0) targetVolume = 0;
+        
+        try {
+          // FlameAudio.bgmの音量を段階的に下げる
+          FlameAudio.bgm.audioPlayer.setVolume(targetVolume);
+        } catch (volumeError) {
+          debugPrint('⚠️ 音量制御エラー (step $currentStep): $volumeError');
+        }
+        
+        if (currentStep >= totalSteps) {
+          timer.cancel();
+          completer.complete();
+        }
+      });
+      
+      // フェードアウト完了を待機
+      await completer.future;
+      
+      // 最後に停止
+      await FlameAudio.bgm.stop();
+      debugPrint('✅ フェードアウト停止完了');
+    } catch (e) {
+      // エラー時は通常の停止を試行
+      debugPrint('❌ フェードアウト失敗、通常停止に切り替え: $e');
+      await FlameAudio.bgm.stop();
+    }
+  }
+  
+  /// 現在の階層に応じてBGMを更新（共通関数使用）
+  void _updateBgmForCurrentFloor() async {
+    debugPrint('🎵 BGM更新開始: 階層=${_floorName(_currentFloor)}');
+    
+    // 階層に応じたBGMファイルを決定
+    String? bgmFile;
+    switch (_currentFloor) {
+      case FloorType.floor1:
+        bgmFile = 'misty_dream.mp3';
+        debugPrint('🎵 1階BGM選択: 霧の中の夢');
+        break;
+        
+      case FloorType.underground:
+        bgmFile = 'swimming_fish_dream.mp3';
+        debugPrint('🎵 地下BGM選択: 夢の中を泳ぐ魚');
+        break;
+        
+      default:
+        bgmFile = null; // 無音
+        debugPrint('🔇 BGM選択: 無音 (${_floorName(_currentFloor)})');
+        break;
+    }
+    
+    // 共通BGM切り替え関数を使用（非同期実行で画面遷移をブロックしない）
+    _switchBgmWithFadeOut(bgmFile);
+    debugPrint('✅ BGM切り替え開始（階層遷移）');
+  }
+  
+  /// 階層名を取得（デバッグ用）
+  String _floorName(FloorType? floor) {
+    switch (floor) {
+      case FloorType.floor1:
+        return '1階';
+      case FloorType.underground:
+        return '地下';
+      case null:
+        return '不明';
+      default:
+        return floor.toString();
+    }
+  }
+  
+  /// BGMシステムを停止（dispose時）安全な停止方法
+  void _stopFloorBgmSystem() async {
+    try {
+      MultiFloorNavigationSystem().removeListener(_onFloorChanged);
+      
+      // loopLongAudioの場合はbgm.stopではなく、より安全な方法を使用
+      if (_isBgmPlaying) {
+        await _stopCurrentBgmSafely();
+      }
+      
+      _isBgmPlaying = false;
+      debugPrint('🔇 階層BGMシステム停止完了');
+    } catch (e) {
+      debugPrint('❌ BGMシステム停止エラー: $e');
+    }
+  }
+  
+  /// 共通BGM切り替え関数（フェードアウト→1秒後→新BGM開始）
+  Future<void> _switchBgmWithFadeOut(String? newBgmFile) async {
+    try {
+      // フェードアウト開始
+      if (_isBgmPlaying) {
+        debugPrint('🔇 BGMフェードアウト開始（共通関数）');
+        _fadeOutCurrentBgm(); // 非同期実行
+      }
+      
+      _isBgmPlaying = false;
+      debugPrint('✅ フェードアウト開始完了');
+      
+      // 統一タイミング：0.8秒待機
+      await Future.delayed(const Duration(milliseconds: 800));
+      
+      // 新しいBGMを開始（nullの場合は無音）
+      if (newBgmFile != null) {
+        await FlameAudio.bgm.play(newBgmFile, volume: 0.5);
+        _isBgmPlaying = true;
+        debugPrint('✅ 新BGM開始成功: $newBgmFile');
+      } else {
+        debugPrint('🔇 無音状態を継続');
+      }
+    } catch (e) {
+      debugPrint('❌ BGM切り替えエラー: $e');
+      _isBgmPlaying = false;
+    }
+  }
+  
+  /// 公式推奨：BGM停止
+  Future<void> _stopCurrentBgmSafely() async {
+    try {
+      // 公式推奨：FlameAudio.bgm.stop()でBGM停止
+      await FlameAudio.bgm.stop();
+      debugPrint('✅ BGM停止完了');
+    } catch (e) {
+      debugPrint('⚠️ BGM停止エラー: $e');
+    }
   }
 
   /// ゲーム状態を監視してクリア画面を表示
