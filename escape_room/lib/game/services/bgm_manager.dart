@@ -15,6 +15,7 @@ class BgmManager extends ChangeNotifier {
 
   FloorType? _currentFloor;
   bool _isBgmPlaying = false;
+  bool _isDisabled = false; // BGMマネージャーを無効化するフラグ
 
   bool get isBgmPlaying => _isBgmPlaying;
   FloorType? get currentFloor => _currentFloor;
@@ -44,8 +45,19 @@ class BgmManager extends ChangeNotifier {
     }
   }
 
+  /// BGMマネージャーを無効化（ホームボタン使用時）
+  void disable() {
+    _isDisabled = true;
+    debugPrint('🔇 BGMマネージャー無効化');
+  }
+
   /// 階層変化時の処理
   void onFloorChanged(FloorType newFloor) {
+    if (_isDisabled) {
+      debugPrint('🔇 BGMマネージャー無効化中のため階層変化をスキップ');
+      return;
+    }
+    
     if (_currentFloor != newFloor) {
       debugPrint('🎵 階層変化を検出: ${_floorName(_currentFloor)} → ${_floorName(newFloor)}');
       
@@ -57,7 +69,9 @@ class BgmManager extends ChangeNotifier {
       
       // 少し待ってから新しいBGMを開始
       Future.delayed(const Duration(milliseconds: 300), () {
-        _updateBgmForCurrentFloor();
+        if (!_isDisabled) {
+          _updateBgmForCurrentFloor();
+        }
       });
     }
   }

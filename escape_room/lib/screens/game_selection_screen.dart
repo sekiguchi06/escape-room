@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flame_audio/flame_audio.dart';
@@ -36,16 +37,40 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen>
     );
     _progressManager.initialize();
     
-    // BGM開始（ループ再生）
-    _startBackgroundMusic();
+    // BGM開始（画面表示後に確実実行）
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _forceResetBGM();
+    });
+    
+    // 定期的にBGMをチェックして修正
+    Timer.periodic(Duration(milliseconds: 500), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+      if (!FlameAudio.bgm.isPlaying) {
+        FlameAudio.bgm.play('moonlight.mp3', volume: 0.5);
+      }
+    });
   }
   
+  /// FlameAudio公式実装：BGMリセット
+  void _forceResetBGM() async {
+    try {
+      // 公式実装：play()のみ（自動で前のBGMが停止される）
+      await FlameAudio.bgm.play('moonlight.mp3', volume: 0.5);
+      debugPrint('✅ スタート画面BGM設定完了（公式実装）');
+    } catch (e) {
+      debugPrint('❌ BGM設定エラー: $e');
+    }
+  }
+
   /// 公式推奨：スタート画面BGM開始
   void _startBackgroundMusic() async {
     try {
-      // 公式推奨：FlameAudio.bgm.play()でBGM再生
+      // 公式実装：直接BGMを再生（自動で前のBGMが停止）
       await FlameAudio.bgm.play('moonlight.mp3', volume: 0.5);
-      debugPrint('🎵 スタート画面BGM開始: moonlight.mp3 (音量: 0.5)');
+      debugPrint('🎵 スタート画面BGM開始: moonlight.mp3');
     } catch (e) {
       debugPrint('❌ BGM再生エラー: $e');
     }

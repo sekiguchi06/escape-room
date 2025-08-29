@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flame_audio/flame_audio.dart';
 import 'hint_dialog.dart';
+import '../services/bgm_manager.dart';
 import '../escape_room.dart';
 import 'room_navigation_system.dart';
 import 'lighting_system.dart';
@@ -44,9 +46,12 @@ class GameMenuBar extends StatelessWidget {
               _buildMenuButton(
                 icon: Icons.home,
                 label: 'ホーム',
-                onPressed: () {
+                onPressed: () async {
                   debugPrint('🏠 Home pressed - Going to game start screen');
-                  // ゲームスタート画面（GameSelectionScreen）に戻る
+                  // BGMマネージャーを無効化してスタート画面BGMを設定
+                  BgmManager().disable();
+                  await FlameAudio.bgm.play('moonlight.mp3', volume: 0.5);
+                  // 画面遷移
                   Navigator.of(context).pop();
                 },
               ),

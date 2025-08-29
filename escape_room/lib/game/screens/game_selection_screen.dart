@@ -117,6 +117,8 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen>
                               subtitle: '',
                               color: Colors.green.shade600,
                               onPressed: () async {
+                                // タップ音追加
+                                FlameAudio.play('decision_button.mp3', volume: 0.3);
                                 DeviceFeedbackManager().gameActionVibrate(
                                   GameAction.buttonTap,
                                 );
@@ -145,6 +147,8 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen>
                                   : Colors.grey.shade600,
                               onPressed: _progressManager.hasProgress
                                   ? () async {
+                                      // タップ音追加
+                                      FlameAudio.play('decision_button.mp3', volume: 0.3);
                                       DeviceFeedbackManager().gameActionVibrate(
                                         GameAction.buttonTap,
                                       );
@@ -167,6 +171,8 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen>
                               subtitle: '',
                               color: Colors.orange.shade600,
                               onPressed: () {
+                                // タップ音追加
+                                FlameAudio.play('decision_button.mp3', volume: 0.3);
                                 DeviceFeedbackManager().gameActionVibrate(
                                   GameAction.buttonTap,
                                 );

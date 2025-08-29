@@ -12,9 +12,9 @@ class GameSelectionNavigationManager {
   GameSelectionNavigationManager({required this.progressManager});
 
   Future<void> startNewGame(BuildContext context) async {
-    // FlameAudio公式：画面遷移前にBGMを停止（単純なstop()使用）
-    debugPrint('🎵 GameSelectionNavigationManager: Stopping start screen BGM before game start');
-    await FlameAudio.bgm.stop();
+    // BGM停止せずにゲーム画面で直接切り替え（無音期間を防ぐため）
+    debugPrint('🎵 GameSelectionNavigationManager: BGM停止なしでゲーム画面遷移');
+    // await FlameAudio.bgm.stop(); // 無効化：無音期間を防ぐため
     
     await progressManager.startNewGame();
 
@@ -30,8 +30,8 @@ class GameSelectionNavigationManager {
       final progress = await progressManager.loadSavedGame();
 
       if (progress != null) {
-        // FlameAudio公式：BGMを停止してから画面遷移
-        await FlameAudio.bgm.stop();
+        // BGM停止せずにゲーム画面で直接切り替え（無音期間を防ぐため）
+        // await FlameAudio.bgm.stop(); // 無効化：無音期間を防ぐため
         
         if (context.mounted) {
           Navigator.of(context).pushFade(const EscapeRoom()).then((_) {

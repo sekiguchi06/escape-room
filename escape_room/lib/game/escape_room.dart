@@ -397,16 +397,16 @@ class _EscapeRoomState extends ConsumerState<EscapeRoom> {
     }
   }
   
-  /// 公式推奨：BGM停止
+  /// 公式推奨：BGM停止（無効化済み - ホームボタンBGM切り替えのため）
   void _forceStopCurrentBgm() async {
     try {
-      debugPrint('🔇 BGM停止開始');
-      await FlameAudio.bgm.stop();
-      _isBgmPlaying = false;
-      debugPrint('✅ BGM停止完了');
+      debugPrint('🔇 BGM停止呼び出し - 無効化済みのためスキップ');
+      // await FlameAudio.bgm.stop(); // 無効化：ホームボタンでの切り替えを妨害するため
+      // _isBgmPlaying = false;
+      debugPrint('✅ BGM停止スキップ完了');
     } catch (e) {
       debugPrint('❌ BGM停止エラー: $e');
-      _isBgmPlaying = false;
+      // _isBgmPlaying = false;
     }
   }
   
@@ -493,12 +493,12 @@ class _EscapeRoomState extends ConsumerState<EscapeRoom> {
     }
   }
   
-  /// 公式推奨：BGM停止
+  /// 公式推奨：BGM停止（無効化済み - ホームボタンBGM切り替えのため）
   Future<void> _stopCurrentBgmSafely() async {
     try {
-      // 公式推奨：FlameAudio.bgm.stop()でBGM停止
-      await FlameAudio.bgm.stop();
-      debugPrint('✅ BGM停止完了');
+      debugPrint('🔇 BGM停止呼び出し - 無効化済みのためスキップ');
+      // await FlameAudio.bgm.stop(); // 無効化：ホームボタンでの切り替えを妨害するため
+      debugPrint('✅ BGM停止スキップ完了');
     } catch (e) {
       debugPrint('⚠️ BGM停止エラー: $e');
     }
