@@ -20,6 +20,7 @@ class ResponsiveHotspotComponent extends HotspotComponent {
     required this.relativeSize,
     super.invisible = true,    // デフォルトで透明
     super.debugMode,
+    super.hotspotNumber,       // ホットスポット番号
   }) : super(
     position: Vector2.zero(), // 初期値、updateForScreenSizeで更新
     size: Vector2.zero(),

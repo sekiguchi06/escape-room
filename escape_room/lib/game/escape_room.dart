@@ -36,6 +36,7 @@ class _EscapeRoomState extends ConsumerState<EscapeRoom> {
   // BGM管理用変数
   FloorType? _currentFloor;
   bool _isBgmPlaying = false;
+  String? _currentBgmFile;
 
   @override
   void initState() {
@@ -330,14 +331,13 @@ class _EscapeRoomState extends ConsumerState<EscapeRoom> {
     _initializeFloorBgmSystem();
   }
 
-  /// 公式推奨：FlameAudio BGMシステム初期化
+  /// BGMシステム初期化（app.dartで初期化済みのため階層システムのみ）
   void _initializeBgmSystem() async {
     try {
-      // 1. 公式推奨：BGMシステム初期化
-      await FlameAudio.bgm.initialize();
-      debugPrint('✅ FlameAudio BGM初期化完了');
+      // FlameAudio.bgm.initialize() - app.dartで一元管理済み（重複削除）
+      debugPrint('✅ FlameAudio BGM - app.dartで初期化済み');
       
-      // 2. 階層別BGMシステムの初期化
+      // 階層別BGMシステムの初期化
       _initializeFloorBgmSystem();
     } catch (e) {
       debugPrint('❌ BGM初期化エラー: $e');
@@ -410,57 +410,7 @@ class _EscapeRoomState extends ConsumerState<EscapeRoom> {
     }
   }
   
-  /// ベストプラクティス：Timer.periodicでBGMフェードアウト（1秒間）
-  Future<void> _fadeOutCurrentBgm() async {
-    if (!_isBgmPlaying) {
-      debugPrint('🔇 BGM再生中ではないためフェードアウトスキップ');
-      return;
-    }
-    
-    try {
-      debugPrint('🔇 BGMフェードアウト開始（1秒間）');
-      
-      const Duration fadeDuration = Duration(milliseconds: 1000);
-      const Duration updateInterval = Duration(milliseconds: 50);
-      const double initialVolume = 0.5;
-      
-      int totalSteps = fadeDuration.inMilliseconds ~/ updateInterval.inMilliseconds;
-      int currentStep = 0;
-      
-      final completer = Completer<void>();
-      
-      Timer.periodic(updateInterval, (timer) {
-        currentStep++;
-        double remainingPercent = 1.0 - (currentStep / totalSteps);
-        double targetVolume = initialVolume * remainingPercent;
-        
-        if (targetVolume < 0) targetVolume = 0;
-        
-        try {
-          // FlameAudio.bgmの音量を段階的に下げる
-          FlameAudio.bgm.audioPlayer.setVolume(targetVolume);
-        } catch (volumeError) {
-          debugPrint('⚠️ 音量制御エラー (step $currentStep): $volumeError');
-        }
-        
-        if (currentStep >= totalSteps) {
-          timer.cancel();
-          completer.complete();
-        }
-      });
-      
-      // フェードアウト完了を待機
-      await completer.future;
-      
-      // 最後に停止
-      await FlameAudio.bgm.stop();
-      debugPrint('✅ フェードアウト停止完了');
-    } catch (e) {
-      // エラー時は通常の停止を試行
-      debugPrint('❌ フェードアウト失敗、通常停止に切り替え: $e');
-      await FlameAudio.bgm.stop();
-    }
-  }
+  // 複雑フェードシステム削除 - FlameAudio公式統一により不要
   
   /// 現在の階層に応じてBGMを更新（共通関数使用）
   void _updateBgmForCurrentFloor() async {
@@ -486,7 +436,7 @@ class _EscapeRoomState extends ConsumerState<EscapeRoom> {
     }
     
     // 共通BGM切り替え関数を使用（非同期実行で画面遷移をブロックしない）
-    _switchBgmWithFadeOut(bgmFile);
+    _switchBgmSimple(bgmFile);
     debugPrint('✅ BGM切り替え開始（階層遷移）');
   }
   
@@ -521,28 +471,21 @@ class _EscapeRoomState extends ConsumerState<EscapeRoom> {
     }
   }
   
-  /// 共通BGM切り替え関数（フェードアウト→1秒後→新BGM開始）
-  Future<void> _switchBgmWithFadeOut(String? newBgmFile) async {
+  /// FlameAudio公式統一：シンプルBGM切り替え
+  Future<void> _switchBgmSimple(String? newBgmFile) async {
     try {
-      // フェードアウト開始
-      if (_isBgmPlaying) {
-        debugPrint('🔇 BGMフェードアウト開始（共通関数）');
-        _fadeOutCurrentBgm(); // 非同期実行
-      }
+      // 公式推奨：stop() -> play() パターン
+      debugPrint('🎵 BGM切り替え開始: $_currentBgmFile -> $newBgmFile');
+      await FlameAudio.bgm.stop();
       
-      _isBgmPlaying = false;
-      debugPrint('✅ フェードアウト開始完了');
-      
-      // 統一タイミング：0.8秒待機
-      await Future.delayed(const Duration(milliseconds: 800));
-      
-      // 新しいBGMを開始（nullの場合は無音）
       if (newBgmFile != null) {
         await FlameAudio.bgm.play(newBgmFile, volume: 0.5);
+        _currentBgmFile = newBgmFile;
         _isBgmPlaying = true;
-        debugPrint('✅ 新BGM開始成功: $newBgmFile');
+        debugPrint('✅ 新BGM開始: $newBgmFile');
       } else {
-        debugPrint('🔇 無音状態を継続');
+        _isBgmPlaying = false;
+        debugPrint('🔇 BGM停止状態');
       }
     } catch (e) {
       debugPrint('❌ BGM切り替えエラー: $e');

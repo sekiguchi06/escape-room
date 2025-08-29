@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -43,6 +44,13 @@ class AudioService {
   double _sfxVolume = 0.8;
   double _uiVolume = 1.0;
   bool _isMuted = false;
+  
+  // BGMフェード機能用
+  Timer? _fadeTimer;
+  bool _isFading = false;
+  double _currentBGMVolume = 0.6;
+  String? _currentBGMFile;
+  String? _pendingBGMFile;
 
   /// 初期化
   Future<void> initialize() async {
@@ -90,30 +98,171 @@ class AudioService {
     }
   }
 
-  /// BGMを再生
+  /// BGMを再生（従来互換・即座に切り替え）
+  /// 推奨：switchBGMWithFade() を使用してスムーズな切り替えを
   Future<void> playBGM(String fileName, {double? volume, bool loop = true}) async {
     if (!_isInitialized || _isMuted) return;
     
     try {
+      // 既存のフェードタイマーをキャンセル
+      _fadeTimer?.cancel();
+      _fadeTimer = null;
+      _isFading = false;
+      
       final effectiveVolume = (volume ?? _bgmVolume) * _masterVolume;
       if (loop) {
-        await FlameAudio.loopLongAudio(fileName, volume: effectiveVolume);
+        await FlameAudio.bgm.play(fileName, volume: effectiveVolume);
       } else {
         await FlameAudio.play(fileName, volume: effectiveVolume);
       }
+      
+      // 状態管理を更新
+      _currentBGMFile = fileName;
+      _currentBGMVolume = volume ?? _bgmVolume;
+      
       debugPrint('🎵 BGM played: $fileName (volume: ${effectiveVolume.toStringAsFixed(2)}, loop: $loop)');
     } catch (e) {
       debugPrint('❌ BGM failed: $fileName - $e');
+      _currentBGMFile = null;
     }
   }
 
   /// BGMを停止
   Future<void> stopBGM() async {
     try {
+      // フェードタイマーをキャンセル
+      _fadeTimer?.cancel();
+      _fadeTimer = null;
+      _isFading = false;
+      
       FlameAudio.bgm.stop();
+      _currentBGMFile = null;
+      _currentBGMVolume = _bgmVolume;
       debugPrint('🎵 BGM stopped');
     } catch (e) {
       debugPrint('❌ BGM stop failed: $e');
+    }
+  }
+
+  /// 【統一BGM切り替え関数】
+  /// 現在のBGMを1.0秒でフェードアウト後、新しいBGMを元音量で再生
+  /// 
+  /// [newBGMFile] 新しいBGMファイル名（空文字列の場合は停止のみ）
+  /// [fadeOutDuration] フェードアウト時間（デフォルト1.0秒）
+  /// [targetVolume] 新BGMの目標音量（デフォルトは設定されたBGM音量）
+  Future<void> switchBGMWithFade(
+    String newBGMFile, {
+    Duration fadeOutDuration = const Duration(milliseconds: 1000),
+    double? targetVolume,
+  }) async {
+    if (!_isInitialized || _isMuted) {
+      debugPrint('⚠️ AudioService not initialized or muted - BGM switch skipped');
+      return;
+    }
+
+    // 空文字列の場合は停止のみ
+    if (newBGMFile.isEmpty) {
+      debugPrint('🎵 Empty BGM file - stopping current BGM');
+      await stopBGM();
+      return;
+    }
+
+    final effectiveTargetVolume = targetVolume ?? _bgmVolume;
+    
+    // 同じBGMが既に再生中の場合はスキップ
+    if (_currentBGMFile == newBGMFile && !_isFading) {
+      debugPrint('🎵 Same BGM already playing: $newBGMFile');
+      return;
+    }
+
+    debugPrint('🎵 Starting BGM switch: ${_currentBGMFile ?? 'none'} → $newBGMFile');
+
+    try {
+      // フェード中の場合は既存タイマーをキャンセル
+      if (_isFading) {
+        _fadeTimer?.cancel();
+        _isFading = false;
+      }
+
+      // BGMが再生中の場合はフェードアウトしてから切り替え
+      if (_currentBGMFile != null) {
+        _pendingBGMFile = newBGMFile;
+        await _fadeOutCurrentBGM(fadeOutDuration, effectiveTargetVolume);
+      } else {
+        // BGMが再生されていない場合は直接新しいBGMを再生
+        await _playNewBGM(newBGMFile, effectiveTargetVolume);
+      }
+    } catch (e) {
+      debugPrint('❌ BGM switch failed: ${_currentBGMFile ?? 'none'} → $newBGMFile - $e');
+      // エラー時は安全に新しいBGMを再生
+      await _playNewBGM(newBGMFile, effectiveTargetVolume);
+    }
+  }
+
+  /// フェードアウト処理（内部用）
+  Future<void> _fadeOutCurrentBGM(Duration duration, double nextTargetVolume) async {
+    if (_currentBGMFile == null) return;
+
+    _isFading = true;
+    const int fadeSteps = 50; // 50ステップでスムーズなフェード
+    final int intervalMs = (duration.inMilliseconds / fadeSteps).round();
+    final double volumeStep = _currentBGMVolume / fadeSteps;
+    
+    double currentVolume = _currentBGMVolume;
+    int step = 0;
+
+    _fadeTimer = Timer.periodic(Duration(milliseconds: intervalMs), (timer) async {
+      step++;
+      currentVolume = (_currentBGMVolume - (volumeStep * step)).clamp(0.0, 1.0);
+      
+      try {
+        // FlameAudioのBGM音量を直接制御（公式推奨方法）
+        FlameAudio.bgm.audioPlayer.setVolume(currentVolume * _masterVolume);
+        
+        // フェードアウト完了
+        if (step >= fadeSteps || currentVolume <= 0.0) {
+          timer.cancel();
+          _fadeTimer = null;
+          _isFading = false;
+          
+          // 現在のBGMを停止
+          FlameAudio.bgm.stop();
+          debugPrint('🎵 BGM fadeout completed: $_currentBGMFile');
+          
+          // 新しいBGMを再生
+          if (_pendingBGMFile != null) {
+            await _playNewBGM(_pendingBGMFile!, nextTargetVolume);
+            _pendingBGMFile = null;
+          }
+        }
+      } catch (e) {
+        timer.cancel();
+        _fadeTimer = null;
+        _isFading = false;
+        debugPrint('❌ Fade out error at step $step: $e');
+        
+        // エラー時も新しいBGMを再生
+        if (_pendingBGMFile != null) {
+          await _playNewBGM(_pendingBGMFile!, nextTargetVolume);
+          _pendingBGMFile = null;
+        }
+      }
+    });
+  }
+
+  /// 新しいBGMを元音量で再生（内部用）
+  Future<void> _playNewBGM(String fileName, double targetVolume) async {
+    try {
+      final effectiveVolume = targetVolume * _masterVolume;
+      await FlameAudio.bgm.play(fileName, volume: effectiveVolume);
+      
+      _currentBGMFile = fileName;
+      _currentBGMVolume = targetVolume;
+      
+      debugPrint('🎵 New BGM started: $fileName (volume: ${effectiveVolume.toStringAsFixed(2)})');
+    } catch (e) {
+      debugPrint('❌ New BGM playback failed: $fileName - $e');
+      _currentBGMFile = null;
     }
   }
 
@@ -181,6 +330,11 @@ class AudioService {
   double get uiVolume => _uiVolume;
   bool get isMuted => _isMuted;
   bool get isInitialized => _isInitialized;
+  
+  // BGM状態ゲッター
+  String? get currentBGMFile => _currentBGMFile;
+  bool get isFading => _isFading;
+  double get currentBGMVolume => _currentBGMVolume;
 }
 
 /// Riverpod プロバイダー

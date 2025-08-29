@@ -141,7 +141,10 @@ class RoomHotspotSystem extends ChangeNotifier {
   List<HotspotData> _getHotspotsFromDefinitions(String roomType) {
     final definitions = RoomHotspotDefinitions.getHotspotsForRoom(roomType);
     
-    return definitions.map((definition) {
+    return definitions.asMap().entries.map((entry) {
+      final index = entry.key;
+      final definition = entry.value;
+      
       return HotspotData(
         id: definition['id'],
         asset: _getAssetForHotspot(definition['id']),
@@ -159,6 +162,7 @@ class RoomHotspotSystem extends ChangeNotifier {
           recordHotspotInteraction(definition['id']);
           _handleHotspotTap(definition['id']);
         },
+        hotspotNumber: index + 1, // 1から始まる番号を付与
       );
     }).toList();
   }
@@ -239,6 +243,9 @@ class RoomHotspotSystem extends ChangeNotifier {
   void _handleHotspotTap(String hotspotId) {
     debugPrint('🎯 新しいホットスポット「$hotspotId」がタップされました');
     
+    // デバッグ情報を表示
+    _showHotspotDebugInfo(hotspotId);
+    
     // インベントリシステムと連携してアイテム取得
     final inventory = InventorySystem();
     final itemId = _getItemForHotspot(hotspotId);
@@ -256,6 +263,53 @@ class RoomHotspotSystem extends ChangeNotifier {
         );
       }
     }
+  }
+
+  /// ホットスポットのデバッグ情報を表示
+  void _showHotspotDebugInfo(String hotspotId) {
+    debugPrint('🐛 === ホットスポットデバッグ情報 ===');
+    debugPrint('🆔 ID: $hotspotId');
+    debugPrint('📛 名前: ${_getNameForHotspot(hotspotId)}');
+    debugPrint('🏷️ 説明: ${_getDescriptionForHotspot(hotspotId)}');
+    debugPrint('🎁 アイテム: ${_getItemForHotspot(hotspotId)}');
+    debugPrint('👆 操作履歴: ${hasInteractedWith(hotspotId) ? "済み" : "未操作"}');
+    debugPrint('🔧 デバッグモード: 有効');
+    debugPrint('================================');
+  }
+
+  /// ホットスポットの説明を取得
+  String _getDescriptionForHotspot(String hotspotId) {
+    const descriptionMap = {
+      // room_left (回廊)
+      'left_stone_pillar': '古い石の柱。何かが刻まれている',
+      'center_floor_item': '床に落ちているアイテム。取得可能',
+      'right_wall_switch': '壁に設置されたスイッチ。押せそうだ',
+      'back_light_source': '部屋の奥にある光源。調べてみよう',
+      
+      // room_right (錬金術室)
+      'left_herb_shelf': '薬草や瓶が並ぶ棚。錬金術の材料か',
+      'center_main_shelf': 'メインの作業台。重要そうな装置がある',
+      'right_tool_shelf': '錬金術の道具が置かれた棚',
+      
+      // room_leftmost (地下通路)
+      'left_wall_secret': '壁面に隠された秘密がありそうだ',
+      'passage_center_trap': '通路の中央にある仕掛け。慎重に',
+      'exit_light_clue': '出口への手がかりとなる光源',
+      
+      // room_rightmost (宝物庫)
+      'table_left_vase': '装飾の施された美しい壺',
+      'table_right_treasure': '宝箱が置かれている。開けられるか？',
+      'wall_crest': '壁に刻まれた紋章。重要な意味がありそうだ',
+
+      // room_center (中央の部屋)
+      'center_main_table': '部屋の中央にある大きなテーブル',
+      'center_bookshelf': '古い本が並ぶ本棚。何か手がかりが？',
+      'center_fireplace': '暖炉。火は消えているが何かありそう',
+      'center_carpet': '装飾カーペット。下に何かが？',
+      'hidden_room_entrance_center': '隠し部屋への入口らしき場所',
+    };
+    
+    return descriptionMap[hotspotId] ?? '調べることができる場所';
   }
 
 

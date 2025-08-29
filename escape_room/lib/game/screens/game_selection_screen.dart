@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flame_audio/flame_audio.dart';
 
 import '../../framework/device/device_feedback_manager.dart';
 import 'components/background_decoration.dart';
@@ -26,6 +27,7 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen>
   @override
   void initState() {
     super.initState();
+    debugPrint('🎮 GameSelectionScreen (/game/screens/): initState called');
     WidgetsBinding.instance.addObserver(this);
     _progressManager = GameSelectionProgressManager(
       onProgressChanged: () {
@@ -36,6 +38,56 @@ class _GameSelectionScreenState extends ConsumerState<GameSelectionScreen>
       progressManager: _progressManager,
     );
     _progressManager.initialize();
+    
+    // FlameAudio公式推奨：シンプルなBGM開始
+    _startBackgroundMusic();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    debugPrint('🔄 GameSelectionScreen(/game/): App lifecycle changed to $state');
+    
+    if (state == AppLifecycleState.resumed) {
+      debugPrint('🎵 GameSelectionScreen(/game/): App resumed - checking BGM');
+      Future.delayed(const Duration(milliseconds: 300), () {
+        if (mounted) {
+          _restartBGMIfNeeded();
+        }
+      });
+    }
+  }
+  
+  void _restartBGMIfNeeded() async {
+    try {
+      final currentState = FlameAudio.bgm.audioPlayer.state;
+      debugPrint('🎵 GameSelectionScreen(/game/): Current BGM state: $currentState');
+      
+      if (currentState == PlayerState.stopped) {
+        debugPrint('🎵 BGM stopped - restarting start screen BGM');
+        await FlameAudio.bgm.play('moonlight.mp3', volume: 0.3);
+        debugPrint('✅ Start screen BGM restarted');
+      } else {
+        debugPrint('🎵 BGM already playing - no restart needed');
+      }
+    } catch (e) {
+      debugPrint('❌ BGM restart error: $e');
+    }
+  }
+
+  /// FlameAudio公式推奨：シンプルなBGM開始
+  void _startBackgroundMusic() async {
+    try {
+      debugPrint('🎵 GameSelectionScreen: Starting start screen BGM (FlameAudio official pattern)');
+      
+      // FlameAudio公式推奨：シンプルなBGM再生
+      // ライフサイクル管理はFlameAudio.bgmが自動処理
+      await FlameAudio.bgm.play('moonlight.mp3', volume: 0.3);
+      
+      debugPrint('✅ Start screen BGM started using FlameAudio official API');
+    } catch (e) {
+      debugPrint('❌ BGM start error: $e');
+    }
   }
 
   @override

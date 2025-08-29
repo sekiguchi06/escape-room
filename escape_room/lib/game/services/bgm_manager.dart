@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flame_audio/flame_audio.dart';
 import '../../framework/escape_room/core/room_types.dart';
+import '../../framework/audio/audio_service.dart';
+import '../../framework/audio/bgm_switcher.dart';
 
 /// BGM管理サービスクラス
 /// Flutter公式ベストプラクティスに従った設計
@@ -60,11 +62,11 @@ class BgmManager extends ChangeNotifier {
     }
   }
 
-  /// BGM停止（公式推奨）
+  /// BGM停止（統一AudioService使用）
   Future<void> _forceStopCurrentBgm() async {
     try {
       debugPrint('🔇 BGM停止開始');
-      await FlameAudio.bgm.stop();
+      await AudioService().stopBGM();
       _isBgmPlaying = false;
       debugPrint('✅ BGM停止完了');
       notifyListeners();
@@ -75,57 +77,8 @@ class BgmManager extends ChangeNotifier {
     }
   }
 
-  /// BGMフェードアウト（ベストプラクティス）
-  Future<void> _fadeOutCurrentBgm() async {
-    if (!_isBgmPlaying) {
-      debugPrint('🔇 BGM再生中ではないためフェードアウトスキップ');
-      return;
-    }
-    
-    try {
-      debugPrint('🔇 BGMフェードアウト開始（1秒間）');
-      
-      const Duration fadeDuration = Duration(milliseconds: 1000);
-      const Duration updateInterval = Duration(milliseconds: 50);
-      const double initialVolume = 0.5;
-      
-      int totalSteps = fadeDuration.inMilliseconds ~/ updateInterval.inMilliseconds;
-      int currentStep = 0;
-      
-      final completer = Completer<void>();
-      
-      Timer.periodic(updateInterval, (timer) {
-        currentStep++;
-        double remainingPercent = 1.0 - (currentStep / totalSteps);
-        double targetVolume = initialVolume * remainingPercent;
-        
-        if (targetVolume < 0) targetVolume = 0;
-        
-        try {
-          FlameAudio.bgm.audioPlayer.setVolume(targetVolume);
-        } catch (volumeError) {
-          debugPrint('⚠️ 音量制御エラー (step $currentStep): $volumeError');
-        }
-        
-        if (currentStep >= totalSteps) {
-          timer.cancel();
-          completer.complete();
-        }
-      });
-      
-      // フェードアウト完了を待機
-      await completer.future;
-      
-      // 最後に停止
-      await FlameAudio.bgm.stop();
-      debugPrint('✅ フェードアウト停止完了');
-    } catch (e) {
-      debugPrint('❌ フェードアウト失敗、通常停止に切り替え: $e');
-      await FlameAudio.bgm.stop();
-    }
-  }
 
-  /// 現在の階層に応じてBGMを更新
+  /// 現在の階層に応じてBGMを更新（統一システム使用）
   Future<void> _updateBgmForCurrentFloor() async {
     debugPrint('🎵 BGM更新開始: 階層=${_floorName(_currentFloor)}');
     
@@ -133,47 +86,71 @@ class BgmManager extends ChangeNotifier {
       String bgmFile;
       switch (_currentFloor) {
         case FloorType.floor1:
-          bgmFile = 'moonlight.mp3';
+          bgmFile = AudioAssets.moonlight;        // スタート・1階BGM
           break;
         case FloorType.underground:
-          bgmFile = 'swimming_fish_dream.mp3';
+          bgmFile = AudioAssets.swimmingFishDream;  // 地下BGM
           break;
         case null:
         default:
-          bgmFile = 'misty_dream.mp3';
+          bgmFile = AudioAssets.mistyDream;        // デフォルト・メインゲームBGM
           break;
       }
       
-      debugPrint('🎵 BGM再生開始: $bgmFile');
-      await FlameAudio.bgm.play(bgmFile, volume: 0.5);
+      debugPrint('🎵 統一BGMサービスで再生開始: $bgmFile');
+      await AudioService().playBGM(bgmFile, volume: 0.5);
       _isBgmPlaying = true;
-      debugPrint('✅ BGM再生成功: $bgmFile');
+      debugPrint('✅ 統一BGM再生成功: $bgmFile');
       notifyListeners();
     } catch (e) {
-      debugPrint('❌ BGM再生失敗: $e');
+      debugPrint('❌ 統一BGM再生失敗: $e');
       _isBgmPlaying = false;
       notifyListeners();
     }
   }
 
-  /// フェードアウト付きBGM切り替え
+  /// フェードアウト付きBGM切り替え（統一システム使用）
   Future<void> switchBgmWithFadeOut(FloorType newFloor) async {
     if (_currentFloor == newFloor) {
       debugPrint('🎵 同じ階層のためBGM切り替えスキップ');
       return;
     }
 
-    debugPrint('🎵 フェードアウト付きBGM切り替え開始');
+    debugPrint('🎵 統一BGM切り替えサービスでフェード開始');
     
-    if (_isBgmPlaying) {
-      await _fadeOutCurrentBgm();
+    try {
+      // BGMタイプを決定
+      RoomBGMType roomType;
+      switch (newFloor) {
+        case FloorType.floor1:
+          roomType = RoomBGMType.mainFloor;
+          break;
+        case FloorType.underground:
+          roomType = RoomBGMType.underground;
+          break;
+        default:
+          roomType = RoomBGMType.mainFloor;
+          break;
+      }
+      
+      // 統一BGM切り替え関数を使用（1.0秒フェードアウト）
+      await BGMSwitcher.switchToRoomBGM(
+        roomType,
+        fadeOutDuration: const Duration(milliseconds: 1000),
+      );
+      
+      _currentFloor = newFloor;
+      _isBgmPlaying = true;
+      debugPrint('✅ 統一BGM切り替え完了: ${_floorName(newFloor)}');
+      notifyListeners();
+    } catch (e) {
+      debugPrint('❌ 統一BGM切り替え失敗: $e');
+      _isBgmPlaying = false;
+      notifyListeners();
     }
-    
-    _currentFloor = newFloor;
-    await _updateBgmForCurrentFloor();
   }
 
-  /// 安全なBGM停止
+  /// 安全なBGM停止（統一システム使用）
   Future<void> stopCurrentBgmSafely() async {
     if (!_isBgmPlaying) {
       debugPrint('🔇 BGM停止済みのためスキップ');
@@ -181,13 +158,13 @@ class BgmManager extends ChangeNotifier {
     }
     
     try {
-      debugPrint('🔇 BGM安全停止開始');
-      await FlameAudio.bgm.stop();
+      debugPrint('🔇 統一BGMサービスで安全停止開始');
+      await AudioService().stopBGM();
       _isBgmPlaying = false;
-      debugPrint('✅ BGM安全停止完了');
+      debugPrint('✅ 統一BGM安全停止完了');
       notifyListeners();
     } catch (e) {
-      debugPrint('❌ BGM安全停止エラー: $e');
+      debugPrint('❌ 統一BGM安全停止エラー: $e');
       _isBgmPlaying = false;
       notifyListeners();
     }

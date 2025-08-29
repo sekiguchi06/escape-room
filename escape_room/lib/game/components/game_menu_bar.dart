@@ -4,6 +4,10 @@ import '../escape_room.dart';
 import 'room_navigation_system.dart';
 import 'lighting_system.dart';
 import 'inventory_system.dart';
+import '../../screens/debug/audio_debug_screen.dart';
+import '../../screens/debug/image_debug_screen.dart';
+import '../../screens/debug/item_debug_screen.dart';
+import '../../screens/debug/puzzle_debug_screen.dart';
 
 /// ゲーム上部メニューバー
 class GameMenuBar extends StatelessWidget {
@@ -71,6 +75,19 @@ class GameMenuBar extends StatelessWidget {
                 onPressed: () {
                   debugPrint('💡 Hint pressed');
                   HintDialog.show(context, onAddItem);
+                },
+              ),
+
+              // 区切り線
+              Container(width: 1, height: 30, color: Colors.brown[400]),
+
+              // デバッグボタン
+              _buildMenuButton(
+                icon: Icons.bug_report,
+                label: 'デバッグ',
+                onPressed: () {
+                  debugPrint('🐛 Debug pressed - Opening debug menu');
+                  _showDebugMenu(context);
                 },
               ),
             ],
@@ -164,6 +181,154 @@ class GameMenuBar extends StatelessWidget {
 
     // フェードオーバーレイを表示してリスタート
     _showFadeRestartOverlay(context);
+  }
+
+  /// デバッグメニューを表示
+  void _showDebugMenu(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.black.withValues(alpha: 0.9),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+            side: BorderSide(color: Colors.green[400]!, width: 2),
+          ),
+          title: const Row(
+            children: [
+              Icon(Icons.bug_report, color: Colors.green),
+              SizedBox(width: 8),
+              Text('デバッグメニュー', style: TextStyle(color: Colors.green)),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildDebugMenuItem(
+                context,
+                icon: Icons.volume_up,
+                title: '音声デバッグ',
+                subtitle: 'BGM・効果音の制御',
+                onTap: () => _navigateToDebugScreen(context, const AudioDebugScreen()),
+              ),
+              const SizedBox(height: 8),
+              _buildDebugMenuItem(
+                context,
+                icon: Icons.image,
+                title: '画像デバッグ', 
+                subtitle: '背景・アイテム画像の確認',
+                onTap: () => _navigateToDebugScreen(context, const ImageDebugScreen()),
+              ),
+              const SizedBox(height: 8),
+              _buildDebugMenuItem(
+                context,
+                icon: Icons.inventory,
+                title: 'アイテムデバッグ',
+                subtitle: 'インベントリシステムの確認',
+                onTap: () => _navigateToDebugScreen(context, const ItemDebugScreen()),
+              ),
+              const SizedBox(height: 8),
+              _buildDebugMenuItem(
+                context,
+                icon: Icons.extension,
+                title: 'パズルデバッグ',
+                subtitle: 'パズル状態・進行の確認',
+                onTap: () => _navigateToDebugScreen(context, const PuzzleDebugScreen()),
+              ),
+              const SizedBox(height: 8),
+              _buildDebugMenuItem(
+                context,
+                icon: Icons.visibility,
+                title: 'ホットスポット表示',
+                subtitle: 'ホットスポットの可視化切替',
+                onTap: () => _toggleHotspotVisibility(context),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('閉じる', style: TextStyle(color: Colors.green[300])),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// デバッグメニューアイテムを構築
+  Widget _buildDebugMenuItem(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: Colors.green, size: 24),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      color: Colors.grey[400],
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.arrow_forward_ios, color: Colors.green, size: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// デバッグ画面に遷移
+  void _navigateToDebugScreen(BuildContext context, Widget screen) {
+    Navigator.of(context).pop(); // メニューを閉じる
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => screen),
+    );
+  }
+
+  /// ホットスポット可視性を切り替え
+  void _toggleHotspotVisibility(BuildContext context) {
+    Navigator.of(context).pop(); // メニューを閉じる
+    
+    // ホットスポット表示状態の切り替えを通知
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('ホットスポット表示を切り替えました'),
+        backgroundColor: Colors.green,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+    
+    debugPrint('🎯 Hotspot visibility toggled');
+    // TODO: 実際のホットスポット表示切り替えロジックを実装
   }
 
   /// フェード効果付きリスタートオーバーレイ

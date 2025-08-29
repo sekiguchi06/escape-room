@@ -31,17 +31,8 @@ class FlameAudioProvider implements AudioProvider {
     debugPrint('🎵 Config loaded - SFX enabled: $_sfxEnabled');
     debugPrint('🎵 SFX assets: ${config.sfxAssets}');
 
-    try {
-      // BGMシステム初期化
-      await FlameAudio.bgm.initialize();
-    } catch (e) {
-      if (config.debugMode) {
-        debugPrint(
-          'FlameAudio BGM initialization failed (test environment): $e',
-        );
-      }
-      // テスト環境でのMissingPluginExceptionは想定内として続行
-    }
+    // FlameAudio.bgm.initialize() - app.dartで一元管理済み（重複削除）
+    debugPrint('🎵 BGM initialization skipped - handled by app.dart');
 
     // プリロード処理（公式のaudioCache使用）
     await _preloadAssets();

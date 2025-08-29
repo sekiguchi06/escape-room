@@ -1,6 +1,7 @@
 import 'package:flame/components.dart';
 import '../../framework/components/responsive_hotspot_component.dart';
 import 'hotspot_definitions/hidden_room_hotspots.dart';
+import 'hotspot_definitions/room_center_hotspots.dart';
 
 /// 各部屋のホットスポット座標定義
 /// 400x600統一背景サイズに対する相対座標
@@ -239,6 +240,8 @@ class RoomHotspotDefinitions {
     switch (roomType) {
       case 'room_left':
         return roomLeftHotspots;
+      case 'room_center':
+        return RoomCenterHotspots.definitions;
       case 'room_right':
         return roomRightHotspots;
       case 'room_leftmost':
@@ -277,14 +280,18 @@ class RoomHotspotDefinitions {
   ) {
     final definitions = getHotspotsForRoom(roomType);
     
-    return definitions.map((definition) {
+    return definitions.asMap().entries.map((entry) {
+      final index = entry.key;
+      final definition = entry.value;
+      
       return ResponsiveHotspotComponent(
         id: definition['id'],
         onTap: onTap,
         relativePosition: definition['relativePosition'],
         relativeSize: definition['relativeSize'],
-        invisible: true,  // デフォルトで透明（デバッグ時にfalse）
-        debugMode: false, // デバッグ時にtrue
+        invisible: false,        // デバッグ表示のため可視化
+        debugMode: true,         // デバッグモード有効
+        hotspotNumber: index + 1, // 1から始まる番号を付与
       );
     }).toList();
   }

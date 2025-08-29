@@ -14,64 +14,36 @@ import 'package:flutter/widgets.dart';
 class $AssetsAudioGen {
   const $AssetsAudioGen();
 
-  /// File path: assets/audio/ambient_exploration.mp3
-  String get ambientExploration => 'assets/audio/ambient_exploration.mp3';
+  /// File path: assets/audio/close.mp3
+  String get close => 'assets/audio/close.mp3';
 
-  /// File path: assets/audio/button_press.mp3
-  String get buttonPress => 'assets/audio/button_press.mp3';
+  /// File path: assets/audio/decision_button.mp3
+  String get decisionButton => 'assets/audio/decision_button.mp3';
 
-  /// File path: assets/audio/error_sound.mp3
-  String get errorSound => 'assets/audio/error_sound.mp3';
+  /// File path: assets/audio/door.mp3
+  String get door => 'assets/audio/door.mp3';
 
-  /// File path: assets/audio/exploration_ambient.mp3
-  String get explorationAmbient => 'assets/audio/exploration_ambient.mp3';
+  /// File path: assets/audio/misty_dream.mp3
+  String get mistyDream => 'assets/audio/misty_dream.mp3';
 
-  /// File path: assets/audio/game_clear.mp3
-  String get gameClear => 'assets/audio/game_clear.mp3';
+  /// File path: assets/audio/moonlight.mp3
+  String get moonlight => 'assets/audio/moonlight.mp3';
 
-  /// File path: assets/audio/gimmick_activate.mp3
-  String get gimmickActivate => 'assets/audio/gimmick_activate.mp3';
+  /// File path: assets/audio/swimming_fish_dream.mp3
+  String get swimmingFishDream => 'assets/audio/swimming_fish_dream.mp3';
 
-  /// File path: assets/audio/hotspot_interact.mp3
-  String get hotspotInteract => 'assets/audio/hotspot_interact.mp3';
-
-  /// File path: assets/audio/item_get.mp3
-  String get itemGet => 'assets/audio/item_get.mp3';
-
-  /// File path: assets/audio/menu.mp3
-  String get menu => 'assets/audio/menu.mp3';
-
-  /// File path: assets/audio/menu_theme.mp3
-  String get menuTheme => 'assets/audio/menu_theme.mp3';
-
-  /// File path: assets/audio/puzzle_success.mp3
-  String get puzzleSuccess => 'assets/audio/puzzle_success.mp3';
-
-  /// File path: assets/audio/puzzle_tension.mp3
-  String get puzzleTension => 'assets/audio/puzzle_tension.mp3';
-
-  /// File path: assets/audio/tap_general.mp3
-  String get tapGeneral => 'assets/audio/tap_general.mp3';
-
-  /// File path: assets/audio/victory_fanfare.mp3
-  String get victoryFanfare => 'assets/audio/victory_fanfare.mp3';
+  /// File path: assets/audio/walk.mp3
+  String get walk => 'assets/audio/walk.mp3';
 
   /// List of all assets
   List<String> get values => [
-    ambientExploration,
-    buttonPress,
-    errorSound,
-    explorationAmbient,
-    gameClear,
-    gimmickActivate,
-    hotspotInteract,
-    itemGet,
-    menu,
-    menuTheme,
-    puzzleSuccess,
-    puzzleTension,
-    tapGeneral,
-    victoryFanfare,
+    close,
+    decisionButton,
+    door,
+    mistyDream,
+    moonlight,
+    swimmingFishDream,
+    walk,
   ];
 }
 
@@ -103,6 +75,22 @@ class $AssetsImagesGen {
   /// File path: assets/images/escape_room_bg_night.png
   AssetGenImage get escapeRoomBgNight =>
       const AssetGenImage('assets/images/escape_room_bg_night.png');
+
+  /// File path: assets/images/hidden_room_a.png
+  AssetGenImage get hiddenRoomA =>
+      const AssetGenImage('assets/images/hidden_room_a.png');
+
+  /// File path: assets/images/hidden_room_b.png
+  AssetGenImage get hiddenRoomB =>
+      const AssetGenImage('assets/images/hidden_room_b.png');
+
+  /// File path: assets/images/hidden_room_c.png
+  AssetGenImage get hiddenRoomC =>
+      const AssetGenImage('assets/images/hidden_room_c.png');
+
+  /// File path: assets/images/hidden_room_d.png
+  AssetGenImage get hiddenRoomD =>
+      const AssetGenImage('assets/images/hidden_room_d.png');
 
   /// Directory path: assets/images/hotspots
   $AssetsImagesHotspotsGen get hotspots => const $AssetsImagesHotspotsGen();
@@ -187,6 +175,10 @@ class $AssetsImagesGen {
     escapeRoomBg,
     escapeRoomBgDark,
     escapeRoomBgNight,
+    hiddenRoomA,
+    hiddenRoomB,
+    hiddenRoomC,
+    hiddenRoomD,
     roomLeft,
     roomLeftNight,
     roomLeftmost,
@@ -429,6 +421,10 @@ class $AssetsImagesItemsGen {
   AssetGenImage get undergroundMasterKey =>
       const AssetGenImage('assets/images/items/underground_master_key.png');
 
+  /// File path: assets/images/items/wooden_stairs.png
+  AssetGenImage get woodenStairs =>
+      const AssetGenImage('assets/images/items/wooden_stairs.png');
+
   /// List of all assets
   List<AssetGenImage> get values => [
     ancientRune,
@@ -442,6 +438,7 @@ class $AssetsImagesItemsGen {
     ritualStone,
     undergroundKey,
     undergroundMasterKey,
+    woodenStairs,
   ];
 }
 

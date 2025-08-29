@@ -108,7 +108,7 @@ class _SimpleChoicePuzzleState extends State<SimpleChoicePuzzle> {
       decoration: BoxDecoration(
         // 地下への階段の背景画像
         image: DecorationImage(
-          image: Assets.images.items.woodenStairs.image().image,
+          image: Assets.images.items.woodenStairs.provider(),
           fit: BoxFit.cover,
         ),
       ),

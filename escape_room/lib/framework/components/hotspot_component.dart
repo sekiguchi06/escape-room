@@ -9,6 +9,7 @@ class HotspotComponent extends SpriteComponent with TapCallbacks {
   late final Function(String) onTap;
   bool _invisible = false;
   bool _debugMode = false;
+  int? _hotspotNumber; // ホットスポット番号（左上に表示用）
 
   HotspotComponent({
     required this.id,
@@ -17,8 +18,10 @@ class HotspotComponent extends SpriteComponent with TapCallbacks {
     required Vector2 size,
     bool invisible = false,
     bool debugMode = false,
+    int? hotspotNumber,
   }) : _invisible = invisible,
        _debugMode = debugMode,
+       _hotspotNumber = hotspotNumber,
        super(position: position, size: size);
 
   /// 透明状態の取得
@@ -27,6 +30,9 @@ class HotspotComponent extends SpriteComponent with TapCallbacks {
   /// デバッグモード状態の取得
   @override
   bool get debugMode => _debugMode;
+
+  /// ホットスポット番号の取得
+  int? get hotspotNumber => _hotspotNumber;
 
   /// 透明状態の設定
   void setInvisible(bool invisible) {
@@ -38,6 +44,11 @@ class HotspotComponent extends SpriteComponent with TapCallbacks {
   void setDebugMode(bool debugMode) {
     _debugMode = debugMode;
     _updateVisibility();
+  }
+
+  /// ホットスポット番号の設定
+  void setHotspotNumber(int? number) {
+    _hotspotNumber = number;
   }
 
   /// 表示状態の更新
@@ -82,41 +93,72 @@ class HotspotComponent extends SpriteComponent with TapCallbacks {
 
   @override
   void render(Canvas canvas) {
-    if (sprite != null) {
+    // デバッグモードでない場合は親のレンダリング処理のみ実行
+    if (!_debugMode) {
       super.render(canvas);
-    } else {
-      // スプライトがない場合は枠線付きの矩形を描画
-      final paint = Paint()
-        ..color = Colors.grey.withValues(alpha: 0.3)
-        ..style = PaintingStyle.fill;
+      return;
+    }
 
-      final borderPaint = Paint()
-        ..color = Colors.grey
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 2.0;
+    // 透明背景で赤い枠線のホットスポットを描画
+    final borderPaint = Paint()
+      ..color = Colors.red
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
 
-      canvas.drawRect(size.toRect(), paint);
-      canvas.drawRect(size.toRect(), borderPaint);
+    // 赤い枠線を描画
+    canvas.drawRect(size.toRect(), borderPaint);
 
-      // IDテキストを表示
-      final textPainter = TextPainter(
+    // ホットスポット番号を左上に表示
+    if (_hotspotNumber != null) {
+      final numberTextPainter = TextPainter(
         text: TextSpan(
-          text: id,
+          text: _hotspotNumber.toString(),
           style: const TextStyle(
-            color: Colors.black,
-            fontSize: 16,
+            color: Colors.red,
+            fontSize: 14,
             fontWeight: FontWeight.bold,
+            backgroundColor: Colors.white,
           ),
         ),
         textDirection: TextDirection.ltr,
       );
 
-      textPainter.layout();
-      textPainter.paint(
+      numberTextPainter.layout();
+      
+      // 白い背景の小さな矩形を描画
+      final backgroundRect = Rect.fromLTWH(
+        2, 2, 
+        numberTextPainter.width + 4, 
+        numberTextPainter.height + 2,
+      );
+      final backgroundPaint = Paint()
+        ..color = Colors.white.withValues(alpha: 0.9);
+      canvas.drawRect(backgroundRect, backgroundPaint);
+
+      // 番号テキストを描画
+      numberTextPainter.paint(canvas, const Offset(4, 2));
+    }
+
+    // デバッグ情報としてIDを右下に小さく表示
+    if (_debugMode) {
+      final idTextPainter = TextPainter(
+        text: TextSpan(
+          text: id,
+          style: const TextStyle(
+            color: Colors.red,
+            fontSize: 10,
+            fontWeight: FontWeight.normal,
+          ),
+        ),
+        textDirection: TextDirection.ltr,
+      );
+
+      idTextPainter.layout();
+      idTextPainter.paint(
         canvas,
         Offset(
-          (size.x - textPainter.width) / 2,
-          (size.y - textPainter.height) / 2,
+          size.x - idTextPainter.width - 2,
+          size.y - idTextPainter.height - 2,
         ),
       );
     }

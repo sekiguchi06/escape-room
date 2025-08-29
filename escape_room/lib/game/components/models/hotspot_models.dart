@@ -10,6 +10,7 @@ class HotspotData {
   final Offset position;
   final Size size;
   final Function(Offset tapPosition)? onTap;
+  final int? hotspotNumber; // ホットスポット番号（左上表示用）
 
   const HotspotData({
     required this.id,
@@ -19,6 +20,7 @@ class HotspotData {
     required this.position,
     required this.size,
     this.onTap,
+    this.hotspotNumber,
   });
 }
 
