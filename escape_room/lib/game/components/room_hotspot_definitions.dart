@@ -1,5 +1,6 @@
 import 'package:flame/components.dart';
 import '../../framework/components/responsive_hotspot_component.dart';
+import 'hotspot_definitions/hidden_room_hotspots.dart';
 
 /// 各部屋のホットスポット座標定義
 /// 400x600統一背景サイズに対する相対座標

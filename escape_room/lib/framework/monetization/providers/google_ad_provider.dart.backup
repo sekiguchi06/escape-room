@@ -1,0 +1,446 @@
+import 'package:flutter/foundation.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import '../monetization_system.dart';
+import 'ads/banner_ad_handler.dart';
+import 'ads/interstitial_ad_handler.dart';
+import 'ads/rewarded_ad_handler.dart';
+import 'ads/ad_event_manager.dart';
+
+/// Google Mobile Ads SDKを使用したAdProviderの実装
+class GoogleAdProvider implements AdProvider {
+  MonetizationConfiguration? _config;
+  
+  BannerAdHandler? _bannerHandler;
+  InterstitialAdHandler? _interstitialHandler;
+  RewardedAdHandler? _rewardedHandler;
+  AdEventManager? _eventManager;
+
+  @override
+  Future<bool> initialize(MonetizationConfiguration config) async {
+    _config = config;
+
+    try {
+      // Google Mobile Ads SDKの初期化
+      final mobileAds = MobileAds.instance;
+      await mobileAds.initialize();
+
+      // イベントマネージャーの初期化
+      _eventManager = AdEventManager(config: config);
+
+      // 各広告ハンドラーの初期化
+      _bannerHandler = BannerAdHandler(
+        config: config,
+        onAdEvent: _eventManager!.notifyListeners,
+      );
+      
+      _interstitialHandler = InterstitialAdHandler(
+        config: config,
+        onAdEvent: _eventManager!.notifyListeners,
+      );
+      
+      _rewardedHandler = RewardedAdHandler(
+        config: config,
+        onAdEvent: _eventManager!.notifyListeners,
+      );
+
+      if (config.debugMode) {
+        debugPrint(
+          'GoogleAdProvider initialized (testMode: ${config.testMode})',
+        );
+      }
+
+      return true;
+    } catch (e) {
+      debugPrint('GoogleAdProvider initialization failed: $e');
+      return false;
+    }
+  }
+
+  @override
+  Future<AdResult> loadAd(AdType adType, {String? adId}) async {
+    try {
+      switch (adType) {
+        case AdType.banner:
+          return await _bannerHandler?.loadAd(adId) ?? AdResult.failed;
+        case AdType.interstitial:
+          return await _interstitialHandler?.loadAd(adId) ?? AdResult.failed;
+        case AdType.rewarded:
+          return await _rewardedHandler?.loadAd(adId) ?? AdResult.failed;
+        case AdType.native:
+        case AdType.appOpen:
+          return AdResult.failed;
+      }
+    } catch (e) {
+      _eventManager?.notifyListeners(
+        AdEventData(
+          adType: adType,
+          result: AdResult.failed,
+          adId: adId,
+          errorMessage: e.toString(),
+          timestamp: DateTime.now(),
+        ),
+      );
+      return AdResult.failed;
+    }
+  }
+
+
+  Future<AdResult> _loadInterstitialAd(String? adId) async {
+    final adUnitId = _getAdUnitId(AdType.interstitial, adId);
+
+    await InterstitialAd.load(
+      adUnitId: adUnitId,
+      request: const AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (ad) {
+          _interstitialAd = ad;
+          _loadedAds[AdType.interstitial] = ad;
+
+          ad.fullScreenContentCallback = FullScreenContentCallback(
+            onAdShowedFullScreenContent: (ad) {
+              _notifyListeners(
+                AdEventData(
+                  adType: AdType.interstitial,
+                  result: AdResult.shown,
+                  adId: adId,
+                  timestamp: DateTime.now(),
+                ),
+              );
+            },
+            onAdDismissedFullScreenContent: (ad) {
+              _notifyListeners(
+                AdEventData(
+                  adType: AdType.interstitial,
+                  result: AdResult.closed,
+                  adId: adId,
+                  timestamp: DateTime.now(),
+                ),
+              );
+              ad.dispose();
+              _loadedAds.remove(AdType.interstitial);
+            },
+            onAdFailedToShowFullScreenContent: (ad, error) {
+              _notifyListeners(
+                AdEventData(
+                  adType: AdType.interstitial,
+                  result: AdResult.failed,
+                  adId: adId,
+                  errorMessage: error.message,
+                  timestamp: DateTime.now(),
+                ),
+              );
+              ad.dispose();
+              _loadedAds.remove(AdType.interstitial);
+            },
+            onAdClicked: (ad) {
+              _notifyListeners(
+                AdEventData(
+                  adType: AdType.interstitial,
+                  result: AdResult.clicked,
+                  adId: adId,
+                  timestamp: DateTime.now(),
+                ),
+              );
+            },
+          );
+
+          _notifyListeners(
+            AdEventData(
+              adType: AdType.interstitial,
+              result: AdResult.loaded,
+              adId: adId,
+              timestamp: DateTime.now(),
+            ),
+          );
+        },
+        onAdFailedToLoad: (error) {
+          _notifyListeners(
+            AdEventData(
+              adType: AdType.interstitial,
+              result: AdResult.failed,
+              adId: adId,
+              errorMessage: error.message,
+              timestamp: DateTime.now(),
+            ),
+          );
+        },
+      ),
+    );
+
+    return AdResult.loaded;
+  }
+
+  Future<AdResult> _loadRewardedAd(String? adId) async {
+    final adUnitId = _getAdUnitId(AdType.rewarded, adId);
+
+    await RewardedAd.load(
+      adUnitId: adUnitId,
+      request: const AdRequest(),
+      rewardedAdLoadCallback: RewardedAdLoadCallback(
+        onAdLoaded: (ad) {
+          _rewardedAd = ad;
+          _loadedAds[AdType.rewarded] = ad;
+
+          ad.fullScreenContentCallback = FullScreenContentCallback(
+            onAdShowedFullScreenContent: (ad) {
+              _notifyListeners(
+                AdEventData(
+                  adType: AdType.rewarded,
+                  result: AdResult.shown,
+                  adId: adId,
+                  timestamp: DateTime.now(),
+                ),
+              );
+            },
+            onAdDismissedFullScreenContent: (ad) {
+              _notifyListeners(
+                AdEventData(
+                  adType: AdType.rewarded,
+                  result: AdResult.closed,
+                  adId: adId,
+                  timestamp: DateTime.now(),
+                ),
+              );
+              ad.dispose();
+              _loadedAds.remove(AdType.rewarded);
+            },
+            onAdFailedToShowFullScreenContent: (ad, error) {
+              _notifyListeners(
+                AdEventData(
+                  adType: AdType.rewarded,
+                  result: AdResult.failed,
+                  adId: adId,
+                  errorMessage: error.message,
+                  timestamp: DateTime.now(),
+                ),
+              );
+              ad.dispose();
+              _loadedAds.remove(AdType.rewarded);
+            },
+            onAdClicked: (ad) {
+              _notifyListeners(
+                AdEventData(
+                  adType: AdType.rewarded,
+                  result: AdResult.clicked,
+                  adId: adId,
+                  timestamp: DateTime.now(),
+                ),
+              );
+            },
+          );
+
+          _notifyListeners(
+            AdEventData(
+              adType: AdType.rewarded,
+              result: AdResult.loaded,
+              adId: adId,
+              timestamp: DateTime.now(),
+            ),
+          );
+        },
+        onAdFailedToLoad: (error) {
+          _notifyListeners(
+            AdEventData(
+              adType: AdType.rewarded,
+              result: AdResult.failed,
+              adId: adId,
+              errorMessage: error.message,
+              timestamp: DateTime.now(),
+            ),
+          );
+        },
+      ),
+    );
+
+    return AdResult.loaded;
+  }
+
+  @override
+  Future<AdResult> showAd(AdType adType, {String? adId}) async {
+    if (_config?.adsDisabled == true ||
+        _config?.enabledAdTypes[adType] != true) {
+      return AdResult.failed;
+    }
+
+    // 準備チェック
+    if (!await isAdReady(adType, adId: adId)) {
+      return AdResult.notReady;
+    }
+
+    // 最小間隔チェック
+    final lastShown = _lastShownTime[adType];
+    if (lastShown != null) {
+      final elapsed = DateTime.now().difference(lastShown).inSeconds;
+      if (elapsed < _config!.minAdInterval) {
+        return AdResult.failed;
+      }
+    }
+
+    try {
+      switch (adType) {
+        case AdType.banner:
+          return _showBannerAd(adId);
+        case AdType.interstitial:
+          return await _showInterstitialAd(adId);
+        case AdType.rewarded:
+          return await _showRewardedAd(adId);
+        case AdType.native:
+        case AdType.appOpen:
+          return AdResult.failed;
+      }
+    } catch (e) {
+      _notifyListeners(
+        AdEventData(
+          adType: adType,
+          result: AdResult.failed,
+          adId: adId,
+          errorMessage: e.toString(),
+          timestamp: DateTime.now(),
+        ),
+      );
+      return AdResult.failed;
+    }
+  }
+
+  AdResult _showBannerAd(String? adId) {
+    // バナー広告はUI側で表示される想定
+    _lastShownTime[AdType.banner] = DateTime.now();
+    return AdResult.shown;
+  }
+
+  Future<AdResult> _showInterstitialAd(String? adId) async {
+    final ad = _interstitialAd;
+    if (ad == null) return AdResult.notReady;
+
+    await ad.show();
+    _lastShownTime[AdType.interstitial] = DateTime.now();
+    return AdResult.shown;
+  }
+
+  Future<AdResult> _showRewardedAd(String? adId) async {
+    final ad = _rewardedAd;
+    if (ad == null) return AdResult.notReady;
+
+    await ad.show(
+      onUserEarnedReward: (ad, reward) {
+        _notifyListeners(
+          AdEventData(
+            adType: AdType.rewarded,
+            result: AdResult.rewarded,
+            adId: adId,
+            additionalData: {
+              'reward_type': reward.type,
+              'reward_amount': reward.amount,
+              'reward_multiplier': _config?.rewardMultiplier ?? 1.0,
+            },
+            timestamp: DateTime.now(),
+          ),
+        );
+      },
+    );
+
+    _lastShownTime[AdType.rewarded] = DateTime.now();
+    return AdResult.shown;
+  }
+
+  @override
+  Future<AdResult> hideAd(AdType adType, {String? adId}) async {
+    switch (adType) {
+      case AdType.banner:
+        _bannerAd?.dispose();
+        _bannerAd = null;
+        _loadedAds.remove(AdType.banner);
+        break;
+      case AdType.interstitial:
+        _interstitialAd?.dispose();
+        _interstitialAd = null;
+        _loadedAds.remove(AdType.interstitial);
+        break;
+      case AdType.rewarded:
+        _rewardedAd?.dispose();
+        _rewardedAd = null;
+        _loadedAds.remove(AdType.rewarded);
+        break;
+      case AdType.native:
+      case AdType.appOpen:
+        break;
+    }
+
+    if (_config?.debugMode == true) {
+      debugPrint('Google ad hidden: $adType (id: $adId)');
+    }
+
+    return AdResult.closed;
+  }
+
+  @override
+  Future<bool> isAdReady(AdType adType, {String? adId}) async {
+    return _loadedAds[adType] != null;
+  }
+
+  String _getAdUnitId(AdType adType, String? customId) {
+    if (customId != null) return customId;
+
+    // テストモード時はテストIDを使用
+    if (_config?.testMode == true) {
+      switch (adType) {
+        case AdType.banner:
+          return _testBannerId;
+        case AdType.interstitial:
+          return _testInterstitialId;
+        case AdType.rewarded:
+          return _testRewardedId;
+        case AdType.native:
+        case AdType.appOpen:
+          return _testBannerId; // フォールバック
+      }
+    }
+
+    // 環境変数からIDを取得（プラットフォーム別）
+    switch (adType) {
+      case AdType.banner:
+        return EnvConfig.getBannerAdUnitId();
+      case AdType.interstitial:
+        return EnvConfig.getInterstitialAdUnitId();
+      case AdType.rewarded:
+        // リワード広告は現在未実装なのでバナーを返す
+        return EnvConfig.getBannerAdUnitId();
+      case AdType.native:
+      case AdType.appOpen:
+        return EnvConfig.getBannerAdUnitId(); // フォールバック
+    }
+  }
+
+  void _notifyListeners(AdEventData event) {
+    for (final listener in _listeners) {
+      try {
+        listener(event);
+      } catch (e) {
+        debugPrint('Ad event listener error: $e');
+      }
+    }
+  }
+
+  @override
+  void addAdEventListener(void Function(AdEventData event) listener) {
+    _listeners.add(listener);
+  }
+
+  @override
+  void removeAdEventListener(void Function(AdEventData event) listener) {
+    _listeners.remove(listener);
+  }
+
+  @override
+  Future<void> dispose() async {
+    _bannerAd?.dispose();
+    _interstitialAd?.dispose();
+    _rewardedAd?.dispose();
+
+    _listeners.clear();
+    _loadedAds.clear();
+    _lastShownTime.clear();
+
+    debugPrint('GoogleAdProvider disposed');
+  }
+}

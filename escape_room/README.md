@@ -16,6 +16,9 @@ Flutter + Flameベースの脱出ゲーム特化開発フレームワーク
 ### 特化ドキュメント
 - **[HOTSPOT_IMAGE_GENERATION_PROJECT.md](docs/HOTSPOT_IMAGE_GENERATION_PROJECT.md)** - ホットスポット画像生成ガイド
 - **[MCP_TROUBLESHOOTING_GUIDE.md](docs/MCP_TROUBLESHOOTING_GUIDE.md)** - MCP接続問題解決ガイド
+- **[AUDIO_SYSTEM_CONSTRAINTS.md](docs/AUDIO_SYSTEM_CONSTRAINTS.md)** - 音声システム制約とFlameAudio準拠
+- **[ESCAPE_ROOM_CONTENT_MAP.md](docs/ESCAPE_ROOM_CONTENT_MAP.md)** - ゲームコンテンツマップ
+- **[ESCAPE_ROOM_FINAL_DESIGN.md](docs/ESCAPE_ROOM_FINAL_DESIGN.md)** - 最終設計書
 
 ## テスト実行
 

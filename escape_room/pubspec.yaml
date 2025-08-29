@@ -111,12 +111,18 @@ flutter:
     - assets/images/underground_center.png
     - assets/images/underground_right.png
     - assets/images/underground_rightmost.png
+    # Hidden room assets
+    - assets/images/hidden_room_a.png
+    - assets/images/hidden_room_b.png
+    - assets/images/hidden_room_c.png
+    - assets/images/hidden_room_d.png
     - assets/images/items/dark_crystal.png
     - assets/images/items/ritual_stone.png
     - assets/images/items/pure_water.png
     - assets/images/items/ancient_rune.png
     - assets/images/items/underground_key.png
     - assets/images/items/underground_master_key.png
+    - assets/images/items/wooden_stairs.png
     # UI elements for floor system
     - assets/images/ui/floor_indicator_1f.png
     - assets/images/ui/floor_indicator_uf.png

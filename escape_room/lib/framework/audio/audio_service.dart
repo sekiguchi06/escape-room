@@ -3,10 +3,17 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// オーディオファイル定数
+/// 重要制約: FlameAudioは assets/audio/ プレフィックスを自動付加
+/// 参照: AUDIO_SYSTEM_CONSTRAINTS.md
 class AudioAssets {
   static const String decisionButton = 'decision_button.mp3';
   static const String close = 'close.mp3';                         // 閉じる音（新規追加）
   static const String walk = 'walk.mp3';                           // 歩く音（新規追加）
+  
+  // 新しいBGM音声ファイル（assets/audio/ に配置済み）
+  static const String mistyDream = 'misty_dream.mp3';              // 1階BGM：霧の中の夢
+  static const String moonlight = 'moonlight.mp3';                 // スタート画面BGM：月光
+  static const String swimmingFishDream = 'swimming_fish_dream.mp3'; // 地下BGM：夢の中を泳ぐ魚
   static const String ambientExploration = 'decision_button.mp3';  // 暫定的にdecision_button.mp3を使用
   static const String buttonPress = 'decision_button.mp3';         // 暫定的にdecision_button.mp3を使用
   static const String itemGet = 'decision_button.mp3';             // 暫定的にdecision_button.mp3を使用
