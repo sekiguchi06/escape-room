@@ -122,10 +122,83 @@ export class ComfyUIService {
       sampler = 'dpmpp_2m',
       scheduler = 'karras',
       model = DEFAULT_MODEL,
+      lora = '',
+      lora_strength = 0.7,
       output_name
     } = args;
 
-    const workflow = {
+    // LoRA使用判定
+    const useLoRA = lora && lora.trim() !== '';
+
+    const workflow = useLoRA ? {
+      "1": {
+        "class_type": "CheckpointLoaderSimple",
+        "inputs": {
+          "ckpt_name": model
+        }
+      },
+      "2": {
+        "class_type": "LoraLoader",
+        "inputs": {
+          "model": ["1", 0],
+          "clip": ["1", 1],
+          "lora_name": lora,
+          "strength_model": lora_strength,
+          "strength_clip": lora_strength
+        }
+      },
+      "3": {
+        "class_type": "CLIPTextEncode",
+        "inputs": {
+          "text": prompt,
+          "clip": ["2", 1]
+        }
+      },
+      "4": {
+        "class_type": "CLIPTextEncode",
+        "inputs": {
+          "text": negative_prompt,
+          "clip": ["2", 1]
+        }
+      },
+      "5": {
+        "class_type": "EmptyLatentImage",
+        "inputs": {
+          "width": width,
+          "height": height,
+          "batch_size": 1
+        }
+      },
+      "6": {
+        "class_type": "KSampler",
+        "inputs": {
+          "seed": Math.floor(Math.random() * 1000000),
+          "steps": steps,
+          "cfg": cfg_scale,
+          "sampler_name": sampler,
+          "scheduler": scheduler,
+          "denoise": 1.0,
+          "model": ["2", 0],
+          "positive": ["3", 0],
+          "negative": ["4", 0],
+          "latent_image": ["5", 0]
+        }
+      },
+      "7": {
+        "class_type": "VAEDecode",
+        "inputs": {
+          "samples": ["6", 0],
+          "vae": ["1", 2]
+        }
+      },
+      "8": {
+        "class_type": "SaveImage",
+        "inputs": {
+          "images": ["7", 0],
+          "filename_prefix": output_name || "comfyui_txt2img"
+        }
+      }
+    } : {
       "1": {
         "class_type": "CheckpointLoaderSimple",
         "inputs": {

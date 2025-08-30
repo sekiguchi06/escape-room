@@ -72,6 +72,16 @@ class GlobalImageGenerationMCP {
               output_name: {
                 type: 'string',
                 description: 'Custom output filename (optional)'
+              },
+              lora: { 
+                type: 'string', 
+                description: 'LoRA filename (optional)', 
+                default: '' 
+              },
+              lora_strength: { 
+                type: 'number', 
+                description: 'LoRA strength', 
+                default: 0.7 
               }
             },
             required: ['prompt']
